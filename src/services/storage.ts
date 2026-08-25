@@ -13,12 +13,13 @@ const STORAGE_KEYS = {
   MEASUREMENT_FIELDS: 'tailor_measurement_fields_v1',
   SHOP_SETTINGS: 'tailor_shop_settings_v1',
   LANGUAGE: 'tailor_app_lang_v1',
+  AUTH_USER: 'tailor_app_auth_user_v1',
 };
 
 export const DEFAULT_SHOP_SETTINGS: ShopSettings = {
   shopNameEn: 'Rayan Tailor Shop Management',
-  shopNameFa: 'خیاطی و دوخت راین',
-  shopNamePs: 'د راین خیاطي او کالیو ګنډل',
+  shopNameFa: 'خیاطی و دوخت رایان',
+  shopNamePs: 'د رایان خیاطي او کالیو ګنډل',
   taglineEn: 'Finest bespoke Afghan tailoring & traditional fashion',
   taglineFa: 'بهترین دوخت لباس‌های سنتی، مجلسی و مدرن',
   taglinePs: 'د ټولو دودیزو، مجلسی او عصري جامو باکیفیته ګنډل',
@@ -32,8 +33,8 @@ export const DEFAULT_SHOP_SETTINGS: ShopSettings = {
   currencyFa: 'افغانی',
   currencyPs: 'افغانۍ',
   receiptFooterEn: 'Please bring this receipt for collection. Rayan Tailors guarantees perfection in every stitch!',
-  receiptFooterFa: 'لطفاً هنگام تحویل گرفتن لباس، این بل را با خود داشته باشید. تضمین کیفیت خیاطی راین!',
-  receiptFooterPs: 'مهرباني وکړئ د کالیو اخیستلو پر مهال دا بِل له ځان سره ولرئ. د راین خیاطۍ د لوړ کیفیت تضمین!',
+  receiptFooterFa: 'لطفاً هنگام تحویل گرفتن لباس، این بل را با خود داشته باشید. تضمین کیفیت خیاطی رایان!',
+  receiptFooterPs: 'مهرباني وکړئ د کالیو اخیستلو پر مهال دا بِل له ځان سره ولرئ. د رایان خیاطۍ د لوړ کیفیت تضمین!',
   logoType: 'emblem',
 };
 
@@ -570,10 +571,17 @@ export const storageService = {
   getShopSettings(): ShopSettings {
     const settings = getStoredItem<ShopSettings>(STORAGE_KEYS.SHOP_SETTINGS, DEFAULT_SHOP_SETTINGS);
     // Auto-migrate old default name if present
-    if (settings.shopNameEn === 'Afghan Sadr Tailor Shop & Cloth Store' || settings.shopNameFa === 'افغان صدر خیاطی و رخت فروشی') {
+    if (
+      settings.shopNameEn === 'Afghan Sadr Tailor Shop & Cloth Store' || 
+      settings.shopNameFa === 'افغان صدر خیاطی و رخت فروشی' ||
+      settings.shopNameFa === 'خیاطی و دوخت راین' ||
+      settings.shopNamePs === 'د راین خیاطي او کالیو ګنډل'
+    ) {
       settings.shopNameEn = DEFAULT_SHOP_SETTINGS.shopNameEn;
       settings.shopNameFa = DEFAULT_SHOP_SETTINGS.shopNameFa;
       settings.shopNamePs = DEFAULT_SHOP_SETTINGS.shopNamePs;
+      settings.receiptFooterFa = DEFAULT_SHOP_SETTINGS.receiptFooterFa;
+      settings.receiptFooterPs = DEFAULT_SHOP_SETTINGS.receiptFooterPs;
       this.saveShopSettings(settings);
     }
     return settings;
@@ -581,6 +589,19 @@ export const storageService = {
 
   saveShopSettings(settings: ShopSettings): void {
     setStoredItem(STORAGE_KEYS.SHOP_SETTINGS, settings);
+  },
+
+  // Auth User Session
+  getAuthUser(): { email: string; name: string } | null {
+    return getStoredItem<{ email: string; name: string } | null>(STORAGE_KEYS.AUTH_USER, null);
+  },
+
+  saveAuthUser(user: { email: string; name: string } | null): void {
+    if (user) {
+      setStoredItem(STORAGE_KEYS.AUTH_USER, user);
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
+    }
   },
 
   // Language

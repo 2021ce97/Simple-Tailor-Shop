@@ -8,7 +8,6 @@ import {
   Language 
 } from './types';
 import { storageService } from './services/storage';
-import { translations } from './translations/i18n';
 import { Navbar } from './components/Navbar';
 import { Sidebar, MainNavTab, SettingsSubTab } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
@@ -16,12 +15,18 @@ import { OrderForm } from './components/OrderForm';
 import { CustomersView } from './components/CustomersView';
 import { DesignSettingsView } from './components/DesignSettingsView';
 import { ReceiptSlipModal } from './components/ReceiptSlipModal';
+import { LoginView } from './components/LoginView';
 
 export default function App() {
   // 1. Language State & RTL
   const [language, setLanguage] = useState<Language>(() => storageService.getLanguage());
 
-  // 2. Data State
+  // 2. Authentication State
+  const [currentUser, setCurrentUser] = useState<{ email: string; name: string } | null>(() => 
+    storageService.getAuthUser()
+  );
+
+  // 3. Data State
   const [orders, setOrders] = useState<Order[]>(() => storageService.getOrders());
   const [customers, setCustomers] = useState<Customer[]>(() => storageService.getCustomers());
   const [measurementFields, setMeasurementFields] = useState<MeasurementField[]>(() => 
@@ -34,7 +39,7 @@ export default function App() {
     storageService.getShopSettings()
   );
 
-  // 3. Navigation & Modal State
+  // 4. Navigation & Modal State
   const [currentTab, setCurrentTab] = useState<MainNavTab>('dashboard');
   const [settingsSubTab, setSettingsSubTab] = useState<SettingsSubTab>('design');
   const [isSidebarOpenMobile, setIsSidebarOpenMobile] = useState<boolean>(false);
@@ -75,6 +80,18 @@ export default function App() {
   // Switch Language
   const handleLanguageChange = (lang: Language) => {
     setLanguage(lang);
+  };
+
+  // Login handler
+  const handleLoginSuccess = (user: { email: string; name: string }) => {
+    storageService.saveAuthUser(user);
+    setCurrentUser(user);
+  };
+
+  // Logout handler
+  const handleSignOut = () => {
+    storageService.saveAuthUser(null);
+    setCurrentUser(null);
   };
 
   // Navigation Selection Handler (from Sidebar or Navbar)
@@ -136,6 +153,18 @@ export default function App() {
 
   const isRtl = language === 'fa' || language === 'ps';
 
+  // If not logged in, display the Login View
+  if (!currentUser) {
+    return (
+      <LoginView
+        language={language}
+        shopSettings={shopSettings}
+        onLanguageChange={handleLanguageChange}
+        onLoginSuccess={handleLoginSuccess}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F9F7F2] text-[#1A1A1A] flex flex-col font-sans selection:bg-[#D4AF37]/30">
       {/* Sidebar Navigation */}
@@ -151,6 +180,7 @@ export default function App() {
         onCloseMobile={() => setIsSidebarOpenMobile(false)}
         onSelectNav={handleSelectNav}
         onLanguageChange={handleLanguageChange}
+        onSignOut={handleSignOut}
       />
 
       {/* Main Content Layout with responsive margin for desktop sidebar */}
@@ -165,6 +195,7 @@ export default function App() {
           onToggleSidebar={() => setIsSidebarOpenMobile(prev => !prev)}
           onTabChange={handleSelectNav}
           onLanguageChange={handleLanguageChange}
+          onSignOut={handleSignOut}
         />
 
         {/* Main Content View Container */}

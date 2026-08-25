@@ -6,9 +6,8 @@ import {
   Menu, 
   PlusCircle, 
   Globe, 
-  LayoutDashboard,
-  Users,
-  Sparkles
+  LogOut,
+  UserCheck
 } from 'lucide-react';
 import { MainNavTab, SettingsSubTab } from './Sidebar';
 
@@ -19,15 +18,16 @@ interface NavbarProps {
   onToggleSidebar: () => void;
   onTabChange: (tab: MainNavTab, subTab?: SettingsSubTab) => void;
   onLanguageChange: (lang: Language) => void;
+  onSignOut?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
-  currentTab,
   language,
   shopSettings,
   onToggleSidebar,
   onTabChange,
   onLanguageChange,
+  onSignOut,
 }) => {
   const t = translations[language];
 
@@ -86,7 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Language Switcher Bar */}
             <div className="flex items-center gap-1 bg-stone-900/90 p-1 rounded-xl border border-stone-700/80">
-              <Globe className="w-3.5 h-3.5 text-[#D4AF37] ml-1 mr-0.5" />
+              <Globe className="w-3.5 h-3.5 text-[#D4AF37] ml-1 mr-0.5 hidden sm:inline-block" />
               
               <button
                 type="button"
@@ -127,10 +127,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                 EN
               </button>
             </div>
+
+            {/* User & Sign Out */}
+            {onSignOut && (
+              <button
+                onClick={onSignOut}
+                id="navbar-signout-btn"
+                title={t.signOut}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 text-stone-300 hover:text-rose-400 hover:bg-rose-950/40 border border-stone-800 rounded-xl text-xs transition cursor-pointer"
+              >
+                <UserCheck className="w-3.5 h-3.5 text-[#D4AF37] hidden sm:inline-block" />
+                <span className="hidden md:inline-block font-mono text-[11px]">tailor1</span>
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
         </div>
       </div>
     </header>
   );
 };
-
