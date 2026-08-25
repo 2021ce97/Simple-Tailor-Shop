@@ -1,0 +1,6 @@
+{
+  "name": "Rayan Tailor Shop Management",
+  "description": "Comprehensive Afghan tailor shop management system for taking customer orders, saving measurements, generating PDF receipts, managing customer profiles, and customizing design templates in English, Dari, and Pashto.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

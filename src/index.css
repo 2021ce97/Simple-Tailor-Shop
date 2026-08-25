@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #F9F7F2;
+    color: #2D2926;
+    font-family: 'Plus Jakarta Sans', 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+
+  [dir="rtl"] {
+    font-family: 'Vazirmatn', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Custom Bento Grid theme utilities */
+.bg-bento-canvas {
+  background-color: #F9F7F2;
+}
+
+.bg-bento-dark {
+  background-color: #1A1A1A;
+}
+
+.text-bento-gold {
+  color: #D4AF37;
+}
+
+.bg-bento-gold {
+  background-color: #D4AF37;
+}
+
+.border-bento-gold {
+  border-color: #D4AF37;
+}
+
+.border-bento-subtle {
+  border-color: #E5E5E5;
+}
+
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  @page {
+    margin: 4mm;
+    size: auto;
+  }
+}
+
