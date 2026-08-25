@@ -23,7 +23,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 
 interface ReceiptSlipModalProps {
   order: Order;
@@ -73,32 +73,43 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
     window.print();
   };
 
-  // PDF Generator using jsPDF and html2canvas
+  // PDF Generator using html-to-image and jsPDF (safe from oklch parser errors)
   const handleDownloadPdf = async () => {
     if (!receiptRef.current) return;
     try {
       setIsGeneratingPdf(true);
       const element = receiptRef.current;
       
-      const canvas = await html2canvas(element, {
-        scale: 2.5,
-        useCORS: true,
+      const dataUrl = await toPng(element, {
+        pixelRatio: 2.5,
         backgroundColor: '#ffffff',
-        logging: false,
+        cacheBust: true,
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      // Initialize PDF document
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: [80, 210], // Thermal / Slip format
+        format: 'a4',
       });
 
-      const imgWidth = 74;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const margin = 12; // 12mm margins
+      const printableWidth = pdfWidth - (margin * 2);
       
-      pdf.addImage(imgData, 'JPEG', 3, 3, imgWidth, imgHeight);
-      pdf.save(`Order_${order.orderNumber}_${order.customerName.replace(/\s+/g, '_')}.pdf`);
+      // Calculate aspect ratio
+      const img = new Image();
+      img.src = dataUrl;
+      await new Promise((resolve) => {
+        img.onload = resolve;
+      });
+
+      const imgHeight = (img.naturalHeight * printableWidth) / img.naturalWidth;
+      
+      pdf.addImage(dataUrl, 'PNG', margin, margin, printableWidth, imgHeight);
+      
+      const safeCustomerName = order.customerName ? order.customerName.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_') : 'Customer';
+      pdf.save(`Rayan_Tailors_Receipt_${order.orderNumber || 'Order'}_${safeCustomerName}.pdf`);
     } catch (err) {
       console.error('Error generating PDF:', err);
       // Fallback to print
