@@ -3,12 +3,14 @@ import {
   Order, 
   DesignCategory, 
   MeasurementField, 
-  ShopSettings 
+  ShopSettings,
+  Fabric
 } from '../types';
 
 const STORAGE_KEYS = {
   ORDERS: 'tailor_orders_v1',
   CUSTOMERS: 'tailor_customers_v1',
+  FABRICS: 'tailor_fabrics_v1',
   DESIGN_CATEGORIES: 'tailor_design_categories_v1',
   MEASUREMENT_FIELDS: 'tailor_measurement_fields_v1',
   SHOP_SETTINGS: 'tailor_shop_settings_v1',
@@ -37,6 +39,59 @@ export const DEFAULT_SHOP_SETTINGS: ShopSettings = {
   receiptFooterPs: 'مهرباني وکړئ د کالیو اخیستلو پر مهال دا بِل له ځان سره ولرئ. د رایان خیاطۍ د لوړ کیفیت تضمین!',
   logoType: 'emblem',
 };
+
+export const INITIAL_DEMO_FABRICS: Fabric[] = [
+  {
+    id: 'fab_1',
+    name: 'لته سفید اعلا (Classic White Latha)',
+    code: 'FAB-001',
+    color: 'سفید / White',
+    type: 'نخی لته (Cotton Latha)',
+    pricePerMeter: 450,
+    stockMeters: 65,
+    notes: 'تکه لته باکیفیت و لطیف برای پیراهن تنبان افغانی',
+  },
+  {
+    id: 'fab_2',
+    name: 'ابریشم بوسکی کرمی (Silk Boski Cream)',
+    code: 'FAB-002',
+    color: 'کرمی / Off-White',
+    type: 'ابریشم بوسکی (Silk Boski)',
+    pricePerMeter: 850,
+    stockMeters: 42,
+    notes: 'بوسکی اصیل پاکستانی بسیار نرم و شیک',
+  },
+  {
+    id: 'fab_3',
+    name: 'پشم واسکتی طوسی (Charcoal Wool Blend)',
+    code: 'FAB-003',
+    color: 'خاکستری تیره / Charcoal',
+    type: 'پشم مجلسی (Wool Blend)',
+    pricePerMeter: 1100,
+    stockMeters: 28,
+    notes: 'مناسب برای واسکت و دریشی زمستانی با گرمایش بالا',
+  },
+  {
+    id: 'fab_4',
+    name: 'واش این ویر آبی (Sky Blue Wash & Wear)',
+    code: 'FAB-004',
+    color: 'آبی آسمانی / Sky Blue',
+    type: 'واش این ویر (Wash & Wear)',
+    pricePerMeter: 550,
+    stockMeters: 50,
+    notes: 'پارچه بدون چروک، خنک و تابستانی',
+  },
+  {
+    id: 'fab_5',
+    name: 'مخمل سیاه اعلا (Black Luxury Velvet)',
+    code: 'FAB-005',
+    color: 'سیاه براق / Jet Black',
+    type: 'مخمل (Velvet)',
+    pricePerMeter: 1200,
+    stockMeters: 18,
+    notes: 'مخمل لوکس برای واسکت‌های مجلسی و دامادی',
+  }
+];
 
 export const DEFAULT_MEASUREMENT_FIELDS: MeasurementField[] = [
   { id: 'm1', key: 'qad', labelEn: 'Length (Qad)', labelFa: 'قد', labelPs: 'قد', unit: 'in', isStandard: true },
@@ -160,23 +215,10 @@ export const DEFAULT_DESIGN_CATEGORIES: DesignCategory[] = [
     titlePs: 'د تنبان / پرتوګ سټایل',
     allowCustomInput: true,
     options: [
-      { id: 'o8_1', nameEn: 'Normal (22 inch)', nameFa: 'نارمل 22', namePs: 'نارمل 22' },
-      { id: 'o8_2', nameEn: 'Slim Fit', nameFa: 'تنگ تنبان', namePs: 'تنګ پرتوګ' },
-      { id: 'o8_3', nameEn: 'Wide Traditional (Farakh)', nameFa: 'فراخ تنبان', namePs: 'فراخ پرتوګ' },
-      { id: 'o8_4', nameEn: 'Elastic Waistband', nameFa: 'لستک دار', namePs: 'لاسټیک لرونکی' },
-    ],
-  },
-  {
-    id: 'd9',
-    key: 'shoulderSlope',
-    titleEn: 'Shoulder Slope',
-    titleFa: 'حالت شان',
-    titlePs: 'د اوږې (شان) حالت',
-    allowCustomInput: true,
-    options: [
-      { id: 'o9_1', nameEn: 'Half Down Slope', nameFa: 'شانه نیمه دون کوپ', namePs: 'شانه نیمه ډاون کوپ' },
-      { id: 'o9_2', nameEn: 'Normal Shoulder', nameFa: 'شانه نارمل', namePs: 'نارمل شانه' },
-      { id: 'o9_3', nameEn: 'Straight Shoulder', nameFa: 'شانه نیغه', namePs: 'نېغه شانه' },
+      { id: 'o8_1', nameEn: 'Normal Width (22 in)', nameFa: 'نارمل 22', namePs: 'نارمل 22' },
+      { id: 'o8_2', nameEn: 'Wide Afghan Cut (24 in)', nameFa: 'فراخ افغانی 24', namePs: 'پراخه افغاني 24' },
+      { id: 'o8_3', nameEn: 'Slim Fit (20 in)', nameFa: 'تنگ / فټ 20', namePs: 'تنګ / فټ 20' },
+      { id: 'o8_4', nameEn: 'Elastic Waist (Kash)', nameFa: 'کمر کش دار', namePs: 'کش لرونکی کمر' },
     ],
   },
 ];
@@ -184,11 +226,10 @@ export const DEFAULT_DESIGN_CATEGORIES: DesignCategory[] = [
 const INITIAL_DEMO_CUSTOMERS: Customer[] = [
   {
     id: 'cust_1',
-    name: 'فرهاد (Farhad)',
+    name: 'فرهاد',
     phone: '0765445309',
     whatsapp: '0765445309',
-    address: 'کابل، خیرخانه',
-    notes: 'کالر یی 1.75 راشی، خوښوونکی د دقیق دوخت',
+    notes: 'مشتری دایمی - دوخت کالر دار',
     standardMeasurements: {
       qad: '40',
       shana: '19.5',
@@ -202,19 +243,18 @@ const INITIAL_DEMO_CUSTOMERS: Customer[] = [
       pacha: '8',
     },
     preferredGarmentType: 'perahanTunban',
-    createdAt: '2026-08-20T10:00:00Z',
+    createdAt: '2026-08-23T06:35:30Z',
     updatedAt: '2026-08-23T06:35:30Z',
-    totalOrdersCount: 2,
-    totalSpent: 3800,
+    totalOrdersCount: 1,
+    totalSpent: 1800,
     totalBalance: 0,
   },
   {
     id: 'cust_2',
-    name: 'شکیل خان (Shakil Khan)',
+    name: 'شکیل خان',
     phone: '0782930005',
     whatsapp: '0782930005',
-    address: 'کابل، دهمزنگ',
-    notes: 'هفت غاره، شانه نیمه دون کوپ',
+    notes: 'فرمایش هفت غاره و شانه نیمه دون',
     standardMeasurements: {
       qad: '26.75',
       shana: '16.25',
@@ -223,11 +263,9 @@ const INITIAL_DEMO_CUSTOMERS: Customer[] = [
       chati: '39.5',
       kamar: '36.25',
       surin: '40',
-      tunban: '36',
-      pacha: '8.5',
     },
     preferredGarmentType: 'perahanTunban',
-    createdAt: '2026-08-22T14:30:00Z',
+    createdAt: '2026-08-23T06:58:17Z',
     updatedAt: '2026-08-23T06:58:17Z',
     totalOrdersCount: 1,
     totalSpent: 1600,
@@ -235,11 +273,10 @@ const INITIAL_DEMO_CUSTOMERS: Customer[] = [
   },
   {
     id: 'cust_3',
-    name: 'عطا الله (Ataullah)',
+    name: 'عطا الله',
     phone: '0780372506',
     whatsapp: '0780372506',
-    address: 'کابل، ارزان قیمت',
-    notes: 'دو جوړې پیراهن او تنبان + یو واسکت',
+    notes: 'پیراهن تنبان با واسکت و پټه پتی',
     standardMeasurements: {
       qad: '39',
       shana: '18.5',
@@ -269,8 +306,12 @@ const INITIAL_DEMO_ORDERS: Order[] = [
     customerName: 'فرهاد',
     customerPhone: '0765445309',
     customerWhatsApp: '0765445309',
-    garmentType: 'perahanTunban',
+    garmentType: 'پیراهن و تنبان (Perahan Tunban)',
     quantity: 1,
+    fabricId: 'fab_1',
+    fabricName: 'لته سفید اعلا (Classic White Latha)',
+    fabricColor: 'سفید / White',
+    fabricMeters: 4,
     measurements: {
       qad: '40',
       shana: '19.5',
@@ -289,7 +330,7 @@ const INITIAL_DEMO_ORDERS: Order[] = [
       damanStyle: 'کول دامن',
       placketButtons: 'ساده دکمه 0.90 14',
       sidePocket: 'دو جیب بغل',
-      frontPocket: 'انتخاب',
+      frontPocket: 'یک جیب رو',
       trouserPocket: 'جیب تنبان',
       trouserStyle: 'نارمل 22',
     },
@@ -313,8 +354,12 @@ const INITIAL_DEMO_ORDERS: Order[] = [
     customerName: 'شکیل خان',
     customerPhone: '0782930005',
     customerWhatsApp: '0782930005',
-    garmentType: 'perahanTunban',
+    garmentType: 'پیراهن و تنبان (Perahan Tunban)',
     quantity: 1,
+    fabricId: 'fab_2',
+    fabricName: 'ابریشم بوسکی کرمی (Silk Boski Cream)',
+    fabricColor: 'کرمی / Off-White',
+    fabricMeters: 4,
     measurements: {
       qad: '26.75',
       shana: '16.25',
@@ -348,8 +393,10 @@ const INITIAL_DEMO_ORDERS: Order[] = [
     customerName: 'عطا الله',
     customerPhone: '0780372506',
     customerWhatsApp: '0780372506',
-    garmentType: 'perahanTunban',
+    garmentType: 'پیراهن و تنبان (Perahan Tunban)',
     quantity: 2,
+    isCustomerFabric: true,
+    fabricName: 'رخت از خود مشتری (Customer Own Fabric)',
     measurements: {
       qad: '39',
       shana: '18.5',
@@ -407,8 +454,74 @@ function setStoredItem<T>(key: string, value: T): void {
   }
 }
 
+// Background sync helper to API if online
+async function apiSync(endpoint: string, method = 'GET', data?: any) {
+  try {
+    const res = await fetch(`/api/${endpoint}`, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: data ? JSON.stringify(data) : undefined,
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch {
+    // Graceful offline fallback
+  }
+  return null;
+}
+
 // Storage Operations
 export const storageService = {
+  // Fabrics
+  getFabrics(): Fabric[] {
+    return getStoredItem<Fabric[]>(STORAGE_KEYS.FABRICS, INITIAL_DEMO_FABRICS);
+  },
+
+  getFabricById(id: string): Fabric | undefined {
+    const fabrics = this.getFabrics();
+    return fabrics.find(f => f.id === id || f.code === id);
+  },
+
+  saveFabric(fabric: Fabric): Fabric {
+    const fabrics = this.getFabrics();
+    const existingIndex = fabrics.findIndex(f => f.id === fabric.id);
+    const now = new Date().toISOString();
+
+    if (existingIndex >= 0) {
+      fabrics[existingIndex] = { ...fabric, updatedAt: now };
+    } else {
+      fabrics.unshift({
+        ...fabric,
+        id: fabric.id || 'fab_' + Date.now(),
+        createdAt: fabric.createdAt || now,
+        updatedAt: now,
+      });
+    }
+
+    setStoredItem(STORAGE_KEYS.FABRICS, fabrics);
+    apiSync('fabrics', 'POST', fabric);
+    return fabric;
+  },
+
+  deleteFabric(id: string): void {
+    const fabrics = this.getFabrics().filter(f => f.id !== id);
+    setStoredItem(STORAGE_KEYS.FABRICS, fabrics);
+    apiSync(`fabrics/${id}`, 'DELETE');
+  },
+
+  deductFabricStock(fabricId: string, metersUsed: number): void {
+    if (!fabricId || metersUsed <= 0) return;
+    const fabrics = this.getFabrics();
+    const fabric = fabrics.find(f => f.id === fabricId);
+    if (fabric) {
+      fabric.stockMeters = Math.max(0, Number(fabric.stockMeters || 0) - Number(metersUsed));
+      fabric.updatedAt = new Date().toISOString();
+      setStoredItem(STORAGE_KEYS.FABRICS, fabrics);
+      apiSync('fabrics', 'POST', fabric);
+    }
+  },
+
   // Orders
   getOrders(): Order[] {
     return getStoredItem<Order[]>(STORAGE_KEYS.ORDERS, INITIAL_DEMO_ORDERS);
@@ -431,12 +544,16 @@ export const storageService = {
         createdAt: order.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
+
+      // If new order used fabric from inventory, auto-deduct stock
+      if (order.fabricId && order.fabricMeters && order.fabricMeters > 0) {
+        this.deductFabricStock(order.fabricId, order.fabricMeters);
+      }
     }
 
     setStoredItem(STORAGE_KEYS.ORDERS, orders);
-
-    // Also update or create customer automatically!
     this.syncCustomerFromOrder(order);
+    apiSync('orders', 'POST', order);
 
     return order;
   },
@@ -444,6 +561,7 @@ export const storageService = {
   deleteOrder(id: string): void {
     const orders = this.getOrders().filter(o => o.id !== id);
     setStoredItem(STORAGE_KEYS.ORDERS, orders);
+    apiSync(`orders/${id}`, 'DELETE');
   },
 
   // Automatically update/create customer when an order is saved
@@ -541,12 +659,14 @@ export const storageService = {
     }
 
     setStoredItem(STORAGE_KEYS.CUSTOMERS, customers);
+    apiSync('customers', 'POST', customer);
     return customer;
   },
 
   deleteCustomer(id: string): void {
     const customers = this.getCustomers().filter(c => c.id !== id);
     setStoredItem(STORAGE_KEYS.CUSTOMERS, customers);
+    apiSync(`customers/${id}`, 'DELETE');
   },
 
   // Design Categories
@@ -556,6 +676,7 @@ export const storageService = {
 
   saveDesignCategories(categories: DesignCategory[]): void {
     setStoredItem(STORAGE_KEYS.DESIGN_CATEGORIES, categories);
+    apiSync('design-categories', 'POST', categories);
   },
 
   // Measurement Fields
@@ -565,30 +686,18 @@ export const storageService = {
 
   saveMeasurementFields(fields: MeasurementField[]): void {
     setStoredItem(STORAGE_KEYS.MEASUREMENT_FIELDS, fields);
+    apiSync('measurement-fields', 'POST', fields);
   },
 
   // Shop Settings
   getShopSettings(): ShopSettings {
     const settings = getStoredItem<ShopSettings>(STORAGE_KEYS.SHOP_SETTINGS, DEFAULT_SHOP_SETTINGS);
-    // Auto-migrate old default name if present
-    if (
-      settings.shopNameEn === 'Afghan Sadr Tailor Shop & Cloth Store' || 
-      settings.shopNameFa === 'افغان صدر خیاطی و رخت فروشی' ||
-      settings.shopNameFa === 'خیاطی و دوخت راین' ||
-      settings.shopNamePs === 'د راین خیاطي او کالیو ګنډل'
-    ) {
-      settings.shopNameEn = DEFAULT_SHOP_SETTINGS.shopNameEn;
-      settings.shopNameFa = DEFAULT_SHOP_SETTINGS.shopNameFa;
-      settings.shopNamePs = DEFAULT_SHOP_SETTINGS.shopNamePs;
-      settings.receiptFooterFa = DEFAULT_SHOP_SETTINGS.receiptFooterFa;
-      settings.receiptFooterPs = DEFAULT_SHOP_SETTINGS.receiptFooterPs;
-      this.saveShopSettings(settings);
-    }
     return settings;
   },
 
   saveShopSettings(settings: ShopSettings): void {
     setStoredItem(STORAGE_KEYS.SHOP_SETTINGS, settings);
+    apiSync('shop-settings', 'POST', settings);
   },
 
   // Auth User Session
@@ -610,7 +719,7 @@ export const storageService = {
     if (stored === 'en' || stored === 'fa' || stored === 'ps') {
       return stored;
     }
-    return 'fa'; // Default to Dari / دری (or user can switch seamlessly to Pashto / English)
+    return 'fa'; // Default to Dari / دری
   },
 
   saveLanguage(lang: 'en' | 'fa' | 'ps'): void {
@@ -620,10 +729,11 @@ export const storageService = {
   // Backup & Export / Import
   exportFullDatabase(): string {
     const backup = {
-      version: 1,
+      version: 2,
       exportedAt: new Date().toISOString(),
       shopSettings: this.getShopSettings(),
       customers: this.getCustomers(),
+      fabrics: this.getFabrics(),
       orders: this.getOrders(),
       designCategories: this.getDesignCategories(),
       measurementFields: this.getMeasurementFields(),
@@ -636,6 +746,7 @@ export const storageService = {
       const data = JSON.parse(jsonString);
       if (data.shopSettings) setStoredItem(STORAGE_KEYS.SHOP_SETTINGS, data.shopSettings);
       if (data.customers) setStoredItem(STORAGE_KEYS.CUSTOMERS, data.customers);
+      if (data.fabrics) setStoredItem(STORAGE_KEYS.FABRICS, data.fabrics);
       if (data.orders) setStoredItem(STORAGE_KEYS.ORDERS, data.orders);
       if (data.designCategories) setStoredItem(STORAGE_KEYS.DESIGN_CATEGORIES, data.designCategories);
       if (data.measurementFields) setStoredItem(STORAGE_KEYS.MEASUREMENT_FIELDS, data.measurementFields);
@@ -649,6 +760,7 @@ export const storageService = {
   resetAllToDemo(): void {
     setStoredItem(STORAGE_KEYS.ORDERS, INITIAL_DEMO_ORDERS);
     setStoredItem(STORAGE_KEYS.CUSTOMERS, INITIAL_DEMO_CUSTOMERS);
+    setStoredItem(STORAGE_KEYS.FABRICS, INITIAL_DEMO_FABRICS);
     setStoredItem(STORAGE_KEYS.DESIGN_CATEGORIES, DEFAULT_DESIGN_CATEGORIES);
     setStoredItem(STORAGE_KEYS.MEASUREMENT_FIELDS, DEFAULT_MEASUREMENT_FIELDS);
     setStoredItem(STORAGE_KEYS.SHOP_SETTINGS, DEFAULT_SHOP_SETTINGS);
@@ -657,7 +769,6 @@ export const storageService = {
   generateNextOrderNumber(): string {
     const orders = this.getOrders();
     if (orders.length === 0) return '16309';
-    // Look for highest numeric order number
     const numbers = orders
       .map(o => parseInt(o.orderNumber, 10))
       .filter(n => !isNaN(n));
@@ -665,4 +776,38 @@ export const storageService = {
     const max = Math.max(...numbers);
     return (max + 1).toString();
   },
+
+  // Pull latest data from PostgreSQL database if available
+  async syncFromDatabase(): Promise<void> {
+    try {
+      const [fabricsRes, ordersRes, customersRes] = await Promise.all([
+        fetch('/api/fabrics').catch(() => null),
+        fetch('/api/orders').catch(() => null),
+        fetch('/api/customers').catch(() => null)
+      ]);
+
+      if (fabricsRes && fabricsRes.ok) {
+        const data = await fabricsRes.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setStoredItem(STORAGE_KEYS.FABRICS, data);
+        }
+      }
+
+      if (ordersRes && ordersRes.ok) {
+        const data = await ordersRes.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setStoredItem(STORAGE_KEYS.ORDERS, data);
+        }
+      }
+
+      if (customersRes && customersRes.ok) {
+        const data = await customersRes.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setStoredItem(STORAGE_KEYS.CUSTOMERS, data);
+        }
+      }
+    } catch (e) {
+      console.log('Database initial sync handled in local mode');
+    }
+  }
 };

@@ -16,6 +16,7 @@ export interface MeasurementField {
   unit: string;
   defaultValue?: string;
   isStandard?: boolean;
+  sortOrder?: number;
 }
 
 export interface DesignOption {
@@ -33,6 +34,20 @@ export interface DesignCategory {
   titlePs: string;
   options: DesignOption[];
   allowCustomInput?: boolean;
+}
+
+export interface Fabric {
+  id: string;
+  name: string;
+  code: string; // e.g. "FAB-001"
+  color: string;
+  type: string; // e.g. "Cotton Latha", "Silk Boski", "Wash & Wear", "Velvet", "Wool Blend"
+  pricePerMeter: number;
+  stockMeters: number;
+  imageUrl?: string;
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Customer {
@@ -58,7 +73,7 @@ export interface OrderItem {
   pricePerUnit: number;
   totalPrice: number;
   measurements: MeasurementValues;
-  designSelections: Record<string, string>; // categoryKey -> optionName or custom string
+  designSelections: Record<string, string>;
   fabricNotes?: string;
   specialInstructions?: string;
 }
@@ -71,15 +86,23 @@ export interface Order {
   customerPhone: string;
   customerWhatsApp?: string;
   
-  items: OrderItem[];
+  items?: OrderItem[];
   
   // Quick direct access for single-garment orders (most common)
   garmentType: string;
   quantity: number;
   measurements: MeasurementValues;
   designSelections: Record<string, string>;
+  
+  // Fabric Details
+  fabricId?: string;
+  fabricName?: string;
+  fabricColor?: string;
+  fabricMeters?: number;
+  isCustomerFabric?: boolean;
+  
   specialInstructions?: string;
-  cabinetSlot?: string; // Optional tag e.g. "D1", "C4" like on photo
+  cabinetSlot?: string; // Optional tag e.g. "D1", "C4"
 
   // Financials
   totalAmount: number;
@@ -89,7 +112,7 @@ export interface Order {
 
   // Status & Dates
   status: OrderStatus;
-  orderDate: string; // YYYY-MM-DD HH:mm
+  orderDate: string; // YYYY-MM-DD HH:mm or YYYY-MM-DD
   deliveryDate: string; // YYYY-MM-DD
   completedDate?: string;
   deliveredDate?: string;

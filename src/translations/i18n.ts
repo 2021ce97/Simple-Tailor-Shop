@@ -42,6 +42,8 @@ export interface Translations {
   dashboard: string;
   newOrder: string;
   customers: string;
+  fabrics: string;
+  fabricInventory: string;
   designAndSettings: string;
   designTemplatesNav: string;
   measurementSettingsNav: string;
@@ -60,6 +62,7 @@ export interface Translations {
   totalBalanceDue: string;
 
   // Order status
+  orderStatus: string;
   statusPending: string;
   statusInProgress: string;
   statusReady: string;
@@ -96,6 +99,26 @@ export interface Translations {
   existingCustomerFound: string;
   newCustomerAutoSaved: string;
   quickFill: string;
+
+  // Fabric Inventory
+  addFabric: string;
+  editFabric: string;
+  fabricName: string;
+  fabricCode: string;
+  fabricType: string;
+  fabricColor: string;
+  pricePerMeter: string;
+  stockMeters: string;
+  inStock: string;
+  lowStock: string;
+  outOfStock: string;
+  selectFabric: string;
+  customerFabric: string;
+  fabricUsed: string;
+  selectFromInventory: string;
+  fabricDetails: string;
+  searchFabricPlaceholder: string;
+  meters: string;
 
   // Garment Types
   perahanTunban: string;
@@ -187,7 +210,7 @@ export const translations: Record<Language, Translations> = {
     edit: 'Edit',
     close: 'Close',
     search: 'Search',
-    searchPlaceholder: 'Search by Order #, Customer Name, or Phone...',
+    searchPlaceholder: 'Search by Customer Name, Contact, Order #, or Date...',
     filter: 'Filter',
     all: 'All',
     actions: 'Actions',
@@ -218,6 +241,8 @@ export const translations: Record<Language, Translations> = {
     dashboard: 'Orders Dashboard',
     newOrder: 'New Order',
     customers: 'Customer Directory',
+    fabrics: 'Fabric Inventory',
+    fabricInventory: 'Fabric Inventory',
     designAndSettings: 'Design & Settings',
     designTemplatesNav: 'Design Templates',
     measurementSettingsNav: 'Measurement Fields',
@@ -229,14 +254,15 @@ export const translations: Record<Language, Translations> = {
     pendingOrders: 'Pending',
     inProgressOrders: 'In Progress',
     readyOrders: 'Ready for Pickup',
-    deliveredOrders: 'Delivered / Completed',
+    deliveredOrders: 'Delivered',
     totalRevenue: 'Total Value',
     totalPaid: 'Collected Paid',
     totalBalanceDue: 'Balance Due',
 
+    orderStatus: 'Order Status',
     statusPending: 'Pending',
-    statusInProgress: 'In Stitching',
-    statusReady: 'Ready for Pickup',
+    statusInProgress: 'In-Progress',
+    statusReady: 'Ready',
     statusDelivered: 'Delivered',
 
     paymentStatus: 'Payment Status',
@@ -268,6 +294,25 @@ export const translations: Record<Language, Translations> = {
     existingCustomerFound: 'Existing customer identified! Measurements ready.',
     newCustomerAutoSaved: 'New customer will be automatically added to directory.',
     quickFill: 'Quick Fill',
+
+    addFabric: 'Add Fabric',
+    editFabric: 'Edit Fabric',
+    fabricName: 'Fabric Name',
+    fabricCode: 'Fabric Code',
+    fabricType: 'Fabric Material / Type',
+    fabricColor: 'Color / Shade',
+    pricePerMeter: 'Price / Meter',
+    stockMeters: 'Stock in Stock',
+    inStock: 'In Stock',
+    lowStock: 'Low Stock',
+    outOfStock: 'Out of Stock',
+    selectFabric: 'Select Fabric',
+    customerFabric: "Customer's Own Fabric",
+    fabricUsed: 'Fabric Used (Meters)',
+    selectFromInventory: 'Select from Shop Inventory',
+    fabricDetails: 'Fabric Details',
+    searchFabricPlaceholder: 'Search fabric by name, code, type, or color...',
+    meters: 'm',
 
     perahanTunban: 'Perahan Tunban (Afghan Suit)',
     waistcoat: 'Waistcoat (Wasqat)',
@@ -352,7 +397,7 @@ export const translations: Record<Language, Translations> = {
     edit: 'ویرایش',
     close: 'بستن',
     search: 'جستجو',
-    searchPlaceholder: 'جستجو بر اساس شماره فرمایش، نام مشتری یا شماره تماس...',
+    searchPlaceholder: 'جستجو بر اساس نام مشتری، شماره تماس، شماره بل یا تاریخ...',
     filter: 'فیلتر',
     all: 'همه',
     actions: 'عملیات',
@@ -383,6 +428,8 @@ export const translations: Record<Language, Translations> = {
     dashboard: 'داشبورد فرمایشات',
     newOrder: 'ثبت فرمایش جدید',
     customers: 'فهرست مشتریان',
+    fabrics: 'موجودی رخت و تکه',
+    fabricInventory: 'موجودی رخت و تکه',
     designAndSettings: 'طرح‌ها و تنظیمات',
     designTemplatesNav: 'طرح‌ها و مدل‌ها',
     measurementSettingsNav: 'فیلدهای اندازه',
@@ -392,15 +439,16 @@ export const translations: Record<Language, Translations> = {
 
     totalOrders: 'مجموع فرمایشات',
     pendingOrders: 'در انتظار',
-    inProgressOrders: 'در حال دوخت',
+    inProgressOrders: 'تحت دوخت',
     readyOrders: 'آماده تحویل',
     deliveredOrders: 'تحویل داده شده',
     totalRevenue: 'مجموع ارزش',
     totalPaid: 'مجموع وصولی',
     totalBalanceDue: 'باقیمانده کل',
 
+    orderStatus: 'وضعیت فرمایش',
     statusPending: 'در انتظار',
-    statusInProgress: 'در حال دوخت',
+    statusInProgress: 'تحت دوخت',
     statusReady: 'آماده تحویل',
     statusDelivered: 'تحویل شده',
 
@@ -433,6 +481,25 @@ export const translations: Record<Language, Translations> = {
     existingCustomerFound: 'مشتری قبلی شناسایی شد! اندازه‌ها آماده بارگذاری هستند.',
     newCustomerAutoSaved: 'مشتری جدید به صورت خودکار به لیست مشتریان اضافه می‌شود.',
     quickFill: 'پر کردن سریع',
+
+    addFabric: 'افزودن رخت جدید',
+    editFabric: 'ویرایش رخت',
+    fabricName: 'نام رخت / پارچه',
+    fabricCode: 'کد رخت',
+    fabricType: 'جنس / نوعیت رخت',
+    fabricColor: 'رنگ رخت',
+    pricePerMeter: 'قیمت فی متر',
+    stockMeters: 'موجودی (متر)',
+    inStock: 'موجود',
+    lowStock: 'موجودی کم',
+    outOfStock: 'ختم شده',
+    selectFabric: 'انتخاب رخت',
+    customerFabric: 'رخت از خود مشتری',
+    fabricUsed: 'مقدار رخت (متر)',
+    selectFromInventory: 'انتخاب از گدام خیاطی',
+    fabricDetails: 'مشخصات رخت',
+    searchFabricPlaceholder: 'جستجوی رخت بر اساس نام، کد، جنس یا رنگ...',
+    meters: 'متر',
 
     perahanTunban: 'پیراهن و تنبان',
     waistcoat: 'واسکت',
@@ -517,7 +584,7 @@ export const translations: Record<Language, Translations> = {
     edit: 'سمول',
     close: 'بندول',
     search: 'پلټنه',
-    searchPlaceholder: 'د فرمایش شمېرې، نوم یا ټلیفون پر بنسټ پلټنه...',
+    searchPlaceholder: 'د پېرودونکي نوم، ټلیفون، بِل نمبر یا نېټه وپلټئ...',
     filter: 'فلټر',
     all: 'ټول',
     actions: 'کړنې',
@@ -548,6 +615,8 @@ export const translations: Record<Language, Translations> = {
     dashboard: 'د فرمایشونو ډشبورډ',
     newOrder: 'نوی فرمایش',
     customers: 'د پېرودونکو لړلیک',
+    fabrics: 'د رختونو زېرمه (ګدام)',
+    fabricInventory: 'د رختونو زېرمه',
     designAndSettings: 'ډیزاینونه او تنظیمات',
     designTemplatesNav: 'ډیزاینونه او بېلګې',
     measurementSettingsNav: 'د اندازو فیلډونه',
@@ -564,6 +633,7 @@ export const translations: Record<Language, Translations> = {
     totalPaid: 'ترلاسه شوې روپۍ',
     totalBalanceDue: 'ټولې پاتې روپۍ',
 
+    orderStatus: 'د فرمایش حالت',
     statusPending: 'په تمه',
     statusInProgress: 'تر ګنډلو لاندې',
     statusReady: 'چمتو شوی',
@@ -598,6 +668,25 @@ export const translations: Record<Language, Translations> = {
     existingCustomerFound: 'پخوانی مشتري وپېژندل شو! اندازې چمتو دي.',
     newCustomerAutoSaved: 'نوی مشتري به په اتومات ډول د پیرودونکو لړۍ ته اضافه شي.',
     quickFill: 'چټک ډکول',
+
+    addFabric: 'نوی رخت ورزیات کړئ',
+    editFabric: 'رخت سم کړئ',
+    fabricName: 'د رخت نوم',
+    fabricCode: 'د رخت کوډ',
+    fabricType: 'د رخت ډول / مواد',
+    fabricColor: 'د رخت رنګ',
+    pricePerMeter: 'فی متر بیه',
+    stockMeters: 'موجوده ذخیره (متره)',
+    inStock: 'موجود دی',
+    lowStock: 'لږ پاتې',
+    outOfStock: 'ختم شوی',
+    selectFabric: 'رخت وټاکئ',
+    customerFabric: 'د مشتري خپل رخت',
+    fabricUsed: 'کارېدلی رخت (متره)',
+    selectFromInventory: 'د هټۍ له ذخیرې څخه انتخاب',
+    fabricDetails: 'د رخت تفصیلات',
+    searchFabricPlaceholder: 'د رخت نوم، کوډ، رنګ یا ډول پلټل...',
+    meters: 'متره',
 
     perahanTunban: 'پیراهن او تنبان (ګنډل شوې جامې)',
     waistcoat: 'واسکت',

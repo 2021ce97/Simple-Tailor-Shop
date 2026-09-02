@@ -5,7 +5,8 @@ import {
   MeasurementField, 
   DesignCategory, 
   ShopSettings, 
-  Language 
+  Language,
+  Fabric
 } from './types';
 import { storageService } from './services/storage';
 import { Navbar } from './components/Navbar';
@@ -13,6 +14,7 @@ import { Sidebar, MainNavTab, SettingsSubTab } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { OrderForm } from './components/OrderForm';
 import { CustomersView } from './components/CustomersView';
+import { FabricsView } from './components/FabricsView';
 import { DesignSettingsView } from './components/DesignSettingsView';
 import { ReceiptSlipModal } from './components/ReceiptSlipModal';
 import { LoginView } from './components/LoginView';
@@ -29,6 +31,7 @@ export default function App() {
   // 3. Data State
   const [orders, setOrders] = useState<Order[]>(() => storageService.getOrders());
   const [customers, setCustomers] = useState<Customer[]>(() => storageService.getCustomers());
+  const [fabrics, setFabrics] = useState<Fabric[]>(() => storageService.getFabrics());
   const [measurementFields, setMeasurementFields] = useState<MeasurementField[]>(() => 
     storageService.getMeasurementFields()
   );
@@ -46,6 +49,7 @@ export default function App() {
 
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [prefilledCustomer, setPrefilledCustomer] = useState<Customer | null>(null);
+  const [prefilledFabric, setPrefilledFabric] = useState<Fabric | null>(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [activeReceiptOrder, setActiveReceiptOrder] = useState<Order | null>(null);
 
@@ -55,6 +59,13 @@ export default function App() {
     document.documentElement.lang = language === 'en' ? 'en' : language === 'fa' ? 'fa' : 'ps';
     storageService.saveLanguage(language);
   }, [language]);
+
+  // Initial Database Sync from Supabase PostgreSQL in background
+  useEffect(() => {
+    storageService.syncFromDatabase().then(() => {
+      reloadData();
+    });
+  }, []);
 
   // Keyboard shortcuts (e.g. F2 for new order)
   useEffect(() => {
@@ -72,6 +83,7 @@ export default function App() {
   const reloadData = () => {
     setOrders(storageService.getOrders());
     setCustomers(storageService.getCustomers());
+    setFabrics(storageService.getFabrics());
     setMeasurementFields(storageService.getMeasurementFields());
     setDesignCategories(storageService.getDesignCategories());
     setShopSettings(storageService.getShopSettings());
@@ -99,6 +111,7 @@ export default function App() {
     if (tab === 'new_order') {
       setEditingOrder(null);
       setPrefilledCustomer(null);
+      setPrefilledFabric(null);
     }
     if (subTab) {
       setSettingsSubTab(subTab);
@@ -112,6 +125,7 @@ export default function App() {
     reloadData();
     setEditingOrder(null);
     setPrefilledCustomer(null);
+    setPrefilledFabric(null);
 
     if (shouldPrint) {
       setActiveReceiptOrder(savedOrder);
@@ -123,6 +137,7 @@ export default function App() {
   const handleStartNewOrder = () => {
     setEditingOrder(null);
     setPrefilledCustomer(null);
+    setPrefilledFabric(null);
     setCurrentTab('new_order');
   };
 
@@ -130,6 +145,15 @@ export default function App() {
   const handleNewOrderForCustomer = (customer: Customer) => {
     setEditingOrder(null);
     setPrefilledCustomer(customer);
+    setPrefilledFabric(null);
+    setCurrentTab('new_order');
+  };
+
+  // Start New Order with a Selected Fabric from Fabric Inventory
+  const handleNewOrderForFabric = (fabric: Fabric) => {
+    setEditingOrder(null);
+    setPrefilledCustomer(null);
+    setPrefilledFabric(fabric);
     setCurrentTab('new_order');
   };
 
@@ -137,6 +161,7 @@ export default function App() {
   const handleEditOrder = (order: Order) => {
     setEditingOrder(order);
     setPrefilledCustomer(null);
+    setPrefilledFabric(null);
     setCurrentTab('new_order');
   };
 
@@ -175,6 +200,7 @@ export default function App() {
         shopSettings={shopSettings}
         orders={orders}
         customers={customers}
+        fabrics={fabrics}
         designCategoriesCount={designCategories.length}
         isOpenOnMobile={isSidebarOpenMobile}
         onCloseMobile={() => setIsSidebarOpenMobile(false)}
@@ -199,7 +225,7 @@ export default function App() {
         />
 
         {/* Main Content View Container */}
-        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <main className="flex-1 w-full max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-5">
           {currentTab === 'dashboard' && (
             <Dashboard
               orders={orders}
@@ -217,6 +243,7 @@ export default function App() {
             <OrderForm
               initialOrder={editingOrder}
               prefilledCustomer={prefilledCustomer}
+              prefilledFabric={prefilledFabric}
               measurementFields={measurementFields}
               designCategories={designCategories}
               shopSettings={shopSettings}
@@ -225,8 +252,19 @@ export default function App() {
               onCancel={() => {
                 setEditingOrder(null);
                 setPrefilledCustomer(null);
+                setPrefilledFabric(null);
                 setCurrentTab('dashboard');
               }}
+            />
+          )}
+
+          {currentTab === 'fabrics' && (
+            <FabricsView
+              fabrics={fabrics}
+              shopSettings={shopSettings}
+              language={language}
+              onFabricUpdated={reloadData}
+              onSelectFabricForOrder={handleNewOrderForFabric}
             />
           )}
 
@@ -251,35 +289,23 @@ export default function App() {
               shopSettings={shopSettings}
               language={language}
               activeSubTab={settingsSubTab}
-              onSubTabChange={setSettingsSubTab}
-              onUpdateDesignCategories={cats => {
-                setDesignCategories(cats);
-                reloadData();
-              }}
-              onUpdateMeasurementFields={fields => {
-                setMeasurementFields(fields);
-                reloadData();
-              }}
-              onUpdateShopSettings={settings => {
-                setShopSettings(settings);
-                reloadData();
-              }}
-              onDataReset={reloadData}
+              onCategoryUpdated={reloadData}
+              onMeasurementFieldsUpdated={reloadData}
+              onSettingsUpdated={reloadData}
+              onDatabaseRestored={reloadData}
             />
           )}
         </main>
       </div>
 
-      {/* Tailor Receipt & Measurement Slip Modal */}
+      {/* Printable Receipt Modal Slip */}
       {activeReceiptOrder && (
         <ReceiptSlipModal
           order={activeReceiptOrder}
           shopSettings={shopSettings}
           measurementFields={measurementFields}
-          designCategories={designCategories}
           language={language}
           onClose={() => setActiveReceiptOrder(null)}
-          onEdit={handleEditOrder}
         />
       )}
     </div>
