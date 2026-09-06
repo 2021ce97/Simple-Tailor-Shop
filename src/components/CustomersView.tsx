@@ -4,7 +4,8 @@ import {
   Order, 
   MeasurementField, 
   ShopSettings, 
-  Language 
+  Language,
+  ProductSale
 } from '../types';
 import { translations } from '../translations/i18n';
 import { storageService } from '../services/storage';
@@ -26,12 +27,19 @@ import {
   ChevronRight,
   ArrowRight,
   MessageCircle,
-  ExternalLink
+  ExternalLink,
+  ShoppingBag,
+  Tag,
+  DollarSign,
+  CreditCard,
+  CheckCircle2,
+  Clock
 } from 'lucide-react';
 
 interface CustomersViewProps {
   customers: Customer[];
   orders: Order[];
+  productSales?: ProductSale[];
   measurementFields: MeasurementField[];
   shopSettings: ShopSettings;
   language: Language;
@@ -44,6 +52,7 @@ interface CustomersViewProps {
 export const CustomersView: React.FC<CustomersViewProps> = ({
   customers,
   orders,
+  productSales = [],
   measurementFields,
   shopSettings,
   language,
@@ -57,17 +66,18 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
   // State
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCustomer, setActiveCustomer] = useState<Customer | null>(
-    selectedCustomerId ? customers.find(c => c.id === selectedCustomerId) || null : null
+    selectedCustomerId ? (customers || []).find(c => c.id === selectedCustomerId) || null : null
   );
   const [isEditingModalOpen, setIsEditingModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [historyTab, setHistoryTab] = useState<'all' | 'orders' | 'products'>('all');
 
   // Currency
   const currencySymbol = language === 'ps' 
-    ? shopSettings.currencyPs 
+    ? (shopSettings?.currencyPs || 'افغانۍ') 
     : language === 'fa' 
-    ? shopSettings.currencyFa 
-    : shopSettings.currencyEn;
+    ? (shopSettings?.currencyFa || 'افغانی') 
+    : (shopSettings?.currencySymbol || shopSettings?.currencyEn || 'AFN');
 
   // Filtered Customers: search by Name, Phone, or Past Order Number!
   const filteredCustomers = useMemo(() => {
@@ -96,6 +106,34 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
     if (!activeCustomer) return [];
     return orders.filter(o => o.customerId === activeCustomer.id || o.customerPhone === activeCustomer.phone);
   }, [orders, activeCustomer]);
+
+  // Customer product purchases
+  const activeCustomerSales = useMemo(() => {
+    if (!activeCustomer) return [];
+    return (productSales || []).filter(s => 
+      s.customerId === activeCustomer.id || 
+      (s.customerPhone && activeCustomer.phone && s.customerPhone === activeCustomer.phone) ||
+      (s.customerName && activeCustomer.name && s.customerName.trim().toLowerCase() === activeCustomer.name.trim().toLowerCase())
+    );
+  }, [productSales, activeCustomer]);
+
+  // Combined statistics for active customer profile
+  const customerStats = useMemo(() => {
+    const totalOrderSpend = activeCustomerOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+    const totalOrderBalance = activeCustomerOrders.reduce((sum, o) => sum + (Number(o.balanceAmount) || 0), 0);
+    const totalProductSpend = activeCustomerSales.reduce((sum, s) => sum + (Number(s.totalAmount) || 0), 0);
+    const grandTotalSpend = totalOrderSpend + totalProductSpend;
+
+    return {
+      totalOrderSpend,
+      totalOrderBalance,
+      totalProductSpend,
+      grandTotalSpend,
+      ordersCount: activeCustomerOrders.length,
+      salesCount: activeCustomerSales.length,
+      totalCount: activeCustomerOrders.length + activeCustomerSales.length
+    };
+  }, [activeCustomerOrders, activeCustomerSales]);
 
   // Open Edit/Add Modal
   const handleOpenEditModal = (cust?: Customer) => {
@@ -363,29 +401,126 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                 </div>
               )}
 
-              {/* Customer Order History */}
-              <div className="space-y-3 pt-2">
-                <h3 className="font-bold text-sm text-[#1A1A1A] flex items-center gap-1.5">
-                  <span className="w-1 h-3.5 bg-[#D4AF37] rounded-full inline-block" />
-                  <History className="w-4 h-4 text-[#D4AF37]" />
-                  <span>{t.customerHistory} ({activeCustomerOrders.length})</span>
-                </h3>
+              {/* Customer Financial Overview Metric Chips */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+                <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+                  <span className="text-[10px] uppercase tracking-wider text-stone-500 font-bold block">
+                    {language === 'fa' ? 'سفارشات خیاطی' : language === 'ps' ? 'د خیاطۍ فرمایشونه' : 'Tailoring Orders'}
+                  </span>
+                  <div className="flex items-baseline gap-1 mt-0.5">
+                    <span className="font-mono font-black text-sm text-[#1A1A1A]">
+                      {customerStats.totalOrderSpend.toLocaleString()}
+                    </span>
+                    <span className="text-[10px] text-stone-500">{currencySymbol}</span>
+                    <span className="text-[10px] font-bold text-stone-600 ms-auto">
+                      ({customerStats.ordersCount})
+                    </span>
+                  </div>
+                </div>
 
-                {activeCustomerOrders.length === 0 ? (
-                  <p className="text-xs text-[#706E6B] italic">
-                    {language === 'fa' ? 'هنوز سفارشی ثبت نشده است.' : 'No orders in history.'}
+                <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-200/80">
+                  <span className="text-[10px] uppercase tracking-wider text-emerald-800 font-bold block">
+                    {language === 'fa' ? 'خرید محصولات' : language === 'ps' ? 'د اجناسو پیرود' : 'Product Purchases'}
+                  </span>
+                  <div className="flex items-baseline gap-1 mt-0.5">
+                    <span className="font-mono font-black text-sm text-emerald-900">
+                      {customerStats.totalProductSpend.toLocaleString()}
+                    </span>
+                    <span className="text-[10px] text-emerald-700">{currencySymbol}</span>
+                    <span className="text-[10px] font-bold text-emerald-700 ms-auto">
+                      ({customerStats.salesCount})
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-rose-50/60 rounded-xl border border-rose-200/80">
+                  <span className="text-[10px] uppercase tracking-wider text-rose-800 font-bold block">
+                    {t.totalBalanceDue}
+                  </span>
+                  <div className="flex items-baseline gap-1 mt-0.5">
+                    <span className="font-mono font-black text-sm text-rose-700">
+                      {customerStats.totalOrderBalance.toLocaleString()}
+                    </span>
+                    <span className="text-[10px] text-rose-600">{currencySymbol}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Customer Activity History: Orders & Product Purchases */}
+              <div className="space-y-3 pt-2">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 pb-2">
+                  <h3 className="font-bold text-sm text-[#1A1A1A] flex items-center gap-1.5">
+                    <span className="w-1 h-3.5 bg-[#D4AF37] rounded-full inline-block" />
+                    <History className="w-4 h-4 text-[#D4AF37]" />
+                    <span>{t.customerHistory}</span>
+                    <span className="text-xs font-mono font-bold text-stone-500">
+                      ({customerStats.totalCount})
+                    </span>
+                  </h3>
+
+                  {/* Filter Sub-Tabs */}
+                  <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl text-[11px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setHistoryTab('all')}
+                      className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
+                        historyTab === 'all'
+                          ? 'bg-white text-[#1A1A1A] shadow-xs'
+                          : 'text-stone-600 hover:text-stone-900'
+                      }`}
+                    >
+                      {t.all} ({customerStats.totalCount})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setHistoryTab('orders')}
+                      className={`px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1 ${
+                        historyTab === 'orders'
+                          ? 'bg-white text-[#1A1A1A] shadow-xs'
+                          : 'text-stone-600 hover:text-stone-900'
+                      }`}
+                    >
+                      <Scissors className="w-3 h-3 text-[#D4AF37]" />
+                      <span>{language === 'fa' ? 'سفارشات' : language === 'ps' ? 'فرمایشونه' : 'Orders'} ({customerStats.ordersCount})</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setHistoryTab('products')}
+                      className={`px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1 ${
+                        historyTab === 'products'
+                          ? 'bg-white text-[#1A1A1A] shadow-xs'
+                          : 'text-stone-600 hover:text-stone-900'
+                      }`}
+                    >
+                      <ShoppingBag className="w-3 h-3 text-emerald-600" />
+                      <span>{language === 'fa' ? 'محصولات' : language === 'ps' ? 'اجناس' : 'Products'} ({customerStats.salesCount})</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Empty State */}
+                {customerStats.totalCount === 0 ? (
+                  <p className="text-xs text-[#706E6B] italic py-3 text-center">
+                    {language === 'fa' ? 'هنوز سفارشی یا خریدی برای این مشتری ثبت نشده است.' : 'No orders or product purchases recorded for this customer.'}
                   </p>
                 ) : (
-                  <div className="space-y-2">
-                    {activeCustomerOrders.map(ord => (
+                  <div className="space-y-2.5 max-h-96 overflow-y-auto pr-1">
+                    {/* 1. Tailoring Orders List */}
+                    {(historyTab === 'all' || historyTab === 'orders') && activeCustomerOrders.map(ord => (
                       <div 
-                        key={ord.id}
+                        key={`order-${ord.id}`}
                         className="p-3 bg-[#F9F7F2] hover:bg-stone-200/50 rounded-xl border border-[#E5E5E5] flex items-center justify-between gap-3 text-xs transition"
                       >
-                        <div>
-                          <div className="flex items-center gap-2">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-mono font-black text-[#1A1A1A]">#{ord.orderNumber}</span>
-                            <span className="font-semibold text-[#1A1A1A]">{ord.garmentType}</span>
+                            <span className="inline-flex items-center gap-1 font-semibold text-[#1A1A1A]">
+                              <Scissors className="w-3 h-3 text-[#D4AF37]" />
+                              <span>{ord.garmentType}</span>
+                            </span>
+                            {ord.fabricName && (
+                              <span className="text-[10px] text-stone-500">({ord.fabricName})</span>
+                            )}
                             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                               ord.status === 'ready' ? 'bg-emerald-100 text-emerald-800' :
                               ord.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
@@ -394,22 +529,99 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                               {t[('status' + ord.status.charAt(0).toUpperCase() + ord.status.slice(1).replace('_', '')) as keyof typeof t] || ord.status}
                             </span>
                           </div>
-                          <div className="flex items-center gap-3 text-[11px] text-[#706E6B] mt-1 font-mono">
-                            <span>{ord.orderDate}</span>
+
+                          <div className="flex items-center gap-3 text-[11px] text-[#706E6B] font-mono flex-wrap">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3 text-stone-400" />
+                              <span>{ord.orderDate}</span>
+                            </span>
                             <span>•</span>
-                            <span>{ord.totalAmount} {currencySymbol}</span>
+                            <span className="font-bold text-[#1A1A1A]">
+                              {ord.totalAmount} {currencySymbol}
+                            </span>
+                            {ord.balanceAmount > 0 ? (
+                              <span className="text-rose-600 font-bold">
+                                ({t.balanceDue}: {ord.balanceAmount} {currencySymbol})
+                              </span>
+                            ) : (
+                              <span className="text-emerald-700 font-bold">({t.paid})</span>
+                            )}
                           </div>
                         </div>
 
                         <button
+                          type="button"
                           onClick={() => onViewReceipt(ord)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-stone-100 border border-[#E5E5E5] rounded-lg text-[11px] font-bold text-[#1A1A1A] transition cursor-pointer shadow-2xs"
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white hover:bg-stone-100 border border-[#E5E5E5] rounded-lg text-[11px] font-bold text-[#1A1A1A] transition cursor-pointer shadow-2xs shrink-0"
+                          title={t.print}
                         >
                           <Printer className="w-3.5 h-3.5" />
                           <span>{t.print}</span>
                         </button>
                       </div>
                     ))}
+
+                    {/* 2. Product Purchases List */}
+                    {(historyTab === 'all' || historyTab === 'products') && activeCustomerSales.map(sale => (
+                      <div 
+                        key={`sale-${sale.id}`}
+                        className="p-3 bg-emerald-50/40 hover:bg-emerald-50/70 rounded-xl border border-emerald-200/70 flex items-center justify-between gap-3 text-xs transition"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="inline-flex items-center gap-1 font-bold text-[#1A1A1A]">
+                              <ShoppingBag className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>{sale.productName}</span>
+                            </span>
+                            {sale.category && (
+                              <span className="text-[10px] px-1.5 py-0.5 bg-white rounded-md border border-emerald-200 text-emerald-800 font-semibold">
+                                {sale.category}
+                              </span>
+                            )}
+                            <span className="text-[10px] font-black px-1.5 py-0.5 bg-emerald-100 text-emerald-800 rounded-md font-mono">
+                              &times; {sale.quantity}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-3 text-[11px] text-stone-600 font-mono flex-wrap">
+                            <span className="flex items-center gap-1 font-sans text-stone-500">
+                              <Calendar className="w-3 h-3 text-stone-400" />
+                              <span>{sale.saleDate ? sale.saleDate.split('T')[0] : '-'}</span>
+                            </span>
+                            <span>•</span>
+                            <span className="font-bold text-[#1A1A1A]">
+                              {sale.totalAmount.toLocaleString()} {currencySymbol}
+                            </span>
+                            <span className="text-stone-400">
+                              ({sale.sellingPrice.toLocaleString()} {currencySymbol}/{t.unitPiece || 'unit'})
+                            </span>
+                            {sale.paymentMethod && (
+                              <span className="text-[10px] uppercase font-bold text-stone-500 font-sans">
+                                {sale.paymentMethod}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="text-end shrink-0">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                            {language === 'fa' ? 'خرید محصول' : language === 'ps' ? 'د جنس پیرود' : 'Product Purchase'}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Tab specific empty states */}
+                    {historyTab === 'orders' && activeCustomerOrders.length === 0 && (
+                      <p className="text-xs text-stone-500 italic py-2 text-center">
+                        {language === 'fa' ? 'هیچ سفارش خیاطی برای این مشتری یافت نشد.' : 'No tailoring orders found for this customer.'}
+                      </p>
+                    )}
+                    {historyTab === 'products' && activeCustomerSales.length === 0 && (
+                      <p className="text-xs text-stone-500 italic py-2 text-center">
+                        {language === 'fa' ? 'هیچ خرید محصولی برای این مشتری یافت نشد.' : 'No product purchases found for this customer.'}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
@@ -434,7 +646,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-4 bg-[#D4AF37] rounded-full inline-block" />
                 <h3 className="font-bold text-base text-[#1A1A1A]">
-                  {editingCustomer.id.startsWith('cust_') && !customers.find(c => c.id === editingCustomer.id) 
+                  {editingCustomer.id.startsWith('cust_') && !(customers || []).find(c => c.id === editingCustomer.id) 
                     ? t.addNewCustomer 
                     : t.editCustomer}
                 </h3>

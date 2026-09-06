@@ -50,6 +50,45 @@ export interface Fabric {
   updatedAt?: string;
 }
 
+export interface ProductCategory {
+  id: string;
+  name: string;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  category: string; // e.g. "Shoes", "Watches", "Perfume"
+  vendor?: string;
+  brand?: string;
+  sku?: string;
+  imageUrl?: string;
+  purchasePrice: number; // Purchase price only (selling price decided upon sale)
+  stockQuantity: number;
+  lowStockThreshold?: number;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProductSale {
+  id: string;
+  productId: string;
+  productName: string;
+  category: string;
+  quantity: number;
+  purchasePrice: number; // cost
+  sellingPrice: number; // decided at time of sale
+  totalAmount: number;
+  profit: number; // (sellingPrice - purchasePrice) * quantity
+  customerId?: string;
+  customerName?: string;
+  customerPhone?: string;
+  saleDate: string;
+  paymentMethod?: string;
+  notes?: string;
+}
+
 export interface Customer {
   id: string;
   name: string;
@@ -137,6 +176,7 @@ export interface ShopSettings {
   currencyEn: string;
   currencyFa: string;
   currencyPs: string;
+  currencySymbol?: string;
   receiptFooterEn?: string;
   receiptFooterFa?: string;
   receiptFooterPs?: string;

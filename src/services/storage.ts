@@ -3,20 +3,74 @@ import {
   Order, 
   DesignCategory, 
   MeasurementField, 
-  ShopSettings,
-  Fabric
+  ShopSettings, 
+  Fabric, 
+  Product, 
+  ProductCategory,
+  ProductSale 
 } from '../types';
 
 const STORAGE_KEYS = {
   ORDERS: 'tailor_orders_v1',
   CUSTOMERS: 'tailor_customers_v1',
   FABRICS: 'tailor_fabrics_v1',
+  PRODUCTS: 'tailor_products_v1',
+  PRODUCT_CATEGORIES: 'tailor_product_categories_v1',
+  PRODUCT_VENDORS: 'tailor_product_vendors_v1',
+  PRODUCT_BRANDS: 'tailor_product_brands_v1',
+  PRODUCT_SALES: 'tailor_product_sales_v1',
   DESIGN_CATEGORIES: 'tailor_design_categories_v1',
   MEASUREMENT_FIELDS: 'tailor_measurement_fields_v1',
   SHOP_SETTINGS: 'tailor_shop_settings_v1',
   LANGUAGE: 'tailor_app_lang_v1',
   AUTH_USER: 'tailor_app_auth_user_v1',
 };
+
+export const DEFAULT_PRODUCT_CATEGORIES = ['Shoes', 'Watches', 'Perfume', 'Accessories', 'Caps / Karakul'];
+export const DEFAULT_PRODUCT_VENDORS = ['Arab Mobiles Distributor', 'China Shop', 'Kabul Wholesale Supply'];
+export const DEFAULT_PRODUCT_BRANDS = ['Peshawari Leather', 'Curren Classic', 'Al-Rehab Oud', 'Casio', 'Rayan Signature'];
+
+export const INITIAL_DEMO_PRODUCTS: Product[] = [
+  {
+    id: 'prod_1',
+    name: 'کفش چرم دست‌دوز اعلا (Handmade Leather Peshawari Shoes)',
+    category: 'Shoes',
+    brand: 'Peshawari Leather',
+    vendor: 'Kabul Wholesale Supply',
+    purchasePrice: 1200,
+    stockQuantity: 14,
+    lowStockThreshold: 3,
+    description: 'چرم اصل گاوی دست‌دوز، زیره راحت و بادوام برای مجالس',
+    createdAt: '2026-08-20T10:00:00Z',
+    updatedAt: '2026-08-20T10:00:00Z',
+  },
+  {
+    id: 'prod_2',
+    name: 'ساعت مچی مجلسی طلایی (Classic Gold Quartz Watch)',
+    category: 'Watches',
+    brand: 'Curren Classic',
+    vendor: 'China Shop',
+    purchasePrice: 850,
+    stockQuantity: 8,
+    lowStockThreshold: 2,
+    description: 'ضد آب روزمره با رنگ ثابت طلایی و نمایشگر تقویم',
+    createdAt: '2026-08-21T11:00:00Z',
+    updatedAt: '2026-08-21T11:00:00Z',
+  },
+  {
+    id: 'prod_3',
+    name: 'عطر سلطنتی عود و امبر (Royal Oud & Amber Perfume 50ml)',
+    category: 'Perfume',
+    brand: 'Al-Rehab Oud',
+    vendor: 'Arab Mobiles Distributor',
+    purchasePrice: 650,
+    stockQuantity: 22,
+    lowStockThreshold: 4,
+    description: 'رایحه ماندگار و اصیل عربی مناسب فصل‌های مختلف',
+    createdAt: '2026-08-22T09:30:00Z',
+    updatedAt: '2026-08-22T09:30:00Z',
+  }
+];
 
 export const DEFAULT_SHOP_SETTINGS: ShopSettings = {
   shopNameEn: 'Rayan Tailor Shop Management',
@@ -34,6 +88,7 @@ export const DEFAULT_SHOP_SETTINGS: ShopSettings = {
   currencyEn: 'AFN',
   currencyFa: 'افغانی',
   currencyPs: 'افغانۍ',
+  currencySymbol: 'AFN',
   receiptFooterEn: 'Please bring this receipt for collection. Rayan Tailors guarantees perfection in every stitch!',
   receiptFooterFa: 'لطفاً هنگام تحویل گرفتن لباس، این بل را با خود داشته باشید. تضمین کیفیت خیاطی رایان!',
   receiptFooterPs: 'مهرباني وکړئ د کالیو اخیستلو پر مهال دا بِل له ځان سره ولرئ. د رایان خیاطۍ د لوړ کیفیت تضمین!',
@@ -436,11 +491,18 @@ const INITIAL_DEMO_ORDERS: Order[] = [
 function getStoredItem<T>(key: string, defaultValue: T): T {
   try {
     const item = localStorage.getItem(key);
-    if (!item) {
+    if (!item || item === 'undefined' || item === 'null') {
       localStorage.setItem(key, JSON.stringify(defaultValue));
       return defaultValue;
     }
-    return JSON.parse(item);
+    const parsed = JSON.parse(item);
+    if (parsed === null || parsed === undefined) {
+      return defaultValue;
+    }
+    if (Array.isArray(defaultValue) && !Array.isArray(parsed)) {
+      return defaultValue;
+    }
+    return parsed;
   } catch {
     return defaultValue;
   }
@@ -475,16 +537,17 @@ async function apiSync(endpoint: string, method = 'GET', data?: any) {
 export const storageService = {
   // Fabrics
   getFabrics(): Fabric[] {
-    return getStoredItem<Fabric[]>(STORAGE_KEYS.FABRICS, INITIAL_DEMO_FABRICS);
+    const list = getStoredItem<Fabric[]>(STORAGE_KEYS.FABRICS, INITIAL_DEMO_FABRICS);
+    return Array.isArray(list) ? list : INITIAL_DEMO_FABRICS;
   },
 
   getFabricById(id: string): Fabric | undefined {
-    const fabrics = this.getFabrics();
+    const fabrics = this.getFabrics() || [];
     return fabrics.find(f => f.id === id || f.code === id);
   },
 
   saveFabric(fabric: Fabric): Fabric {
-    const fabrics = this.getFabrics();
+    const fabrics = this.getFabrics() || [];
     const existingIndex = fabrics.findIndex(f => f.id === fabric.id);
     const now = new Date().toISOString();
 
@@ -505,14 +568,14 @@ export const storageService = {
   },
 
   deleteFabric(id: string): void {
-    const fabrics = this.getFabrics().filter(f => f.id !== id);
+    const fabrics = (this.getFabrics() || []).filter(f => f.id !== id);
     setStoredItem(STORAGE_KEYS.FABRICS, fabrics);
     apiSync(`fabrics/${id}`, 'DELETE');
   },
 
   deductFabricStock(fabricId: string, metersUsed: number): void {
     if (!fabricId || metersUsed <= 0) return;
-    const fabrics = this.getFabrics();
+    const fabrics = this.getFabrics() || [];
     const fabric = fabrics.find(f => f.id === fabricId);
     if (fabric) {
       fabric.stockMeters = Math.max(0, Number(fabric.stockMeters || 0) - Number(metersUsed));
@@ -522,13 +585,220 @@ export const storageService = {
     }
   },
 
+  // Products & Retail Inventory
+  getProducts(): Product[] {
+    const list = getStoredItem<Product[]>(STORAGE_KEYS.PRODUCTS, INITIAL_DEMO_PRODUCTS);
+    return Array.isArray(list) ? list : INITIAL_DEMO_PRODUCTS;
+  },
+
+  getProductById(id: string): Product | undefined {
+    const products = this.getProducts() || [];
+    return products.find(p => p.id === id);
+  },
+
+  saveProduct(product: Partial<Product> & { name: string; category: string; purchasePrice: number; stockQuantity: number }): Product {
+    const products = this.getProducts() || [];
+    const now = new Date().toISOString();
+    const id = product.id || `prod_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+
+    const fullProduct: Product = {
+      id,
+      name: product.name,
+      category: product.category,
+      vendor: product.vendor || '',
+      brand: product.brand || '',
+      purchasePrice: Number(product.purchasePrice) || 0,
+      stockQuantity: Number(product.stockQuantity) || 0,
+      lowStockThreshold: product.lowStockThreshold !== undefined ? Number(product.lowStockThreshold) : 2,
+      description: product.description || '',
+      createdAt: product.createdAt || now,
+      updatedAt: now,
+    };
+
+    const existingIndex = products.findIndex(p => p.id === id);
+    if (existingIndex >= 0) {
+      products[existingIndex] = fullProduct;
+    } else {
+      products.unshift(fullProduct);
+    }
+
+    setStoredItem(STORAGE_KEYS.PRODUCTS, products);
+    apiSync('products', 'POST', fullProduct);
+    return fullProduct;
+  },
+
+  deleteProduct(id: string): void {
+    let products = this.getProducts() || [];
+    products = products.filter(p => p.id !== id);
+    setStoredItem(STORAGE_KEYS.PRODUCTS, products);
+    apiSync(`products/${id}`, 'DELETE');
+  },
+
+  // Product Categories
+  getProductCategories(): ProductCategory[] {
+    const list = getStoredItem<any[]>(STORAGE_KEYS.PRODUCT_CATEGORIES, DEFAULT_PRODUCT_CATEGORIES);
+    const safeList = Array.isArray(list) && list.length > 0 ? list : DEFAULT_PRODUCT_CATEGORIES;
+    return safeList.map((item, idx) => {
+      if (typeof item === 'string') {
+        return { id: `cat_${idx}_${item.toLowerCase().replace(/[^a-z0-9]/g, '_')}`, name: item };
+      }
+      return item as ProductCategory;
+    });
+  },
+
+  saveProductCategory(name: string): ProductCategory {
+    const trimmed = name.trim();
+    const list = this.getProductCategories();
+    const existing = list.find(c => c.name.toLowerCase() === trimmed.toLowerCase());
+    if (existing) return existing;
+    const newCat: ProductCategory = {
+      id: `cat_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+      name: trimmed,
+    };
+    list.push(newCat);
+    setStoredItem(STORAGE_KEYS.PRODUCT_CATEGORIES, list);
+    return newCat;
+  },
+
+  deleteProductCategory(idOrName: string): ProductCategory[] {
+    let list = this.getProductCategories();
+    list = list.filter(c => c.id !== idOrName && c.name !== idOrName);
+    setStoredItem(STORAGE_KEYS.PRODUCT_CATEGORIES, list);
+    return list;
+  },
+
+  // Product Vendors
+  getProductVendors(): string[] {
+    const list = getStoredItem<string[]>(STORAGE_KEYS.PRODUCT_VENDORS, DEFAULT_PRODUCT_VENDORS);
+    return Array.isArray(list) && list.length > 0 ? list : DEFAULT_PRODUCT_VENDORS;
+  },
+
+  saveProductVendor(name: string): string[] {
+    const trimmed = name.trim();
+    if (!trimmed) return this.getProductVendors();
+    const list = this.getProductVendors();
+    if (!list.includes(trimmed)) {
+      list.push(trimmed);
+      setStoredItem(STORAGE_KEYS.PRODUCT_VENDORS, list);
+    }
+    return list;
+  },
+
+  deleteProductVendor(name: string): string[] {
+    let list = this.getProductVendors();
+    list = list.filter(v => v !== name);
+    setStoredItem(STORAGE_KEYS.PRODUCT_VENDORS, list);
+    return list;
+  },
+
+  // Product Brands
+  getProductBrands(): string[] {
+    const list = getStoredItem<string[]>(STORAGE_KEYS.PRODUCT_BRANDS, DEFAULT_PRODUCT_BRANDS);
+    return Array.isArray(list) && list.length > 0 ? list : DEFAULT_PRODUCT_BRANDS;
+  },
+
+  saveProductBrand(name: string): string[] {
+    const trimmed = name.trim();
+    if (!trimmed) return this.getProductBrands();
+    const list = this.getProductBrands();
+    if (!list.includes(trimmed)) {
+      list.push(trimmed);
+      setStoredItem(STORAGE_KEYS.PRODUCT_BRANDS, list);
+    }
+    return list;
+  },
+
+  deleteProductBrand(name: string): string[] {
+    let list = this.getProductBrands();
+    list = list.filter(b => b !== name);
+    setStoredItem(STORAGE_KEYS.PRODUCT_BRANDS, list);
+    return list;
+  },
+
+  // Product Sales
+  getProductSales(): ProductSale[] {
+    const list = getStoredItem<ProductSale[]>(STORAGE_KEYS.PRODUCT_SALES, []);
+    return Array.isArray(list) ? list : [];
+  },
+
+  recordProductSale(sale: {
+    productId: string;
+    productName: string;
+    category: string;
+    quantity: number;
+    sellingPrice: number;
+    customerId?: string;
+    customerName?: string;
+    customerPhone?: string;
+    notes?: string;
+  }): ProductSale {
+    const products = this.getProducts() || [];
+    const product = products.find(p => p.id === sale.productId);
+    const purchasePrice = product ? Number(product.purchasePrice) || 0 : 0;
+    const qty = Math.max(1, Number(sale.quantity) || 1);
+    const sellingPrice = Number(sale.sellingPrice) || 0;
+    const totalAmount = sellingPrice * qty;
+    const profit = (sellingPrice - purchasePrice) * qty;
+
+    const newSale: ProductSale = {
+      id: `sale_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+      productId: sale.productId,
+      productName: sale.productName,
+      category: sale.category,
+      quantity: qty,
+      purchasePrice,
+      sellingPrice,
+      totalAmount,
+      profit,
+      customerId: sale.customerId,
+      customerName: sale.customerName,
+      customerPhone: sale.customerPhone,
+      saleDate: new Date().toISOString(),
+      notes: sale.notes,
+    };
+
+    // Deduct stock from product
+    if (product) {
+      product.stockQuantity = Math.max(0, (Number(product.stockQuantity) || 0) - qty);
+      product.updatedAt = new Date().toISOString();
+      setStoredItem(STORAGE_KEYS.PRODUCTS, products);
+      apiSync('products', 'POST', product);
+    }
+
+    const sales = this.getProductSales();
+    sales.unshift(newSale);
+    setStoredItem(STORAGE_KEYS.PRODUCT_SALES, sales);
+    apiSync('product-sales', 'POST', newSale);
+
+    return newSale;
+  },
+
+  saveProductSale(sale: {
+    productId: string;
+    productName: string;
+    category: string;
+    quantity: number;
+    purchasePrice?: number;
+    sellingPrice: number;
+    totalAmount?: number;
+    profit?: number;
+    customerId?: string;
+    customerName?: string;
+    customerPhone?: string;
+    paymentMethod?: string;
+    notes?: string;
+  }): ProductSale {
+    return this.recordProductSale(sale);
+  },
+
   // Orders
   getOrders(): Order[] {
-    return getStoredItem<Order[]>(STORAGE_KEYS.ORDERS, INITIAL_DEMO_ORDERS);
+    const list = getStoredItem<Order[]>(STORAGE_KEYS.ORDERS, INITIAL_DEMO_ORDERS);
+    return Array.isArray(list) ? list : INITIAL_DEMO_ORDERS;
   },
 
   getOrderById(id: string): Order | undefined {
-    const orders = this.getOrders();
+    const orders = this.getOrders() || [];
     return orders.find(o => o.id === id || o.orderNumber === id);
   },
 
@@ -566,7 +836,7 @@ export const storageService = {
 
   // Automatically update/create customer when an order is saved
   syncCustomerFromOrder(order: Order): void {
-    const customers = this.getCustomers();
+    const customers = this.getCustomers() || [];
     const cleanPhone = order.customerPhone.trim();
     const cleanName = order.customerName.trim();
 
@@ -612,8 +882,8 @@ export const storageService = {
   },
 
   recalculateCustomerStats(customerId: string): void {
-    const orders = this.getOrders().filter(o => o.customerId === customerId);
-    const customers = this.getCustomers();
+    const orders = (this.getOrders() || []).filter(o => o.customerId === customerId);
+    const customers = this.getCustomers() || [];
     const customer = customers.find(c => c.id === customerId);
 
     if (customer) {
@@ -626,25 +896,26 @@ export const storageService = {
 
   // Customers
   getCustomers(): Customer[] {
-    return getStoredItem<Customer[]>(STORAGE_KEYS.CUSTOMERS, INITIAL_DEMO_CUSTOMERS);
+    const list = getStoredItem<Customer[]>(STORAGE_KEYS.CUSTOMERS, INITIAL_DEMO_CUSTOMERS);
+    return Array.isArray(list) ? list : INITIAL_DEMO_CUSTOMERS;
   },
 
   getCustomerById(id: string): Customer | undefined {
-    const customers = this.getCustomers();
+    const customers = this.getCustomers() || [];
     return customers.find(c => c.id === id);
   },
 
   findCustomerByPhoneOrName(query: string): Customer[] {
     if (!query || !query.trim()) return [];
     const q = query.trim().toLowerCase();
-    const customers = this.getCustomers();
+    const customers = this.getCustomers() || [];
     return customers.filter(
       c => c.name.toLowerCase().includes(q) || c.phone.includes(q)
     );
   },
 
   saveCustomer(customer: Customer): Customer {
-    const customers = this.getCustomers();
+    const customers = this.getCustomers() || [];
     const existingIndex = customers.findIndex(c => c.id === customer.id);
 
     if (existingIndex >= 0) {
@@ -664,14 +935,15 @@ export const storageService = {
   },
 
   deleteCustomer(id: string): void {
-    const customers = this.getCustomers().filter(c => c.id !== id);
+    const customers = (this.getCustomers() || []).filter(c => c.id !== id);
     setStoredItem(STORAGE_KEYS.CUSTOMERS, customers);
     apiSync(`customers/${id}`, 'DELETE');
   },
 
   // Design Categories
   getDesignCategories(): DesignCategory[] {
-    return getStoredItem<DesignCategory[]>(STORAGE_KEYS.DESIGN_CATEGORIES, DEFAULT_DESIGN_CATEGORIES);
+    const list = getStoredItem<DesignCategory[]>(STORAGE_KEYS.DESIGN_CATEGORIES, DEFAULT_DESIGN_CATEGORIES);
+    return Array.isArray(list) ? list : DEFAULT_DESIGN_CATEGORIES;
   },
 
   saveDesignCategories(categories: DesignCategory[]): void {
@@ -681,7 +953,8 @@ export const storageService = {
 
   // Measurement Fields
   getMeasurementFields(): MeasurementField[] {
-    return getStoredItem<MeasurementField[]>(STORAGE_KEYS.MEASUREMENT_FIELDS, DEFAULT_MEASUREMENT_FIELDS);
+    const list = getStoredItem<MeasurementField[]>(STORAGE_KEYS.MEASUREMENT_FIELDS, DEFAULT_MEASUREMENT_FIELDS);
+    return Array.isArray(list) ? list : DEFAULT_MEASUREMENT_FIELDS;
   },
 
   saveMeasurementFields(fields: MeasurementField[]): void {
@@ -734,6 +1007,11 @@ export const storageService = {
       shopSettings: this.getShopSettings(),
       customers: this.getCustomers(),
       fabrics: this.getFabrics(),
+      products: this.getProducts(),
+      productCategories: this.getProductCategories(),
+      productVendors: this.getProductVendors(),
+      productBrands: this.getProductBrands(),
+      productSales: this.getProductSales(),
       orders: this.getOrders(),
       designCategories: this.getDesignCategories(),
       measurementFields: this.getMeasurementFields(),
@@ -747,6 +1025,11 @@ export const storageService = {
       if (data.shopSettings) setStoredItem(STORAGE_KEYS.SHOP_SETTINGS, data.shopSettings);
       if (data.customers) setStoredItem(STORAGE_KEYS.CUSTOMERS, data.customers);
       if (data.fabrics) setStoredItem(STORAGE_KEYS.FABRICS, data.fabrics);
+      if (data.products) setStoredItem(STORAGE_KEYS.PRODUCTS, data.products);
+      if (data.productCategories) setStoredItem(STORAGE_KEYS.PRODUCT_CATEGORIES, data.productCategories);
+      if (data.productVendors) setStoredItem(STORAGE_KEYS.PRODUCT_VENDORS, data.productVendors);
+      if (data.productBrands) setStoredItem(STORAGE_KEYS.PRODUCT_BRANDS, data.productBrands);
+      if (data.productSales) setStoredItem(STORAGE_KEYS.PRODUCT_SALES, data.productSales);
       if (data.orders) setStoredItem(STORAGE_KEYS.ORDERS, data.orders);
       if (data.designCategories) setStoredItem(STORAGE_KEYS.DESIGN_CATEGORIES, data.designCategories);
       if (data.measurementFields) setStoredItem(STORAGE_KEYS.MEASUREMENT_FIELDS, data.measurementFields);
@@ -761,6 +1044,11 @@ export const storageService = {
     setStoredItem(STORAGE_KEYS.ORDERS, INITIAL_DEMO_ORDERS);
     setStoredItem(STORAGE_KEYS.CUSTOMERS, INITIAL_DEMO_CUSTOMERS);
     setStoredItem(STORAGE_KEYS.FABRICS, INITIAL_DEMO_FABRICS);
+    setStoredItem(STORAGE_KEYS.PRODUCTS, INITIAL_DEMO_PRODUCTS);
+    setStoredItem(STORAGE_KEYS.PRODUCT_CATEGORIES, DEFAULT_PRODUCT_CATEGORIES);
+    setStoredItem(STORAGE_KEYS.PRODUCT_VENDORS, DEFAULT_PRODUCT_VENDORS);
+    setStoredItem(STORAGE_KEYS.PRODUCT_BRANDS, DEFAULT_PRODUCT_BRANDS);
+    setStoredItem(STORAGE_KEYS.PRODUCT_SALES, []);
     setStoredItem(STORAGE_KEYS.DESIGN_CATEGORIES, DEFAULT_DESIGN_CATEGORIES);
     setStoredItem(STORAGE_KEYS.MEASUREMENT_FIELDS, DEFAULT_MEASUREMENT_FIELDS);
     setStoredItem(STORAGE_KEYS.SHOP_SETTINGS, DEFAULT_SHOP_SETTINGS);

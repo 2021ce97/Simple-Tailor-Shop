@@ -44,6 +44,8 @@ export interface Translations {
   customers: string;
   fabrics: string;
   fabricInventory: string;
+  products: string;
+  productsInventory: string;
   designAndSettings: string;
   designTemplatesNav: string;
   measurementSettingsNav: string;
@@ -187,6 +189,60 @@ export interface Translations {
   price: string;
   thankYouMessage: string;
 
+  // Products & Retail Inventory
+  shoes: string;
+  watches: string;
+  perfume: string;
+  purchasePrice: string;
+  sellingPrice: string;
+  stockQuantity: string;
+  lowStockThreshold: string;
+  sellItem: string;
+  sellProduct: string;
+  recordSale: string;
+  salesHistory: string;
+  profit: string;
+  brand: string;
+  vendor: string;
+  category: string;
+  manageVendorsCategories: string;
+  createProductListing: string;
+  newInventoryEntry: string;
+  addRemoveReusableValues: string;
+  addVendor: string;
+  addBrand: string;
+  itemName: string;
+  selectVendor: string;
+  selectCategory: string;
+  selectBrand: string;
+  decidePriceNotice: string;
+  addProduct: string;
+  editProduct: string;
+  productName: string;
+  initialStock: string;
+  sku: string;
+  description: string;
+  allCategories: string;
+  product: string;
+  customer: string;
+  searchProductPlaceholder: string;
+  noProductsFound: string;
+  quantityToSell: string;
+  confirmSale: string;
+  updateProduct: string;
+  salesHistoryNav: string;
+  newSale: string;
+  lowStockAlert: string;
+  configurableThreshold: string;
+  revenueOverview7Days: string;
+  dailyRevenue: string;
+  orderRevenue: string;
+  productSalesRevenue: string;
+  customerHistoryDetails: string;
+  tailorOrdersHistory: string;
+  retailPurchasesHistory: string;
+  totalSpent: string;
+
   // Login & Auth
   loginTitle: string;
   loginSubtitle: string;
@@ -243,6 +299,8 @@ export const translations: Record<Language, Translations> = {
     customers: 'Customer Directory',
     fabrics: 'Fabric Inventory',
     fabricInventory: 'Fabric Inventory',
+    products: 'Products & Retail',
+    productsInventory: 'Products Inventory',
     designAndSettings: 'Design & Settings',
     designTemplatesNav: 'Design Templates',
     measurementSettingsNav: 'Measurement Fields',
@@ -376,6 +434,60 @@ export const translations: Record<Language, Translations> = {
     price: 'Price',
     thankYouMessage: 'Thank you for choosing our tailor shop!',
 
+    // Products & Retail Inventory
+    shoes: 'Shoes',
+    watches: 'Watches',
+    perfume: 'Perfume',
+    purchasePrice: 'Purchase Price',
+    sellingPrice: 'Selling Price',
+    stockQuantity: 'Stock Quantity',
+    lowStockThreshold: 'Low Stock Alert',
+    sellItem: 'Sell Item',
+    sellProduct: 'Sell Product',
+    recordSale: 'Record Retail Sale',
+    salesHistory: 'Sales History',
+    profit: 'Profit / Margin',
+    brand: 'Brand / Company',
+    vendor: 'Vendor / Supplier',
+    category: 'Category',
+    manageVendorsCategories: 'Manage vendors and categories',
+    createProductListing: 'Create a product listing',
+    newInventoryEntry: 'New inventory entry',
+    addRemoveReusableValues: 'Add or remove reusable values',
+    addVendor: 'Add Vendor',
+    addBrand: 'Add Brand',
+    itemName: 'Item Name',
+    selectVendor: 'Select vendor...',
+    selectCategory: 'Select category...',
+    selectBrand: 'Select brand...',
+    decidePriceNotice: 'Selling price is decided at time of sale',
+    addProduct: 'Add New Product',
+    editProduct: 'Edit Product',
+    productName: 'Product Name',
+    initialStock: 'Initial Stock Quantity',
+    sku: 'Item Code / SKU',
+    description: 'Description & Details',
+    allCategories: 'All Categories',
+    product: 'Product',
+    customer: 'Customer',
+    searchProductPlaceholder: 'Search products by name, brand, SKU...',
+    noProductsFound: 'No products found matching your search',
+    quantityToSell: 'Quantity to Sell',
+    confirmSale: 'Confirm Sale',
+    updateProduct: 'Update Product',
+    salesHistoryNav: 'Sales History',
+    newSale: 'Make a New Sale',
+    lowStockAlert: 'Low Stock Alert',
+    configurableThreshold: 'Alert Threshold',
+    revenueOverview7Days: '7-Day Revenue Overview (Orders vs Retail Sales)',
+    dailyRevenue: 'Daily Revenue',
+    orderRevenue: 'Tailoring Orders Revenue',
+    productSalesRevenue: 'Retail Sales Revenue',
+    customerHistoryDetails: 'Customer Transaction & Order History',
+    tailorOrdersHistory: 'Tailoring Orders History',
+    retailPurchasesHistory: 'Retail Products Purchased',
+    totalSpent: 'Total Customer Spend',
+
     loginTitle: 'Sign In to Rayan Tailors',
     loginSubtitle: 'Enter your credentials to access the management portal',
     email: 'Email Address',
@@ -430,6 +542,8 @@ export const translations: Record<Language, Translations> = {
     customers: 'فهرست مشتریان',
     fabrics: 'موجودی رخت و تکه',
     fabricInventory: 'موجودی رخت و تکه',
+    products: 'اجناس و کالاها',
+    productsInventory: 'موجودی اجناس و کالا',
     designAndSettings: 'طرح‌ها و تنظیمات',
     designTemplatesNav: 'طرح‌ها و مدل‌ها',
     measurementSettingsNav: 'فیلدهای اندازه',
@@ -563,6 +677,60 @@ export const translations: Record<Language, Translations> = {
     price: 'قیمت',
     thankYouMessage: 'از انتخاب و اعتماد شما متشکریم!',
 
+    // Products & Retail Inventory
+    shoes: 'کفش و بوټ',
+    watches: 'ساعت',
+    perfume: 'عطر و ادکلن',
+    purchasePrice: 'قیمت خرید',
+    sellingPrice: 'قیمت فروش',
+    stockQuantity: 'تعداد موجودی',
+    lowStockThreshold: 'هشدار کمبود موجودی',
+    sellItem: 'فروش کالا',
+    sellProduct: 'فروش محصول',
+    recordSale: 'ثبت فروش',
+    salesHistory: 'تاریخچه فروشات',
+    profit: 'فایده / مفاد',
+    brand: 'برند / شرکت',
+    vendor: 'عرضه‌کننده / فروشنده',
+    category: 'دسته‌بندی',
+    manageVendorsCategories: 'مدیریت فروشندگان و دسته‌بندی‌ها',
+    createProductListing: 'ثبت کالای جدید',
+    newInventoryEntry: 'ورودی جدید موجودی',
+    addRemoveReusableValues: 'افزودن یا حذف مقادیر پیش‌فرض',
+    addVendor: 'افزودن فروشنده',
+    addBrand: 'افزودن برند',
+    itemName: 'نام کالا',
+    selectVendor: 'انتخاب فروشنده...',
+    selectCategory: 'انتخاب دسته‌بندی...',
+    selectBrand: 'انتخاب برند...',
+    decidePriceNotice: 'قیمت فروش در هنگام فروش کالا تعیین می‌شود',
+    addProduct: 'افزودن جنس جدید',
+    editProduct: 'ویرایش مشخصات جنس',
+    productName: 'نام جنس / محصول',
+    initialStock: 'تعداد موجودی اولیه',
+    sku: 'کد جنس (SKU)',
+    description: 'توضیحات و مشخصات',
+    allCategories: 'همه دسته‌ها',
+    product: 'جنس',
+    customer: 'مشتری',
+    searchProductPlaceholder: 'جستجوی اجناس بر اساس نام، برند، کد...',
+    noProductsFound: 'هیچ جنسی یافت نشد',
+    quantityToSell: 'تعداد فروش',
+    confirmSale: 'تأیید و ثبت فروش',
+    updateProduct: 'به‌روزرسانی جنس',
+    salesHistoryNav: 'تاریخچه فروشات',
+    newSale: 'ثبت فروش جدید',
+    lowStockAlert: 'هشدار کمبود موجودی',
+    configurableThreshold: 'حد هشدار موجودی',
+    revenueOverview7Days: 'نمودار عواید ۷ روز اخیر (فرمایشات در برابر فروشات)',
+    dailyRevenue: 'عاید روزانه',
+    orderRevenue: 'عاید فرمایشات خیاطی',
+    productSalesRevenue: 'عاید فروش اجناس',
+    customerHistoryDetails: 'سابقه و تاریخچه معاملات مشتری',
+    tailorOrdersHistory: 'تاریخچه فرمایشات خیاطی',
+    retailPurchasesHistory: 'اجناس و اقلام خریداری شده',
+    totalSpent: 'مجموعه مصارف مشتری',
+
     loginTitle: 'ورود به مدیریت خیاطی رایان',
     loginSubtitle: 'برای دسترسی به سیستم، مشخصات خود را وارد نمایید',
     email: 'آدرس ایمیل',
@@ -617,6 +785,8 @@ export const translations: Record<Language, Translations> = {
     customers: 'د پېرودونکو لړلیک',
     fabrics: 'د رختونو زېرمه (ګدام)',
     fabricInventory: 'د رختونو زېرمه',
+    products: 'جنسونه او توکي',
+    productsInventory: 'د جنسونو زېرمه',
     designAndSettings: 'ډیزاینونه او تنظیمات',
     designTemplatesNav: 'ډیزاینونه او بېلګې',
     measurementSettingsNav: 'د اندازو فیلډونه',
@@ -749,6 +919,60 @@ export const translations: Record<Language, Translations> = {
     qty: 'تعداد',
     price: 'قیمت',
     thankYouMessage: 'ستاسو له باور او راتګ څخه مننه!',
+
+    // Products & Retail Inventory
+    shoes: 'بوټان او چپلی',
+    watches: 'ساعتونه',
+    perfume: 'عطر او خوشبويي',
+    purchasePrice: 'د پیرودلو بیه',
+    sellingPrice: 'د خرڅلاو بیه',
+    stockQuantity: 'د موجودي شمېر',
+    lowStockThreshold: 'د کموالي خبرداری',
+    sellItem: 'د توکي خرڅول',
+    sellProduct: 'جنس خرڅول',
+    recordSale: 'د خرڅلاو ثبت',
+    salesHistory: 'د خرڅلاو تاریخچه',
+    profit: 'ګټه / مفاد',
+    brand: 'برانډ / شرکت',
+    vendor: 'عرضه کوونکی / پلورونکی',
+    category: 'کټګوري / وېشنیزه',
+    manageVendorsCategories: 'د عرضه کوونکو او وېشنیزو سمبالښت',
+    createProductListing: 'د نوي جنس اضافه کول',
+    newInventoryEntry: 'نوی جنس',
+    addRemoveReusableValues: 'د ارزښتونو زیاتول یا ړنګول',
+    addVendor: 'عرضه کوونکی زیاتول',
+    addBrand: 'برانډ زیاتول',
+    itemName: 'د جنس نوم',
+    selectVendor: 'عرضه کوونکی وټاکئ...',
+    selectCategory: 'وېشنیزه وټاکئ...',
+    selectBrand: 'برانډ وټاکئ...',
+    decidePriceNotice: 'د خرڅلاو بیه د خرڅلاو پر مهال ټاکل کېږي',
+    addProduct: 'نوی جنس ورزیاتول',
+    editProduct: 'د جنس تدوین',
+    productName: 'د جنس نوم',
+    initialStock: 'لومړنی موجودیت',
+    sku: 'د جنس کوډ (SKU)',
+    description: 'تفصیلات او ځانګړتیاوې',
+    allCategories: 'ټولې کټګورۍ',
+    product: 'جنس',
+    customer: 'پیرودونکی',
+    searchProductPlaceholder: 'د توکو پلټنه د نوم، برانډ یا کوډ له مخې...',
+    noProductsFound: 'هیڅ جنس ونه موندل شو',
+    quantityToSell: 'د خرڅلاو شمېر',
+    confirmSale: 'د پلور بشپړول',
+    updateProduct: 'جنس تازه کول',
+    salesHistoryNav: 'د خرڅلاو تاریخچه',
+    newSale: 'نوی پلور ثبتول',
+    lowStockAlert: 'د کموالي خبرداری',
+    configurableThreshold: 'د کموالي حد',
+    revenueOverview7Days: 'د تېرو ۷ ورځو عاید (فرمایشونه او پرچون پلور)',
+    dailyRevenue: 'ورځنی عاید',
+    orderRevenue: 'د خیاطۍ عاید',
+    productSalesRevenue: 'د پرچون پلور عاید',
+    customerHistoryDetails: 'د مشتري د راکړې ورکړې تاریخچه',
+    tailorOrdersHistory: 'د خیاطۍ فرمایشونه',
+    retailPurchasesHistory: 'پېرل شوي توکي او اجناس',
+    totalSpent: 'د مشتري ټول مصرف',
 
     loginTitle: 'د رایان خیاطۍ مدیریت ته ننوتل',
     loginSubtitle: 'سیستم ته د لاسرسي لپاره خپل معلومات دننه کړئ',

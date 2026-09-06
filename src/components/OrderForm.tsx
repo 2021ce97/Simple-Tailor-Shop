@@ -92,6 +92,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   const [selectedFabricId, setSelectedFabricId] = useState<string>(
     initialOrder?.fabricId || prefilledFabric?.id || ''
   );
+  const selectedFabric = fabricsList.find(f => f.id === selectedFabricId);
   const [fabricName, setFabricName] = useState<string>(
     initialOrder?.fabricName || prefilledFabric?.name || ''
   );
@@ -162,7 +163,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   // Check matching customers on phone/name change
   useEffect(() => {
     if (customerPhone.trim().length >= 3 || customerName.trim().length >= 2) {
-      const allCust = storageService.getCustomers();
+      const allCust = storageService.getCustomers() || [];
       const phoneQ = customerPhone.trim().toLowerCase();
       const nameQ = customerName.trim().toLowerCase();
 
@@ -173,7 +174,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
       setMatchingCustomers(matches.slice(0, 4));
 
       // Direct exact match
-      const exact = matches.find(c => c.phone.trim() === phoneQ);
+      const exact = (matches || []).find(c => c.phone.trim() === phoneQ);
       if (exact) {
         setMatchedExistingCustomer(exact);
       }
@@ -522,45 +523,74 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               </div>
             </div>
 
+            {/* Mode A: Select from Inventory Dropdown */}
             {!isCustomerFabric ? (
               <div className="space-y-3">
-                {/* Available Fabrics Selector Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
-                  {fabricsList.map(fab => {
-                    const isSelected = selectedFabricId === fab.id;
-                    const stock = Number(fab.stockMeters) || 0;
-                    return (
-                      <div
-                        key={fab.id}
-                        onClick={() => handleSelectShopFabric(fab)}
-                        className={`p-3 rounded-xl border transition-all cursor-pointer text-xs ${
-                          isSelected
-                            ? 'bg-amber-50/80 border-[#D4AF37] ring-2 ring-[#D4AF37]/30 shadow-xs'
-                            : 'bg-stone-50 border-stone-200 hover:border-stone-300'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-mono font-bold text-[10px] px-1.5 py-0.2 bg-stone-200 rounded text-stone-700">
-                            {fab.code}
-                          </span>
-                          <span className={`text-[10px] font-bold ${stock < 15 ? 'text-amber-600' : 'text-emerald-700'}`}>
-                            {stock} {t.meters}
-                          </span>
-                        </div>
-                        <div className="font-bold text-[#1A1A1A] truncate">{fab.name}</div>
-                        <div className="text-[11px] text-stone-500 flex items-center justify-between mt-1">
-                          <span>{fab.color}</span>
-                          <span className="font-mono font-bold text-stone-800">
-                            {fab.pricePerMeter} {currencySymbol}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 mb-1.5">
+                    {language === 'fa' ? 'انتخاب رخت از لیست گدام (Dropdown):' : language === 'ps' ? 'له ګدام څخه د رخت ټاکل:' : 'Select Fabric from Inventory (Dropdown):'}
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={selectedFabricId}
+                      onChange={e => {
+                        const fab = fabricsList.find(f => f.id === e.target.value);
+                        if (fab) {
+                          handleSelectShopFabric(fab);
+                        } else {
+                          setSelectedFabricId('');
+                          setFabricName('');
+                        }
+                      }}
+                      className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-xs font-bold text-[#1A1A1A] focus:bg-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 outline-hidden cursor-pointer"
+                    >
+                      <option value="">
+                        {language === 'fa' 
+                          ? '-- لطفاً رخت مورد نظر را از گدام انتخاب نمایید --' 
+                          : language === 'ps'
+                          ? '-- مهرباني وکړئ له زېرمې څخه رخت وټاکئ --'
+                          : '-- Select fabric from inventory --'}
+                      </option>
+                      {fabricsList.map(fab => {
+                        const stock = Number(fab.stockMeters) || 0;
+                        return (
+                          <option key={fab.id} value={fab.id}>
+                            [{fab.code}] {fab.name} — {fab.color} ({stock} {t.meters} موجود) — {fab.pricePerMeter} {currencySymbol}/{t.meters}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
                 </div>
 
-                {/* Fabric Meters Input */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                {/* Selected Fabric Banner / Detail */}
+                {selectedFabricId && (
+                  <div className="p-3 bg-amber-50/70 border border-[#D4AF37]/40 rounded-xl flex items-center justify-between text-xs">
+                    <div>
+                      <div className="font-extrabold text-[#1A1A1A] flex items-center gap-2">
+                        <span className="font-mono text-[11px] px-1.5 py-0.5 bg-[#D4AF37]/20 text-[#B39025] rounded font-black">
+                          {selectedFabric?.code}
+                        </span>
+                        <span>{selectedFabric?.name}</span>
+                      </div>
+                      <div className="text-[11px] text-stone-600 mt-0.5">
+                        {selectedFabric?.color} • {selectedFabric?.type} • 
+                        <span className="font-bold text-stone-800 ms-1">
+                          {selectedFabric?.pricePerMeter} {currencySymbol}/{t.meters}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-end">
+                      <span className="text-[10px] text-stone-700 block">{t.stockMeters}:</span>
+                      <span className={`font-mono font-black text-sm ${(selectedFabric?.stockMeters || 0) < 15 ? 'text-amber-600' : 'text-emerald-700'}`}>
+                        {selectedFabric?.stockMeters} {t.meters}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Fabric Name & Fabric Meters Input */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                   <div>
                     <label className="block text-xs font-bold text-stone-600 mb-1">
                       {t.fabricName}
@@ -602,23 +632,67 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                         <Plus className="w-3.5 h-3.5" />
                       </button>
                     </div>
+
+                    {/* Quick Meters chips */}
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      {[3.5, 4.0, 4.25, 4.5, 5.0].map(m => (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => setFabricMeters(m)}
+                          className={`text-[10px] font-mono px-2 py-0.5 rounded-md border transition cursor-pointer ${
+                            fabricMeters === m
+                              ? 'bg-[#1A1A1A] text-white border-[#1A1A1A] font-bold'
+                              : 'bg-stone-100 text-stone-600 hover:bg-stone-200 border-stone-200'
+                          }`}
+                        >
+                          {m}m
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="p-3 bg-amber-50/50 rounded-xl border border-amber-200/60 text-xs">
-                <p className="text-stone-700 font-medium">
-                  {language === 'fa' 
-                    ? 'رخت توسط خود مشتری آورده شده است. مشخصات یا رنگ تکه را در صورت لزوم بنویسید:' 
-                    : 'Customer provided their own fabric. Specify details if needed:'}
-                </p>
-                <input
-                  type="text"
-                  value={fabricName}
-                  onChange={e => setFabricName(e.target.value)}
-                  placeholder="مثال: تکه نخی سفید ۴ متره آورده شد..."
-                  className="w-full mt-2 px-3 py-2 bg-white border border-amber-300 rounded-xl text-xs font-medium focus:outline-hidden focus:ring-1 focus:ring-[#D4AF37]"
-                />
+              /* Mode B: Customer Provided Their Own Fabric */
+              <div className="p-4 bg-amber-50/60 rounded-xl border border-amber-200/80 text-xs space-y-3">
+                <div className="flex items-center gap-2 text-[#B39025] font-bold">
+                  <Scissors className="w-4 h-4" />
+                  <span>
+                    {language === 'fa' 
+                      ? 'رخت توسط خود مشتری آورده شده است (تکه شخصی مشتری)' 
+                      : language === 'ps'
+                      ? 'رخت د پېرودونکي له خوا راوړل شوی دی'
+                      : 'Customer Provided Their Own Fabric'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-stone-700 mb-1">
+                      {language === 'fa' ? 'مشخصات / نوعیت یا رنگ رخت مشتری:' : 'Customer Fabric Details & Color:'}
+                    </label>
+                    <input
+                      type="text"
+                      value={fabricName}
+                      onChange={e => setFabricName(e.target.value)}
+                      placeholder="مثال: تکه نخی کرمی آورده شد..."
+                      className="w-full px-3 py-2 bg-white border border-amber-300 rounded-xl text-xs font-medium focus:outline-hidden focus:ring-1 focus:ring-[#D4AF37]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-stone-700 mb-1">
+                      {t.fabricMeters} ({t.meters}):
+                    </label>
+                    <input
+                      type="number"
+                      step="0.25"
+                      min="0.5"
+                      value={fabricMeters}
+                      onChange={e => setFabricMeters(Math.max(0.5, parseFloat(e.target.value) || 4))}
+                      className="w-full px-3 py-2 bg-white border border-amber-300 rounded-xl text-xs font-medium focus:outline-hidden focus:ring-1 focus:ring-[#D4AF37]"
+                    />
+                  </div>
+                </div>
               </div>
             )}
           </div>

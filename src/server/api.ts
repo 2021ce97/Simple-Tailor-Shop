@@ -2,6 +2,7 @@ import express, { Router, Request, Response } from 'express';
 import { safeQuery, isDatabaseConnected } from '../db/db';
 import { 
   INITIAL_DEMO_FABRICS, 
+  INITIAL_DEMO_PRODUCTS,
   DEFAULT_MEASUREMENT_FIELDS, 
   DEFAULT_DESIGN_CATEGORIES, 
   DEFAULT_SHOP_SETTINGS 
@@ -11,6 +12,8 @@ export const apiRouter = Router();
 
 // In-memory fallback stores
 let inMemoryFabrics = [...INITIAL_DEMO_FABRICS];
+let inMemoryProducts: any[] = [...INITIAL_DEMO_PRODUCTS];
+let inMemoryProductSales: any[] = [];
 let inMemoryOrders: any[] = [];
 let inMemoryCustomers: any[] = [];
 let inMemorySettings: any = { ...DEFAULT_SHOP_SETTINGS };
@@ -324,3 +327,43 @@ apiRouter.post('/design-categories', (req: Request, res: Response) => {
   inMemoryDesignCategories = req.body;
   res.json({ success: true });
 });
+
+// --- PRODUCTS ---
+apiRouter.get('/products', (req: Request, res: Response) => {
+  res.json(inMemoryProducts);
+});
+
+apiRouter.post('/products', (req: Request, res: Response) => {
+  const product = req.body;
+  if (!product || !product.id) {
+    return res.status(400).json({ error: 'Product data with id is required' });
+  }
+  const idx = inMemoryProducts.findIndex(p => p.id === product.id);
+  if (idx >= 0) {
+    inMemoryProducts[idx] = { ...product, updatedAt: new Date().toISOString() };
+  } else {
+    inMemoryProducts.unshift({ ...product, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+  }
+  res.json({ success: true, product });
+});
+
+apiRouter.delete('/products/:id', (req: Request, res: Response) => {
+  const { id } = req.params;
+  inMemoryProducts = inMemoryProducts.filter(p => p.id !== id);
+  res.json({ success: true });
+});
+
+// --- PRODUCT SALES ---
+apiRouter.get('/product-sales', (req: Request, res: Response) => {
+  res.json(inMemoryProductSales);
+});
+
+apiRouter.post('/product-sales', (req: Request, res: Response) => {
+  const sale = req.body;
+  if (!sale || !sale.id) {
+    return res.status(400).json({ error: 'Sale record with id is required' });
+  }
+  inMemoryProductSales.unshift(sale);
+  res.json({ success: true, sale });
+});
+

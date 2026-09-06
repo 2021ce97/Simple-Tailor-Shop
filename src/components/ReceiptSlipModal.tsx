@@ -28,8 +28,8 @@ import { toPng } from 'html-to-image';
 interface ReceiptSlipModalProps {
   order: Order;
   shopSettings: ShopSettings;
-  measurementFields: MeasurementField[];
-  designCategories: DesignCategory[];
+  measurementFields?: MeasurementField[];
+  designCategories?: DesignCategory[];
   language: Language;
   onClose: () => void;
   onEdit?: (order: Order) => void;
@@ -38,8 +38,8 @@ interface ReceiptSlipModalProps {
 export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
   order,
   shopSettings,
-  measurementFields,
-  designCategories,
+  measurementFields = [],
+  designCategories = [],
   language,
   onClose,
   onEdit,
@@ -148,7 +148,7 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
   };
 
   // Map active measurements with values
-  const activeMeasurements = measurementFields
+  const activeMeasurements = (measurementFields || [])
     .map(field => ({
       key: field.key,
       label: language === 'ps' ? field.labelPs : language === 'fa' ? field.labelFa : field.labelEn,
@@ -160,7 +160,7 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
   // Map active design selections with labels
   const activeDesignItems = Object.entries(order.designSelections || {})
     .map(([catKey, value]) => {
-      const cat = designCategories.find(c => c.key === catKey);
+      const cat = (designCategories || []).find(c => c.key === catKey);
       const catTitle = cat 
         ? (language === 'ps' ? cat.titlePs : language === 'fa' ? cat.titleFa : cat.titleEn)
         : catKey;

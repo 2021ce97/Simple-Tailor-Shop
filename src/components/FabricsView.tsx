@@ -39,6 +39,20 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
   const [editingFabric, setEditingFabric] = useState<Fabric | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
 
+  // Configurable Low Stock Threshold (default: 15 meters)
+  const [lowStockThreshold, setLowStockThreshold] = useState<number>(() => {
+    const saved = localStorage.getItem('fabrics_low_stock_threshold');
+    return saved ? Math.max(1, parseInt(saved, 10)) : 15;
+  });
+
+  const handleUpdateThreshold = (val: number) => {
+    const cleaned = Math.max(1, val);
+    setLowStockThreshold(cleaned);
+    localStorage.setItem('fabrics_low_stock_threshold', cleaned.toString());
+    // Also notify window for sidebar synchronization
+    window.dispatchEvent(new Event('storage'));
+  };
+
   // Form fields
   const [formName, setFormName] = useState('');
   const [formCode, setFormCode] = useState('');
@@ -49,10 +63,10 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
   const [formNotes, setFormNotes] = useState('');
 
   const currencySymbol = language === 'ps' 
-    ? shopSettings.currencyPs 
+    ? (shopSettings?.currencyPs || 'افغانۍ') 
     : language === 'fa' 
-    ? shopSettings.currencyFa 
-    : shopSettings.currencyEn;
+    ? (shopSettings?.currencyFa || 'افغانی') 
+    : (shopSettings?.currencySymbol || shopSettings?.currencyEn || 'AFN');
 
   // Filtered Fabrics
   const filteredFabrics = useMemo(() => {
@@ -68,23 +82,26 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
 
       let matchesStock = true;
       const stock = Number(fabric.stockMeters) || 0;
-      if (stockFilter === 'in_stock') matchesStock = stock >= 15;
-      else if (stockFilter === 'low_stock') matchesStock = stock > 0 && stock < 15;
+      if (stockFilter === 'in_stock') matchesStock = stock > lowStockThreshold;
+      else if (stockFilter === 'low_stock') matchesStock = stock > 0 && stock <= lowStockThreshold;
       else if (stockFilter === 'out_of_stock') matchesStock = stock <= 0;
 
       return matchesSearch && matchesStock;
     });
-  }, [fabrics, searchTerm, stockFilter]);
+  }, [fabrics, searchTerm, stockFilter, lowStockThreshold]);
 
   // Total stock summary
   const summary = useMemo(() => {
     const totalVarieties = fabrics.length;
     const totalMeters = fabrics.reduce((sum, f) => sum + (Number(f.stockMeters) || 0), 0);
-    const lowStockCount = fabrics.filter(f => (Number(f.stockMeters) || 0) < 15 && (Number(f.stockMeters) || 0) > 0).length;
+    const lowStockCount = fabrics.filter(f => {
+      const s = Number(f.stockMeters) || 0;
+      return s > 0 && s <= lowStockThreshold;
+    }).length;
     const totalValue = fabrics.reduce((sum, f) => sum + ((Number(f.stockMeters) || 0) * (Number(f.pricePerMeter) || 0)), 0);
 
     return { totalVarieties, totalMeters, lowStockCount, totalValue };
-  }, [fabrics]);
+  }, [fabrics, lowStockThreshold]);
 
   const openAddModal = () => {
     const nextNum = (fabrics.length + 1).toString().padStart(3, '0');
@@ -139,6 +156,15 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
       storageService.deleteFabric(fabric.id);
       onFabricUpdated();
     }
+  };
+
+  const handleUpdateStock = (fabric: Fabric, newStock: number) => {
+    storageService.saveFabric({
+      ...fabric,
+      stockMeters: Math.max(0, newStock),
+      updatedAt: new Date().toISOString()
+    });
+    onFabricUpdated();
   };
 
   // Quick preset template
@@ -260,38 +286,55 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
           )}
         </div>
 
-        {/* Stock status pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-          <button
-            onClick={() => setStockFilter('all')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
-              stockFilter === 'all'
-                ? 'bg-[#1A1A1A] text-white shadow-xs'
-                : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-            }`}
-          >
-            {t.all} ({fabrics.length})
-          </button>
-          <button
-            onClick={() => setStockFilter('in_stock')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
-              stockFilter === 'in_stock'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-            }`}
-          >
-            {t.inStock}
-          </button>
-          <button
-            onClick={() => setStockFilter('low_stock')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
-              stockFilter === 'low_stock'
-                ? 'bg-amber-600 text-white shadow-xs'
-                : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
-            }`}
-          >
-            {t.lowStock}
-          </button>
+        {/* Stock status pills & Configurable Low Stock Threshold */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+            <button
+              onClick={() => setStockFilter('all')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
+                stockFilter === 'all'
+                  ? 'bg-[#1A1A1A] text-white shadow-xs'
+                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+              }`}
+            >
+              {t.all} ({fabrics.length})
+            </button>
+            <button
+              onClick={() => setStockFilter('in_stock')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
+                stockFilter === 'in_stock'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+              }`}
+            >
+              {t.inStock}
+            </button>
+            <button
+              onClick={() => setStockFilter('low_stock')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                stockFilter === 'low_stock'
+                  ? 'bg-amber-500 text-stone-950 font-black shadow-xs'
+                  : 'bg-amber-50 text-amber-800 hover:bg-amber-100'
+              }`}
+            >
+              <AlertTriangle className="w-3.5 h-3.5" />
+              <span>{t.lowStock} ({summary.lowStockCount})</span>
+            </button>
+          </div>
+
+          {/* Configurable Threshold Input */}
+          <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50/90 border border-amber-200 rounded-xl text-xs text-amber-900">
+            <span className="text-[11px] font-bold">{t.lowStockThreshold || (language === 'fa' ? 'آستانه هشدار کمبود:' : 'Alert Threshold:')}</span>
+            <input
+              type="number"
+              min="1"
+              max="500"
+              value={lowStockThreshold}
+              onChange={e => handleUpdateThreshold(parseInt(e.target.value) || 1)}
+              className="w-14 px-1.5 py-0.5 bg-white border border-amber-300 rounded text-center text-xs font-bold font-mono text-stone-900"
+            />
+            <span className="text-[11px] font-medium">{t.meters}</span>
+          </div>
         </div>
       </div>
 
@@ -316,90 +359,147 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        /* Fabric Inventory Rows Form */
+        <div className="bg-white rounded-2xl border border-[#E5E5E5] shadow-xs overflow-hidden divide-y divide-stone-200">
+          {/* Header Row for Large Screens */}
+          <div className="hidden lg:grid grid-cols-12 gap-3 px-5 py-3 bg-stone-50 text-[11px] font-bold text-stone-600 uppercase tracking-wider border-b border-stone-200">
+            <div className="col-span-2">
+              {language === 'fa' ? 'کد و رخت' : language === 'ps' ? 'کوډ او رخت' : 'Code & Name'}
+            </div>
+            <div className="col-span-2">
+              {language === 'fa' ? 'جنس و رنگ' : language === 'ps' ? 'جنس او رنګ' : 'Material & Color'}
+            </div>
+            <div className="col-span-3">
+              {language === 'fa' ? 'موجودی و ذخیره' : language === 'ps' ? 'موجودي او زېرمه' : 'Stock (Meters)'}
+            </div>
+            <div className="col-span-2 text-start">
+              {t.pricePerMeter}
+            </div>
+            <div className="col-span-3 text-end">
+              {t.actions}
+            </div>
+          </div>
+
+          {/* Individual Fabric Rows */}
           {filteredFabrics.map(fabric => {
             const stock = Number(fabric.stockMeters) || 0;
-            const isLow = stock > 0 && stock < 15;
+            const isLow = stock > 0 && stock <= lowStockThreshold;
             const isOut = stock <= 0;
+            const totalRowValue = stock * (Number(fabric.pricePerMeter) || 0);
 
             return (
               <div
                 key={fabric.id}
-                id={`fabric-card-${fabric.id}`}
-                className="bg-white rounded-2xl border border-[#E5E5E5] p-4 shadow-xs hover:border-[#D4AF37]/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between group"
+                id={`fabric-row-${fabric.id}`}
+                className={`p-4 lg:px-5 lg:py-3.5 hover:bg-stone-50/70 transition-colors flex flex-col lg:grid lg:grid-cols-12 gap-3 items-start lg:items-center ${
+                  isLow ? 'bg-amber-50/30' : ''
+                }`}
               >
-                <div>
-                  {/* Top Bar with Code & Stock Badge */}
-                  <div className="flex items-center justify-between gap-2 mb-2.5">
-                    <span className="font-mono text-xs font-bold px-2 py-0.5 bg-stone-100 text-stone-700 rounded-md border border-stone-200">
-                      {fabric.code}
-                    </span>
-                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
-                      isOut 
-                        ? 'bg-rose-100 text-rose-800' 
-                        : isLow 
-                        ? 'bg-amber-100 text-amber-800' 
-                        : 'bg-emerald-100 text-emerald-800'
-                    }`}>
-                      {isOut ? t.outOfStock : isLow ? t.lowStock : t.inStock}
-                    </span>
+                {/* 1. Code & Name */}
+                <div className="w-full lg:col-span-2 flex items-center gap-2.5">
+                  <span className="font-mono text-xs font-black px-2.5 py-1 bg-stone-100 text-stone-800 rounded-lg border border-stone-200 shrink-0">
+                    {fabric.code}
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="font-extrabold text-sm text-[#1A1A1A] leading-tight truncate">
+                      {fabric.name}
+                    </h3>
+                    {fabric.notes && (
+                      <p className="text-[11px] text-stone-700 italic truncate max-w-[200px]" title={fabric.notes}>
+                        {fabric.notes}
+                      </p>
+                    )}
                   </div>
-
-                  {/* Fabric Name & Type */}
-                  <h3 className="font-extrabold text-sm text-[#1A1A1A] leading-snug mb-1 group-hover:text-[#B39025] transition-colors">
-                    {fabric.name}
-                  </h3>
-                  <p className="text-xs text-stone-700 font-medium mb-3">
-                    {fabric.type} • <span className="text-stone-800 font-semibold">{fabric.color}</span>
-                  </p>
-
-                  {/* Stock meter visual progress */}
-                  <div className="bg-stone-50 rounded-xl p-3 border border-stone-100 mb-3">
-                    <div className="flex items-center justify-between text-xs mb-1.5">
-                      <span className="text-stone-700 font-semibold">{t.stockMeters}:</span>
-                      <span className="font-mono font-black text-[#1A1A1A] text-sm">
-                        {stock} <span className="text-xs font-medium text-stone-700">{t.meters}</span>
-                      </span>
-                    </div>
-                    {/* Progress Bar */}
-                    <div className="w-full bg-stone-200 h-2 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full rounded-full transition-all duration-500 ${
-                          isOut ? 'bg-rose-500' : isLow ? 'bg-amber-500' : 'bg-emerald-500'
-                        }`}
-                        style={{ width: `${Math.min(100, (stock / 60) * 100)}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Price per meter */}
-                  <div className="flex items-center justify-between text-xs py-1 border-b border-stone-100 mb-2">
-                    <span className="text-stone-700">{t.pricePerMeter}:</span>
-                    <span className="font-mono font-bold text-[#1A1A1A]">
-                      {Number(fabric.pricePerMeter).toLocaleString()} {currencySymbol} / {t.meters}
-                    </span>
-                  </div>
-
-                  {fabric.notes && (
-                    <p className="text-[11px] text-stone-700 italic line-clamp-2 mb-2">
-                      "{fabric.notes}"
-                    </p>
-                  )}
                 </div>
 
-                {/* Bottom Actions */}
-                <div className="pt-3 flex items-center justify-between gap-2 border-t border-stone-100">
+                {/* 2. Type & Color */}
+                <div className="w-full lg:col-span-2 text-xs text-stone-700">
+                  <div className="flex items-center gap-1.5 font-semibold text-[#1A1A1A]">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37] shrink-0 inline-block" />
+                    <span>{fabric.color}</span>
+                  </div>
+                  <span className="text-[11px] text-stone-700 block mt-0.5">
+                    {fabric.type}
+                  </span>
+                </div>
+
+                {/* 3. Stock with meters & progress bar */}
+                <div className="w-full lg:col-span-3 space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-black text-[#1A1A1A] text-sm">
+                        {stock} <span className="text-xs font-normal text-stone-700">{t.meters}</span>
+                      </span>
+                      {isLow ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500 text-stone-950 border border-amber-600 shadow-xs animate-pulse">
+                          <AlertTriangle className="w-3 h-3" />
+                          <span>{t.lowStockAlert || (language === 'fa' ? 'کمبود موجودی' : 'Low Stock')} (&le;{lowStockThreshold}{t.meters})</span>
+                        </span>
+                      ) : (
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          isOut 
+                            ? 'bg-rose-100 text-rose-800' 
+                            : 'bg-emerald-100 text-emerald-800'
+                        }`}>
+                          {isOut ? t.outOfStock : t.inStock}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Quick +/- Stock buttons */}
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateStock(fabric, Math.max(0, stock - 5))}
+                        title="-5m"
+                        className="px-1.5 py-0.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-[10px] font-mono font-bold cursor-pointer"
+                      >
+                        -5m
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateStock(fabric, stock + 5)}
+                        title="+5m"
+                        className="px-1.5 py-0.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded text-[10px] font-mono font-bold cursor-pointer"
+                      >
+                        +5m
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="w-full bg-stone-200 h-1.5 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        isOut ? 'bg-rose-500' : isLow ? 'bg-amber-500' : 'bg-emerald-500'
+                      }`}
+                      style={{ width: `${Math.min(100, (stock / 60) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* 4. Price per meter & Total Row Value */}
+                <div className="w-full lg:col-span-2 text-xs">
+                  <div className="font-mono font-extrabold text-[#1A1A1A] text-sm">
+                    {Number(fabric.pricePerMeter).toLocaleString()} <span className="text-[11px] font-normal text-stone-700">{currencySymbol} / {t.meters}</span>
+                  </div>
+                  <div className="text-[10px] text-stone-700 font-mono mt-0.5">
+                    {language === 'fa' ? 'ارزش:' : language === 'ps' ? 'ارزښت:' : 'Value:'} {totalRowValue.toLocaleString()} {currencySymbol}
+                  </div>
+                </div>
+
+                {/* 5. Row Actions */}
+                <div className="w-full lg:col-span-3 flex items-center justify-between lg:justify-end gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-stone-100">
                   {onSelectFabricForOrder && (
                     <button
                       onClick={() => onSelectFabricForOrder(fabric)}
-                      className="flex-1 py-1.5 px-3 bg-amber-50 hover:bg-[#D4AF37] hover:text-[#1A1A1A] text-[#B39025] rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="py-1.5 px-3 bg-amber-50 hover:bg-[#D4AF37] hover:text-[#1A1A1A] text-[#B39025] rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
                     >
                       <Scissors className="w-3.5 h-3.5" />
-                      <span>{language === 'fa' ? 'ثبت فرمایش با این رخت' : 'New Order with this'}</span>
+                      <span>{language === 'fa' ? 'ثبت فرمایش' : language === 'ps' ? 'نوی فرمایش' : 'New Order'}</span>
                     </button>
                   )}
 
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 ms-auto lg:ms-0">
                     <button
                       onClick={() => openEditModal(fabric)}
                       title={t.edit}

@@ -6,7 +6,10 @@ import {
   DesignCategory, 
   ShopSettings, 
   Language,
-  Fabric
+  Fabric,
+  Product,
+  ProductCategory,
+  ProductSale
 } from './types';
 import { storageService } from './services/storage';
 import { Navbar } from './components/Navbar';
@@ -15,6 +18,8 @@ import { Dashboard } from './components/Dashboard';
 import { OrderForm } from './components/OrderForm';
 import { CustomersView } from './components/CustomersView';
 import { FabricsView } from './components/FabricsView';
+import { ProductsView } from './components/ProductsView';
+import { SalesHistoryView } from './components/SalesHistoryView';
 import { DesignSettingsView } from './components/DesignSettingsView';
 import { ReceiptSlipModal } from './components/ReceiptSlipModal';
 import { LoginView } from './components/LoginView';
@@ -32,6 +37,13 @@ export default function App() {
   const [orders, setOrders] = useState<Order[]>(() => storageService.getOrders());
   const [customers, setCustomers] = useState<Customer[]>(() => storageService.getCustomers());
   const [fabrics, setFabrics] = useState<Fabric[]>(() => storageService.getFabrics());
+  const [products, setProducts] = useState<Product[]>(() => storageService.getProducts());
+  const [productCategories, setProductCategories] = useState<ProductCategory[]>(() => 
+    storageService.getProductCategories()
+  );
+  const [productSales, setProductSales] = useState<ProductSale[]>(() => 
+    storageService.getProductSales()
+  );
   const [measurementFields, setMeasurementFields] = useState<MeasurementField[]>(() => 
     storageService.getMeasurementFields()
   );
@@ -84,15 +96,54 @@ export default function App() {
     setOrders(storageService.getOrders());
     setCustomers(storageService.getCustomers());
     setFabrics(storageService.getFabrics());
+    setProducts(storageService.getProducts());
+    setProductCategories(storageService.getProductCategories());
+    setProductSales(storageService.getProductSales());
     setMeasurementFields(storageService.getMeasurementFields());
     setDesignCategories(storageService.getDesignCategories());
     setShopSettings(storageService.getShopSettings());
+  };
+
+  // Product Inventory Handlers
+  const handleAddProduct = async (prodData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const saved = await storageService.saveProduct(prodData);
+    reloadData();
+    return saved;
+  };
+
+  const handleUpdateProduct = async (prod: Product) => {
+    await storageService.saveProduct(prod);
+    reloadData();
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    await storageService.deleteProduct(productId);
+    reloadData();
+  };
+
+  const handleRecordProductSale = async (saleData: Omit<ProductSale, 'id' | 'createdAt'>) => {
+    const saved = await storageService.saveProductSale(saleData);
+    reloadData();
+    return saved;
+  };
+
+  const handleAddProductCategory = async (catName: string) => {
+    const saved = await storageService.saveProductCategory(catName);
+    reloadData();
+    return saved;
   };
 
   // Switch Language
   const handleLanguageChange = (lang: Language) => {
     setLanguage(lang);
   };
+
+  // Computed currency symbol for current language
+  const currencySymbol = useMemo(() => {
+    if (language === 'ps') return shopSettings?.currencyPs || 'افغانۍ';
+    if (language === 'fa') return shopSettings?.currencyFa || 'افغانی';
+    return shopSettings?.currencySymbol || shopSettings?.currencyEn || 'AFN';
+  }, [language, shopSettings]);
 
   // Login handler
   const handleLoginSuccess = (user: { email: string; name: string }) => {
@@ -201,6 +252,8 @@ export default function App() {
         orders={orders}
         customers={customers}
         fabrics={fabrics}
+        productsCount={products.length}
+        salesCount={productSales.length}
         designCategoriesCount={designCategories.length}
         isOpenOnMobile={isSidebarOpenMobile}
         onCloseMobile={() => setIsSidebarOpenMobile(false)}
@@ -229,6 +282,7 @@ export default function App() {
           {currentTab === 'dashboard' && (
             <Dashboard
               orders={orders}
+              productSales={productSales}
               shopSettings={shopSettings}
               language={language}
               onNewOrder={handleStartNewOrder}
@@ -268,10 +322,40 @@ export default function App() {
             />
           )}
 
+          {currentTab === 'products' && (
+            <ProductsView
+              products={products}
+              categories={productCategories}
+              sales={productSales}
+              currencySymbol={currencySymbol}
+              language={language}
+              onAddProduct={handleAddProduct}
+              onUpdateProduct={handleUpdateProduct}
+              onDeleteProduct={handleDeleteProduct}
+              onRecordSale={handleRecordProductSale}
+              onAddCategory={handleAddProductCategory}
+            />
+          )}
+
+          {currentTab === 'sales_history' && (
+            <SalesHistoryView
+              sales={productSales}
+              products={products}
+              categories={productCategories}
+              customers={customers}
+              shopSettings={shopSettings}
+              currencySymbol={currencySymbol}
+              language={language}
+              onRecordSale={handleRecordProductSale}
+              onNavigateToProducts={() => setCurrentTab('products')}
+            />
+          )}
+
           {currentTab === 'customers' && (
             <CustomersView
               customers={customers}
               orders={orders}
+              productSales={productSales}
               measurementFields={measurementFields}
               shopSettings={shopSettings}
               language={language}
@@ -304,8 +388,10 @@ export default function App() {
           order={activeReceiptOrder}
           shopSettings={shopSettings}
           measurementFields={measurementFields}
+          designCategories={designCategories}
           language={language}
           onClose={() => setActiveReceiptOrder(null)}
+          onEdit={handleEditOrder}
         />
       )}
     </div>

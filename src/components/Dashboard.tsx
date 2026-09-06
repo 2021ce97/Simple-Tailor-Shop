@@ -4,10 +4,21 @@ import {
   OrderStatus, 
   ShopSettings, 
   Language, 
-  Customer 
+  Customer,
+  ProductSale
 } from '../types';
 import { translations } from '../translations/i18n';
 import { storageService } from '../services/storage';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  CartesianGrid
+} from 'recharts';
 import { 
   Search, 
   Plus, 
@@ -31,11 +42,15 @@ import {
   X,
   Package,
   MessageCircle,
-  PackageCheck
+  PackageCheck,
+  TrendingUp,
+  BarChart3,
+  ShoppingBag
 } from 'lucide-react';
 
 interface DashboardProps {
   orders: Order[];
+  productSales?: ProductSale[];
   shopSettings: ShopSettings;
   language: Language;
   onNewOrder: () => void;
@@ -47,6 +62,7 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({
   orders,
+  productSales = [],
   shopSettings,
   language,
   onNewOrder,
@@ -68,10 +84,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   // Currency
   const currencySymbol = language === 'ps' 
-    ? shopSettings.currencyPs 
+    ? (shopSettings?.currencyPs || 'افغانۍ') 
     : language === 'fa' 
-    ? shopSettings.currencyFa 
-    : shopSettings.currencyEn;
+    ? (shopSettings?.currencyFa || 'افغانی') 
+    : (shopSettings?.currencySymbol || shopSettings?.currencyEn || 'AFN');
 
   // Filtered Orders with multi-field search:
   // (Customer name, Contact/phone, Order ID/Number, Order date, Delivery date, Fabric name)
@@ -115,6 +131,62 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
     return { total, pending, inProgress, ready, delivered, totalBalance, totalRevenue };
   }, [orders]);
+
+  // 7-Day Revenue Visualization Data (Orders vs Product Sales)
+  const last7DaysRevenueData = useMemo(() => {
+    const days: Array<{
+      dateKey: string;
+      displayLabel: string;
+      orderRevenue: number;
+      productRevenue: number;
+      totalRevenue: number;
+    }> = [];
+
+    const now = new Date();
+    // 6 days ago up to today (7 days total)
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const dateKey = d.toISOString().split('T')[0]; // "YYYY-MM-DD"
+
+      const dayName = d.toLocaleDateString(language === 'fa' || language === 'ps' ? 'fa-AF' : 'en-US', { weekday: 'short' });
+      const monthDay = `${d.getMonth() + 1}/${d.getDate()}`;
+      const displayLabel = `${dayName} ${monthDay}`;
+
+      // Revenue from orders on this date (match orderDate or createdAt)
+      const dayOrders = orders.filter(o => {
+        const dStr = o.orderDate || o.createdAt;
+        return dStr && dStr.startsWith(dateKey);
+      });
+      const orderRevenue = dayOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+
+      // Revenue from product sales on this date (match saleDate or createdAt)
+      const daySales = (productSales || []).filter(s => {
+        const sStr = s.saleDate || s.createdAt;
+        return sStr && sStr.startsWith(dateKey);
+      });
+      const productRevenue = daySales.reduce((sum, s) => sum + (Number(s.totalAmount) || 0), 0);
+
+      days.push({
+        dateKey,
+        displayLabel,
+        orderRevenue,
+        productRevenue,
+        totalRevenue: orderRevenue + productRevenue
+      });
+    }
+
+    const total7DayRevenue = days.reduce((sum, d) => sum + d.totalRevenue, 0);
+    const total7DayOrdersRevenue = days.reduce((sum, d) => sum + d.orderRevenue, 0);
+    const total7DayProductsRevenue = days.reduce((sum, d) => sum + d.productRevenue, 0);
+
+    return {
+      days,
+      total7DayRevenue,
+      total7DayOrdersRevenue,
+      total7DayProductsRevenue
+    };
+  }, [orders, productSales, language]);
 
   // Quick status updater
   const handleUpdateStatus = (order: Order, newStatus: OrderStatus) => {
@@ -234,6 +306,126 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
             <DollarSign className="w-5 h-5" />
           </div>
+        </div>
+      </div>
+
+      {/* 7-Day Daily Revenue Visualization (Recharts Bar Chart) */}
+      <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-amber-50 text-[#B39025] flex items-center justify-center">
+              <BarChart3 className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-sm font-black text-[#1A1A1A]">
+                {language === 'fa' ? 'نمودار عواید ۷ روز گذشته' : language === 'ps' ? 'د تېرو ۷ ورځو عواید ګراف' : 'Last 7 Days Daily Revenue'}
+              </h2>
+              <p className="text-[11px] text-stone-500">
+                {language === 'fa' 
+                  ? 'مقایسه عواید روزانه حاصل از سفارشات خیاطی و فروشات محصولات' 
+                  : language === 'ps' 
+                  ? 'د خیاطۍ فرمایشونو او اجناسو پلور ورځني عواید' 
+                  : 'Daily earnings breakdown from tailoring orders & boutique product sales'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 text-xs">
+            {/* Total 7 Days Badge */}
+            <div className="bg-stone-50 px-3 py-1.5 rounded-xl border border-stone-200 flex items-center gap-2 font-mono">
+              <span className="text-stone-500 font-sans text-[11px] font-bold">
+                {language === 'fa' ? 'مجموع ۷ روز:' : language === 'ps' ? 'د ۷ ورځو مجموعه:' : '7-Day Total:'}
+              </span>
+              <span className="font-black text-[#1A1A1A]">
+                {last7DaysRevenueData.total7DayRevenue.toLocaleString()} {currencySymbol}
+              </span>
+            </div>
+
+            {/* Legend Chips */}
+            <div className="flex items-center gap-3 text-[11px] font-bold">
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-xs bg-[#D4AF37]" />
+                <span className="text-stone-700">{language === 'fa' ? 'سفارشات' : language === 'ps' ? 'فرمایشونه' : 'Orders'} ({last7DaysRevenueData.total7DayOrdersRevenue.toLocaleString()})</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-xs bg-[#059669]" />
+                <span className="text-stone-700">{language === 'fa' ? 'فروشات محصولات' : language === 'ps' ? 'د اجناسو پلور' : 'Products'} ({last7DaysRevenueData.total7DayProductsRevenue.toLocaleString()})</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Chart Container */}
+        <div className="w-full h-64 pt-2">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={last7DaysRevenueData.days}
+              margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F0EFEA" />
+              <XAxis 
+                dataKey="displayLabel" 
+                tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 600 }}
+                axisLine={{ stroke: '#E5E5E5' }}
+                tickLine={false}
+              />
+              <YAxis 
+                tick={{ fontSize: 11, fill: '#6B7280', fontFamily: 'monospace' }}
+                axisLine={{ stroke: '#E5E5E5' }}
+                tickLine={false}
+                tickFormatter={(val) => Number(val).toLocaleString()}
+              />
+              <Tooltip
+                content={({ active, payload, label }) => {
+                  if (active && payload && payload.length) {
+                    const ordRev = Number(payload.find(p => p.dataKey === 'orderRevenue')?.value) || 0;
+                    const prodRev = Number(payload.find(p => p.dataKey === 'productRevenue')?.value) || 0;
+                    const totRev = ordRev + prodRev;
+                    return (
+                      <div className="bg-[#181818] text-white p-3 rounded-xl shadow-xl border border-stone-700 text-xs space-y-1.5 min-w-44">
+                        <div className="font-bold text-stone-300 border-b border-stone-800 pb-1">
+                          {label}
+                        </div>
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-[#D4AF37] flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-xs bg-[#D4AF37]" />
+                            {language === 'fa' ? 'سفارشات:' : 'Orders:'}
+                          </span>
+                          <span className="font-mono font-bold">{ordRev.toLocaleString()} {currencySymbol}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-emerald-400 flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-xs bg-[#059669]" />
+                            {language === 'fa' ? 'محصولات:' : 'Products:'}
+                          </span>
+                          <span className="font-mono font-bold">{prodRev.toLocaleString()} {currencySymbol}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-4 pt-1 border-t border-stone-800 font-bold">
+                          <span className="text-white">{language === 'fa' ? 'مجموع روز:' : 'Daily Total:'}</span>
+                          <span className="font-mono text-[#D4AF37]">{totRev.toLocaleString()} {currencySymbol}</span>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Bar 
+                dataKey="orderRevenue" 
+                name={language === 'fa' ? 'عواید سفارشات' : language === 'ps' ? 'د فرمایشونو عواید' : 'Order Revenue'} 
+                fill="#D4AF37" 
+                radius={[4, 4, 0, 0]} 
+                maxBarSize={32}
+              />
+              <Bar 
+                dataKey="productRevenue" 
+                name={language === 'fa' ? 'عواید محصولات' : language === 'ps' ? 'د اجناسو عواید' : 'Product Sales'} 
+                fill="#059669" 
+                radius={[4, 4, 0, 0]} 
+                maxBarSize={32}
+              />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
@@ -417,26 +609,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         </div>
                       </td>
 
-                      {/* Status Dropdown */}
+                      {/* Status Color-Coded Badge */}
                       <td className="py-3 px-4 align-middle">
-                        <select
-                          value={order.status}
-                          onChange={e => handleUpdateStatus(order, e.target.value as OrderStatus)}
-                          className={`text-xs font-bold px-2.5 py-1.5 rounded-xl border outline-hidden cursor-pointer ${
-                            order.status === 'ready'
-                              ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
-                              : order.status === 'in_progress'
-                              ? 'bg-blue-50 text-blue-800 border-blue-300'
-                              : order.status === 'delivered'
-                              ? 'bg-purple-50 text-purple-800 border-purple-300'
-                              : 'bg-amber-50 text-amber-800 border-amber-300'
-                          }`}
-                        >
-                          <option value="pending">⏳ {t.statusPending}</option>
-                          <option value="in_progress">✂️ {t.statusInProgress}</option>
-                          <option value="ready">✅ {t.statusReady}</option>
-                          <option value="delivered">📦 {t.statusDelivered}</option>
-                        </select>
+                        <div className="relative inline-block">
+                          <select
+                            value={order.status}
+                            onChange={e => handleUpdateStatus(order, e.target.value as OrderStatus)}
+                            className={`text-xs font-black px-3 py-1.5 rounded-full border shadow-2xs outline-hidden cursor-pointer transition-all duration-150 ${
+                              order.status === 'ready'
+                                ? 'bg-emerald-100 text-emerald-900 border-emerald-400 hover:bg-emerald-200 ring-1 ring-emerald-500/20'
+                                : order.status === 'in_progress'
+                                ? 'bg-blue-100 text-blue-900 border-blue-400 hover:bg-blue-200 ring-1 ring-blue-500/20'
+                                : order.status === 'delivered'
+                                ? 'bg-purple-100 text-purple-900 border-purple-400 hover:bg-purple-200 ring-1 ring-purple-500/20'
+                                : 'bg-amber-100 text-amber-900 border-amber-400 hover:bg-amber-200 ring-1 ring-amber-500/20'
+                            }`}
+                          >
+                            <option value="pending">⏳ {t.statusPending}</option>
+                            <option value="in_progress">✂️ {t.statusInProgress}</option>
+                            <option value="ready">✅ {t.statusReady}</option>
+                            <option value="delivered">📦 {t.statusDelivered}</option>
+                          </select>
+                        </div>
                       </td>
 
                       {/* Payment Status & Balance */}
@@ -528,14 +722,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <select
                       value={order.status}
                       onChange={e => handleUpdateStatus(order, e.target.value as OrderStatus)}
-                      className={`text-xs font-bold px-2 py-1 rounded-lg border outline-hidden ${
+                      className={`text-xs font-black px-2.5 py-1 rounded-full border shadow-2xs outline-hidden cursor-pointer ${
                         order.status === 'ready'
-                          ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                          ? 'bg-emerald-100 text-emerald-900 border-emerald-400'
                           : order.status === 'in_progress'
-                          ? 'bg-blue-50 text-blue-800 border-blue-300'
+                          ? 'bg-blue-100 text-blue-900 border-blue-400'
                           : order.status === 'delivered'
-                          ? 'bg-purple-50 text-purple-800 border-purple-300'
-                          : 'bg-amber-50 text-amber-800 border-amber-300'
+                          ? 'bg-purple-100 text-purple-900 border-purple-400'
+                          : 'bg-amber-100 text-amber-900 border-amber-400'
                       }`}
                     >
                       <option value="pending">⏳ {t.statusPending}</option>

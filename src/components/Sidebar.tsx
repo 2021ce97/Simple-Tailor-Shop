@@ -8,15 +8,15 @@ import {
   Users, 
   SlidersHorizontal, 
   Layers,
+  ShoppingBag,
+  TrendingUp,
   Globe, 
   X,
   LogOut,
-  UserCheck,
-  CheckCircle2,
-  Clock
+  UserCheck
 } from 'lucide-react';
 
-export type MainNavTab = 'dashboard' | 'new_order' | 'customers' | 'fabrics' | 'settings';
+export type MainNavTab = 'dashboard' | 'new_order' | 'customers' | 'fabrics' | 'products' | 'sales_history' | 'settings';
 export type SettingsSubTab = 'design' | 'measurements' | 'shop' | 'backup';
 
 interface SidebarProps {
@@ -27,6 +27,8 @@ interface SidebarProps {
   orders: Order[];
   customers: Customer[];
   fabrics: Fabric[];
+  productsCount?: number;
+  salesCount?: number;
   designCategoriesCount: number;
   isOpenOnMobile: boolean;
   onCloseMobile: () => void;
@@ -42,6 +44,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   orders,
   customers,
   fabrics,
+  productsCount = 0,
+  salesCount = 0,
   isOpenOnMobile,
   onCloseMobile,
   onSelectNav,
@@ -59,8 +63,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   // Stats for badge chips
   const totalOrdersCount = orders.length;
-  const pendingCount = orders.filter(o => o.status === 'pending' || o.status === 'in_progress').length;
-  const readyCount = orders.filter(o => o.status === 'ready').length;
   const totalCustomersCount = customers.length;
   const totalFabricsCount = fabrics.length;
 
@@ -221,7 +223,53 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
           </button>
 
-          {/* 5. Settings */}
+          {/* 5. Products Inventory (Shoes, Watches, Perfumes) */}
+          <button
+            onClick={() => handleNavClick('products')}
+            id="sidebar-products-link"
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              isTabActive('products')
+                ? 'bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 font-black'
+                : 'text-stone-300 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <ShoppingBag className={`w-4 h-4 ${isTabActive('products') ? 'text-[#D4AF37]' : 'text-stone-400'}`} />
+              <span>{t.products}</span>
+            </div>
+            {productsCount > 0 && (
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                isTabActive('products') ? 'bg-[#D4AF37] text-[#181818]' : 'bg-stone-800 text-stone-300'
+              }`}>
+                {productsCount}
+              </span>
+            )}
+          </button>
+
+          {/* 6. Sales History (New Sale & Sales History) */}
+          <button
+            onClick={() => handleNavClick('sales_history')}
+            id="sidebar-sales-history-link"
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              isTabActive('sales_history')
+                ? 'bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 font-black'
+                : 'text-stone-300 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <TrendingUp className={`w-4 h-4 ${isTabActive('sales_history') ? 'text-[#D4AF37]' : 'text-stone-400'}`} />
+              <span>{t.salesHistory || (language === 'fa' ? 'تاریخچه فروشات' : language === 'ps' ? 'د پلور تاریخچه' : 'Sales History')}</span>
+            </div>
+            {salesCount > 0 && (
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                isTabActive('sales_history') ? 'bg-[#D4AF37] text-[#181818]' : 'bg-stone-800 text-stone-300'
+              }`}>
+                {salesCount}
+              </span>
+            )}
+          </button>
+
+          {/* 7. Settings */}
           <button
             onClick={() => handleNavClick('settings')}
             id="sidebar-settings-link"
@@ -239,26 +287,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               4
             </span>
           </button>
-        </div>
-
-        {/* Quick Summary Pill */}
-        <div className="p-3 mx-3 mb-2 rounded-xl bg-stone-900/90 border border-stone-800 shrink-0 text-xs">
-          <div className="grid grid-cols-2 gap-2">
-            <div className="flex items-center gap-2 p-1.5 bg-black/40 rounded-lg">
-              <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <div>
-                <span className="text-[9px] text-stone-400 block leading-tight">{t.pendingOrders}</span>
-                <span className="font-mono font-bold text-white text-xs">{pendingCount}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 p-1.5 bg-black/40 rounded-lg">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <div>
-                <span className="text-[9px] text-stone-400 block leading-tight">{t.readyOrders}</span>
-                <span className="font-mono font-bold text-white text-xs">{readyCount}</span>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* User Account & Sign Out Section */}
