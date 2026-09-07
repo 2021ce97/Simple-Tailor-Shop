@@ -12,7 +12,8 @@ import {
   ShieldCheck,
   Ruler,
   FileText,
-  AlertCircle
+  AlertCircle,
+  ArrowLeft
 } from 'lucide-react';
 
 interface LoginViewProps {
@@ -73,6 +74,10 @@ export const LoginView: React.FC<LoginViewProps> = ({
       {/* Top Header / Language Switcher */}
       <header className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 flex items-center justify-between z-10">
         <div className="flex items-center gap-3">
+          <a href="/" className="inline-flex items-center gap-1.5 text-xs font-bold text-stone-400 hover:text-white transition" aria-label="Back to customer tracking">
+            <ArrowLeft className="h-4 w-4" />
+            <span>{language === 'fa' ? 'بازگشت' : language === 'ps' ? 'بېرته' : 'Back'}</span>
+          </a>
           <div className="w-10 h-10 rounded-xl bg-[#D4AF37] flex items-center justify-center text-[#1A1A1A] font-black shadow-lg shadow-[#D4AF37]/20">
             <Scissors className="w-5 h-5 transform -rotate-45" />
           </div>

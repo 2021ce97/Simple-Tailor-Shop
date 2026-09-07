@@ -33,6 +33,46 @@ apiRouter.get('/health', async (req: Request, res: Response) => {
 
 // Public tracking endpoint. It intentionally exposes no customer contact,
 // measurements, payment data, internal notes, or shop inventory.
+apiRouter.get('/public/orders', async (req: Request, res: Response) => {
+  const lookup = String(req.query.lookup || '').trim();
+  if (!lookup) {
+    return res.status(400).json({ error: 'Cloth ID or contact number is required' });
+  }
+
+  const result = await safeQuery(`
+    SELECT order_number, garment_type, quantity, status, order_date, delivery_date,
+           completed_date, delivered_date
+    FROM orders
+    WHERE order_number = $1
+       OR regexp_replace(COALESCE(customer_phone, ''), '\\D', '', 'g') = regexp_replace($1, '\\D', '', 'g')
+       OR regexp_replace(COALESCE(customer_whatsapp, ''), '\\D', '', 'g') = regexp_replace($1, '\\D', '', 'g')
+    ORDER BY created_at DESC
+  `, [lookup]);
+
+  const databaseOrders = result?.rows || [];
+  const normalizedLookup = lookup.replace(/\D/g, '');
+  const memoryOrders = inMemoryOrders.filter(item =>
+    item.orderNumber === lookup ||
+    String(item.customerPhone || '').replace(/\D/g, '') === normalizedLookup ||
+    String(item.customerWhatsApp || '').replace(/\D/g, '') === normalizedLookup
+  );
+  const sourceOrders = databaseOrders.length > 0 ? databaseOrders : memoryOrders;
+  if (sourceOrders.length === 0) {
+    return res.status(404).json({ error: 'No cloth order was found for this ID or contact' });
+  }
+
+  return res.json({ orders: sourceOrders.map((order: any) => ({
+    orderNumber: order.order_number || order.orderNumber,
+    garmentType: order.garment_type || order.garmentType,
+    quantity: order.quantity,
+    status: order.status,
+    orderDate: order.order_date || order.orderDate,
+    deliveryDate: order.delivery_date || order.deliveryDate,
+    completedDate: order.completed_date || order.completedDate || null,
+    deliveredDate: order.delivered_date || order.deliveredDate || null,
+  })) });
+});
+
 apiRouter.get('/public/orders/:orderNumber', async (req: Request, res: Response) => {
   const orderNumber = String(req.params.orderNumber || '').trim();
   if (!orderNumber) {
