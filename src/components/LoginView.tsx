@@ -259,7 +259,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
       {/* Footer */}
       <footer className="w-full max-w-6xl mx-auto px-4 py-4 text-center text-stone-500 text-xs z-10">
         <p>© {new Date().getFullYear()} {shopTitle} • {language === 'fa' ? 'تمامی حقوق محفوظ است' : language === 'ps' ? 'ټولې حقونه خوندي دي' : 'All rights reserved'}</p>
-        <a href="/track" className="mt-2 inline-block text-[#D4AF37] hover:text-white transition">
+        <a href="/" className="mt-2 inline-block text-[#D4AF37] hover:text-white transition">
           {language === 'fa' ? 'پیگیری وضعیت لباس مشتری' : language === 'ps' ? 'د خپلو جامو حالت وګورئ' : 'Track your cloth order'}
         </a>
         <p className="mt-2 text-[10px] text-stone-600">Developed by Rayan Tech Solutions · rayan-tech-solution.tech</p>

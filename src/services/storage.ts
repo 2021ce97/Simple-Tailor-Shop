@@ -1068,12 +1068,15 @@ export const storageService = {
   // Pull latest data from PostgreSQL database if available
   async syncFromDatabase(): Promise<void> {
     try {
-      const [fabricsRes, ordersRes, customersRes, productsRes, productSalesRes] = await Promise.all([
+      const [fabricsRes, ordersRes, customersRes, productsRes, productSalesRes, measurementFieldsRes, designCategoriesRes, shopSettingsRes] = await Promise.all([
         fetch('/api/fabrics').catch(() => null),
         fetch('/api/orders').catch(() => null),
         fetch('/api/customers').catch(() => null),
         fetch('/api/products').catch(() => null),
-        fetch('/api/product-sales').catch(() => null)
+        fetch('/api/product-sales').catch(() => null),
+        fetch('/api/measurement-fields').catch(() => null),
+        fetch('/api/design-categories').catch(() => null),
+        fetch('/api/shop-settings').catch(() => null)
       ]);
 
       if (fabricsRes && fabricsRes.ok) {
@@ -1105,6 +1108,21 @@ export const storageService = {
       if (productSalesRes && productSalesRes.ok) {
         const data = await productSalesRes.json();
         if (Array.isArray(data)) setStoredItem(STORAGE_KEYS.PRODUCT_SALES, data);
+      }
+
+      if (measurementFieldsRes && measurementFieldsRes.ok) {
+        const data = await measurementFieldsRes.json();
+        if (Array.isArray(data) && data.length > 0) setStoredItem(STORAGE_KEYS.MEASUREMENT_FIELDS, data);
+      }
+
+      if (designCategoriesRes && designCategoriesRes.ok) {
+        const data = await designCategoriesRes.json();
+        if (Array.isArray(data) && data.length > 0) setStoredItem(STORAGE_KEYS.DESIGN_CATEGORIES, data);
+      }
+
+      if (shopSettingsRes && shopSettingsRes.ok) {
+        const data = await shopSettingsRes.json();
+        if (data && typeof data === 'object') setStoredItem(STORAGE_KEYS.SHOP_SETTINGS, data);
       }
     } catch (e) {
       console.log('Database initial sync handled in local mode');

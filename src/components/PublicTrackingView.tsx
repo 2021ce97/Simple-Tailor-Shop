@@ -51,7 +51,7 @@ export const PublicTrackingView: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f4f1ea] text-[#1c2421] px-4 py-6 sm:py-10">
       <main className="mx-auto max-w-2xl">
-        <a href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-stone-600 hover:text-[#1c2421]">
+        <a href="/login" className="inline-flex items-center gap-2 text-sm font-semibold text-stone-600 hover:text-[#1c2421]">
           <ArrowLeft className="h-4 w-4" /> Staff login
         </a>
 

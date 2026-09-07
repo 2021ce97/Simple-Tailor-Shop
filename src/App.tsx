@@ -27,9 +27,18 @@ import { PublicTrackingView } from './components/PublicTrackingView';
 import { ReportsView } from './components/ReportsView';
 
 export default function App() {
-  if (window.location.pathname === '/track' || window.location.pathname === '/customer-tracking') {
+  if (window.location.pathname === '/' || window.location.pathname === '/track' || window.location.pathname === '/customer-tracking') {
     return <PublicTrackingView />;
   }
+
+  if (window.location.pathname === '/login') {
+    return <ShopApp />;
+  }
+
+  return <PublicTrackingView />;
+}
+
+function ShopApp() {
 
   // 1. Language State & RTL
   const [language, setLanguage] = useState<Language>(() => storageService.getLanguage());

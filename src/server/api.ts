@@ -341,23 +341,69 @@ apiRouter.post('/shop-settings', async (req: Request, res: Response) => {
 });
 
 // --- MEASUREMENT FIELDS ---
-apiRouter.get('/measurement-fields', (req: Request, res: Response) => {
+apiRouter.get('/measurement-fields', async (req: Request, res: Response) => {
+  const result = await safeQuery('SELECT * FROM measurement_fields ORDER BY sort_order, id');
+  if (result?.rows) {
+    inMemoryMeasurementFields = result.rows.map((row: any) => ({
+      id: row.id,
+      key: row.key,
+      labelEn: row.label_en,
+      labelFa: row.label_fa,
+      labelPs: row.label_ps,
+      unit: row.unit,
+      defaultValue: row.default_value,
+      isStandard: row.is_standard,
+      sortOrder: row.sort_order,
+    }));
+  }
   res.json(inMemoryMeasurementFields);
 });
 
-apiRouter.post('/measurement-fields', (req: Request, res: Response) => {
-  inMemoryMeasurementFields = req.body;
-  res.json({ success: true });
+apiRouter.post('/measurement-fields', async (req: Request, res: Response) => {
+  const fields = Array.isArray(req.body) ? req.body : [];
+  inMemoryMeasurementFields = fields;
+  for (const field of fields) {
+    await safeQuery(`
+      INSERT INTO measurement_fields (id, key, label_en, label_fa, label_ps, unit, default_value, is_standard, sort_order)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      ON CONFLICT (id) DO UPDATE SET
+        key = EXCLUDED.key, label_en = EXCLUDED.label_en, label_fa = EXCLUDED.label_fa,
+        label_ps = EXCLUDED.label_ps, unit = EXCLUDED.unit, default_value = EXCLUDED.default_value,
+        is_standard = EXCLUDED.is_standard, sort_order = EXCLUDED.sort_order;
+    `, [field.id, field.key, field.labelEn, field.labelFa, field.labelPs, field.unit, field.defaultValue, field.isStandard ?? true, field.sortOrder ?? 0]);
+  }
+  res.json({ success: true, fields });
 });
 
 // --- DESIGN CATEGORIES ---
-apiRouter.get('/design-categories', (req: Request, res: Response) => {
+apiRouter.get('/design-categories', async (req: Request, res: Response) => {
+  const result = await safeQuery('SELECT * FROM design_categories ORDER BY id');
+  if (result?.rows) {
+    inMemoryDesignCategories = result.rows.map((row: any) => ({
+      id: row.id,
+      key: row.key,
+      titleEn: row.title_en,
+      titleFa: row.title_fa,
+      titlePs: row.title_ps,
+      options: row.options || [],
+    }));
+  }
   res.json(inMemoryDesignCategories);
 });
 
-apiRouter.post('/design-categories', (req: Request, res: Response) => {
-  inMemoryDesignCategories = req.body;
-  res.json({ success: true });
+apiRouter.post('/design-categories', async (req: Request, res: Response) => {
+  const categories = Array.isArray(req.body) ? req.body : [];
+  inMemoryDesignCategories = categories;
+  for (const category of categories) {
+    await safeQuery(`
+      INSERT INTO design_categories (id, key, title_en, title_fa, title_ps, options)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      ON CONFLICT (id) DO UPDATE SET
+        key = EXCLUDED.key, title_en = EXCLUDED.title_en, title_fa = EXCLUDED.title_fa,
+        title_ps = EXCLUDED.title_ps, options = EXCLUDED.options;
+    `, [category.id, category.key, category.titleEn, category.titleFa, category.titlePs, JSON.stringify(category.options || [])]);
+  }
+  res.json({ success: true, categories });
 });
 
 // --- PRODUCTS ---
