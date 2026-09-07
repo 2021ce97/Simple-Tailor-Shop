@@ -56,6 +56,7 @@ export default function App() {
 
   // 4. Navigation & Modal State
   const [currentTab, setCurrentTab] = useState<MainNavTab>('dashboard');
+  const [globalOrderSearch, setGlobalOrderSearch] = useState('');
   const [settingsSubTab, setSettingsSubTab] = useState<SettingsSubTab>('design');
   const [isSidebarOpenMobile, setIsSidebarOpenMobile] = useState<boolean>(false);
 
@@ -242,7 +243,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F9F7F2] text-[#1A1A1A] flex flex-col font-sans selection:bg-[#D4AF37]/30">
+    <div className="min-h-screen bg-[#0f172a] text-[#1A1A1A] flex flex-col font-sans selection:bg-teal-400/30">
       {/* Sidebar Navigation */}
       <Sidebar
         currentTab={currentTab}
@@ -252,7 +253,7 @@ export default function App() {
         orders={orders}
         customers={customers}
         fabrics={fabrics}
-        productsCount={products.length}
+        products={products}
         salesCount={productSales.length}
         designCategoriesCount={designCategories.length}
         isOpenOnMobile={isSidebarOpenMobile}
@@ -273,6 +274,10 @@ export default function App() {
           shopSettings={shopSettings}
           onToggleSidebar={() => setIsSidebarOpenMobile(prev => !prev)}
           onTabChange={handleSelectNav}
+          onSearchOrders={(query) => {
+            setGlobalOrderSearch(query);
+            if (query.trim()) setCurrentTab('dashboard');
+          }}
           onLanguageChange={handleLanguageChange}
           onSignOut={handleSignOut}
         />
@@ -283,6 +288,7 @@ export default function App() {
             <Dashboard
               orders={orders}
               productSales={productSales}
+              globalSearchTerm={globalOrderSearch}
               shopSettings={shopSettings}
               language={language}
               onNewOrder={handleStartNewOrder}

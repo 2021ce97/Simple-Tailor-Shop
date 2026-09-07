@@ -537,8 +537,8 @@ async function apiSync(endpoint: string, method = 'GET', data?: any) {
 export const storageService = {
   // Fabrics
   getFabrics(): Fabric[] {
-    const list = getStoredItem<Fabric[]>(STORAGE_KEYS.FABRICS, INITIAL_DEMO_FABRICS);
-    return Array.isArray(list) ? list : INITIAL_DEMO_FABRICS;
+    const list = getStoredItem<Fabric[]>(STORAGE_KEYS.FABRICS, []);
+    return Array.isArray(list) ? list : [];
   },
 
   getFabricById(id: string): Fabric | undefined {
@@ -587,8 +587,8 @@ export const storageService = {
 
   // Products & Retail Inventory
   getProducts(): Product[] {
-    const list = getStoredItem<Product[]>(STORAGE_KEYS.PRODUCTS, INITIAL_DEMO_PRODUCTS);
-    return Array.isArray(list) ? list : INITIAL_DEMO_PRODUCTS;
+    const list = getStoredItem<Product[]>(STORAGE_KEYS.PRODUCTS, []);
+    return Array.isArray(list) ? list : [];
   },
 
   getProductById(id: string): Product | undefined {
@@ -793,8 +793,8 @@ export const storageService = {
 
   // Orders
   getOrders(): Order[] {
-    const list = getStoredItem<Order[]>(STORAGE_KEYS.ORDERS, INITIAL_DEMO_ORDERS);
-    return Array.isArray(list) ? list : INITIAL_DEMO_ORDERS;
+    const list = getStoredItem<Order[]>(STORAGE_KEYS.ORDERS, []);
+    return Array.isArray(list) ? list : [];
   },
 
   getOrderById(id: string): Order | undefined {
@@ -896,8 +896,8 @@ export const storageService = {
 
   // Customers
   getCustomers(): Customer[] {
-    const list = getStoredItem<Customer[]>(STORAGE_KEYS.CUSTOMERS, INITIAL_DEMO_CUSTOMERS);
-    return Array.isArray(list) ? list : INITIAL_DEMO_CUSTOMERS;
+    const list = getStoredItem<Customer[]>(STORAGE_KEYS.CUSTOMERS, []);
+    return Array.isArray(list) ? list : [];
   },
 
   getCustomerById(id: string): Customer | undefined {
@@ -1068,10 +1068,12 @@ export const storageService = {
   // Pull latest data from PostgreSQL database if available
   async syncFromDatabase(): Promise<void> {
     try {
-      const [fabricsRes, ordersRes, customersRes] = await Promise.all([
+      const [fabricsRes, ordersRes, customersRes, productsRes, productSalesRes] = await Promise.all([
         fetch('/api/fabrics').catch(() => null),
         fetch('/api/orders').catch(() => null),
-        fetch('/api/customers').catch(() => null)
+        fetch('/api/customers').catch(() => null),
+        fetch('/api/products').catch(() => null),
+        fetch('/api/product-sales').catch(() => null)
       ]);
 
       if (fabricsRes && fabricsRes.ok) {
@@ -1093,6 +1095,16 @@ export const storageService = {
         if (Array.isArray(data) && data.length > 0) {
           setStoredItem(STORAGE_KEYS.CUSTOMERS, data);
         }
+      }
+
+      if (productsRes && productsRes.ok) {
+        const data = await productsRes.json();
+        if (Array.isArray(data)) setStoredItem(STORAGE_KEYS.PRODUCTS, data);
+      }
+
+      if (productSalesRes && productSalesRes.ok) {
+        const data = await productSalesRes.json();
+        if (Array.isArray(data)) setStoredItem(STORAGE_KEYS.PRODUCT_SALES, data);
       }
     } catch (e) {
       console.log('Database initial sync handled in local mode');

@@ -173,6 +173,41 @@ export async function initDatabase() {
         data JSONB NOT NULL,
         updated_at TIMESTAMPTZ DEFAULT NOW()
       );
+
+      CREATE TABLE IF NOT EXISTS products (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        category TEXT NOT NULL,
+        vendor TEXT,
+        brand TEXT,
+        sku TEXT,
+        image_url TEXT,
+        purchase_price NUMERIC DEFAULT 0,
+        stock_quantity INT DEFAULT 0,
+        low_stock_threshold INT DEFAULT 5,
+        description TEXT,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+
+      CREATE TABLE IF NOT EXISTS product_sales (
+        id TEXT PRIMARY KEY,
+        product_id TEXT NOT NULL,
+        product_name TEXT NOT NULL,
+        category TEXT NOT NULL,
+        quantity INT NOT NULL,
+        purchase_price NUMERIC DEFAULT 0,
+        selling_price NUMERIC NOT NULL,
+        total_amount NUMERIC NOT NULL,
+        profit NUMERIC DEFAULT 0,
+        customer_id TEXT,
+        customer_name TEXT,
+        customer_phone TEXT,
+        sale_date TEXT NOT NULL,
+        payment_method TEXT,
+        notes TEXT,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
     `);
     isDbAvailable = true;
     console.log('PostgreSQL database tables verified and connected.');
@@ -181,4 +216,3 @@ export async function initDatabase() {
     console.log('PostgreSQL database not available (' + (err?.message || 'connection failed') + '). Falling back to local storage.');
   }
 }
-

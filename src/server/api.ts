@@ -1,8 +1,6 @@
 import express, { Router, Request, Response } from 'express';
 import { safeQuery, isDatabaseConnected } from '../db/db';
 import { 
-  INITIAL_DEMO_FABRICS, 
-  INITIAL_DEMO_PRODUCTS,
   DEFAULT_MEASUREMENT_FIELDS, 
   DEFAULT_DESIGN_CATEGORIES, 
   DEFAULT_SHOP_SETTINGS 
@@ -11,8 +9,8 @@ import {
 export const apiRouter = Router();
 
 // In-memory fallback stores
-let inMemoryFabrics = [...INITIAL_DEMO_FABRICS];
-let inMemoryProducts: any[] = [...INITIAL_DEMO_PRODUCTS];
+let inMemoryFabrics: any[] = [];
+let inMemoryProducts: any[] = [];
 let inMemoryProductSales: any[] = [];
 let inMemoryOrders: any[] = [];
 let inMemoryCustomers: any[] = [];
@@ -329,11 +327,22 @@ apiRouter.post('/design-categories', (req: Request, res: Response) => {
 });
 
 // --- PRODUCTS ---
-apiRouter.get('/products', (req: Request, res: Response) => {
+apiRouter.get('/products', async (req: Request, res: Response) => {
+  const result = await safeQuery('SELECT * FROM products ORDER BY created_at DESC');
+  if (result?.rows) {
+    inMemoryProducts = result.rows.map((row: any) => ({
+      id: row.id, name: row.name, category: row.category, vendor: row.vendor,
+      brand: row.brand, sku: row.sku, imageUrl: row.image_url,
+      purchasePrice: Number(row.purchase_price) || 0, stockQuantity: Number(row.stock_quantity) || 0,
+      lowStockThreshold: Number(row.low_stock_threshold) || 5, description: row.description,
+      createdAt: row.created_at, updatedAt: row.updated_at,
+    }));
+    return res.json(inMemoryProducts);
+  }
   res.json(inMemoryProducts);
 });
 
-apiRouter.post('/products', (req: Request, res: Response) => {
+apiRouter.post('/products', async (req: Request, res: Response) => {
   const product = req.body;
   if (!product || !product.id) {
     return res.status(400).json({ error: 'Product data with id is required' });
@@ -344,26 +353,66 @@ apiRouter.post('/products', (req: Request, res: Response) => {
   } else {
     inMemoryProducts.unshift({ ...product, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
   }
+  await safeQuery(`
+    INSERT INTO products (id, name, category, vendor, brand, sku, image_url, purchase_price, stock_quantity, low_stock_threshold, description, updated_at)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
+    ON CONFLICT (id) DO UPDATE SET
+      name = EXCLUDED.name, category = EXCLUDED.category, vendor = EXCLUDED.vendor,
+      brand = EXCLUDED.brand, sku = EXCLUDED.sku, image_url = EXCLUDED.image_url,
+      purchase_price = EXCLUDED.purchase_price, stock_quantity = EXCLUDED.stock_quantity,
+      low_stock_threshold = EXCLUDED.low_stock_threshold, description = EXCLUDED.description,
+      updated_at = NOW();
+  `, [
+    product.id, product.name, product.category, product.vendor, product.brand, product.sku,
+    product.imageUrl, product.purchasePrice || 0, product.stockQuantity || 0,
+    product.lowStockThreshold ?? 5, product.description,
+  ]);
   res.json({ success: true, product });
 });
 
-apiRouter.delete('/products/:id', (req: Request, res: Response) => {
+apiRouter.delete('/products/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
   inMemoryProducts = inMemoryProducts.filter(p => p.id !== id);
+  await safeQuery('DELETE FROM products WHERE id = $1', [id]);
   res.json({ success: true });
 });
 
 // --- PRODUCT SALES ---
-apiRouter.get('/product-sales', (req: Request, res: Response) => {
+apiRouter.get('/product-sales', async (req: Request, res: Response) => {
+  const result = await safeQuery('SELECT * FROM product_sales ORDER BY sale_date DESC, created_at DESC');
+  if (result?.rows) {
+    inMemoryProductSales = result.rows.map((row: any) => ({
+      id: row.id, productId: row.product_id, productName: row.product_name, category: row.category,
+      quantity: Number(row.quantity) || 0, purchasePrice: Number(row.purchase_price) || 0,
+      sellingPrice: Number(row.selling_price) || 0, totalAmount: Number(row.total_amount) || 0,
+      profit: Number(row.profit) || 0, customerId: row.customer_id, customerName: row.customer_name,
+      customerPhone: row.customer_phone, saleDate: row.sale_date, paymentMethod: row.payment_method,
+      notes: row.notes,
+    }));
+    return res.json(inMemoryProductSales);
+  }
   res.json(inMemoryProductSales);
 });
 
-apiRouter.post('/product-sales', (req: Request, res: Response) => {
+apiRouter.post('/product-sales', async (req: Request, res: Response) => {
   const sale = req.body;
   if (!sale || !sale.id) {
     return res.status(400).json({ error: 'Sale record with id is required' });
   }
-  inMemoryProductSales.unshift(sale);
+  const existing = inMemoryProductSales.findIndex(record => record.id === sale.id);
+  if (existing >= 0) inMemoryProductSales[existing] = sale;
+  else inMemoryProductSales.unshift(sale);
+  await safeQuery(`
+    INSERT INTO product_sales (id, product_id, product_name, category, quantity, purchase_price, selling_price, total_amount, profit, customer_id, customer_name, customer_phone, sale_date, payment_method, notes)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+    ON CONFLICT (id) DO UPDATE SET
+      quantity = EXCLUDED.quantity, selling_price = EXCLUDED.selling_price, total_amount = EXCLUDED.total_amount,
+      profit = EXCLUDED.profit, customer_id = EXCLUDED.customer_id, customer_name = EXCLUDED.customer_name,
+      customer_phone = EXCLUDED.customer_phone, payment_method = EXCLUDED.payment_method, notes = EXCLUDED.notes;
+  `, [
+    sale.id, sale.productId, sale.productName, sale.category, sale.quantity, sale.purchasePrice || 0,
+    sale.sellingPrice, sale.totalAmount, sale.profit || 0, sale.customerId, sale.customerName,
+    sale.customerPhone, sale.saleDate, sale.paymentMethod, sale.notes,
+  ]);
   res.json({ success: true, sale });
 });
-

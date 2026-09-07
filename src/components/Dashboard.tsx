@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { 
   Order, 
   OrderStatus, 
@@ -51,6 +51,7 @@ import {
 interface DashboardProps {
   orders: Order[];
   productSales?: ProductSale[];
+  globalSearchTerm?: string;
   shopSettings: ShopSettings;
   language: Language;
   onNewOrder: () => void;
@@ -63,6 +64,7 @@ interface DashboardProps {
 export const Dashboard: React.FC<DashboardProps> = ({
   orders,
   productSales = [],
+  globalSearchTerm = '',
   shopSettings,
   language,
   onNewOrder,
@@ -77,6 +79,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [paymentFilter, setPaymentFilter] = useState<string>('all');
+
+  // Navbar search is intentionally shared with the dashboard search field so a
+  // tailor can start searching from anywhere in the application.
+  useEffect(() => {
+    setSearchTerm(globalSearchTerm);
+  }, [globalSearchTerm]);
 
   // Quick Payment Modal State
   const [paymentModalOrder, setPaymentModalOrder] = useState<Order | null>(null);
@@ -131,6 +139,31 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
     return { total, pending, inProgress, ready, delivered, totalBalance, totalRevenue };
   }, [orders]);
+
+  const summary = useMemo(() => {
+    const today = new Date();
+    const monthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    const upcomingLimit = new Date(today);
+    upcomingLimit.setDate(today.getDate() + 7);
+    upcomingLimit.setHours(23, 59, 59, 999);
+    const isUpcoming = (order: Order) => {
+      if (order.status === 'delivered' || !order.deliveryDate) return false;
+      const deadline = new Date(`${order.deliveryDate}T23:59:59`);
+      return !Number.isNaN(deadline.getTime()) && deadline >= new Date(today.toDateString()) && deadline <= upcomingLimit;
+    };
+    const orderRevenue = orders
+      .filter(order => (order.orderDate || order.createdAt || '').startsWith(monthKey))
+      .reduce((total, order) => total + (Number(order.paidAmount) || 0), 0);
+    const productRevenue = productSales
+      .filter(sale => (sale.saleDate || sale.createdAt || '').startsWith(monthKey))
+      .reduce((total, sale) => total + (Number(sale.totalAmount) || 0), 0);
+
+    return {
+      pending: orders.filter(order => order.status === 'pending').length,
+      upcomingDeadlines: orders.filter(isUpcoming).length,
+      monthRevenue: orderRevenue + productRevenue,
+    };
+  }, [orders, productSales]);
 
   // 7-Day Revenue Visualization Data (Orders vs Product Sales)
   const last7DaysRevenueData = useMemo(() => {
@@ -257,54 +290,35 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </button>
       </div>
 
-      {/* Metrics Row - Bento Grid Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
-        {/* Metric 1: Total Orders */}
-        <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs flex items-center justify-between group hover:border-[#D4AF37]/50 transition">
+      {/* At-a-glance order summary */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between group hover:border-teal-300 transition">
           <div>
-            <span className="text-[11px] uppercase tracking-wider text-stone-500 font-bold block">{t.totalOrders}</span>
-            <span className="text-2xl font-black text-[#1A1A1A] font-mono mt-1 block">{metrics.total}</span>
+            <span className="text-[11px] uppercase tracking-wider text-slate-500 font-bold block">{language === 'fa' ? 'سفارشات در انتظار' : language === 'ps' ? 'د انتظار فرمایشونه' : 'Pending Orders'}</span>
+            <span className="text-2xl font-black text-slate-900 font-mono mt-1 block">{summary.pending}</span>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-[#1A1A1A] flex items-center justify-center text-[#D4AF37]">
-            <Layers className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+            <Clock className="w-5 h-5" />
           </div>
         </div>
 
-        {/* Metric 2: Ready for Pickup */}
-        <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs flex items-center justify-between group hover:border-emerald-300 transition">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between group hover:border-violet-300 transition">
           <div>
-            <span className="text-[11px] uppercase tracking-wider text-emerald-800 font-bold block">{t.readyOrders}</span>
-            <span className="text-2xl font-black text-emerald-600 font-mono mt-1 block">{metrics.ready}</span>
+            <span className="text-[11px] uppercase tracking-wider text-slate-500 font-bold block">{language === 'fa' ? 'مهلت‌های تحویل (۷ روز)' : language === 'ps' ? 'د تحویل نېټې (۷ ورځې)' : 'Upcoming Deadlines (7 days)'}</span>
+            <span className="text-2xl font-black text-violet-700 font-mono mt-1 block">{summary.upcomingDeadlines}</span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center">
+            <Calendar className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between group hover:border-emerald-300 transition">
+          <div>
+            <span className="text-[11px] uppercase tracking-wider text-slate-500 font-bold block">{language === 'fa' ? 'عواید دریافت‌شده این ماه' : language === 'ps' ? 'د دې میاشتې ترلاسه شوي عواید' : 'Current Month Revenue'}</span>
+            <span className="text-xl font-black text-emerald-700 font-mono mt-1 block">{summary.monthRevenue.toLocaleString()} <span className="text-xs font-sans font-medium">{currencySymbol}</span></span>
           </div>
           <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
-        </div>
-
-        {/* Metric 3: In Stitching / Pending */}
-        <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs flex items-center justify-between group hover:border-[#D4AF37]/50 transition">
-          <div>
-            <span className="text-[11px] uppercase tracking-wider text-amber-900 font-bold block">{t.inProgressOrders} / {t.statusPending}</span>
-            <span className="text-2xl font-black text-[#D4AF37] font-mono mt-1 block">
-              {metrics.inProgress + metrics.pending}
-            </span>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-amber-50 text-[#B39025] flex items-center justify-center">
-            <Scissors className="w-5 h-5" />
-          </div>
-        </div>
-
-        {/* Metric 4: Total Uncollected Balance */}
-        <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs flex items-center justify-between group hover:border-rose-300 transition">
-          <div>
-            <span className="text-[11px] uppercase tracking-wider text-rose-800 font-bold block">{t.totalBalanceDue}</span>
-            <div className="text-xl font-black text-rose-600 font-mono mt-1 flex items-baseline gap-1">
-              <span>{metrics.totalBalance.toLocaleString()}</span>
-              <span className="text-xs text-stone-500 font-sans font-normal">{currencySymbol}</span>
-            </div>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
-            <DollarSign className="w-5 h-5" />
+            <TrendingUp className="w-5 h-5" />
           </div>
         </div>
       </div>

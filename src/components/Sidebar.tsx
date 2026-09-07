@@ -1,5 +1,5 @@
 import React from 'react';
-import { Language, ShopSettings, Order, Customer, Fabric } from '../types';
+import { Language, ShopSettings, Order, Customer, Fabric, Product } from '../types';
 import { translations } from '../translations/i18n';
 import { 
   Scissors, 
@@ -27,7 +27,7 @@ interface SidebarProps {
   orders: Order[];
   customers: Customer[];
   fabrics: Fabric[];
-  productsCount?: number;
+  products: Product[];
   salesCount?: number;
   designCategoriesCount: number;
   isOpenOnMobile: boolean;
@@ -44,7 +44,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   orders,
   customers,
   fabrics,
-  productsCount = 0,
+  products,
   salesCount = 0,
   isOpenOnMobile,
   onCloseMobile,
@@ -65,6 +65,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const totalOrdersCount = orders.length;
   const totalCustomersCount = customers.length;
   const totalFabricsCount = fabrics.length;
+  const fabricThreshold = Number(localStorage.getItem('fabrics_low_stock_threshold') || 15);
+  const lowFabricCount = fabrics.filter(fabric => {
+    const stock = Number(fabric.stockMeters) || 0;
+    return stock > 0 && stock <= fabricThreshold;
+  }).length;
+  const lowProductCount = products.filter(product => {
+    const stock = Number(product.stockQuantity) || 0;
+    return stock <= (product.lowStockThreshold ?? 5);
+  }).length;
 
   const handleNavClick = (tab: MainNavTab) => {
     onSelectNav(tab);
@@ -215,10 +224,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span>{t.fabricInventory}</span>
             </div>
             {totalFabricsCount > 0 && (
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
-                isTabActive('fabrics') ? 'bg-[#D4AF37] text-[#181818]' : 'bg-stone-800 text-stone-300'
+              <span title={lowFabricCount ? `${lowFabricCount} low-stock fabrics` : undefined} className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                lowFabricCount > 0 ? 'bg-rose-500 text-white' : isTabActive('fabrics') ? 'bg-[#D4AF37] text-[#181818]' : 'bg-stone-800 text-stone-300'
               }`}>
-                {totalFabricsCount}
+                {lowFabricCount > 0 ? `! ${lowFabricCount}` : totalFabricsCount}
               </span>
             )}
           </button>
@@ -237,11 +246,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <ShoppingBag className={`w-4 h-4 ${isTabActive('products') ? 'text-[#D4AF37]' : 'text-stone-400'}`} />
               <span>{t.products}</span>
             </div>
-            {productsCount > 0 && (
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
-                isTabActive('products') ? 'bg-[#D4AF37] text-[#181818]' : 'bg-stone-800 text-stone-300'
+            {products.length > 0 && (
+              <span title={lowProductCount ? `${lowProductCount} low-stock products` : undefined} className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                lowProductCount > 0 ? 'bg-rose-500 text-white' : isTabActive('products') ? 'bg-[#D4AF37] text-[#181818]' : 'bg-stone-800 text-stone-300'
               }`}>
-                {productsCount}
+                {lowProductCount > 0 ? `! ${lowProductCount}` : products.length}
               </span>
             )}
           </button>

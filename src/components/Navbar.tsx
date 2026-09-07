@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Language, ShopSettings } from '../types';
 import { translations } from '../translations/i18n';
 import { 
@@ -9,6 +9,7 @@ import {
   LogOut,
   UserCheck
 } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { MainNavTab, SettingsSubTab } from './Sidebar';
 
 interface NavbarProps {
@@ -19,6 +20,7 @@ interface NavbarProps {
   onTabChange: (tab: MainNavTab, subTab?: SettingsSubTab) => void;
   onLanguageChange: (lang: Language) => void;
   onSignOut?: () => void;
+  onSearchOrders: (query: string) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -28,8 +30,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   onTabChange,
   onLanguageChange,
   onSignOut,
+  onSearchOrders,
 }) => {
   const t = translations[language];
+  const [searchQuery, setSearchQuery] = useState('');
 
   const shopTitle = language === 'ps' 
     ? shopSettings.shopNamePs 
@@ -75,6 +79,23 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Quick Action Navigation Bar */}
           <div className="flex items-center gap-2 sm:gap-3">
+            <div className="relative hidden md:block w-52 lg:w-72">
+              <Search className="w-4 h-4 text-slate-400 absolute start-3 top-1/2 -translate-y-1/2" />
+              <input
+                value={searchQuery}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSearchQuery(value);
+                  onSearchOrders(value);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') onSearchOrders(searchQuery);
+                }}
+                placeholder={language === 'fa' ? 'جستجوی سفارش یا مشتری...' : language === 'ps' ? 'فرمایش یا پېرودونکی ولټوئ...' : 'Search order or customer...'}
+                aria-label="Search orders by customer name or order ID"
+                className="w-full bg-slate-800/80 border border-slate-700 rounded-xl ps-9 pe-3 py-2 text-xs text-white placeholder:text-slate-400 outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400"
+              />
+            </div>
             <button
               onClick={() => onTabChange('new_order')}
               id="nav-quick-new-order"
