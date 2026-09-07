@@ -68,7 +68,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
               <div>
                 <h1 className="font-bold text-sm sm:text-base text-white tracking-tight leading-tight flex items-center gap-2">
-                  <span>{shopTitle || 'Rayan Tailor Shop Management'}</span>
+                  <span>{shopTitle || 'Mujeeb Afghan Tailor Shop'}</span>
                 </h1>
                 <p className="text-[10px] text-[#D4AF37] font-medium hidden sm:block">
                   {t.appSubtitle}

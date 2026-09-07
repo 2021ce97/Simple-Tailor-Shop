@@ -920,7 +920,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 type="text"
                 value={shop.phone1}
                 onChange={e => setShop({ ...shop, phone1: e.target.value })}
-                placeholder="0793710008"
+                placeholder="0749592404"
                 className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-mono"
               />
             </div>

@@ -109,7 +109,7 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
       pdf.addImage(dataUrl, 'PNG', margin, margin, printableWidth, imgHeight);
       
       const safeCustomerName = order.customerName ? order.customerName.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_') : 'Customer';
-      pdf.save(`Rayan_Tailors_Receipt_${order.orderNumber || 'Order'}_${safeCustomerName}.pdf`);
+      pdf.save(`Mujeeb_Afghan_Tailor_Receipt_${order.orderNumber || 'Order'}_${safeCustomerName}.pdf`);
     } catch (err) {
       console.error('Error generating PDF:', err);
       // Fallback to print
@@ -250,7 +250,7 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
                 </div>
                 <div>
                   <h1 className="text-lg font-black tracking-tight text-stone-950 font-serif leading-tight">
-                    {shopSettings.shopNamePs || shopSettings.shopNameFa || 'افغان صدر خیاطی او رخت پلورنځی'}
+                    {shopSettings.shopNamePs || shopSettings.shopNameFa || 'مجیب افغان خیاطي'}
                   </h1>
                 </div>
               </div>
@@ -263,14 +263,18 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
                 </span>
                 <span className="flex items-center gap-1">
                   <span>شماره تماس:</span>
-                  <b className="font-mono">{shopSettings.phone1 || '0793710008'}</b>
+                  <b className="font-mono">{shopSettings.phone1 || '0749592404'}</b>
                 </span>
               </div>
 
               {/* Address */}
               <p className="text-[10px] text-stone-600 mt-1 leading-snug px-2">
-                <b>آدرس:</b> {shopSettings.addressFa || shopSettings.addressPs || 'ارزان قیمت چهارراهی محبس المدینه و احمدزی مارکیت منزل دوم افغان صدر خیاطی و رخت فروشی'}
+                <b>آدرس:</b> {shopSettings.addressFa || shopSettings.addressPs || 'چهار راهی بتخاک، کابل افغانستان'}
               </p>
+            </div>
+
+            <div className="mt-3 border-t border-dotted border-stone-300 pt-2 text-center text-[9px] text-stone-500">
+              Developed by Rayan Tech Solutions · rayan-tech-solution.tech
             </div>
 
             {/* Order Info & Customer Strip */}

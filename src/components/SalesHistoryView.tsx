@@ -944,7 +944,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                     ? (shopSettings?.shopNameFa || 'خیاطی رایان') 
                     : language === 'ps' 
                     ? (shopSettings?.shopNamePs || 'د رایان خیاطۍ مدیریت') 
-                    : (shopSettings?.shopNameEn || 'Rayan Tailor Shop')}
+                    : (shopSettings?.shopNameEn || 'Mujeeb Afghan Tailor Shop')}
                 </h2>
                 <p className="text-[10px] text-stone-500">
                   {language === 'fa' 

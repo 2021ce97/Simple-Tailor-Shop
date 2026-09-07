@@ -23,8 +23,14 @@ import { SalesHistoryView } from './components/SalesHistoryView';
 import { DesignSettingsView } from './components/DesignSettingsView';
 import { ReceiptSlipModal } from './components/ReceiptSlipModal';
 import { LoginView } from './components/LoginView';
+import { PublicTrackingView } from './components/PublicTrackingView';
+import { ReportsView } from './components/ReportsView';
 
 export default function App() {
+  if (window.location.pathname === '/track' || window.location.pathname === '/customer-tracking') {
+    return <PublicTrackingView />;
+  }
+
   // 1. Language State & RTL
   const [language, setLanguage] = useState<Language>(() => storageService.getLanguage());
 
@@ -354,6 +360,17 @@ export default function App() {
               language={language}
               onRecordSale={handleRecordProductSale}
               onNavigateToProducts={() => setCurrentTab('products')}
+            />
+          )}
+
+          {currentTab === 'reports' && (
+            <ReportsView
+              orders={orders}
+              products={products}
+              fabrics={fabrics}
+              productSales={productSales}
+              shopSettings={shopSettings}
+              language={language}
             />
           )}
 

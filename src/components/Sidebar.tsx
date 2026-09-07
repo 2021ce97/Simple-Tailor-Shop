@@ -14,9 +14,10 @@ import {
   X,
   LogOut,
   UserCheck
+  , BarChart3
 } from 'lucide-react';
 
-export type MainNavTab = 'dashboard' | 'new_order' | 'customers' | 'fabrics' | 'products' | 'sales_history' | 'settings';
+export type MainNavTab = 'dashboard' | 'new_order' | 'customers' | 'fabrics' | 'products' | 'sales_history' | 'reports' | 'settings';
 export type SettingsSubTab = 'design' | 'measurements' | 'shop' | 'backup';
 
 interface SidebarProps {
@@ -119,7 +120,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
             <div className="overflow-hidden">
               <h1 className="font-extrabold text-sm text-white tracking-tight leading-tight truncate">
-                {shopTitle || 'Rayan Tailor'}
+                {shopTitle || 'Mujeeb Afghan Tailor Shop'}
               </h1>
               <p className="text-[11px] text-[#D4AF37] font-semibold tracking-wide truncate">
                 {t.appSubtitle}
@@ -276,6 +277,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {salesCount}
               </span>
             )}
+          </button>
+
+          <button
+            onClick={() => handleNavClick('reports')}
+            id="sidebar-reports-link"
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              isTabActive('reports')
+                ? 'bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 font-black'
+                : 'text-stone-300 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <BarChart3 className={`w-4 h-4 ${isTabActive('reports') ? 'text-[#D4AF37]' : 'text-stone-400'}`} />
+              <span>{language === 'fa' ? 'گزارش‌ها' : language === 'ps' ? 'راپورونه' : 'Reports'}</span>
+            </div>
           </button>
 
           {/* 7. Settings */}

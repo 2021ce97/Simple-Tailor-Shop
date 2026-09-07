@@ -31,6 +31,40 @@ apiRouter.get('/health', async (req: Request, res: Response) => {
   });
 });
 
+// Public tracking endpoint. It intentionally exposes no customer contact,
+// measurements, payment data, internal notes, or shop inventory.
+apiRouter.get('/public/orders/:orderNumber', async (req: Request, res: Response) => {
+  const orderNumber = String(req.params.orderNumber || '').trim();
+  if (!orderNumber) {
+    return res.status(400).json({ error: 'Cloth ID is required' });
+  }
+
+  const result = await safeQuery(`
+    SELECT order_number, garment_type, quantity, status, order_date, delivery_date,
+           completed_date, delivered_date
+    FROM orders
+    WHERE order_number = $1
+    LIMIT 1
+  `, [orderNumber]);
+
+  const databaseOrder = result?.rows?.[0];
+  const order = databaseOrder || inMemoryOrders.find(item => item.orderNumber === orderNumber);
+  if (!order) {
+    return res.status(404).json({ error: 'No cloth order was found for this ID' });
+  }
+
+  return res.json({
+    orderNumber: order.order_number || order.orderNumber,
+    garmentType: order.garment_type || order.garmentType,
+    quantity: order.quantity,
+    status: order.status,
+    orderDate: order.order_date || order.orderDate,
+    deliveryDate: order.delivery_date || order.deliveryDate,
+    completedDate: order.completed_date || order.completedDate || null,
+    deliveredDate: order.delivered_date || order.deliveredDate || null,
+  });
+});
+
 // --- FABRICS ---
 apiRouter.get('/fabrics', async (req: Request, res: Response) => {
   const result = await safeQuery('SELECT * FROM fabrics ORDER BY created_at DESC');
