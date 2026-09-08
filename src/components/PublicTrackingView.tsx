@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, CheckCircle2, Clock3, Scissors, Search, Shirt, XCircle } from 'lucide-react';
+import { CheckCircle2, Clock3, Scissors, Search, Shirt, XCircle } from 'lucide-react';
 import { Language } from '../types';
 
 type PublicOrder = {
@@ -57,10 +57,7 @@ export const PublicTrackingView: React.FC = () => {
   return (
     <div dir={isRtl ? 'rtl' : 'ltr'} className="min-h-screen bg-[#f4f1ea] text-[#1c2421] px-4 py-6 sm:py-10">
       <main className="mx-auto max-w-2xl">
-        <div className="flex items-center justify-between gap-4">
-          <a href="/login" className="inline-flex items-center gap-2 text-sm font-semibold text-stone-600 hover:text-[#1c2421]">
-            <ArrowLeft className="h-4 w-4" /> {copy.staff}
-          </a>
+        <div className="flex items-center justify-end gap-4">
           <div className="flex items-center gap-1 rounded-xl border border-stone-200 bg-white p-1 text-xs font-bold">
             {(['en', 'fa', 'ps'] as Language[]).map(option => <button key={option} type="button" onClick={() => setLanguage(option)} className={`rounded-lg px-2.5 py-1.5 ${language === option ? 'bg-[#173b3b] text-white' : 'text-stone-500 hover:bg-stone-100'}`}>{option === 'en' ? 'English' : option === 'fa' ? 'دری' : 'پښتو'}</button>)}
           </div>
@@ -119,6 +116,7 @@ export const PublicTrackingView: React.FC = () => {
 
         <footer className="py-6 text-center text-xs text-stone-500">Char Rahi Buth Khak · چهار راهی بتخاک، کابل افغانستان · 0749592404<br />Developed by Rayan Tech Solutions · rayan-tech-solution.tech</footer>
       </main>
+      <a href="/login" className="fixed bottom-4 left-4 z-10 rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm font-bold text-stone-700 shadow-lg shadow-stone-900/10 transition hover:border-[#173b3b] hover:bg-[#173b3b] hover:text-white">{copy.staff}</a>
     </div>
   );
 };
