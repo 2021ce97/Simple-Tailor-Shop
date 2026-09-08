@@ -19,8 +19,9 @@ export function getDbPool(): pg.Pool | null {
         ssl: {
           rejectUnauthorized: false
         },
-        connectionTimeoutMillis: 3000,
+        connectionTimeoutMillis: 15000,
         idleTimeoutMillis: 10000,
+        keepAlive: true,
       });
     } else if (process.env.DB_PASSWORD && process.env.DB_HOST) {
       pool = new Pool({
@@ -32,8 +33,9 @@ export function getDbPool(): pg.Pool | null {
         ssl: {
           rejectUnauthorized: false
         },
-        connectionTimeoutMillis: 3000,
+        connectionTimeoutMillis: 15000,
         idleTimeoutMillis: 10000,
+        keepAlive: true,
       });
     } else {
       // No explicit credentials configured - skip database pool to avoid unneeded connection errors
