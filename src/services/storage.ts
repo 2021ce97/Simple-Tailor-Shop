@@ -72,6 +72,58 @@ export const INITIAL_DEMO_PRODUCTS: Product[] = [
     description: 'رایحه ماندگار و اصیل عربی مناسب فصل‌های مختلف',
     createdAt: '2026-08-22T09:30:00Z',
     updatedAt: '2026-08-22T09:30:00Z',
+  },
+  {
+    id: 'prod_4',
+    name: 'کفش اسپرت سفید (Urban White Sneakers)',
+    category: 'Shoes',
+    brand: 'Rayan Signature',
+    vendor: 'Kabul Wholesale Supply',
+    purchasePrice: 950,
+    stockQuantity: 11,
+    lowStockThreshold: 3,
+    description: 'کفش سبک و راحت روزمره با طراحی سفید مینیمال',
+    createdAt: '2026-08-23T10:15:00Z',
+    updatedAt: '2026-08-23T10:15:00Z',
+  },
+  {
+    id: 'prod_5',
+    name: 'کفش رسمی قهوه‌ای (Classic Brown Dress Shoes)',
+    category: 'Shoes',
+    brand: 'Rayan Signature',
+    vendor: 'Kabul Wholesale Supply',
+    purchasePrice: 1450,
+    stockQuantity: 6,
+    lowStockThreshold: 2,
+    description: 'چرم مصنوعی براق مناسب محافل رسمی و لباس‌های مجلسی',
+    createdAt: '2026-08-24T09:00:00Z',
+    updatedAt: '2026-08-24T09:00:00Z',
+  },
+  {
+    id: 'prod_6',
+    name: 'عطر مشک و عنبر (Musk Amber Perfume 100ml)',
+    category: 'Perfume',
+    brand: 'Al-Rehab Oud',
+    vendor: 'Arab Mobiles Distributor',
+    purchasePrice: 780,
+    stockQuantity: 16,
+    lowStockThreshold: 4,
+    description: 'رایحه گرم و ماندگار برای استفاده روزانه و مهمانی',
+    createdAt: '2026-08-24T11:30:00Z',
+    updatedAt: '2026-08-24T11:30:00Z',
+  },
+  {
+    id: 'prod_7',
+    name: 'کلاه قره‌قل سیاه (Black Karakul Cap)',
+    category: 'Caps / Karakul',
+    brand: 'Rayan Signature',
+    vendor: 'China Shop',
+    purchasePrice: 620,
+    stockQuantity: 9,
+    lowStockThreshold: 2,
+    description: 'کلاه سنتی شیک مناسب لباس افغانی و محافل رسمی',
+    createdAt: '2026-08-25T08:45:00Z',
+    updatedAt: '2026-08-25T08:45:00Z',
   }
 ];
 
@@ -626,8 +678,8 @@ export const storageService = {
 
   // Products & Retail Inventory
   getProducts(): Product[] {
-    const list = getStoredItem<Product[]>(STORAGE_KEYS.PRODUCTS, []);
-    return Array.isArray(list) ? list : [];
+    const list = getStoredItem<Product[]>(STORAGE_KEYS.PRODUCTS, INITIAL_DEMO_PRODUCTS);
+    return Array.isArray(list) ? list : INITIAL_DEMO_PRODUCTS;
   },
 
   getProductById(id: string): Product | undefined {
