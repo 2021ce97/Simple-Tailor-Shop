@@ -14,8 +14,12 @@ export function getDbPool(): pg.Pool | null {
 
   try {
     if (databaseUrl) {
+      const parsedDatabaseUrl = new URL(databaseUrl);
+      if (parsedDatabaseUrl.hostname.endsWith('.pooler.supabase.com') && parsedDatabaseUrl.port === '5432') {
+        parsedDatabaseUrl.port = '6543';
+      }
       pool = new Pool({
-        connectionString: databaseUrl,
+        connectionString: parsedDatabaseUrl.toString(),
         ssl: {
           rejectUnauthorized: false
         },
