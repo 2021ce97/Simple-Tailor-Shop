@@ -10,6 +10,9 @@ import {
   ProductSale 
 } from '../types';
 
+const DEFAULT_OWNER_PHONE = '0772559881';
+const LEGACY_OWNER_PHONE = '0749592404';
+
 const STORAGE_KEYS = {
   ORDERS: 'tailor_orders_v1',
   CUSTOMERS: 'tailor_customers_v1',
@@ -72,6 +75,41 @@ export const INITIAL_DEMO_PRODUCTS: Product[] = [
   }
 ];
 
+export const INITIAL_DEMO_PRODUCT_SALES: ProductSale[] = [
+  {
+    id: 'sale_demo_1',
+    productId: 'prod_1',
+    productName: 'کفش چرم دست‌دوز اعلا (Handmade Leather Peshawari Shoes)',
+    category: 'Shoes',
+    quantity: 2,
+    purchasePrice: 1200,
+    sellingPrice: 1750,
+    totalAmount: 3500,
+    profit: 1100,
+    customerName: 'Ahmad Khan',
+    customerPhone: '0771002003',
+    saleDate: '2026-09-05T10:30:00Z',
+    paymentMethod: 'cash',
+    notes: 'Demo sale',
+  },
+  {
+    id: 'sale_demo_2',
+    productId: 'prod_2',
+    productName: 'ساعت مچی مجلسی طلایی (Classic Gold Quartz Watch)',
+    category: 'Watches',
+    quantity: 1,
+    purchasePrice: 850,
+    sellingPrice: 1400,
+    totalAmount: 1400,
+    profit: 550,
+    customerName: 'Farid Safi',
+    customerPhone: '0772557002',
+    saleDate: '2026-09-06T14:15:00Z',
+    paymentMethod: 'cash',
+    notes: 'Demo sale',
+  },
+];
+
 export const DEFAULT_SHOP_SETTINGS: ShopSettings = {
   shopNameEn: 'Mujeeb Afghan Tailor Shop',
   shopNameFa: 'خیاطی افغان مجیب',
@@ -79,7 +117,7 @@ export const DEFAULT_SHOP_SETTINGS: ShopSettings = {
   taglineEn: 'Finest bespoke Afghan tailoring & traditional fashion',
   taglineFa: 'بهترین دوخت لباس‌های سنتی، مجلسی و مدرن',
   taglinePs: 'د ټولو دودیزو، مجلسی او عصري جامو باکیفیته ګنډل',
-  phone1: '0749592404',
+  phone1: '0772559881',
   phone2: '0780000000',
   whatsapp: '0782207308',
   addressEn: 'Char Rahi Buth Khak',
@@ -92,6 +130,7 @@ export const DEFAULT_SHOP_SETTINGS: ShopSettings = {
   receiptFooterEn: 'Please bring this receipt for collection. Rayan Tailors guarantees perfection in every stitch!',
   receiptFooterFa: 'لطفاً هنگام تحویل گرفتن لباس، این بل را با خود داشته باشید. تضمین کیفیت خیاطی رایان!',
   receiptFooterPs: 'مهرباني وکړئ د کالیو اخیستلو پر مهال دا بِل له ځان سره ولرئ. د رایان خیاطۍ د لوړ کیفیت تضمین!',
+  logoUrl: '/mujeeb-afghan-logo.svg',
   logoType: 'emblem',
 };
 
@@ -717,7 +756,7 @@ export const storageService = {
 
   // Product Sales
   getProductSales(): ProductSale[] {
-    const list = getStoredItem<ProductSale[]>(STORAGE_KEYS.PRODUCT_SALES, []);
+    const list = getStoredItem<ProductSale[]>(STORAGE_KEYS.PRODUCT_SALES, INITIAL_DEMO_PRODUCT_SALES);
     return Array.isArray(list) ? list : [];
   },
 
@@ -964,7 +1003,12 @@ export const storageService = {
 
   // Shop Settings
   getShopSettings(): ShopSettings {
-    const settings = getStoredItem<ShopSettings>(STORAGE_KEYS.SHOP_SETTINGS, DEFAULT_SHOP_SETTINGS);
+    const stored = getStoredItem<ShopSettings | null>(STORAGE_KEYS.SHOP_SETTINGS, null);
+    if (!stored) return DEFAULT_SHOP_SETTINGS;
+
+    const settings = { ...DEFAULT_SHOP_SETTINGS, ...stored };
+    if (settings.phone1 === LEGACY_OWNER_PHONE) settings.phone1 = DEFAULT_OWNER_PHONE;
+    if (!settings.logoUrl) settings.logoUrl = DEFAULT_SHOP_SETTINGS.logoUrl;
     return settings;
   },
 
@@ -1048,7 +1092,7 @@ export const storageService = {
     setStoredItem(STORAGE_KEYS.PRODUCT_CATEGORIES, DEFAULT_PRODUCT_CATEGORIES);
     setStoredItem(STORAGE_KEYS.PRODUCT_VENDORS, DEFAULT_PRODUCT_VENDORS);
     setStoredItem(STORAGE_KEYS.PRODUCT_BRANDS, DEFAULT_PRODUCT_BRANDS);
-    setStoredItem(STORAGE_KEYS.PRODUCT_SALES, []);
+    setStoredItem(STORAGE_KEYS.PRODUCT_SALES, INITIAL_DEMO_PRODUCT_SALES);
     setStoredItem(STORAGE_KEYS.DESIGN_CATEGORIES, DEFAULT_DESIGN_CATEGORIES);
     setStoredItem(STORAGE_KEYS.MEASUREMENT_FIELDS, DEFAULT_MEASUREMENT_FIELDS);
     setStoredItem(STORAGE_KEYS.SHOP_SETTINGS, DEFAULT_SHOP_SETTINGS);
@@ -1102,12 +1146,12 @@ export const storageService = {
 
       if (productsRes && productsRes.ok) {
         const data = await productsRes.json();
-        if (Array.isArray(data)) setStoredItem(STORAGE_KEYS.PRODUCTS, data);
+        if (Array.isArray(data) && data.length > 0) setStoredItem(STORAGE_KEYS.PRODUCTS, data);
       }
 
       if (productSalesRes && productSalesRes.ok) {
         const data = await productSalesRes.json();
-        if (Array.isArray(data)) setStoredItem(STORAGE_KEYS.PRODUCT_SALES, data);
+        if (Array.isArray(data) && data.length > 0) setStoredItem(STORAGE_KEYS.PRODUCT_SALES, data);
       }
 
       if (measurementFieldsRes && measurementFieldsRes.ok) {

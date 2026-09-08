@@ -80,6 +80,7 @@ function ShopApp() {
   const [prefilledFabric, setPrefilledFabric] = useState<Fabric | null>(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [activeReceiptOrder, setActiveReceiptOrder] = useState<Order | null>(null);
+  const [pendingSaleProduct, setPendingSaleProduct] = useState<Product | null>(null);
 
   // Sync RTL and Document Language
   useEffect(() => {
@@ -138,9 +139,41 @@ function ShopApp() {
   };
 
   const handleRecordProductSale = async (saleData: Omit<ProductSale, 'id' | 'createdAt'>) => {
-    const saved = await storageService.saveProductSale(saleData);
+    let saleToSave = saleData;
+    if (saleData.customerName && saleData.customerPhone) {
+      const existingCustomer = customers.find(customer =>
+        (saleData.customerId && customer.id === saleData.customerId) ||
+        customer.phone === saleData.customerPhone
+      );
+      const customer: Customer = {
+        ...(existingCustomer || {}),
+        id: existingCustomer?.id || saleData.customerId || `cust_product_${Date.now()}`,
+        name: saleData.customerName,
+        phone: saleData.customerPhone,
+        whatsapp: existingCustomer?.whatsapp || saleData.customerPhone,
+        address: existingCustomer?.address || '',
+        notes: existingCustomer?.notes || 'Retail product customer',
+        standardMeasurements: existingCustomer?.standardMeasurements || {},
+        preferredGarmentType: existingCustomer?.preferredGarmentType,
+        createdAt: existingCustomer?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        totalOrdersCount: existingCustomer?.totalOrdersCount || 0,
+        totalSpent: existingCustomer?.totalSpent || 0,
+        totalBalance: existingCustomer?.totalBalance || 0,
+      };
+      storageService.saveCustomer(customer);
+      saleToSave = { ...saleData, customerId: customer.id };
+    }
+
+    const saved = await storageService.saveProductSale(saleToSave);
+    setPendingSaleProduct(null);
     reloadData();
     return saved;
+  };
+
+  const handleMakeProductSale = (product: Product) => {
+    setPendingSaleProduct(product);
+    setCurrentTab('sales_history');
   };
 
   const handleAddProductCategory = async (catName: string) => {
@@ -353,7 +386,7 @@ function ShopApp() {
               onAddProduct={handleAddProduct}
               onUpdateProduct={handleUpdateProduct}
               onDeleteProduct={handleDeleteProduct}
-              onRecordSale={handleRecordProductSale}
+              onMakeSale={handleMakeProductSale}
               onAddCategory={handleAddProductCategory}
             />
           )}
@@ -369,6 +402,7 @@ function ShopApp() {
               language={language}
               onRecordSale={handleRecordProductSale}
               onNavigateToProducts={() => setCurrentTab('products')}
+              initialProduct={pendingSaleProduct}
             />
           )}
 

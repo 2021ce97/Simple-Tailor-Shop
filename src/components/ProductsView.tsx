@@ -35,7 +35,7 @@ interface ProductsViewProps {
   onAddProduct: (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Product>;
   onUpdateProduct: (product: Product) => Promise<void>;
   onDeleteProduct: (productId: string) => Promise<void>;
-  onRecordSale: (sale: Omit<ProductSale, 'id' | 'createdAt'>) => Promise<ProductSale>;
+  onMakeSale: (product: Product) => void;
   onAddCategory: (categoryName: string) => Promise<ProductCategory>;
 }
 
@@ -48,7 +48,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
   onAddProduct,
   onUpdateProduct,
   onDeleteProduct,
-  onRecordSale,
+  onMakeSale,
   onAddCategory
 }) => {
   const currencySymbol = propCurrencySymbol || (language === 'ps' ? 'افغانۍ' : language === 'fa' ? 'افغانی' : 'AFN');
@@ -76,8 +76,6 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [isSellModalOpen, setIsSellModalOpen] = useState(false);
-  const [sellingProduct, setSellingProduct] = useState<Product | null>(null);
 
   // Add/Edit Form State (NOTE: strictly NO selling price field as requested)
   const [formData, setFormData] = useState({
@@ -89,14 +87,6 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
     stockQuantity: 1,
     description: '',
     imageUrl: ''
-  });
-
-  // Sell Form State (selling price is decided here at time of sale!)
-  const [sellData, setSellData] = useState({
-    quantity: 1,
-    sellingPrice: 0,
-    customerName: '',
-    notes: ''
   });
 
   // New category creation input
@@ -213,47 +203,6 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
 
     setIsAddModalOpen(false);
     setEditingProduct(null);
-  };
-
-  // Open Sell Modal
-  const handleOpenSellModal = (prod: Product) => {
-    setSellingProduct(prod);
-    setSellData({
-      quantity: 1,
-      sellingPrice: Math.round(prod.purchasePrice * 1.3), // gentle sensible starting suggestion for convenience
-      customerName: '',
-      notes: ''
-    });
-    setIsSellModalOpen(true);
-  };
-
-  // Confirm Sale
-  const handleConfirmSale = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!sellingProduct) return;
-
-    const qty = Number(sellData.quantity) || 1;
-    const sellPrice = Number(sellData.sellingPrice) || 0;
-    const buyPrice = Number(sellingProduct.purchasePrice) || 0;
-    const totalAmt = qty * sellPrice;
-    const profit = (sellPrice - buyPrice) * qty;
-
-    await onRecordSale({
-      productId: sellingProduct.id,
-      productName: sellingProduct.name,
-      category: sellingProduct.category,
-      purchasePrice: buyPrice,
-      sellingPrice: sellPrice,
-      quantity: qty,
-      totalAmount: totalAmt,
-      profit: profit,
-      saleDate: new Date().toISOString(),
-      customerName: sellData.customerName.trim() || undefined,
-      notes: sellData.notes.trim() || undefined
-    });
-
-    setIsSellModalOpen(false);
-    setSellingProduct(null);
   };
 
   // Quick category icon helper
@@ -687,7 +636,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                     <div className="w-full lg:col-span-3 flex items-center justify-between lg:justify-end gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-stone-100">
                       {/* Sell Button - Decides selling price now! */}
                       <button
-                        onClick={() => handleOpenSellModal(product)}
+                        onClick={() => onMakeSale(product)}
                         disabled={stock <= 0}
                         className={`py-1.5 px-3 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 cursor-pointer shadow-2xs ${
                           stock <= 0
@@ -964,140 +913,6 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
         </div>
       )}
 
-      {/* MODAL 2: Sell Product (Deciding Selling Price Here!) */}
-      {isSellModalOpen && sellingProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-stone-200 overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100 bg-emerald-50">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
-                  <ShoppingCart className="w-4 h-4" />
-                </div>
-                <div>
-                  <h2 className="font-extrabold text-base text-[#1A1A1A]">
-                    {t.sellProduct}: {sellingProduct.name}
-                  </h2>
-                  <span className="text-[11px] text-emerald-800 font-bold font-mono">
-                    {sellingProduct.stockQuantity} {t.units} {t.inStock}
-                  </span>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsSellModalOpen(false)}
-                className="p-1.5 text-stone-600 hover:text-stone-800 rounded-lg"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleConfirmSale} className="p-6 space-y-4">
-              {/* Cost Banner for tailor reference */}
-              <div className="p-3 bg-stone-50 border border-stone-200 rounded-xl flex items-center justify-between text-xs">
-                <div>
-                  <span className="text-stone-700 block">{t.purchasePrice} (قیمت خرید):</span>
-                  <span className="font-mono font-bold text-stone-900">
-                    {sellingProduct.purchasePrice.toLocaleString()} {currencySymbol}
-                  </span>
-                </div>
-                <div className="text-end">
-                  <span className="text-stone-700 block">{t.category}:</span>
-                  <span className="font-bold text-[#1A1A1A]">{sellingProduct.category}</span>
-                </div>
-              </div>
-
-              {/* Quantity */}
-              <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
-                  {t.quantityToSell} *
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max={sellingProduct.stockQuantity}
-                  required
-                  value={sellData.quantity}
-                  onChange={e => setSellData({ ...sellData, quantity: parseInt(e.target.value) || 1 })}
-                  className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-[#1A1A1A] focus:bg-white focus:border-emerald-600 outline-hidden"
-                />
-              </div>
-
-              {/* THE SELLING PRICE FIELD (Set here!) */}
-              <div>
-                <label className="block text-xs font-extrabold text-emerald-800 mb-1">
-                  💰 {t.sellingPrice} ({currencySymbol}) *
-                </label>
-                <input
-                  type="number"
-                  required
-                  min={1}
-                  step="10"
-                  value={sellData.sellingPrice || ''}
-                  onChange={e => setSellData({ ...sellData, sellingPrice: parseFloat(e.target.value) || 0 })}
-                  placeholder="قیمت فروش دلخواه را وارد نمایید..."
-                  className="w-full px-3.5 py-2.5 bg-emerald-50/40 border-2 border-emerald-500 rounded-xl text-sm font-mono font-black text-[#1A1A1A] focus:bg-white focus:border-emerald-600 outline-hidden"
-                />
-                <span className="text-[10px] text-stone-700 mt-1 block">
-                  {language === 'fa' 
-                    ? 'قیمت فروش را برای این معامله تعیین کنید' 
-                    : 'Set the custom selling price for this sale'}
-                </span>
-              </div>
-
-              {/* Profit Calculation Preview */}
-              {sellData.sellingPrice > 0 && (
-                <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl space-y-1.5 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="text-stone-700">{t.totalAmount}:</span>
-                    <span className="font-mono font-black text-sm text-[#1A1A1A]">
-                      {((Number(sellData.quantity) || 1) * (Number(sellData.sellingPrice) || 0)).toLocaleString()} {currencySymbol}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between pt-1 border-t border-emerald-200/60">
-                    <span className="font-bold text-emerald-800">{t.profit} (مفاد خالص):</span>
-                    <span className={`font-mono font-black text-sm ${
-                      (Number(sellData.sellingPrice) - sellingProduct.purchasePrice) >= 0 ? 'text-emerald-700' : 'text-rose-600'
-                    }`}>
-                      {((Number(sellData.sellingPrice) - sellingProduct.purchasePrice) * (Number(sellData.quantity) || 1)).toLocaleString()} {currencySymbol}
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {/* Customer Name (Optional) */}
-              <div>
-                <label className="block text-xs font-bold text-stone-700 mb-1">
-                  {t.customerName} ({language === 'fa' ? 'اختیاری' : 'Optional'})
-                </label>
-                <input
-                  type="text"
-                  value={sellData.customerName}
-                  onChange={e => setSellData({ ...sellData, customerName: e.target.value })}
-                  placeholder="نام خریدار..."
-                  className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:bg-white outline-hidden"
-                />
-              </div>
-
-              {/* Modal Buttons */}
-              <div className="flex items-center justify-end gap-2.5 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsSellModalOpen(false)}
-                  className="px-4 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold cursor-pointer"
-                >
-                  {t.cancel}
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold shadow-sm transition cursor-pointer flex items-center gap-1.5"
-                >
-                  <Check className="w-4 h-4" />
-                  <span>{t.confirmSale}</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

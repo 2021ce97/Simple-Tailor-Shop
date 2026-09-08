@@ -71,6 +71,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
   const [isEditingModalOpen, setIsEditingModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [historyTab, setHistoryTab] = useState<'all' | 'orders' | 'products'>('all');
+  const [customerTypeFilter, setCustomerTypeFilter] = useState<'all' | 'tailoring' | 'products'>('all');
 
   // Currency
   const currencySymbol = language === 'ps' 
@@ -82,7 +83,13 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
   // Filtered Customers: search by Name, Phone, or Past Order Number!
   const filteredCustomers = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
-    if (!q) return customers;
+    const matchesCustomerType = (cust: Customer) => {
+      if (customerTypeFilter === 'all') return true;
+      const hasTailoringOrders = orders.some(order => order.customerId === cust.id || order.customerPhone === cust.phone);
+      const hasProductSales = productSales.some(sale => sale.customerId === cust.id || sale.customerPhone === cust.phone);
+      return customerTypeFilter === 'tailoring' ? hasTailoringOrders : hasProductSales;
+    };
+    if (!q) return customers.filter(matchesCustomerType);
 
     // Find order numbers matching search term to also find associated customer IDs
     const matchedCustomerIdsFromOrders = new Set(
@@ -96,10 +103,11 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
       const matchPhone = cust.phone.includes(q);
       const matchOrder = matchedCustomerIdsFromOrders.has(cust.id);
       const matchNotes = cust.notes && cust.notes.toLowerCase().includes(q);
+      const matchesType = matchesCustomerType(cust);
 
-      return matchName || matchPhone || matchOrder || matchNotes;
+      return (matchName || matchPhone || matchOrder || matchNotes) && matchesType;
     });
-  }, [customers, orders, searchTerm]);
+  }, [customers, orders, productSales, searchTerm, customerTypeFilter]);
 
   // Customer orders
   const activeCustomerOrders = useMemo(() => {
@@ -229,6 +237,31 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                   <X className="w-4 h-4" />
                 </button>
               )}
+            </div>
+            <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl mt-3 text-[11px] font-bold">
+              <button
+                type="button"
+                onClick={() => setCustomerTypeFilter('all')}
+                className={`flex-1 px-2.5 py-1.5 rounded-lg cursor-pointer ${customerTypeFilter === 'all' ? 'bg-white text-[#1A1A1A] shadow-xs' : 'text-stone-600'}`}
+              >
+                {language === 'fa' ? 'همه' : 'All'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setCustomerTypeFilter('tailoring')}
+                className={`flex-1 px-2.5 py-1.5 rounded-lg cursor-pointer flex items-center justify-center gap-1 ${customerTypeFilter === 'tailoring' ? 'bg-white text-[#1A1A1A] shadow-xs' : 'text-stone-600'}`}
+              >
+                <Scissors className="w-3 h-3 text-[#D4AF37]" />
+                <span>{language === 'fa' ? 'خیاطی' : 'Tailoring'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setCustomerTypeFilter('products')}
+                className={`flex-1 px-2.5 py-1.5 rounded-lg cursor-pointer flex items-center justify-center gap-1 ${customerTypeFilter === 'products' ? 'bg-white text-[#1A1A1A] shadow-xs' : 'text-stone-600'}`}
+              >
+                <ShoppingBag className="w-3 h-3 text-emerald-600" />
+                <span>{language === 'fa' ? 'محصولات' : 'Products'}</span>
+              </button>
             </div>
           </div>
 

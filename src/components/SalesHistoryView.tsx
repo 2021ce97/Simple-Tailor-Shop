@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   Product, 
   ProductSale, 
@@ -43,6 +43,7 @@ interface SalesHistoryViewProps {
   language: Language;
   onRecordSale: (sale: Omit<ProductSale, 'id' | 'createdAt'>) => Promise<ProductSale>;
   onNavigateToProducts?: () => void;
+  initialProduct?: Product | null;
 }
 
 export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
@@ -55,6 +56,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
   language,
   onRecordSale,
   onNavigateToProducts,
+  initialProduct,
 }) => {
   const t = translations[language];
 
@@ -206,6 +208,10 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
     setIsNewSaleModalOpen(true);
   };
 
+  useEffect(() => {
+    if (initialProduct) handleOpenNewSaleModal(initialProduct);
+  }, [initialProduct]);
+
   // When product changes in modal
   const handleSelectProduct = (prodId: string) => {
     setSelectedProductId(prodId);
@@ -264,6 +270,13 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
         finalCustName = custObj.name;
         finalCustPhone = custObj.phone;
       }
+    }
+
+    if (!finalCustName || !finalCustPhone) {
+      setSaleError(language === 'fa'
+        ? 'لطفاً نام و شماره تماس مشتری را وارد کنید'
+        : 'Customer name and phone number are required');
+      return;
     }
 
     try {
@@ -821,8 +834,8 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
 
               {/* Customer Selector / Creator */}
               <div className="space-y-2 pt-1 border-t border-stone-100">
-                <label className="block text-xs font-bold text-stone-700">
-                  {t.customer || 'Customer'} ({language === 'fa' ? 'اختیاری' : 'Optional'})
+                  <label className="block text-xs font-bold text-stone-700">
+                  {t.customer || 'Customer'} *
                 </label>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -850,7 +863,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                     value={customCustomerName}
                     disabled={!!selectedCustomerId}
                     onChange={e => setCustomCustomerName(e.target.value)}
-                    placeholder={language === 'fa' ? 'یا نام مشتری جدید...' : 'Or enter custom name...'}
+                    placeholder={language === 'fa' ? 'یا نام مشتری جدید...' : 'Or enter new customer name...'}
                     className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:bg-white outline-hidden disabled:opacity-50"
                   />
                 </div>
@@ -860,7 +873,8 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                     type="text"
                     value={customCustomerPhone}
                     onChange={e => setCustomCustomerPhone(e.target.value)}
-                    placeholder={language === 'fa' ? 'شماره تماس مشتری (اختیاری)...' : 'Customer phone (optional)...'}
+                    required
+                    placeholder={language === 'fa' ? 'شماره تماس مشتری...' : 'Customer phone...'}
                     className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:bg-white outline-hidden"
                   />
                 )}

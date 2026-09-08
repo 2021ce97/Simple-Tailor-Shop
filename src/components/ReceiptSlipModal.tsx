@@ -67,6 +67,7 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
     : language === 'fa'
     ? shopSettings.currencyFa
     : shopSettings.currencyEn;
+  const logoUrl = shopSettings.logoUrl || '/mujeeb-afghan-logo.svg';
 
   // Print Handler
   const handlePrint = () => {
@@ -243,11 +244,12 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
           >
             {/* Top Header with Seal and Contacts */}
             <div className="text-center pb-3 border-b-2 border-stone-900">
+              <img
+                src={logoUrl}
+                alt="Mujeeb Afghan Fashion"
+                className="mx-auto mb-2 h-20 w-20 rounded-lg object-cover"
+              />
               <div className="flex items-center justify-center gap-2 mb-1">
-                {/* Traditional Tailor Emblem */}
-                <div className="w-10 h-10 rounded-full border-2 border-stone-800 flex items-center justify-center p-1 bg-stone-50">
-                  <Scissors className="w-6 h-6 text-stone-800 transform -rotate-45" />
-                </div>
                 <div>
                   <h1 className="text-lg font-black tracking-tight text-stone-950 font-serif leading-tight">
                     {shopSettings.shopNamePs || shopSettings.shopNameFa || 'مجیب افغان خیاطي'}

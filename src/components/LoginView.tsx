@@ -79,7 +79,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
             <span>{language === 'fa' ? 'بازگشت' : language === 'ps' ? 'بېرته' : 'Back'}</span>
           </a>
           <div className="w-10 h-10 rounded-xl bg-[#D4AF37] flex items-center justify-center text-[#1A1A1A] font-black shadow-lg shadow-[#D4AF37]/20">
-            <Scissors className="w-5 h-5 transform -rotate-45" />
+            <img src={shopSettings.logoUrl || '/mujeeb-afghan-logo.svg'} alt="Mujeeb Afghan Fashion" className="h-full w-full rounded-xl object-cover" />
           </div>
           <div>
             <span className="font-extrabold text-sm sm:text-base text-white tracking-wide block">
@@ -139,8 +139,8 @@ export const LoginView: React.FC<LoginViewProps> = ({
           
           {/* Card Top Brand Badge */}
           <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-linear-to-b from-[#D4AF37] to-[#B39025] text-[#1A1A1A] mb-4 shadow-xl shadow-[#D4AF37]/25 ring-4 ring-[#D4AF37]/10">
-              <Scissors className="w-8 h-8 transform -rotate-45" />
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-[#D4AF37] mb-4 shadow-xl shadow-[#D4AF37]/25 ring-4 ring-[#D4AF37]/10 overflow-hidden">
+              <img src={shopSettings.logoUrl || '/mujeeb-afghan-logo.svg'} alt="Mujeeb Afghan Fashion" className="h-full w-full object-cover" />
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
               {t.loginTitle}

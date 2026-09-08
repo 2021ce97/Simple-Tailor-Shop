@@ -180,5 +180,6 @@ export interface ShopSettings {
   receiptFooterEn?: string;
   receiptFooterFa?: string;
   receiptFooterPs?: string;
+  logoUrl?: string;
   logoType?: 'emblem' | 'scissors' | 'sewing' | 'custom';
 }
