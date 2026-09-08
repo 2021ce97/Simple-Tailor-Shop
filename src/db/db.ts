@@ -18,6 +18,8 @@ export function getDbPool(): pg.Pool | null {
       if (parsedDatabaseUrl.hostname.endsWith('.pooler.supabase.com') && parsedDatabaseUrl.port === '5432') {
         parsedDatabaseUrl.port = '6543';
       }
+      parsedDatabaseUrl.searchParams.delete('sslmode');
+      parsedDatabaseUrl.searchParams.delete('sslrootcert');
       pool = new Pool({
         connectionString: parsedDatabaseUrl.toString(),
         ssl: {
