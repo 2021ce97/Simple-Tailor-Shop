@@ -1,6 +1,6 @@
 import express from 'express';
-import { apiRouter } from '../src/server/api';
-import { initDatabase } from '../src/db/db';
+import { apiRouter } from '../src/server/api.js';
+import { initDatabase } from '../src/db/db.js';
 
 const app = express();
 app.use(express.json());

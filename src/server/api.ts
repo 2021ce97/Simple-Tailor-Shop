@@ -1,10 +1,10 @@
 import express, { Router, Request, Response } from 'express';
-import { safeQuery, isDatabaseConnected } from '../db/db';
+import { safeQuery, isDatabaseConnected } from '../db/db.js';
 import { 
   DEFAULT_MEASUREMENT_FIELDS, 
   DEFAULT_DESIGN_CATEGORIES, 
   DEFAULT_SHOP_SETTINGS 
-} from '../services/storage';
+} from '../services/storage.js';
 
 export const apiRouter = Router();
 
