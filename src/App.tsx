@@ -27,7 +27,7 @@ import { PublicTrackingView } from './components/PublicTrackingView';
 import { ReportsView } from './components/ReportsView';
 
 export default function App() {
-  if (window.location.pathname === '/' || window.location.pathname === '/track' || window.location.pathname === '/customer-tracking') {
+  if (window.location.pathname === '/' || window.location.pathname === '/track' || window.location.pathname === '/customer-tracking' || window.location.pathname === '/customer-search') {
     return <PublicTrackingView />;
   }
 

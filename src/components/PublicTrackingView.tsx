@@ -48,9 +48,9 @@ export const PublicTrackingView: React.FC = () => {
   };
 
   const copy = {
-    en: { staff: 'Staff login', title: 'Check your cloth progress.', description: 'Enter your Cloth ID or contact number to see the latest production status.', label: 'Cloth ID or contact number', placeholder: 'e.g. 16308 or 0749592404', button: 'Check status', checking: 'Checking...', clothId: 'Cloth ID', garment: 'Garment', quantity: 'Quantity', collection: 'Expected collection', notFound: 'No cloth order was found for this ID or contact.' },
-    fa: { staff: 'ورود کارمندان', title: 'وضعیت لباس خود را ببینید.', description: 'شماره لباس یا شماره تماس خود را برای دیدن آخرین وضعیت وارد کنید.', label: 'شماره لباس یا تماس', placeholder: 'مثلاً 16308 یا 0749592404', button: 'بررسی وضعیت', checking: 'در حال بررسی...', clothId: 'شماره لباس', garment: 'نوع لباس', quantity: 'تعداد', collection: 'تاریخ تسلیمی', notFound: 'برای این شماره لباس یا تماس سفارشی یافت نشد.' },
-    ps: { staff: 'د کارکوونکو ننوتل', title: 'د خپلو جامو حالت وګورئ.', description: 'د وروستي حالت لپاره د جامو شمېره یا د اړیکې شمېره دننه کړئ.', label: 'د جامو یا اړیکې شمېره', placeholder: 'لکه 16308 یا 0749592404', button: 'حالت وګورئ', checking: 'کتل کېږي...', clothId: 'د جامو شمېره', garment: 'د جامو ډول', quantity: 'تعداد', collection: 'د اخیستلو نېټه', notFound: 'د دې جامو یا اړیکې شمېرې لپاره فرمایش ونه موندل شو.' },
+    en: { staff: 'Staff login', title: 'Find your order.', description: 'Search your orders by Order ID or contact number to see the latest production status.', label: 'Order ID or contact number', placeholder: 'e.g. 16308 or 0749592404', button: 'Find order', checking: 'Searching...', clothId: 'Order ID', garment: 'Garment', quantity: 'Quantity', collection: 'Expected collection', notFound: 'No order was found for this Order ID or contact.' },
+    fa: { staff: 'ورود کارمندان', title: 'سفارش خود را پیدا کنید.', description: 'برای دیدن آخرین وضعیت، سفارش‌های خود را با شماره سفارش یا شماره تماس جستجو کنید.', label: 'شماره سفارش یا تماس', placeholder: 'مثلاً 16308 یا 0749592404', button: 'پیدا کردن سفارش', checking: 'در حال جستجو...', clothId: 'شماره سفارش', garment: 'نوع لباس', quantity: 'تعداد', collection: 'تاریخ تسلیمی', notFound: 'برای این شماره سفارش یا تماس سفارشی یافت نشد.' },
+    ps: { staff: 'د کارکوونکو ننوتل', title: 'خپل فرمایش پیدا کړئ.', description: 'د وروستي حالت لپاره خپل فرمایشونه د فرمایش شمېرې یا اړیکې شمېرې له لارې ولټوئ.', label: 'د فرمایش شمېره یا اړیکه', placeholder: 'لکه 16308 یا 0749592404', button: 'فرمایش پیدا کړئ', checking: 'لټون کېږي...', clothId: 'د فرمایش شمېره', garment: 'د جامو ډول', quantity: 'تعداد', collection: 'د اخیستلو نېټه', notFound: 'د دې فرمایش یا اړیکې شمېرې لپاره فرمایش ونه موندل شو.' },
   }[language];
   const isRtl = language !== 'en';
 
@@ -78,16 +78,16 @@ export const PublicTrackingView: React.FC = () => {
 
           <div className="p-6 sm:p-10">
             <form onSubmit={handleSearch} className="space-y-3">
-              <label htmlFor="cloth-id" className="text-xs font-bold uppercase tracking-wider text-stone-500">{copy.label}</label>
+              <label htmlFor="order-lookup" className="text-xs font-bold uppercase tracking-wider text-stone-500">{copy.label}</label>
               <div className="flex flex-col gap-3 sm:flex-row">
-                <input id="cloth-id" value={lookup} onChange={event => setLookup(event.target.value)} placeholder={copy.placeholder} className="min-w-0 flex-1 rounded-xl border border-stone-300 bg-stone-50 px-4 py-3 font-mono text-base outline-none transition focus:border-[#173b3b] focus:ring-2 focus:ring-[#173b3b]/15" />
+                <input id="order-lookup" type="search" autoComplete="off" value={lookup} onChange={event => setLookup(event.target.value)} placeholder={copy.placeholder} aria-label={copy.label} className="min-w-0 flex-1 rounded-xl border border-stone-300 bg-stone-50 px-4 py-3 font-mono text-base outline-none transition focus:border-[#173b3b] focus:ring-2 focus:ring-[#173b3b]/15" />
                 <button type="submit" disabled={isLoading || !lookup.trim()} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#e4bd63] px-5 py-3 font-black text-[#173b3b] transition hover:bg-[#d6aa45] disabled:cursor-not-allowed disabled:opacity-50">
                   <Search className="h-4 w-4" /> {isLoading ? copy.checking : copy.button}
                 </button>
               </div>
             </form>
 
-            {error && <div className="mt-6 flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-700"><XCircle className="h-5 w-5 shrink-0" /> {error === 'No cloth order was found for this ID or contact' ? copy.notFound : error}</div>}
+            {error && <div className="mt-6 flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-700"><XCircle className="h-5 w-5 shrink-0" /> {error === 'No order was found for this Order ID or contact' ? copy.notFound : error}</div>}
 
             {orders.length > 0 && (
               <div className="mt-8 space-y-4 border-t border-stone-200 pt-8">

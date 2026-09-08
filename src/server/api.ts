@@ -36,7 +36,7 @@ apiRouter.get('/health', async (req: Request, res: Response) => {
 apiRouter.get('/public/orders', async (req: Request, res: Response) => {
   const lookup = String(req.query.lookup || '').trim();
   if (!lookup) {
-    return res.status(400).json({ error: 'Cloth ID or contact number is required' });
+    return res.status(400).json({ error: 'Order ID or contact number is required' });
   }
 
   const result = await safeQuery(`
@@ -58,7 +58,7 @@ apiRouter.get('/public/orders', async (req: Request, res: Response) => {
   );
   const sourceOrders = databaseOrders.length > 0 ? databaseOrders : memoryOrders;
   if (sourceOrders.length === 0) {
-    return res.status(404).json({ error: 'No cloth order was found for this ID or contact' });
+    return res.status(404).json({ error: 'No order was found for this Order ID or contact' });
   }
 
   return res.json({ orders: sourceOrders.map((order: any) => ({
