@@ -80,6 +80,36 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
     ? (shopSettings?.currencyFa || 'افغانی') 
     : (shopSettings?.currencySymbol || shopSettings?.currencyEn || 'AFN');
 
+  // Include retail-only buyers in the directory. Matching by phone/customer id
+  // lets a person who uses both services appear in both dedicated views.
+  const allCustomers = useMemo(() => {
+    const directory = new Map<string, Customer>();
+    customers.forEach(customer => directory.set(customer.id || customer.phone, customer));
+    productSales.forEach(sale => {
+      if (!sale.customerName && !sale.customerPhone) return;
+      const exists = Array.from(directory.values()).some(customer =>
+        (sale.customerId && customer.id === sale.customerId) ||
+        Boolean(sale.customerPhone && customer.phone === sale.customerPhone)
+      );
+      if (!exists) {
+        const phone = sale.customerPhone || '';
+        const id = sale.customerId || `retail_${phone || sale.id}`;
+        directory.set(id, {
+          id,
+          name: sale.customerName || (language === 'fa' ? 'مشتری فروشگاه' : language === 'ps' ? 'د هټۍ پېرودونکی' : 'Retail customer'),
+          phone,
+          whatsapp: phone,
+          address: '',
+          notes: '',
+          standardMeasurements: {},
+          createdAt: sale.saleDate || new Date().toISOString(),
+          updatedAt: sale.saleDate || new Date().toISOString(),
+        });
+      }
+    });
+    return Array.from(directory.values());
+  }, [customers, productSales, language]);
+
   // Filtered Customers: search by Name, Phone, or Past Order Number!
   const filteredCustomers = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
@@ -89,7 +119,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
       const hasProductSales = productSales.some(sale => sale.customerId === cust.id || sale.customerPhone === cust.phone);
       return customerTypeFilter === 'tailoring' ? hasTailoringOrders : hasProductSales;
     };
-    if (!q) return customers.filter(matchesCustomerType);
+    if (!q) return allCustomers.filter(matchesCustomerType);
 
     // Find order numbers matching search term to also find associated customer IDs
     const matchedCustomerIdsFromOrders = new Set(
@@ -98,7 +128,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
         .map(o => o.customerId)
     );
 
-    return customers.filter(cust => {
+    return allCustomers.filter(cust => {
       const matchName = cust.name.toLowerCase().includes(q);
       const matchPhone = cust.phone.includes(q);
       const matchOrder = matchedCustomerIdsFromOrders.has(cust.id);
@@ -107,7 +137,12 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
 
       return (matchName || matchPhone || matchOrder || matchNotes) && matchesType;
     });
-  }, [customers, orders, productSales, searchTerm, customerTypeFilter]);
+  }, [allCustomers, orders, productSales, searchTerm, customerTypeFilter]);
+
+  const customerCounts = useMemo(() => ({
+    tailoring: allCustomers.filter(customer => orders.some(order => order.customerId === customer.id || order.customerPhone === customer.phone)).length,
+    products: allCustomers.filter(customer => productSales.some(sale => sale.customerId === customer.id || sale.customerPhone === customer.phone)).length,
+  }), [allCustomers, orders, productSales]);
 
   // Customer orders
   const activeCustomerOrders = useMemo(() => {
@@ -200,7 +235,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
             </h1>
           </div>
           <p className="text-xs text-[#706E6B] mt-0.5">
-            {customers.length} {t.customersList} • {t.newCustomerAutoSaved}
+            {allCustomers.length} {t.customersList} • {t.newCustomerAutoSaved}
           </p>
         </div>
 
@@ -212,6 +247,12 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>{t.addNewCustomer}</span>
         </button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="rounded-2xl border border-stone-200 bg-white p-4"><div className="flex items-center gap-2 text-stone-500 text-xs font-bold"><Users className="w-4 h-4" /> {language === 'fa' ? 'همه مشتریان' : language === 'ps' ? 'ټول پېرودونکي' : 'All customers'}</div><p className="mt-2 text-2xl font-black text-stone-900">{allCustomers.length}</p></div>
+        <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4"><div className="flex items-center gap-2 text-amber-800 text-xs font-bold"><Scissors className="w-4 h-4" /> {language === 'fa' ? 'مشتریان خیاطی' : language === 'ps' ? 'د خیاطۍ پېرودونکي' : 'Tailoring customers'}</div><p className="mt-2 text-2xl font-black text-amber-900">{customerCounts.tailoring}</p></div>
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4"><div className="flex items-center gap-2 text-emerald-800 text-xs font-bold"><ShoppingBag className="w-4 h-4" /> {language === 'fa' ? 'مشتریان محصولات' : language === 'ps' ? 'د محصولاتو پېرودونکي' : 'Product customers'}</div><p className="mt-2 text-2xl font-black text-emerald-900">{customerCounts.products}</p></div>
       </div>
 
       {/* Main 2-Column Layout */}

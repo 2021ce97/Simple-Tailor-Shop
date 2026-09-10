@@ -159,9 +159,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </span>
           </button>
 
-          {/* Section Label */}
+          {/* Tailoring workspace */}
           <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-stone-400">
-            {t.menu}
+            {language === 'fa' ? 'بخش خیاطی' : language === 'ps' ? 'د خیاطۍ برخه' : 'Tailoring'}
           </div>
 
           {/* 2. Order Dashboard */}
@@ -233,7 +233,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
           </button>
 
-          {/* 5. Products Inventory (Shoes, Watches, Perfumes) */}
+          {/* Retail workspace */}
+          <div className="my-3 border-t border-stone-800 pt-3">
+            <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+              {language === 'fa' ? 'بخش فروش محصولات' : language === 'ps' ? 'د محصولاتو پلور' : 'Retail & Products'}
+            </div>
+          </div>
+
+          {/* Products Inventory (Shoes, Watches, Perfumes) */}
           <button
             onClick={() => handleNavClick('products')}
             id="sidebar-products-link"
@@ -293,6 +300,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span>{language === 'fa' ? 'گزارش‌ها' : language === 'ps' ? 'راپورونه' : 'Reports'}</span>
             </div>
           </button>
+
+          <div className="my-3 border-t border-stone-800 pt-3">
+            <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-stone-500">
+              {language === 'fa' ? 'مدیریت سیستم' : language === 'ps' ? 'د سیستم اداره' : 'System'}
+            </div>
+          </div>
 
           {/* 7. Settings */}
           <button

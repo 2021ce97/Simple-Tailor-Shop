@@ -228,6 +228,18 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
     setIsAddingCategory(false);
   };
 
+  const handleRestock = async (product: Product) => {
+    const label = language === 'fa' ? 'تعداد برای افزایش موجودی' : language === 'ps' ? 'د موجودۍ زیاتولو لپاره تعداد' : 'Units to add to stock';
+    const amount = Number(window.prompt(label, '5'));
+    if (Number.isFinite(amount) && amount > 0) {
+      await onUpdateProduct({
+        ...product,
+        stockQuantity: (Number(product.stockQuantity) || 0) + amount,
+        updatedAt: new Date().toISOString(),
+      });
+    }
+  };
+
   return (
     <div className="space-y-6 pb-12">
       {/* Top Header */}
@@ -647,6 +659,17 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                         <ShoppingCart className="w-3.5 h-3.5" />
                         <span>{t.sellProduct}</span>
                       </button>
+
+                      {(isLow || isOut) && (
+                        <button
+                          type="button"
+                          onClick={() => handleRestock(product)}
+                          className="py-1.5 px-3 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 cursor-pointer shadow-2xs bg-amber-500 hover:bg-amber-600 text-stone-950"
+                        >
+                          <Package className="w-3.5 h-3.5" />
+                          <span>{language === 'fa' ? 'افزایش موجودی' : language === 'ps' ? 'موجودي زیاته کړئ' : 'Restock'}</span>
+                        </button>
+                      )}
 
                       <div className="flex items-center gap-1 ms-auto lg:ms-0">
                         <button

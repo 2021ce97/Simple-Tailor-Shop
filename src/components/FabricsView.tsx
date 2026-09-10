@@ -167,6 +167,14 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
     onFabricUpdated();
   };
 
+  const handleRestock = (fabric: Fabric) => {
+    const label = language === 'fa' ? 'تعداد متر برای افزایش موجودی' : language === 'ps' ? 'د موجودۍ زیاتولو لپاره متره' : 'Meters to add to stock';
+    const amount = Number(window.prompt(label, '10'));
+    if (Number.isFinite(amount) && amount > 0) {
+      handleUpdateStock(fabric, (Number(fabric.stockMeters) || 0) + amount);
+    }
+  };
+
   // Quick preset template
   const applyPreset = (presetName: string, presetType: string, presetColor: string, defaultPrice: number) => {
     setFormName(presetName);
@@ -496,6 +504,17 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
                     >
                       <Scissors className="w-3.5 h-3.5" />
                       <span>{language === 'fa' ? 'ثبت فرمایش' : language === 'ps' ? 'نوی فرمایش' : 'New Order'}</span>
+                    </button>
+                  )}
+
+                  {(isLow || isOut) && (
+                    <button
+                      type="button"
+                      onClick={() => handleRestock(fabric)}
+                      className="py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                    >
+                      <Package className="w-3.5 h-3.5" />
+                      <span>{language === 'fa' ? 'افزایش موجودی' : language === 'ps' ? 'موجودي زیاته کړئ' : 'Restock'}</span>
                     </button>
                   )}
 
