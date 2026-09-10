@@ -119,7 +119,7 @@ export interface OrderItem {
 
 export interface Order {
   id: string;
-  orderNumber: string; // Sequential bill number, formatted as 0001, 0002, ...
+  orderNumber: string; // Sequential tracking number, formatted as MA-0001, MA-0002, ...
   customerId: string;
   customerName: string;
   customerPhone: string;
@@ -141,8 +141,6 @@ export interface Order {
   isCustomerFabric?: boolean;
   
   specialInstructions?: string;
-  cabinetSlot?: string; // Optional tag e.g. "D1", "C4"
-
   // Financials
   totalAmount: number;
   paidAmount: number;

@@ -94,7 +94,6 @@ export interface Translations {
   measurements: string;
   designAndStyle: string;
   specialNotes: string;
-  cabinetSlot: string;
   saveOrder: string;
   saveAndPrint: string;
   loadCustomerMeasurements: string;
@@ -349,7 +348,6 @@ export const translations: Record<Language, Translations> = {
     measurements: 'Measurements (Inches)',
     designAndStyle: 'Design & Style Options',
     specialNotes: 'Special Instructions / Tailoring Notes',
-    cabinetSlot: 'Cabinet / Slot Tag',
     saveOrder: 'Save Order',
     saveAndPrint: 'Save & Print Slip',
     loadCustomerMeasurements: 'Load previous measurements',
@@ -596,7 +594,6 @@ export const translations: Record<Language, Translations> = {
     measurements: 'اندازه‌گیری‌ها (انچ)',
     designAndStyle: 'طرح، مدل و استایل',
     specialNotes: 'توضیحات و فرمایشات خاص خیاطی',
-    cabinetSlot: 'کابین / الماری',
     saveOrder: 'ذخیره فرمایش',
     saveAndPrint: 'ذخیره و چاپ بل',
     loadCustomerMeasurements: 'بارگذاری اندازه‌های قبلی این مشتری',
@@ -843,7 +840,6 @@ export const translations: Record<Language, Translations> = {
     measurements: 'اندازې (انچ)',
     designAndStyle: 'ډیزاین، استایل او شیپ',
     specialNotes: 'د خیاطۍ ځانګړي یادښتونه',
-    cabinetSlot: 'المارۍ / کابین',
     saveOrder: 'فرمایش ثبت کړئ',
     saveAndPrint: 'ثبت او بِل چاپ کړئ',
     loadCustomerMeasurements: 'د دې مشتري پخوانۍ اندازې راواخلئ',

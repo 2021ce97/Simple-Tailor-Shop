@@ -44,6 +44,7 @@ apiRouter.get('/public/orders', async (req: Request, res: Response) => {
            completed_date, delivered_date
     FROM orders
     WHERE order_number = $1
+       OR regexp_replace(COALESCE(order_number, ''), '\\D', '', 'g') = regexp_replace($1, '\\D', '', 'g')
        OR regexp_replace(COALESCE(customer_phone, ''), '\\D', '', 'g') = regexp_replace($1, '\\D', '', 'g')
        OR regexp_replace(COALESCE(customer_whatsapp, ''), '\\D', '', 'g') = regexp_replace($1, '\\D', '', 'g')
     ORDER BY created_at DESC
@@ -53,6 +54,7 @@ apiRouter.get('/public/orders', async (req: Request, res: Response) => {
   const normalizedLookup = lookup.replace(/\D/g, '');
   const memoryOrders = inMemoryOrders.filter(item =>
     item.orderNumber === lookup ||
+    String(item.orderNumber || '').replace(/\D/g, '') === normalizedLookup ||
     String(item.customerPhone || '').replace(/\D/g, '') === normalizedLookup ||
     String(item.customerWhatsApp || '').replace(/\D/g, '') === normalizedLookup
   );
@@ -84,11 +86,15 @@ apiRouter.get('/public/orders/:orderNumber', async (req: Request, res: Response)
            completed_date, delivered_date
     FROM orders
     WHERE order_number = $1
+       OR regexp_replace(COALESCE(order_number, ''), '\\D', '', 'g') = regexp_replace($1, '\\D', '', 'g')
     LIMIT 1
   `, [orderNumber]);
 
   const databaseOrder = result?.rows?.[0];
-  const order = databaseOrder || inMemoryOrders.find(item => item.orderNumber === orderNumber);
+  const normalizedOrderNumber = orderNumber.replace(/\D/g, '');
+  const order = databaseOrder || inMemoryOrders.find(item =>
+    item.orderNumber === orderNumber || String(item.orderNumber || '').replace(/\D/g, '') === normalizedOrderNumber
+  );
   if (!order) {
     return res.status(404).json({ error: 'No cloth order was found for this ID' });
   }
@@ -192,7 +198,6 @@ apiRouter.get('/orders', async (req: Request, res: Response) => {
       measurements: row.measurements || {},
       designSelections: row.design_selections || {},
       specialInstructions: row.special_instructions,
-      cabinetSlot: row.cabinet_slot,
       totalAmount: parseFloat(row.total_amount) || 0,
       paidAmount: parseFloat(row.paid_amount) || 0,
       balanceAmount: parseFloat(row.balance_amount) || 0,
@@ -266,7 +271,7 @@ apiRouter.post('/orders', async (req: Request, res: Response) => {
     order.id, order.orderNumber, order.customerId, order.customerName, order.customerPhone, order.customerWhatsApp,
     order.garmentType, order.quantity, order.fabricId, order.fabricName, order.fabricColor, order.fabricMeters || 0,
     order.isCustomerFabric || false, JSON.stringify(order.measurements || {}), JSON.stringify(order.designSelections || {}),
-    order.specialInstructions, order.cabinetSlot, order.totalAmount || 0, order.paidAmount || 0, order.balanceAmount || 0,
+    order.specialInstructions, null, order.totalAmount || 0, order.paidAmount || 0, order.balanceAmount || 0,
     order.paymentStatus || 'unpaid', order.status || 'pending', order.orderDate, order.deliveryDate, order.completedDate, order.deliveredDate
   ]);
 

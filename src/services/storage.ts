@@ -448,7 +448,7 @@ const INITIAL_DEMO_CUSTOMERS: Customer[] = [
 const INITIAL_DEMO_ORDERS: Order[] = [
   {
     id: 'ord_1',
-    orderNumber: '0001',
+    orderNumber: 'MA-0001',
     customerId: 'cust_1',
     customerName: 'فرهاد',
     customerPhone: '0765445309',
@@ -482,7 +482,6 @@ const INITIAL_DEMO_ORDERS: Order[] = [
       trouserStyle: 'نارمل 22',
     },
     specialInstructions: 'کالر یی 1.75 راشی',
-    cabinetSlot: 'D1',
     items: [],
     totalAmount: 1800,
     paidAmount: 1800,
@@ -496,7 +495,7 @@ const INITIAL_DEMO_ORDERS: Order[] = [
   },
   {
     id: 'ord_2',
-    orderNumber: '0002',
+    orderNumber: 'MA-0002',
     customerId: 'cust_2',
     customerName: 'شکیل خان',
     customerPhone: '0782930005',
@@ -521,7 +520,6 @@ const INITIAL_DEMO_ORDERS: Order[] = [
       shoulderSlope: 'شانه نیمه دون کوپ',
     },
     specialInstructions: 'دوخت دقیق و نرم',
-    cabinetSlot: 'C4',
     items: [],
     totalAmount: 1600,
     paidAmount: 1600,
@@ -535,7 +533,7 @@ const INITIAL_DEMO_ORDERS: Order[] = [
   },
   {
     id: 'ord_3',
-    orderNumber: '0003',
+    orderNumber: 'MA-0003',
     customerId: 'cust_3',
     customerName: 'عطا الله',
     customerPhone: '0780372506',
@@ -565,7 +563,6 @@ const INITIAL_DEMO_ORDERS: Order[] = [
       placketButtons: 'پټه پتی',
     },
     specialInstructions: 'پیراهن تنبان + واسکت',
-    cabinetSlot: 'D1 & C4',
     items: [],
     totalAmount: 3200,
     paidAmount: 500,
@@ -1162,13 +1159,18 @@ export const storageService = {
 
   generateNextOrderNumber(): string {
     const orders = this.getOrders();
-    if (orders.length === 0) return '0001';
+    if (orders.length === 0) return 'MA-0001';
     const numbers = orders
-      .map(o => parseInt(o.orderNumber, 10))
+      .map(o => {
+        const match = String(o.orderNumber || '').match(/^MA-(\d+)$/i);
+        return match ? parseInt(match[1], 10) : NaN;
+      })
       .filter(n => !isNaN(n));
-    if (numbers.length === 0) return '0001';
+    // Legacy numeric IDs (for example 18864) are preserved for lookup but do
+    // not affect the new MA sequence.
+    if (numbers.length === 0) return 'MA-0001';
     const max = Math.max(...numbers);
-    return String(max + 1).padStart(4, '0');
+    return `MA-${String(max + 1).padStart(4, '0')}`;
   },
 
   // Pull latest data from PostgreSQL database if available

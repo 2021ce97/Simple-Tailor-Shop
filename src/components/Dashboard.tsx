@@ -110,8 +110,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         (order.customerWhatsApp && order.customerWhatsApp.includes(q)) ||
         (order.orderDate && order.orderDate.toLowerCase().includes(q)) ||
         (order.deliveryDate && order.deliveryDate.toLowerCase().includes(q)) ||
-        (order.fabricName && order.fabricName.toLowerCase().includes(q)) ||
-        (order.cabinetSlot && order.cabinetSlot.toLowerCase().includes(q))
+        (order.fabricName && order.fabricName.toLowerCase().includes(q))
       );
 
       // Status filter
@@ -558,17 +557,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       key={order.id} 
                       className="hover:bg-amber-50/40 transition group"
                     >
-                      {/* Order Number & Cabinet */}
+                      {/* Order Number */}
                       <td className="py-3 px-4 align-middle">
                         <div className="flex flex-col gap-1">
                           <span className="font-mono font-black text-sm text-[#1A1A1A] tracking-wider">
-                            № {order.orderNumber}
+                            {order.orderNumber}
                           </span>
-                          {order.cabinetSlot && (
-                            <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold text-[#D4AF37] bg-stone-900 px-2 py-0.5 rounded-md w-fit">
-                              📦 {order.cabinetSlot}
-                            </span>
-                          )}
                         </div>
                       </td>
 
@@ -724,13 +718,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <div className="flex items-center justify-between gap-2 border-b border-stone-100 pb-2.5">
                     <div className="flex items-center gap-2">
                       <span className="font-mono font-black text-sm text-[#1A1A1A]">
-                        № {order.orderNumber}
+                        {order.orderNumber}
                       </span>
-                      {order.cabinetSlot && (
-                        <span className="text-[10px] font-bold font-mono px-2 py-0.5 bg-stone-900 text-[#D4AF37] rounded-md">
-                          📦 {order.cabinetSlot}
-                        </span>
-                      )}
                     </div>
 
                     <select
@@ -833,7 +822,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex items-center justify-between border-b border-stone-100 pb-3">
               <h3 className="font-black text-sm text-[#1A1A1A] flex items-center gap-2">
                 <CreditCard className="w-4 h-4 text-[#D4AF37]" />
-                <span>{t.paymentStatus} (№ {paymentModalOrder.orderNumber})</span>
+                <span>{t.paymentStatus} ({paymentModalOrder.orderNumber})</span>
               </h3>
               <button
                 onClick={() => setPaymentModalOrder(null)}

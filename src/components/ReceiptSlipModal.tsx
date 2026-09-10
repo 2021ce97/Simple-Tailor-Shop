@@ -41,19 +41,19 @@ const receiptCopy = {
   en: {
     contact: 'Contact', address: 'Address', bill: 'Bill no.', customer: 'Customer',
     noStyle: 'Standard style', notes: 'Tailor notes', noMeasurements: 'No measurements recorded',
-    delivery: 'Delivery date', orderDate: 'Order date', cabinet: 'Cabinet / desk', garment: 'Garment',
+    delivery: 'Delivery date', orderDate: 'Order date', garment: 'Garment',
     quantity: 'Quantity', total: 'Total', paid: 'Paid', balance: 'Balance', developed: 'Developed by: Rayan Tech solution',
   },
   fa: {
     contact: 'شماره تماس', address: 'آدرس', bill: 'شماره بل', customer: 'مشتری',
     noStyle: 'استایل ساده', notes: 'یادداشت خیاط', noMeasurements: 'اندازه‌ای ثبت نشده',
-    delivery: 'تاریخ تحویل', orderDate: 'تاریخ ثبت سفارش', cabinet: 'کابین / میز', garment: 'لباس',
+    delivery: 'تاریخ تحویل', orderDate: 'تاریخ ثبت سفارش', garment: 'لباس',
     quantity: 'تعداد', total: 'مجموع', paid: 'پرداخت', balance: 'باقی‌مانده', developed: 'ساخته شده توسط: Rayan Tech solution',
   },
   ps: {
     contact: 'د اړیکې شمېره', address: 'پته', bill: 'د بِل شمېره', customer: 'پېرودونکی',
     noStyle: 'ساده سټایل', notes: 'د خیاط یادښت', noMeasurements: 'اندازې نه دي ثبت شوي',
-    delivery: 'د سپارلو نېټه', orderDate: 'د فرمایش نېټه', cabinet: 'کابین / مېز', garment: 'کالي',
+    delivery: 'د سپارلو نېټه', orderDate: 'د فرمایش نېټه', garment: 'کالي',
     quantity: 'تعداد', total: 'ټول', paid: 'ورکړل شوي', balance: 'پاتې', developed: 'جوړونکی: Rayan Tech solution',
   },
 } as const;
@@ -97,20 +97,30 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
 
   // Print Handler
   const handlePrint = () => {
+    if (!receiptRef.current) return;
+    const printWindow = window.open('', '_blank', 'width=900,height=900');
+    if (!printWindow) {
+      window.alert('Please allow pop-ups to print this receipt.');
+      return;
+    }
+
     const printSize = printFormat === 'a4' ? 'A4 portrait' : printFormat === 'thermal58' ? '58mm auto' : '80mm auto';
-    const pageStyle = document.createElement('style');
-    pageStyle.id = 'receipt-print-page-style';
-    pageStyle.textContent = `@media print { @page { size: ${printSize}; margin: ${printFormat === 'a4' ? '10mm' : '2mm'}; } }`;
-    document.head.querySelector('#receipt-print-page-style')?.remove();
-    document.head.appendChild(pageStyle);
-    setIsPrinting(true);
-    window.setTimeout(() => {
-      window.print();
-      window.setTimeout(() => {
-        pageStyle.remove();
-        setIsPrinting(false);
-      }, 250);
-    }, 50);
+    const receiptHtml = receiptRef.current.outerHTML;
+    printWindow.document.open();
+    printWindow.document.write(`<!doctype html><html dir="${language === 'en' ? 'ltr' : 'rtl'}"><head>${document.head.innerHTML}<style>
+      @page { size: ${printSize}; margin: ${printFormat === 'a4' ? '10mm' : '2mm'}; }
+      html, body { margin: 0; padding: 0; background: white; }
+      #authentic-receipt-slip { margin: 0 auto; box-shadow: none !important; border: 0 !important; }
+      ${printFormat === 'a4' ? '#authentic-receipt-slip { width: 186mm !important; max-width: 186mm !important; }' : ''}
+      ${printFormat === 'thermal58' ? '#authentic-receipt-slip { width: 54mm !important; max-width: 54mm !important; }' : ''}
+      ${printFormat === 'thermal80' ? '#authentic-receipt-slip { width: 76mm !important; max-width: 76mm !important; }' : ''}
+    </style></head><body>${receiptHtml}</body></html>`);
+    printWindow.document.close();
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.onafterprint = () => printWindow.close();
+    };
   };
 
   // PDF Generator using html-to-image and jsPDF (safe from oklch parser errors)
@@ -245,7 +255,7 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
             <span className="w-1.5 h-4 bg-[#D4AF37] rounded-full inline-block" />
             <Scissors className="w-4 h-4 text-[#D4AF37]" />
             <h2 className="text-sm font-bold tracking-wide">
-              {t.tailorReceipt} - #{order.orderNumber}
+              {t.tailorReceipt} - {order.orderNumber}
             </h2>
           </div>
           
@@ -435,12 +445,8 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
               </div>
             </div>
 
-            {/* Garment / Quantity & Cabinet/Slot Strip */}
-            <div className="grid grid-cols-3 border-b border-stone-900 text-xs py-1.5 px-2 font-bold bg-stone-100/70 text-center">
-              <div>
-                <span className="text-[10px] text-stone-500 block">{receiptText.cabinet}:</span>
-                <span className="font-mono text-stone-900">{order.cabinetSlot || '-'}</span>
-              </div>
+            {/* Garment and quantity */}
+            <div className="grid grid-cols-2 border-b border-stone-900 text-xs py-1.5 px-2 font-bold bg-stone-100/70 text-center">
               <div>
                 <span className="text-[10px] text-stone-500 block">{receiptText.garment}:</span>
                 <span className="text-stone-900">{displayGarmentType}</span>

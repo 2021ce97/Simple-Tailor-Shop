@@ -113,12 +113,9 @@ export const OrderForm: React.FC<OrderFormProps> = ({
     initialOrder?.designSelections || {}
   );
 
-  // Notes & Cabinet
+  // Notes
   const [specialInstructions, setSpecialInstructions] = useState<string>(
     initialOrder?.specialInstructions || ''
-  );
-  const [cabinetSlot, setCabinetSlot] = useState<string>(
-    initialOrder?.cabinetSlot || ''
   );
 
   // Pricing & Payment
@@ -262,7 +259,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({
       measurements,
       designSelections,
       specialInstructions,
-      cabinetSlot,
       items: [],
       totalAmount: Number(totalAmount) || 0,
       paidAmount: Number(paidAmount) || 0,
@@ -292,7 +288,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 {initialOrder ? t.editOrder : t.newOrder}
               </h1>
               <span className="text-xs font-mono font-bold px-2 py-0.5 bg-[#D4AF37]/20 text-[#1A1A1A] rounded-md border border-[#D4AF37]/30">
-                № {orderNumber}
+                {orderNumber}
               </span>
             </div>
             <p className="text-xs text-stone-500 mt-0.5">
@@ -919,12 +915,12 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             </div>
           </div>
 
-          {/* 2. Dates & Cabinet Storage */}
+          {/* 2. Delivery date */}
           <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
             <div className="flex items-center gap-2 text-[#1A1A1A] font-extrabold text-sm border-b border-[#E5E5E5] pb-2">
               <span className="w-1.5 h-4 bg-[#D4AF37] rounded-full inline-block" />
               <Calendar className="w-4 h-4 text-[#D4AF37]" />
-              <span>{t.dates} & {t.cabinetSlot}</span>
+              <span>{t.dates}</span>
             </div>
 
             {/* Delivery Date */}
@@ -965,19 +961,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               </div>
             </div>
 
-            {/* Cabinet Slot */}
-            <div>
-              <label className="block text-xs font-bold text-stone-600 mb-1">
-                {t.cabinetSlot} (e.g. D1, C4, الماری)
-              </label>
-              <input
-                type="text"
-                value={cabinetSlot}
-                onChange={e => setCabinetSlot(e.target.value)}
-                placeholder="D1, C4..."
-                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-[#1A1A1A] focus:bg-white focus:border-[#D4AF37] outline-hidden"
-              />
-            </div>
           </div>
 
           {/* 3. Special Instructions & Notes */}
