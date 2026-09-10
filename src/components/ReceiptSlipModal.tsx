@@ -35,6 +35,29 @@ interface ReceiptSlipModalProps {
   onEdit?: (order: Order) => void;
 }
 
+type PrintFormat = 'a4' | 'thermal58' | 'thermal80';
+
+const receiptCopy = {
+  en: {
+    contact: 'Contact', address: 'Address', bill: 'Bill no.', customer: 'Customer',
+    noStyle: 'Standard style', notes: 'Tailor notes', noMeasurements: 'No measurements recorded',
+    delivery: 'Delivery date', orderDate: 'Order date', cabinet: 'Cabinet / desk', garment: 'Garment',
+    quantity: 'Quantity', total: 'Total', paid: 'Paid', balance: 'Balance', developed: 'Developed by: Rayan Tech solution',
+  },
+  fa: {
+    contact: 'شماره تماس', address: 'آدرس', bill: 'شماره بل', customer: 'مشتری',
+    noStyle: 'استایل ساده', notes: 'یادداشت خیاط', noMeasurements: 'اندازه‌ای ثبت نشده',
+    delivery: 'تاریخ تحویل', orderDate: 'تاریخ ثبت سفارش', cabinet: 'کابین / میز', garment: 'لباس',
+    quantity: 'تعداد', total: 'مجموع', paid: 'پرداخت', balance: 'باقی‌مانده', developed: 'ساخته شده توسط: Rayan Tech solution',
+  },
+  ps: {
+    contact: 'د اړیکې شمېره', address: 'پته', bill: 'د بِل شمېره', customer: 'پېرودونکی',
+    noStyle: 'ساده سټایل', notes: 'د خیاط یادښت', noMeasurements: 'اندازې نه دي ثبت شوي',
+    delivery: 'د سپارلو نېټه', orderDate: 'د فرمایش نېټه', cabinet: 'کابین / مېز', garment: 'کالي',
+    quantity: 'تعداد', total: 'ټول', paid: 'ورکړل شوي', balance: 'پاتې', developed: 'جوړونکی: Rayan Tech solution',
+  },
+} as const;
+
 export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
   order,
   shopSettings,
@@ -45,9 +68,12 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
   onEdit,
 }) => {
   const t = translations[language];
+  const receiptText = receiptCopy[language];
   const receiptRef = useRef<HTMLDivElement>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [printFormat, setPrintFormat] = useState<PrintFormat>('a4');
+  const [isPrinting, setIsPrinting] = useState(false);
 
   // Shop Name & Details based on language or dual
   const shopName = language === 'ps' 
@@ -67,11 +93,24 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
     : language === 'fa'
     ? shopSettings.currencyFa
     : shopSettings.currencyEn;
-  const logoUrl = shopSettings.logoUrl || '/mujeeb-afghan-logo.svg';
+  const logoUrl = shopSettings.logoUrl || '/mujeeb-afghan-logo.jpeg';
 
   // Print Handler
   const handlePrint = () => {
-    window.print();
+    const printSize = printFormat === 'a4' ? 'A4 portrait' : printFormat === 'thermal58' ? '58mm auto' : '80mm auto';
+    const pageStyle = document.createElement('style');
+    pageStyle.id = 'receipt-print-page-style';
+    pageStyle.textContent = `@media print { @page { size: ${printSize}; margin: ${printFormat === 'a4' ? '10mm' : '2mm'}; } }`;
+    document.head.querySelector('#receipt-print-page-style')?.remove();
+    document.head.appendChild(pageStyle);
+    setIsPrinting(true);
+    window.setTimeout(() => {
+      window.print();
+      window.setTimeout(() => {
+        pageStyle.remove();
+        setIsPrinting(false);
+      }, 250);
+    }, 50);
   };
 
   // PDF Generator using html-to-image and jsPDF (safe from oklch parser errors)
@@ -87,30 +126,40 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
         cacheBust: true,
       });
 
-      // Initialize PDF document
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const margin = 12; // 12mm margins
-      const printableWidth = pdfWidth - (margin * 2);
-      
-      // Calculate aspect ratio
       const img = new Image();
       img.src = dataUrl;
       await new Promise((resolve) => {
         img.onload = resolve;
       });
 
+      const pdfWidth = printFormat === 'a4' ? 210 : printFormat === 'thermal58' ? 58 : 80;
+      const margin = printFormat === 'a4' ? 12 : 3;
+      const printableWidth = pdfWidth - (margin * 2);
       const imgHeight = (img.naturalHeight * printableWidth) / img.naturalWidth;
-      
-      pdf.addImage(dataUrl, 'PNG', margin, margin, printableWidth, imgHeight);
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: printFormat === 'a4' ? 'a4' : [pdfWidth, imgHeight + (margin * 2)],
+      });
+      if (printFormat === 'a4') {
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const pageContentHeight = pageHeight - (margin * 2);
+        let imageY = margin;
+        let remainingHeight = imgHeight;
+        pdf.addImage(dataUrl, 'PNG', margin, imageY, printableWidth, imgHeight);
+        remainingHeight -= pageContentHeight;
+        while (remainingHeight > 0) {
+          pdf.addPage();
+          imageY -= pageContentHeight;
+          pdf.addImage(dataUrl, 'PNG', margin, imageY, printableWidth, imgHeight);
+          remainingHeight -= pageContentHeight;
+        }
+      } else {
+        pdf.addImage(dataUrl, 'PNG', margin, margin, printableWidth, imgHeight);
+      }
       
       const safeCustomerName = order.customerName ? order.customerName.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_') : 'Customer';
-      pdf.save(`Mujeeb_Afghan_Tailor_Receipt_${order.orderNumber || 'Order'}_${safeCustomerName}.pdf`);
+      pdf.save(`Mujeeb_Afghan_Fashion_House_${order.orderNumber || 'Order'}_${printFormat}_${safeCustomerName}.pdf`);
     } catch (err) {
       console.error('Error generating PDF:', err);
       // Fallback to print
@@ -162,26 +211,36 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
   const activeDesignItems = Object.entries(order.designSelections || {})
     .map(([catKey, value]) => {
       const cat = (designCategories || []).find(c => c.key === catKey);
+      const option = cat?.options.find(item =>
+        item.nameEn === value || item.nameFa === value || item.namePs === value
+      );
       const catTitle = cat 
         ? (language === 'ps' ? cat.titlePs : language === 'fa' ? cat.titleFa : cat.titleEn)
         : catKey;
       return {
         key: catKey,
         title: catTitle,
-        titleFa: cat ? cat.titleFa : catKey,
-        value,
+        value: option ? (language === 'ps' ? option.namePs : language === 'fa' ? option.nameFa : option.nameEn) : value,
       };
     })
     .filter(d => Boolean(d.value));
 
+  const garmentKeys = ['perahanTunban', 'waistcoat', 'suit', 'coatKorti', 'kameezShalwar', 'kurta', 'otherGarment'] as const;
+  const displayGarmentType = (() => {
+    const garmentKey = garmentKeys.find(key =>
+      translations.en[key] === order.garmentType || translations.fa[key] === order.garmentType || translations.ps[key] === order.garmentType
+    );
+    return garmentKey ? t[garmentKey] : order.garmentType;
+  })();
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto no-print">
+    <div data-print-format={printFormat} className={`receipt-modal-shell fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto ${isPrinting ? 'is-printing' : ''}`}>
       <div 
         id="receipt-modal-container"
         className="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-200 border border-[#E5E5E5]"
       >
         {/* Header Action Bar */}
-        <div className="flex items-center justify-between px-5 py-3.5 bg-[#1A1A1A] text-white border-b border-black">
+        <div className="receipt-actions flex items-center justify-between px-5 py-3.5 bg-[#1A1A1A] text-white border-b border-black no-print">
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-4 bg-[#D4AF37] rounded-full inline-block" />
             <Scissors className="w-4 h-4 text-[#D4AF37]" />
@@ -191,6 +250,14 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
           </div>
           
           <div className="flex items-center gap-2">
+            <label className="flex items-center gap-1.5 text-[10px] font-bold text-stone-300">
+              <span>{t.printFormat}</span>
+              <select value={printFormat} onChange={event => setPrintFormat(event.target.value as PrintFormat)} className="rounded-md border border-white/20 bg-white/10 px-1.5 py-1 text-[10px] text-white outline-none">
+                <option value="a4" className="text-stone-900">{t.standardA4}</option>
+                <option value="thermal58" className="text-stone-900">{t.thermal58}</option>
+                <option value="thermal80" className="text-stone-900">{t.thermal80}</option>
+              </select>
+            </label>
             <button
               onClick={handlePrint}
               id="print-slip-btn"
@@ -238,8 +305,8 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
           <div 
             ref={receiptRef}
             id="authentic-receipt-slip"
-            dir="rtl"
-            className="w-full max-w-[380px] bg-white border border-[#E5E5E5] shadow-xs p-4 text-[#1A1A1A] text-sm font-sans relative select-text rounded-xl"
+            dir={language === 'en' ? 'ltr' : 'rtl'}
+            className={`bg-white border border-[#E5E5E5] shadow-xs p-4 text-[#1A1A1A] text-sm font-sans relative select-text rounded-xl ${printFormat === 'a4' ? 'w-full max-w-[380px]' : printFormat === 'thermal58' ? 'w-[280px]' : 'w-[380px]'}`}
             style={{ minHeight: '520px' }}
           >
             {/* Top Header with Seal and Contacts */}
@@ -247,12 +314,12 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
               <img
                 src={logoUrl}
                 alt="Mujeeb Afghan Fashion"
-                className="mx-auto mb-2 h-20 w-20 rounded-lg object-cover"
+                className="mx-auto mb-2 h-20 w-20 rounded-lg object-contain"
               />
               <div className="flex items-center justify-center gap-2 mb-1">
                 <div>
                   <h1 className="text-lg font-black tracking-tight text-stone-950 font-serif leading-tight">
-                    {shopSettings.shopNamePs || shopSettings.shopNameFa || 'مجیب افغان خیاطي'}
+                    {shopName}
                   </h1>
                 </div>
               </div>
@@ -261,32 +328,28 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
               <div className="flex justify-between items-center text-[11px] font-semibold text-stone-800 px-1 mt-1 border-t border-dotted border-stone-300 pt-1">
                 <span className="flex items-center gap-1">
                   <span>WhatsApp:</span>
-                  <b className="font-mono">{shopSettings.whatsapp || '0782207308'}</b>
+                  <b className="font-mono">{shopSettings.whatsapp || '0782220194'}</b>
                 </span>
                 <span className="flex items-center gap-1">
-                  <span>شماره تماس:</span>
-                  <b className="font-mono">{shopSettings.phone1 || '0749592404'}</b>
+                  <span>{receiptText.contact}:</span>
+                  <b className="font-mono">{shopSettings.phone1 || '0772559881'}</b>
                 </span>
               </div>
 
               {/* Address */}
               <p className="text-[10px] text-stone-600 mt-1 leading-snug px-2">
-                <b>آدرس:</b> {shopSettings.addressFa || shopSettings.addressPs || 'چهار راهی بتخاک، کابل افغانستان'}
+                <b>{receiptText.address}:</b> {shopAddress}
               </p>
-            </div>
-
-            <div className="mt-3 border-t border-dotted border-stone-300 pt-2 text-center text-[9px] text-stone-500">
-              Developed by Rayan Tech Solutions · rayan-tech-solution.tech
             </div>
 
             {/* Order Info & Customer Strip */}
             <div className="grid grid-cols-2 border-b-2 border-stone-900 text-xs font-bold bg-stone-50">
               <div className="p-2 border-l border-stone-900 flex items-center justify-between">
-                <span className="text-stone-600">شماره / بِل:</span>
+                <span className="text-stone-600">{receiptText.bill}:</span>
                 <span className="text-base font-black font-mono text-stone-950">{order.orderNumber}</span>
               </div>
               <div className="p-2 flex items-center justify-between">
-                <span className="text-stone-600">مشتری:</span>
+                <span className="text-stone-600">{receiptText.customer}:</span>
                 <span className="text-sm font-black text-stone-950 truncate max-w-[130px]">{order.customerName}</span>
               </div>
             </div>
@@ -299,13 +362,13 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
                   {activeDesignItems.length > 0 ? (
                     activeDesignItems.map((item, idx) => (
                       <div key={idx} className="p-1.5 flex justify-between items-center">
-                        <span className="text-stone-500 font-medium text-[10px]">{item.titleFa}:</span>
+                        <span className="text-stone-500 font-medium text-[10px]">{item.title}:</span>
                         <span className="font-bold text-stone-900 text-left">{String(item.value)}</span>
                       </div>
                     ))
                   ) : (
                     <div className="p-2 text-stone-400 text-center italic text-[10px]">
-                      استایل ساده / نارمل
+                      {receiptText.noStyle}
                     </div>
                   )}
                 </div>
@@ -313,7 +376,7 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
                 {/* Special Tailor Instructions / Note */}
                 {order.specialInstructions && (
                   <div className="p-2 bg-amber-50/70 border-t border-stone-300 text-[11px] font-semibold text-stone-900 mt-auto">
-                    <span className="text-[10px] text-amber-800 block">نوټ / سپارښتنه:</span>
+                    <span className="text-[10px] text-amber-800 block">{receiptText.notes}:</span>
                     <span>{order.specialInstructions}</span>
                   </div>
                 )}
@@ -323,13 +386,13 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
               <div className="divide-y divide-stone-300 text-xs">
                 {activeMeasurements.map((m, idx) => (
                   <div key={idx} className="flex justify-between items-center px-2.5 py-1 hover:bg-stone-50">
-                    <span className="font-semibold text-stone-700">{m.labelFa || m.label}:</span>
+                    <span className="font-semibold text-stone-700">{m.label}:</span>
                     <span className="font-mono font-black text-stone-950 text-sm">{m.value}</span>
                   </div>
                 ))}
                 {activeMeasurements.length === 0 && (
                   <div className="p-4 text-stone-400 text-center text-xs">
-                    اندازه‌ای ثبت نشده
+                    {receiptText.noMeasurements}
                   </div>
                 )}
               </div>
@@ -338,11 +401,11 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
             {/* Delivery Date & Time section */}
             <div className="p-2 border-b border-dashed border-stone-400 bg-stone-50/50 flex items-center justify-between text-xs">
               <div>
-                <span className="text-[10px] text-stone-500 block">تاریخ تسلیمی (واپسی):</span>
+                <span className="text-[10px] text-stone-500 block">{receiptText.delivery}:</span>
                 <span className="font-black text-stone-950 font-mono">{order.deliveryDate}</span>
               </div>
               <div className="text-left font-mono text-[11px] text-stone-600">
-                <span className="text-[10px] text-stone-400 block">ثبت فرمایش:</span>
+                <span className="text-[10px] text-stone-400 block">{receiptText.orderDate}:</span>
                 <span>{order.orderDate || new Date().toISOString().slice(0, 10)}</span>
               </div>
             </div>
@@ -357,7 +420,7 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
                   width={1.2}
                   fontSize={9}
                 />
-                <span className="text-[9px] text-stone-500 block">بارکود تماس</span>
+                <span className="text-[9px] text-stone-500 block">{t.phoneBarcode}</span>
               </div>
 
               {/* Order Number Barcode */}
@@ -368,22 +431,22 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
                   width={1.4}
                   fontSize={9}
                 />
-                <span className="text-[9px] text-stone-500 block">بارکود بل</span>
+                <span className="text-[9px] text-stone-500 block">{t.billBarcode}</span>
               </div>
             </div>
 
             {/* Garment / Quantity & Cabinet/Slot Strip */}
             <div className="grid grid-cols-3 border-b border-stone-900 text-xs py-1.5 px-2 font-bold bg-stone-100/70 text-center">
               <div>
-                <span className="text-[10px] text-stone-500 block">کابین / دیسک:</span>
+                <span className="text-[10px] text-stone-500 block">{receiptText.cabinet}:</span>
                 <span className="font-mono text-stone-900">{order.cabinetSlot || '-'}</span>
               </div>
               <div>
-                <span className="text-[10px] text-stone-500 block">لباس:</span>
-                <span className="text-stone-900">{order.garmentType}</span>
+                <span className="text-[10px] text-stone-500 block">{receiptText.garment}:</span>
+                <span className="text-stone-900">{displayGarmentType}</span>
               </div>
               <div>
-                <span className="text-[10px] text-stone-500 block">تعداد:</span>
+                <span className="text-[10px] text-stone-500 block">{receiptText.quantity}:</span>
                 <span className="font-mono text-base text-stone-950">{order.quantity || 1}</span>
               </div>
             </div>
@@ -391,19 +454,19 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
             {/* Financials Breakdown Table (جمله, جمله پرداخت, جمله باقیات) */}
             <div className="grid grid-cols-3 border-2 border-stone-950 text-center font-bold mt-2 divide-x divide-x-reverse divide-stone-950 bg-stone-50">
               <div className="p-1.5">
-                <div className="text-[10px] text-stone-600">جمله (ټولې)</div>
+                <div className="text-[10px] text-stone-600">{receiptText.total}</div>
                 <div className="font-mono text-sm font-black text-stone-950">
                   {order.totalAmount} <span className="text-[9px] font-normal">{currencySymbol}</span>
                 </div>
               </div>
               <div className="p-1.5 bg-emerald-50/60">
-                <div className="text-[10px] text-emerald-800">رسید (پرداخت)</div>
+                <div className="text-[10px] text-emerald-800">{receiptText.paid}</div>
                 <div className="font-mono text-sm font-black text-emerald-700">
                   {order.paidAmount} <span className="text-[9px] font-normal">{currencySymbol}</span>
                 </div>
               </div>
               <div className="p-1.5 bg-amber-50/60">
-                <div className="text-[10px] text-amber-900">باقیات (پاتې)</div>
+                <div className="text-[10px] text-amber-900">{receiptText.balance}</div>
                 <div className={`font-mono text-sm font-black ${order.balanceAmount > 0 ? 'text-rose-600' : 'text-stone-800'}`}>
                   {order.balanceAmount} <span className="text-[9px] font-normal">{currencySymbol}</span>
                 </div>
@@ -412,13 +475,14 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
 
             {/* Footer Note */}
             <div className="text-center pt-2 text-[10px] text-stone-500">
-              <p>{shopSettings.receiptFooterFa || 'تشکر از اعتمادتان - لطفاً هنگام تحویل بل را همراه داشته باشید'}</p>
+              <p>{language === 'ps' ? shopSettings.receiptFooterPs : language === 'fa' ? shopSettings.receiptFooterFa : shopSettings.receiptFooterEn}</p>
+              <a href="https://rayan-tech-solution.tech" target="_blank" rel="noreferrer" className="mt-1 inline-block text-[8px] text-stone-400 underline">{receiptText.developed}</a>
             </div>
           </div>
         </div>
 
         {/* Modal Footer Controls */}
-        <div className="px-5 py-3 bg-white border-t border-[#E5E5E5] flex items-center justify-between">
+        <div className="receipt-modal-footer px-5 py-3 bg-white border-t border-[#E5E5E5] flex items-center justify-between no-print">
           <div className="flex items-center gap-2 text-xs text-[#706E6B]">
             <span className={`inline-block w-2.5 h-2.5 rounded-full ${
               order.status === 'ready' ? 'bg-emerald-500' : 

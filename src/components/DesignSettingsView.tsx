@@ -869,7 +869,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
               {t.shopProfile}
             </h3>
             <p className="text-xs text-[#706E6B] mt-0.5">
-              {language === 'fa' ? 'اطلاعاتی که در سربرگ بل و رسیدهای چاپ شده درج می‌شوند' : 'Details displayed on printed receipts and PDF slips'}
+              {language === 'fa' ? 'اطلاعاتی که در سربرگ بل و رسیدهای چاپ شده درج می‌شوند' : language === 'ps' ? 'هغه معلومات چې د چاپ شوي بِل او رسيد په سرليک کې ښکاري' : 'Details displayed on printed receipts and PDF slips'}
             </p>
           </div>
 
@@ -920,7 +920,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 type="text"
                 value={shop.phone1}
                 onChange={e => setShop({ ...shop, phone1: e.target.value })}
-                placeholder="0749592404"
+                placeholder="0772559881"
                 className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-mono"
               />
             </div>
@@ -932,7 +932,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 type="text"
                 value={shop.phone2 || ''}
                 onChange={e => setShop({ ...shop, phone2: e.target.value })}
-                placeholder="0780000000"
+                placeholder="0782220194"
                 className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-mono"
               />
             </div>
@@ -944,14 +944,14 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 type="text"
                 value={shop.whatsapp}
                 onChange={e => setShop({ ...shop, whatsapp: e.target.value })}
-                placeholder="0782207308"
+                placeholder="0782220194"
                 className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-mono"
               />
             </div>
           </div>
 
           {/* Shop Address */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
                 {t.shopAddress} (دری / Dari)
@@ -974,13 +974,24 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs"
               />
             </div>
+            <div>
+              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+                {t.shopAddress} (English)
+              </label>
+              <input
+                type="text"
+                value={shop.addressEn}
+                onChange={e => setShop({ ...shop, addressEn: e.target.value })}
+                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs"
+              />
+            </div>
           </div>
 
           {/* Receipt Footer & Currency */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="sm:col-span-2">
+            <div>
               <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
-                {t.receiptFooter}
+                {t.receiptFooter} (دری / Dari)
               </label>
               <input
                 type="text"
@@ -992,13 +1003,58 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
             </div>
             <div>
               <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
-                {t.currency}
+                {t.receiptFooter} (پښتو / Pashto)
+              </label>
+              <input
+                type="text"
+                value={shop.receiptFooterPs || ''}
+                onChange={e => setShop({ ...shop, receiptFooterPs: e.target.value })}
+                placeholder="مهرباني وکړئ د فرمایش د اخیستلو پر مهال دا بِل له ځان سره ولرئ..."
+                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+                {t.receiptFooter} (English)
+              </label>
+              <input
+                type="text"
+                value={shop.receiptFooterEn || ''}
+                onChange={e => setShop({ ...shop, receiptFooterEn: e.target.value })}
+                placeholder="Please bring this receipt when collecting your order..."
+                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+                {t.currency} (دری / Dari)
               </label>
               <input
                 type="text"
                 value={shop.currencyFa}
-                onChange={e => setShop({ ...shop, currencyFa: e.target.value, currencyPs: e.target.value })}
-                placeholder="افغانی / AFN"
+                onChange={e => setShop({ ...shop, currencyFa: e.target.value })}
+                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-bold"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+                {t.currency} (پښتو / Pashto)
+              </label>
+              <input
+                type="text"
+                value={shop.currencyPs}
+                onChange={e => setShop({ ...shop, currencyPs: e.target.value })}
+                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-bold"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+                {t.currency} (English)
+              </label>
+              <input
+                type="text"
+                value={shop.currencyEn}
+                onChange={e => setShop({ ...shop, currencyEn: e.target.value })}
                 className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-bold"
               />
             </div>

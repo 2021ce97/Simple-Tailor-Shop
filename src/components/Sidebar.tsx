@@ -115,12 +115,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => handleNavClick('dashboard')}
             className="flex items-center gap-3 cursor-pointer group select-none overflow-hidden"
           >
-            <div className="w-10 h-10 rounded-xl bg-[#D4AF37] flex items-center justify-center text-[#181818] font-black shadow-md group-hover:scale-105 transition-transform shrink-0">
-              <Scissors className="w-5 h-5 transform -rotate-45" />
+            <div className="w-10 h-10 rounded-xl bg-black flex items-center justify-center text-[#181818] font-black shadow-md group-hover:scale-105 transition-transform shrink-0 overflow-hidden">
+              <img src={shopSettings.logoUrl || '/mujeeb-afghan-logo.jpeg'} alt="Mujeeb Afghan Fashion" className="h-full w-full object-contain" />
             </div>
             <div className="overflow-hidden">
               <h1 className="font-extrabold text-sm text-white tracking-tight leading-tight truncate">
-                {shopTitle || 'Mujeeb Afghan Tailor Shop'}
+                {shopTitle || 'MUJEEB AFGHAN FASION HOUSE'}
               </h1>
               <p className="text-[11px] text-[#D4AF37] font-semibold tracking-wide truncate">
                 {t.appSubtitle}

@@ -56,6 +56,45 @@
   .no-print {
     display: none !important;
   }
+  .receipt-modal-shell.is-printing {
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+  .receipt-modal-shell.is-printing #receipt-modal-container {
+    display: block !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+  .receipt-modal-shell.is-printing #authentic-receipt-slip {
+    margin: 0 auto !important;
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+  .receipt-modal-shell.is-printing[data-print-format="a4"] #authentic-receipt-slip {
+    width: 186mm !important;
+    max-width: 186mm !important;
+  }
+  .receipt-modal-shell.is-printing[data-print-format="thermal58"] #authentic-receipt-slip {
+    width: 54mm !important;
+    max-width: 54mm !important;
+  }
+  .receipt-modal-shell.is-printing[data-print-format="thermal80"] #authentic-receipt-slip {
+    width: 76mm !important;
+    max-width: 76mm !important;
+  }
+  .receipt-modal-shell.is-printing .overflow-y-auto {
+    overflow: visible !important;
+    padding: 0 !important;
+    background: white !important;
+  }
   .print-only {
     display: block !important;
   }

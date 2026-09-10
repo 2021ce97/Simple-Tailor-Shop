@@ -955,10 +955,10 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
               <div className="text-center space-y-1">
                 <h2 className="font-black text-base text-[#1A1A1A] tracking-wider">
                   {language === 'fa' 
-                    ? (shopSettings?.shopNameFa || 'خیاطی رایان') 
+                    ? (shopSettings?.shopNameFa || 'مجیب افغان خیاطي او رخت پلورنځی')
                     : language === 'ps' 
-                    ? (shopSettings?.shopNamePs || 'د رایان خیاطۍ مدیریت') 
-                    : (shopSettings?.shopNameEn || 'Mujeeb Afghan Tailor Shop')}
+                    ? (shopSettings?.shopNamePs || 'مجیب افغان خیاطي او رخت پلورنځی')
+                    : (shopSettings?.shopNameEn || 'MUJEEB AFGHAN FASION HOUSE')}
                 </h2>
                 <p className="text-[10px] text-stone-500">
                   {language === 'fa' 

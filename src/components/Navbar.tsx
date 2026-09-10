@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Language, ShopSettings } from '../types';
 import { translations } from '../translations/i18n';
 import { 
-  Scissors, 
   Menu, 
   PlusCircle, 
   Globe, 
@@ -63,12 +62,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => onTabChange('dashboard')}
               className="flex items-center gap-2.5 cursor-pointer group shrink-0"
             >
-              <div className="w-9 h-9 rounded-xl bg-[#D4AF37] flex items-center justify-center text-[#1A1A1A] font-black shadow-sm group-hover:scale-105 transition">
-                <Scissors className="w-4 h-4 transform -rotate-45" />
+              <div className="w-9 h-9 overflow-hidden rounded-xl bg-black shadow-sm transition group-hover:scale-105">
+                <img src={shopSettings.logoUrl || '/mujeeb-afghan-logo.jpeg'} alt="Mujeeb Afghan Fashion" className="h-full w-full object-contain" />
               </div>
               <div>
                 <h1 className="font-bold text-sm sm:text-base text-white tracking-tight leading-tight flex items-center gap-2">
-                  <span>{shopTitle || 'Mujeeb Afghan Tailor Shop'}</span>
+                  <span>{shopTitle || 'MUJEEB AFGHAN FASION HOUSE'}</span>
                 </h1>
                 <p className="text-[10px] text-[#D4AF37] font-medium hidden sm:block">
                   {t.appSubtitle}

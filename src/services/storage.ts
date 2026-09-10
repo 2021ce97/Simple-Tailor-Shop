@@ -12,6 +12,7 @@ import {
 
 const DEFAULT_OWNER_PHONE = '0772559881';
 const LEGACY_OWNER_PHONE = '0749592404';
+const LEGACY_SHOP_NAMES = ['Mujeeb Afghan Tailor Shop', 'Rayan Tailor Shop Management', 'مدیریت خیاطی رایان', 'د رایان خیاطۍ مدیریت'];
 
 const STORAGE_KEYS = {
   ORDERS: 'tailor_orders_v1',
@@ -31,7 +32,7 @@ const STORAGE_KEYS = {
 
 export const DEFAULT_PRODUCT_CATEGORIES = ['Shoes', 'Watches', 'Perfume', 'Accessories', 'Caps / Karakul'];
 export const DEFAULT_PRODUCT_VENDORS = ['Arab Mobiles Distributor', 'China Shop', 'Kabul Wholesale Supply'];
-export const DEFAULT_PRODUCT_BRANDS = ['Peshawari Leather', 'Curren Classic', 'Al-Rehab Oud', 'Casio', 'Rayan Signature'];
+export const DEFAULT_PRODUCT_BRANDS = ['Peshawari Leather', 'Curren Classic', 'Al-Rehab Oud', 'Casio', 'Mujeeb Collection'];
 
 export const INITIAL_DEMO_PRODUCTS: Product[] = [
   {
@@ -77,7 +78,7 @@ export const INITIAL_DEMO_PRODUCTS: Product[] = [
     id: 'prod_4',
     name: 'کفش اسپرت سفید (Urban White Sneakers)',
     category: 'Shoes',
-    brand: 'Rayan Signature',
+    brand: 'Mujeeb Collection',
     vendor: 'Kabul Wholesale Supply',
     purchasePrice: 950,
     stockQuantity: 11,
@@ -90,7 +91,7 @@ export const INITIAL_DEMO_PRODUCTS: Product[] = [
     id: 'prod_5',
     name: 'کفش رسمی قهوه‌ای (Classic Brown Dress Shoes)',
     category: 'Shoes',
-    brand: 'Rayan Signature',
+    brand: 'Mujeeb Collection',
     vendor: 'Kabul Wholesale Supply',
     purchasePrice: 1450,
     stockQuantity: 6,
@@ -116,7 +117,7 @@ export const INITIAL_DEMO_PRODUCTS: Product[] = [
     id: 'prod_7',
     name: 'کلاه قره‌قل سیاه (Black Karakul Cap)',
     category: 'Caps / Karakul',
-    brand: 'Rayan Signature',
+    brand: 'Mujeeb Collection',
     vendor: 'China Shop',
     purchasePrice: 620,
     stockQuantity: 9,
@@ -163,15 +164,15 @@ export const INITIAL_DEMO_PRODUCT_SALES: ProductSale[] = [
 ];
 
 export const DEFAULT_SHOP_SETTINGS: ShopSettings = {
-  shopNameEn: 'Mujeeb Afghan Tailor Shop',
-  shopNameFa: 'خیاطی افغان مجیب',
-  shopNamePs: 'مجیب افغان خیاطي',
+  shopNameEn: 'MUJEEB AFGHAN FASION HOUSE',
+  shopNameFa: 'مجیب افغان خیاطی و لباس‌فروشی',
+  shopNamePs: 'مجیب افغان خیاطي او رخت پلورنځی',
   taglineEn: 'Finest bespoke Afghan tailoring & traditional fashion',
   taglineFa: 'بهترین دوخت لباس‌های سنتی، مجلسی و مدرن',
   taglinePs: 'د ټولو دودیزو، مجلسی او عصري جامو باکیفیته ګنډل',
   phone1: '0772559881',
-  phone2: '0780000000',
-  whatsapp: '0782207308',
+  phone2: '0782220194',
+  whatsapp: '0782220194',
   addressEn: 'Char Rahi Buth Khak',
   addressFa: 'چهار راهی بتخاک، کابل افغانستان',
   addressPs: 'چهار راهی بتخاک، کابل افغانستان',
@@ -179,10 +180,10 @@ export const DEFAULT_SHOP_SETTINGS: ShopSettings = {
   currencyFa: 'افغانی',
   currencyPs: 'افغانۍ',
   currencySymbol: 'AFN',
-  receiptFooterEn: 'Please bring this receipt for collection. Rayan Tailors guarantees perfection in every stitch!',
-  receiptFooterFa: 'لطفاً هنگام تحویل گرفتن لباس، این بل را با خود داشته باشید. تضمین کیفیت خیاطی رایان!',
-  receiptFooterPs: 'مهرباني وکړئ د کالیو اخیستلو پر مهال دا بِل له ځان سره ولرئ. د رایان خیاطۍ د لوړ کیفیت تضمین!',
-  logoUrl: '/mujeeb-afghan-logo.svg',
+  receiptFooterEn: 'Please bring this receipt when collecting your order.',
+  receiptFooterFa: 'لطفاً هنگام دریافت سفارش، این بل را با خود داشته باشید.',
+  receiptFooterPs: 'مهرباني وکړئ د فرمایش د اخیستلو پر مهال دا بِل له ځان سره ولرئ.',
+  logoUrl: '/mujeeb-afghan-logo.jpeg',
   logoType: 'emblem',
 };
 
@@ -447,7 +448,7 @@ const INITIAL_DEMO_CUSTOMERS: Customer[] = [
 const INITIAL_DEMO_ORDERS: Order[] = [
   {
     id: 'ord_1',
-    orderNumber: '16308',
+    orderNumber: '0001',
     customerId: 'cust_1',
     customerName: 'فرهاد',
     customerPhone: '0765445309',
@@ -495,7 +496,7 @@ const INITIAL_DEMO_ORDERS: Order[] = [
   },
   {
     id: 'ord_2',
-    orderNumber: '435',
+    orderNumber: '0002',
     customerId: 'cust_2',
     customerName: 'شکیل خان',
     customerPhone: '0782930005',
@@ -534,7 +535,7 @@ const INITIAL_DEMO_ORDERS: Order[] = [
   },
   {
     id: 'ord_3',
-    orderNumber: '18861',
+    orderNumber: '0003',
     customerId: 'cust_3',
     customerName: 'عطا الله',
     customerPhone: '0780372506',
@@ -679,7 +680,9 @@ export const storageService = {
   // Products & Retail Inventory
   getProducts(): Product[] {
     const list = getStoredItem<Product[]>(STORAGE_KEYS.PRODUCTS, INITIAL_DEMO_PRODUCTS);
-    return Array.isArray(list) ? list : INITIAL_DEMO_PRODUCTS;
+    return Array.isArray(list)
+      ? list.map(product => product.brand === 'Rayan Signature' ? { ...product, brand: 'Mujeeb Collection' } : product)
+      : INITIAL_DEMO_PRODUCTS;
   },
 
   getProductById(id: string): Product | undefined {
@@ -785,7 +788,8 @@ export const storageService = {
   // Product Brands
   getProductBrands(): string[] {
     const list = getStoredItem<string[]>(STORAGE_KEYS.PRODUCT_BRANDS, DEFAULT_PRODUCT_BRANDS);
-    return Array.isArray(list) && list.length > 0 ? list : DEFAULT_PRODUCT_BRANDS;
+    const migrated = Array.isArray(list) ? list.map(brand => brand === 'Rayan Signature' ? 'Mujeeb Collection' : brand) : DEFAULT_PRODUCT_BRANDS;
+    return migrated.length > 0 ? migrated : DEFAULT_PRODUCT_BRANDS;
   },
 
   saveProductBrand(name: string): string[] {
@@ -1060,7 +1064,13 @@ export const storageService = {
 
     const settings = { ...DEFAULT_SHOP_SETTINGS, ...stored };
     if (settings.phone1 === LEGACY_OWNER_PHONE) settings.phone1 = DEFAULT_OWNER_PHONE;
-    if (!settings.logoUrl) settings.logoUrl = DEFAULT_SHOP_SETTINGS.logoUrl;
+    if (settings.phone2 === '0780000000' || settings.phone2 === '0782207308') settings.phone2 = '0782220194';
+    if (settings.whatsapp === '0782207308') settings.whatsapp = '0782220194';
+    if (LEGACY_SHOP_NAMES.includes(settings.shopNameEn)) settings.shopNameEn = DEFAULT_SHOP_SETTINGS.shopNameEn;
+    if (LEGACY_SHOP_NAMES.includes(settings.shopNameFa)) settings.shopNameFa = DEFAULT_SHOP_SETTINGS.shopNameFa;
+    if (LEGACY_SHOP_NAMES.includes(settings.shopNamePs)) settings.shopNamePs = DEFAULT_SHOP_SETTINGS.shopNamePs;
+    // Migrate the previous generated emblem to the supplied shop logo.
+    if (!settings.logoUrl || settings.logoUrl === '/mujeeb-afghan-logo.svg') settings.logoUrl = DEFAULT_SHOP_SETTINGS.logoUrl;
     return settings;
   },
 
@@ -1152,13 +1162,13 @@ export const storageService = {
 
   generateNextOrderNumber(): string {
     const orders = this.getOrders();
-    if (orders.length === 0) return '16309';
+    if (orders.length === 0) return '0001';
     const numbers = orders
       .map(o => parseInt(o.orderNumber, 10))
       .filter(n => !isNaN(n));
-    if (numbers.length === 0) return (10000 + Math.floor(Math.random() * 90000)).toString();
+    if (numbers.length === 0) return '0001';
     const max = Math.max(...numbers);
-    return (max + 1).toString();
+    return String(max + 1).padStart(4, '0');
   },
 
   // Pull latest data from PostgreSQL database if available

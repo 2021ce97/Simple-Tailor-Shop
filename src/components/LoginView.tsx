@@ -50,7 +50,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
       if (normalizedEmail === 'tailor1@gmail.com' && password === 'Admin123') {
         onLoginSuccess({
           email: 'tailor1@gmail.com',
-          name: language === 'fa' ? 'مدیر خیاطی رایان' : language === 'ps' ? 'د رایان خیاطۍ مدیر' : 'Master Tailor Admin',
+          name: language === 'fa' ? 'مدیر خیاطی' : language === 'ps' ? 'د خیاطۍ مدیر' : 'Tailor Shop Admin',
         });
       } else {
         setError(t.invalidCredentials || 'Invalid email or password. Please check your credentials.');
@@ -60,10 +60,10 @@ export const LoginView: React.FC<LoginViewProps> = ({
   };
 
   const shopTitle = language === 'ps' 
-    ? shopSettings.shopNamePs || 'د رایان خیاطۍ مدیریت'
+    ? shopSettings.shopNamePs || 'مجیب افغان خیاطي او رخت پلورنځی'
     : language === 'fa' 
-    ? shopSettings.shopNameFa || 'مدیریت خیاطی رایان'
-    : shopSettings.shopNameEn || 'Mujeeb Afghan Tailor Shop';
+    ? shopSettings.shopNameFa || 'مجیب افغان خیاطی و لباس‌فروشی'
+    : shopSettings.shopNameEn || 'MUJEEB AFGHAN FASION HOUSE';
 
   return (
     <div className="min-h-screen bg-[#141414] text-[#F9F7F2] flex flex-col justify-between selection:bg-[#D4AF37]/40 relative overflow-hidden">
@@ -79,7 +79,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
             <span>{language === 'fa' ? 'بازگشت' : language === 'ps' ? 'بېرته' : 'Back'}</span>
           </a>
           <div className="w-10 h-10 rounded-xl bg-[#D4AF37] flex items-center justify-center text-[#1A1A1A] font-black shadow-lg shadow-[#D4AF37]/20">
-            <img src={shopSettings.logoUrl || '/mujeeb-afghan-logo.svg'} alt="Mujeeb Afghan Fashion" className="h-full w-full rounded-xl object-cover" />
+            <img src={shopSettings.logoUrl || '/mujeeb-afghan-logo.jpeg'} alt="Mujeeb Afghan Fashion" className="h-full w-full rounded-xl object-contain" />
           </div>
           <div>
             <span className="font-extrabold text-sm sm:text-base text-white tracking-wide block">
@@ -140,7 +140,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
           {/* Card Top Brand Badge */}
           <div className="text-center mb-6">
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-[#D4AF37] mb-4 shadow-xl shadow-[#D4AF37]/25 ring-4 ring-[#D4AF37]/10 overflow-hidden">
-              <img src={shopSettings.logoUrl || '/mujeeb-afghan-logo.svg'} alt="Mujeeb Afghan Fashion" className="h-full w-full object-cover" />
+              <img src={shopSettings.logoUrl || '/mujeeb-afghan-logo.jpeg'} alt="Mujeeb Afghan Fashion" className="h-full w-full object-contain" />
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
               {t.loginTitle}
@@ -267,7 +267,6 @@ export const LoginView: React.FC<LoginViewProps> = ({
         <a href="/" className="mt-2 inline-block text-[#D4AF37] hover:text-white transition">
           {language === 'fa' ? 'پیگیری وضعیت لباس مشتری' : language === 'ps' ? 'د خپلو جامو حالت وګورئ' : 'Track your cloth order'}
         </a>
-        <p className="mt-2 text-[10px] text-stone-600">Developed by Rayan Tech Solutions · rayan-tech-solution.tech</p>
       </footer>
     </div>
   );

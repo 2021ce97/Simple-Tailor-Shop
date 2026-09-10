@@ -254,11 +254,15 @@ export interface Translations {
   quickLoginAdmin: string;
   loggedInAs: string;
   adminAccount: string;
+  printFormat: string;
+  standardA4: string;
+  thermal58: string;
+  thermal80: string;
 }
 
 export const translations: Record<Language, Translations> = {
   en: {
-    appName: 'Rayan Tailor Shop Management',
+    appName: 'MUJEEB AFGHAN FASION HOUSE',
     appSubtitle: 'Orders, Measurements & Customer Management',
     save: 'Save',
     cancel: 'Cancel',
@@ -488,7 +492,7 @@ export const translations: Record<Language, Translations> = {
     retailPurchasesHistory: 'Retail Products Purchased',
     totalSpent: 'Total Customer Spend',
 
-    loginTitle: 'Sign In to Rayan Tailors',
+    loginTitle: 'Sign In to MUJEEB AFGHAN FASION HOUSE',
     loginSubtitle: 'Enter your credentials to access the management portal',
     email: 'Email Address',
     password: 'Password',
@@ -498,10 +502,14 @@ export const translations: Record<Language, Translations> = {
     quickLoginAdmin: 'Autofill Admin Login',
     loggedInAs: 'Signed in as',
     adminAccount: 'Master Tailor Admin',
+    printFormat: 'Print format',
+    standardA4: 'Standard A4',
+    thermal58: 'Thermal 58 mm',
+    thermal80: 'Thermal 80 mm',
   },
 
   fa: {
-    appName: 'مدیریت خیاطی رایان',
+    appName: 'مجیب افغان خیاطي او رخت پلورنځی',
     appSubtitle: 'سیستم جامع مدیریت سفارشات، اندازه‌ها و مشتریان',
     save: 'ذخیره',
     cancel: 'انصراف',
@@ -731,7 +739,7 @@ export const translations: Record<Language, Translations> = {
     retailPurchasesHistory: 'اجناس و اقلام خریداری شده',
     totalSpent: 'مجموعه مصارف مشتری',
 
-    loginTitle: 'ورود به مدیریت خیاطی رایان',
+    loginTitle: 'ورود به مجیب افغان خیاطي و رخت‌فروشی',
     loginSubtitle: 'برای دسترسی به سیستم، مشخصات خود را وارد نمایید',
     email: 'آدرس ایمیل',
     password: 'رمز عبور (پسورد)',
@@ -740,11 +748,15 @@ export const translations: Record<Language, Translations> = {
     invalidCredentials: 'ایمیل یا رمز عبور وارد شده نادرست است.',
     quickLoginAdmin: 'تکمیل خودکار اطلاعات مدیر',
     loggedInAs: 'وارد شده به عنوان',
-    adminAccount: 'حساب مدیر خیاطی رایان',
+    adminAccount: 'حساب مدیر خیاطی',
+    printFormat: 'نوع چاپ',
+    standardA4: 'سند استاندارد A4',
+    thermal58: 'پرینتر حرارتی ۵۸ میلی‌متر',
+    thermal80: 'پرینتر حرارتی ۸۰ میلی‌متر',
   },
 
   ps: {
-    appName: 'د رایان خیاطۍ مدیریت',
+    appName: 'مجیب افغان خیاطي او رخت پلورنځی',
     appSubtitle: 'د فرمایشونو، اندازو او پیرودونکو د مدیریت جامع سیستم',
     save: 'ساتل / ثبت',
     cancel: 'ردول',
@@ -974,7 +986,7 @@ export const translations: Record<Language, Translations> = {
     retailPurchasesHistory: 'پېرل شوي توکي او اجناس',
     totalSpent: 'د مشتري ټول مصرف',
 
-    loginTitle: 'د رایان خیاطۍ مدیریت ته ننوتل',
+    loginTitle: 'مجیب افغان خیاطي او رخت پلورنځي ته ننوتل',
     loginSubtitle: 'سیستم ته د لاسرسي لپاره خپل معلومات دننه کړئ',
     email: 'د بریښنالیک پته',
     password: 'پټنوم (پاسورډ)',
@@ -983,6 +995,10 @@ export const translations: Record<Language, Translations> = {
     invalidCredentials: 'بریښنالیک یا پټنوم ناسم دی. مهرباني وکړئ معلومات وګورئ.',
     quickLoginAdmin: 'د اډمین معلومات اتومات ډکول',
     loggedInAs: 'ننوتلی یاست لکه',
-    adminAccount: 'د رایان خیاطۍ د مدیر حساب',
+    adminAccount: 'د خیاطۍ د مدیر حساب',
+    printFormat: 'د چاپ ډول',
+    standardA4: 'معیاري A4 سند',
+    thermal58: 'حرارتي ۵۸ ملي متره',
+    thermal80: 'حرارتي ۸۰ ملي متره',
   },
 };

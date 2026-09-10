@@ -723,7 +723,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                     type="text"
                     value={editingCustomer.whatsapp || ''}
                     onChange={e => setEditingCustomer({ ...editingCustomer, whatsapp: e.target.value })}
-                    placeholder="0782207308..."
+                    placeholder="0772559881..."
                     className="w-full px-3 py-2.5 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-mono focus:outline-hidden focus:border-[#D4AF37]"
                   />
                 </div>

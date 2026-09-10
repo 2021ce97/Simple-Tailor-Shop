@@ -119,7 +119,7 @@ export interface OrderItem {
 
 export interface Order {
   id: string;
-  orderNumber: string; // e.g. "16308", "18917"
+  orderNumber: string; // Sequential bill number, formatted as 0001, 0002, ...
   customerId: string;
   customerName: string;
   customerPhone: string;
