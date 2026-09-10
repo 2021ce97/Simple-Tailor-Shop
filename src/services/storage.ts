@@ -1176,6 +1176,14 @@ export const storageService = {
   // Pull latest data from PostgreSQL database if available
   async syncFromDatabase(): Promise<void> {
     try {
+      // Older installations stored orders only in the browser. Send those
+      // records first so they become available to the public tracking page
+      // and to staff on another device after upgrading the application.
+      const localOrdersBeforeSync = this.getOrders();
+      if (localOrdersBeforeSync.length > 0) {
+        await Promise.all(localOrdersBeforeSync.map(order => apiSync('orders', 'POST', order)));
+      }
+
       const [fabricsRes, ordersRes, customersRes, productsRes, productSalesRes, measurementFieldsRes, designCategoriesRes, shopSettingsRes] = await Promise.all([
         fetch('/api/fabrics').catch(() => null),
         fetch('/api/orders').catch(() => null),

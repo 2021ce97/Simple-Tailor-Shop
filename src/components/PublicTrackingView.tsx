@@ -42,15 +42,45 @@ export const PublicTrackingView: React.FC = () => {
     const value = lookup.trim();
     if (!value) return;
 
+    const normalizedLookup = value.replace(/\D/g, '');
+    const localMatches = storageService.getOrders()
+      .filter(order =>
+        order.orderNumber.trim().toLowerCase() === value.toLowerCase() ||
+        String(order.orderNumber || '').replace(/\D/g, '') === normalizedLookup ||
+        String(order.customerPhone || '').replace(/\D/g, '') === normalizedLookup ||
+        String(order.customerWhatsApp || '').replace(/\D/g, '') === normalizedLookup
+      )
+      .map(order => ({
+        orderNumber: order.orderNumber,
+        garmentType: order.garmentType,
+        quantity: order.quantity,
+        status: order.status,
+        orderDate: order.orderDate,
+        deliveryDate: order.deliveryDate,
+        completedDate: order.completedDate,
+        deliveredDate: order.deliveredDate,
+      }));
+
     setError('');
     setOrders([]);
     setIsLoading(true);
     try {
       const response = await fetch(`/api/public/orders?lookup=${encodeURIComponent(value)}`);
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Order not found');
-      setOrders(data.orders || []);
+      if (response.ok && Array.isArray(data.orders) && data.orders.length > 0) {
+        setOrders(data.orders);
+        return;
+      }
+      if (localMatches.length > 0) {
+        setOrders(localMatches);
+        return;
+      }
+      throw new Error(data.error || 'Order not found');
     } catch (searchError) {
+      if (localMatches.length > 0) {
+        setOrders(localMatches);
+        return;
+      }
       setError(searchError instanceof Error ? searchError.message : 'Order not found');
     } finally {
       setIsLoading(false);
