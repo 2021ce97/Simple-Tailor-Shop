@@ -116,7 +116,11 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
     const matchesCustomerType = (cust: Customer) => {
       if (customerTypeFilter === 'all') return true;
       const hasTailoringOrders = orders.some(order => order.customerId === cust.id || order.customerPhone === cust.phone);
-      const hasProductSales = productSales.some(sale => sale.customerId === cust.id || sale.customerPhone === cust.phone);
+      const hasProductSales = productSales.some(sale =>
+        sale.customerId === cust.id ||
+        (sale.customerPhone && cust.phone && sale.customerPhone === cust.phone) ||
+        (sale.customerName && cust.name && sale.customerName.trim().toLowerCase() === cust.name.trim().toLowerCase())
+      );
       return customerTypeFilter === 'tailoring' ? hasTailoringOrders : hasProductSales;
     };
     if (!q) return allCustomers.filter(matchesCustomerType);
@@ -141,7 +145,11 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
 
   const customerCounts = useMemo(() => ({
     tailoring: allCustomers.filter(customer => orders.some(order => order.customerId === customer.id || order.customerPhone === customer.phone)).length,
-    products: allCustomers.filter(customer => productSales.some(sale => sale.customerId === customer.id || sale.customerPhone === customer.phone)).length,
+    products: allCustomers.filter(customer => productSales.some(sale =>
+      sale.customerId === customer.id ||
+      (sale.customerPhone && customer.phone && sale.customerPhone === customer.phone) ||
+      (sale.customerName && customer.name && sale.customerName.trim().toLowerCase() === customer.name.trim().toLowerCase())
+    )).length,
   }), [allCustomers, orders, productSales]);
 
   // Customer orders
