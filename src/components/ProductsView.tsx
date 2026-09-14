@@ -850,9 +850,12 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                     type="number"
                     required
                     min="0"
-                    step="10"
-                    value={formData.purchasePrice || ''}
-                    onChange={e => setFormData({ ...formData, purchasePrice: parseFloat(e.target.value) || 0 })}
+                    step="any"
+                    value={formData.purchasePrice === 0 ? '' : formData.purchasePrice}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setFormData({ ...formData, purchasePrice: val === '' ? 0 : parseFloat(val) || 0 });
+                    }}
                     placeholder="1200"
                     className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-[#1A1A1A] focus:bg-white focus:border-[#D4AF37] outline-hidden"
                   />

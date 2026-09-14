@@ -7,14 +7,31 @@ export interface MeasurementValues {
   [key: string]: string | number;
 }
 
+export interface GarmentTypeConfig {
+  id: string; // e.g. 'perahan_tunban', 'wescott', 'shirt', 'kurta', 'two_piece', 'suit', 'coat_korti', 'other'
+  key: string;
+  nameEn: string;
+  nameFa: string; // Dari / دری
+  namePs: string; // Pashto / پښتو
+  descriptionEn?: string;
+  descriptionFa?: string;
+  descriptionPs?: string;
+  icon?: string;
+  sortOrder?: number;
+  isStandard?: boolean;
+}
+
 export interface MeasurementField {
   id: string;
   key: string;
   labelEn: string;
   labelFa: string; // Dari / دری
   labelPs: string; // Pashto / پښتو
-  unit: string;
-  defaultValue?: string;
+  garmentCategory: string; // 'all' | 'perahan_tunban' | 'wescott' | 'shirt' | 'kurta' | 'two_piece' | 'suit' | 'coat_korti' | string
+  unit: string; // 'in' | 'cm'
+  defaultValue?: string | number;
+  step?: string; // e.g. '0.25', '0.50', '1.0'
+  required?: boolean;
   isStandard?: boolean;
   sortOrder?: number;
 }
@@ -29,11 +46,13 @@ export interface DesignOption {
 export interface DesignCategory {
   id: string;
   key: string;
+  garmentCategory?: string; // 'all' | 'perahan_tunban' | 'wescott' | 'shirt' | 'kurta' | 'two_piece' | 'suit' | string
   titleEn: string;
   titleFa: string;
   titlePs: string;
   options: DesignOption[];
   allowCustomInput?: boolean;
+  sortOrder?: number;
 }
 
 export interface Fabric {
@@ -44,6 +63,7 @@ export interface Fabric {
   type: string; // e.g. "Cotton Latha", "Silk Boski", "Wash & Wear", "Velvet", "Wool Blend"
   pricePerMeter: number;
   stockMeters: number;
+  supplier?: string;
   imageUrl?: string;
   notes?: string;
   createdAt?: string;

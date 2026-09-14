@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Customer, 
   Order, 
@@ -68,6 +68,16 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
   const [activeCustomer, setActiveCustomer] = useState<Customer | null>(
     selectedCustomerId ? (customers || []).find(c => c.id === selectedCustomerId) || null : null
   );
+
+  // Sync selected customer from props (e.g. when clicked from Dashboard order row)
+  useEffect(() => {
+    if (selectedCustomerId) {
+      const match = (customers || []).find(c => c.id === selectedCustomerId);
+      if (match) {
+        setActiveCustomer(match);
+      }
+    }
+  }, [selectedCustomerId, customers]);
   const [isEditingModalOpen, setIsEditingModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [historyTab, setHistoryTab] = useState<'all' | 'orders' | 'products'>('all');

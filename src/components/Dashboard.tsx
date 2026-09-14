@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { 
   Order, 
   OrderStatus, 
   ShopSettings, 
   Language, 
-  Customer,
   ProductSale
 } from '../types';
 import { translations } from '../translations/i18n';
@@ -16,7 +15,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
   CartesianGrid
 } from 'recharts';
 import { 
@@ -27,26 +25,30 @@ import {
   Trash2, 
   Calendar, 
   Clock, 
-  Phone, 
-  User, 
   DollarSign, 
   Layers, 
   CheckCircle2, 
-  AlertCircle,
-  Scissors,
-  Check,
-  ChevronDown,
-  Filter,
-  Eye,
-  CreditCard,
-  X,
-  Package,
-  MessageCircle,
-  PackageCheck,
-  TrendingUp,
-  BarChart3,
-  ShoppingBag
+  Scissors, 
+  ChevronDown, 
+  CreditCard, 
+  X, 
+  MessageCircle, 
+  PackageCheck, 
+  TrendingUp, 
+  BarChart3, 
+  ShoppingBag, 
+  ArrowUpDown, 
+  ArrowUp, 
+  ArrowDown, 
+  ExternalLink,
+  Sparkles,
+  Tag,
+  Download
 } from 'lucide-react';
+import { printReceiptElement, downloadReceiptPdf } from '../services/printService';
+
+export type SortOption = 'newest' | 'oldest' | 'delivery_asc' | 'delivery_desc';
+export type DashboardViewStream = 'orders' | 'retail' | 'all';
 
 interface DashboardProps {
   orders: Order[];
@@ -75,32 +77,38 @@ export const Dashboard: React.FC<DashboardProps> = ({
 }) => {
   const t = translations[language];
 
-  // Search & Filters State
+  // Active Stream Tab: 'orders' | 'retail' | 'all'
+  const [activeStream, setActiveStream] = useState<DashboardViewStream>('orders');
+
+  // Search, Filters & Sorting State
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [paymentFilter, setPaymentFilter] = useState<string>('all');
-
-  // Navbar search is intentionally shared with the dashboard search field so a
-  // tailor can start searching from anywhere in the application.
-  useEffect(() => {
-    setSearchTerm(globalSearchTerm);
-  }, [globalSearchTerm]);
+  const [sortBy, setSortBy] = useState<SortOption>('newest');
 
   // Quick Payment Modal State
   const [paymentModalOrder, setPaymentModalOrder] = useState<Order | null>(null);
   const [newPaidInput, setNewPaidInput] = useState<number>(0);
 
-  // Currency
+  // Retail Receipt Print State in Dashboard
+  const [activeRetailReceipt, setActiveRetailReceipt] = useState<ProductSale | null>(null);
+  const retailReceiptPrintRef = useRef<HTMLDivElement>(null);
+
+  // Global search sync
+  useEffect(() => {
+    setSearchTerm(globalSearchTerm);
+  }, [globalSearchTerm]);
+
+  // Currency Symbol
   const currencySymbol = language === 'ps' 
     ? (shopSettings?.currencyPs || 'افغانۍ') 
     : language === 'fa' 
     ? (shopSettings?.currencyFa || 'افغانی') 
     : (shopSettings?.currencySymbol || shopSettings?.currencyEn || 'AFN');
 
-  // Filtered Orders with multi-field search:
-  // (Customer name, Contact/phone, Order ID/Number, Order date, Delivery date, Fabric name)
+  // Filtered & Sorted Tailoring Orders
   const filteredOrders = useMemo(() => {
-    return orders.filter(order => {
+    const list = orders.filter(order => {
       const q = searchTerm.trim().toLowerCase();
       
       const matchesSearch = !q || (
@@ -110,13 +118,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
         (order.customerWhatsApp && order.customerWhatsApp.includes(q)) ||
         (order.orderDate && order.orderDate.toLowerCase().includes(q)) ||
         (order.deliveryDate && order.deliveryDate.toLowerCase().includes(q)) ||
-        (order.fabricName && order.fabricName.toLowerCase().includes(q))
+        (order.fabricName && order.fabricName.toLowerCase().includes(q)) ||
+        (order.garmentType && order.garmentType.toLowerCase().includes(q))
       );
 
-      // Status filter
       const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-
-      // Payment filter
       const matchesPayment = 
         paymentFilter === 'all' ||
         (paymentFilter === 'paid' && order.balanceAmount === 0) ||
@@ -124,47 +130,144 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       return matchesSearch && matchesStatus && matchesPayment;
     });
-  }, [orders, searchTerm, statusFilter, paymentFilter]);
 
-  // Dashboard Metrics
+    return list.sort((a, b) => {
+      if (sortBy === 'newest') {
+        const dateA = new Date(a.orderDate || a.createdAt || '').getTime() || 0;
+        const dateB = new Date(b.orderDate || b.createdAt || '').getTime() || 0;
+        return dateB - dateA;
+      }
+      if (sortBy === 'oldest') {
+        const dateA = new Date(a.orderDate || a.createdAt || '').getTime() || 0;
+        const dateB = new Date(b.orderDate || b.createdAt || '').getTime() || 0;
+        return dateA - dateB;
+      }
+      if (sortBy === 'delivery_asc') {
+        const dateA = new Date(a.deliveryDate || '9999-12-31').getTime() || 0;
+        const dateB = new Date(b.deliveryDate || '9999-12-31').getTime() || 0;
+        return dateA - dateB;
+      }
+      if (sortBy === 'delivery_desc') {
+        const dateA = new Date(a.deliveryDate || '0000-01-01').getTime() || 0;
+        const dateB = new Date(b.deliveryDate || '0000-01-01').getTime() || 0;
+        return dateB - dateA;
+      }
+      return 0;
+    });
+  }, [orders, searchTerm, statusFilter, paymentFilter, sortBy]);
+
+  // Filtered & Sorted Retail Sales
+  const filteredSales = useMemo(() => {
+    const list = (productSales || []).filter(sale => {
+      const q = searchTerm.trim().toLowerCase();
+      if (!q) return true;
+      return (
+        sale.productName.toLowerCase().includes(q) ||
+        (sale.customerName && sale.customerName.toLowerCase().includes(q)) ||
+        (sale.customerPhone && sale.customerPhone.includes(q)) ||
+        (sale.category && sale.category.toLowerCase().includes(q)) ||
+        (sale.brand && sale.brand.toLowerCase().includes(q)) ||
+        (sale.saleDate && sale.saleDate.toLowerCase().includes(q)) ||
+        `sl-${sale.id.slice(-6)}`.toLowerCase().includes(q)
+      );
+    });
+
+    return list.sort((a, b) => {
+      const dateA = new Date(a.saleDate || a.createdAt || '').getTime() || 0;
+      const dateB = new Date(b.saleDate || b.createdAt || '').getTime() || 0;
+      return sortBy === 'oldest' ? dateA - dateB : dateB - dateA;
+    });
+  }, [productSales, searchTerm, sortBy]);
+
+  // Comprehensive Metrics (Tailor + Retail)
   const metrics = useMemo(() => {
-    const total = orders.length;
+    const totalOrders = orders.length;
     const pending = orders.filter(o => o.status === 'pending').length;
     const inProgress = orders.filter(o => o.status === 'in_progress').length;
     const ready = orders.filter(o => o.status === 'ready').length;
     const delivered = orders.filter(o => o.status === 'delivered').length;
     const totalBalance = orders.reduce((sum, o) => sum + (Number(o.balanceAmount) || 0), 0);
-    const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+    const orderRevenue = orders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+    const orderPaid = orders.reduce((sum, o) => sum + (Number(o.paidAmount) || 0), 0);
 
-    return { total, pending, inProgress, ready, delivered, totalBalance, totalRevenue };
-  }, [orders]);
+    const totalSales = (productSales || []).length;
+    const retailRevenue = (productSales || []).reduce((sum, s) => sum + (Number(s.totalAmount) || 0), 0);
+    const retailProfit = (productSales || []).reduce((sum, s) => sum + (Number(s.profit) || 0), 0);
+    const retailCollected = retailRevenue;
 
-  const summary = useMemo(() => {
-    const today = new Date();
-    const monthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-    const upcomingLimit = new Date(today);
-    upcomingLimit.setDate(today.getDate() + 7);
-    upcomingLimit.setHours(23, 59, 59, 999);
-    const isUpcoming = (order: Order) => {
-      if (order.status === 'delivered' || !order.deliveryDate) return false;
-      const deadline = new Date(`${order.deliveryDate}T23:59:59`);
-      return !Number.isNaN(deadline.getTime()) && deadline >= new Date(today.toDateString()) && deadline <= upcomingLimit;
-    };
-    const orderRevenue = orders
-      .filter(order => (order.orderDate || order.createdAt || '').startsWith(monthKey))
-      .reduce((total, order) => total + (Number(order.paidAmount) || 0), 0);
-    const productRevenue = productSales
-      .filter(sale => (sale.saleDate || sale.createdAt || '').startsWith(monthKey))
-      .reduce((total, sale) => total + (Number(sale.totalAmount) || 0), 0);
+    const totalShopCollected = orderPaid + retailCollected;
+    const totalShopRevenue = orderRevenue + retailRevenue;
 
-    return {
-      pending: orders.filter(order => order.status === 'pending').length,
-      upcomingDeadlines: orders.filter(isUpcoming).length,
-      monthRevenue: orderRevenue + productRevenue,
+    return { 
+      total: totalOrders, 
+      pending, 
+      inProgress, 
+      ready, 
+      delivered, 
+      totalBalance, 
+      orderRevenue,
+      orderPaid,
+      totalSales,
+      retailRevenue,
+      retailProfit,
+      totalShopCollected,
+      totalShopRevenue
     };
   }, [orders, productSales]);
 
-  // 7-Day Revenue Visualization Data (Orders vs Product Sales)
+  // Daily & Monthly Summary
+  const summary = useMemo(() => {
+    const today = new Date();
+    const todayDateKey = today.toISOString().slice(0, 10);
+    const monthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+
+    // 1. Today's Tailoring Orders
+    const todayOrders = orders.filter(order => {
+      const dStr = order.orderDate || order.createdAt || '';
+      return dStr.startsWith(todayDateKey);
+    });
+    const todayOrdersCount = todayOrders.length;
+    const todayOrdersTotalAmount = todayOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+
+    // 2. Today's Retail Sales
+    const todaySales = (productSales || []).filter(sale => {
+      const sStr = sale.saleDate || sale.createdAt || '';
+      return sStr.startsWith(todayDateKey);
+    });
+    const todaySalesCount = todaySales.length;
+    const todaySalesRevenue = todaySales.reduce((sum, s) => sum + (Number(s.totalAmount) || 0), 0);
+    const todaySalesProfit = todaySales.reduce((sum, s) => sum + (Number(s.profit) || 0), 0);
+
+    // 3. Pending Deliveries
+    const pendingDeliveriesCount = orders.filter(order => order.status !== 'delivered').length;
+    const readyForPickupCount = orders.filter(order => order.status === 'ready').length;
+    const inTailoringCount = orders.filter(order => order.status === 'in_progress' || order.status === 'pending').length;
+
+    // 4. Monthly Revenues
+    const orderMonthlyRevenue = orders
+      .filter(order => (order.orderDate || order.createdAt || '').startsWith(monthKey))
+      .reduce((total, order) => total + (Number(order.paidAmount) || 0), 0);
+    const productMonthlyRevenue = (productSales || [])
+      .filter(sale => (sale.saleDate || sale.createdAt || '').startsWith(monthKey))
+      .reduce((total, sale) => total + (Number(sale.totalAmount) || 0), 0);
+    const totalMonthlyRevenue = orderMonthlyRevenue + productMonthlyRevenue;
+
+    return {
+      todayOrdersCount,
+      todayOrdersTotalAmount,
+      todaySalesCount,
+      todaySalesRevenue,
+      todaySalesProfit,
+      pendingDeliveriesCount,
+      readyForPickupCount,
+      inTailoringCount,
+      totalMonthlyRevenue,
+      orderMonthlyRevenue,
+      productMonthlyRevenue,
+    };
+  }, [orders, productSales]);
+
+  // 7-Day Revenue Visualization Data
   const last7DaysRevenueData = useMemo(() => {
     const days: Array<{
       dateKey: string;
@@ -175,24 +278,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
     }> = [];
 
     const now = new Date();
-    // 6 days ago up to today (7 days total)
     for (let i = 6; i >= 0; i--) {
       const d = new Date(now);
       d.setDate(d.getDate() - i);
-      const dateKey = d.toISOString().split('T')[0]; // "YYYY-MM-DD"
+      const dateKey = d.toISOString().split('T')[0];
 
       const dayName = d.toLocaleDateString(language === 'fa' || language === 'ps' ? 'fa-AF' : 'en-US', { weekday: 'short' });
       const monthDay = `${d.getMonth() + 1}/${d.getDate()}`;
       const displayLabel = `${dayName} ${monthDay}`;
 
-      // Revenue from orders on this date (match orderDate or createdAt)
       const dayOrders = orders.filter(o => {
         const dStr = o.orderDate || o.createdAt;
         return dStr && dStr.startsWith(dateKey);
       });
       const orderRevenue = dayOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
 
-      // Revenue from product sales on this date (match saleDate or createdAt)
       const daySales = (productSales || []).filter(s => {
         const sStr = s.saleDate || s.createdAt;
         return sStr && sStr.startsWith(dateKey);
@@ -220,7 +320,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     };
   }, [orders, productSales, language]);
 
-  // Quick status updater
+  // Status Updater
   const handleUpdateStatus = (order: Order, newStatus: OrderStatus) => {
     const updated: Order = {
       ...order,
@@ -232,7 +332,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     onOrderUpdated();
   };
 
-  // Quick Payment Save
+  // Payment update
   const handleSavePaymentUpdate = () => {
     if (!paymentModalOrder) return;
     const paid = Number(newPaidInput) || 0;
@@ -263,6 +363,95 @@ export const Dashboard: React.FC<DashboardProps> = ({
     }
   };
 
+  const handleDeleteSale = (sale: ProductSale) => {
+    if (window.confirm(`${t.confirmDelete} (${sale.productName})`)) {
+      storageService.deleteProductSale(sale.id);
+      onOrderUpdated();
+    }
+  };
+
+  // Direct Print and PDF for Retail Slip
+  const [isPrintingRetail, setIsPrintingRetail] = useState(false);
+  const [isGeneratingRetailPdf, setIsGeneratingRetailPdf] = useState(false);
+
+  const handlePrintRetailReceipt = async () => {
+    if (!retailReceiptPrintRef.current || !activeRetailReceipt) return;
+    const shopName = language === 'fa' 
+      ? (shopSettings?.shopNameFa || 'Mujeeb Afghan') 
+      : language === 'ps' 
+      ? (shopSettings?.shopNamePs || 'Mujeeb Afghan') 
+      : (shopSettings?.shopNameEn || 'MUJEEB AFGHAN FASHION HOUSE');
+    
+    await printReceiptElement(retailReceiptPrintRef.current, {
+      title: `${shopName} - SL-${activeRetailReceipt.id.slice(-6).toUpperCase()}`,
+      pageFormat: 'thermal80',
+      dir: language === 'en' ? 'ltr' : 'rtl',
+      onStart: () => setIsPrintingRetail(true),
+      onComplete: () => setIsPrintingRetail(false),
+      onError: () => setIsPrintingRetail(false)
+    });
+  };
+
+  const handleDownloadRetailPdf = async () => {
+    if (!retailReceiptPrintRef.current || !activeRetailReceipt) return;
+    const safeCustomerName = activeRetailReceipt.customerName ? activeRetailReceipt.customerName.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_') : 'Customer';
+    const filename = `Retail_Receipt_SL_${activeRetailReceipt.id.slice(-6).toUpperCase()}_${safeCustomerName}`;
+    await downloadReceiptPdf(retailReceiptPrintRef.current, {
+      filename,
+      pageFormat: 'thermal80',
+      onStart: () => setIsGeneratingRetailPdf(true),
+      onComplete: () => setIsGeneratingRetailPdf(false),
+      onError: (err) => {
+        console.error('Retail PDF error:', err);
+        setIsGeneratingRetailPdf(false);
+        handlePrintRetailReceipt();
+      }
+    });
+  };
+
+  // Status badge config
+  const getStatusBadgeConfig = (status: OrderStatus) => {
+    switch (status) {
+      case 'in_progress':
+        return {
+          label: t.statusInProgress,
+          badgeClass: 'bg-blue-50 text-blue-900 border-blue-300 ring-1 ring-blue-500/20 hover:bg-blue-100',
+          dotClass: 'bg-blue-600',
+          pulse: true,
+          icon: Scissors,
+          iconClass: 'text-blue-700',
+        };
+      case 'ready':
+        return {
+          label: t.statusReady,
+          badgeClass: 'bg-emerald-50 text-emerald-900 border-emerald-300 ring-1 ring-emerald-500/20 hover:bg-emerald-100',
+          dotClass: 'bg-emerald-600',
+          pulse: false,
+          icon: CheckCircle2,
+          iconClass: 'text-emerald-700',
+        };
+      case 'delivered':
+        return {
+          label: t.statusDelivered,
+          badgeClass: 'bg-purple-50 text-purple-900 border-purple-300 ring-1 ring-purple-500/20 hover:bg-purple-100',
+          dotClass: 'bg-purple-600',
+          pulse: false,
+          icon: PackageCheck,
+          iconClass: 'text-purple-700',
+        };
+      case 'pending':
+      default:
+        return {
+          label: t.statusPending,
+          badgeClass: 'bg-amber-50 text-amber-900 border-amber-300 ring-1 ring-amber-500/20 hover:bg-amber-100',
+          dotClass: 'bg-amber-500',
+          pulse: true,
+          icon: Clock,
+          iconClass: 'text-amber-700',
+        };
+    }
+  };
+
   return (
     <div className="space-y-6 pb-16 animate-in fade-in duration-200">
       {/* Top Banner / Actions */}
@@ -274,55 +463,141 @@ export const Dashboard: React.FC<DashboardProps> = ({
               {t.dashboard}
             </h1>
             <p className="text-xs text-stone-500 mt-0.5">
-              {orders.length} {t.totalOrders} • {language === 'fa' ? 'مدیریت، فیلتر و جستجوی سریع سفارشات' : language === 'ps' ? 'د فرمایشونو چټکه پلټنه او فلټر' : 'Fast search, status filtering and order tracking'}
+              {orders.length} {t.totalOrders} • {(productSales || []).length} {t.totalRetailSales} • {language === 'fa' ? 'مدیریت و تفکیک سفارشات خیاطی و فروشات پرچون' : language === 'ps' ? 'د خیاطۍ او پرچون پلور مدیریت' : 'Orders & Retail records management'}
             </p>
           </div>
         </div>
 
-        <button
-          onClick={onNewOrder}
-          id="dashboard-new-order-btn"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#D4AF37] hover:bg-[#C29E2E] active:scale-98 text-[#1A1A1A] font-black rounded-xl text-sm transition cursor-pointer shadow-xs"
-        >
-          <Plus className="w-5 h-5 stroke-[2.5]" />
-          <span>{t.newOrder}</span>
-        </button>
-      </div>
-
-      {/* At-a-glance order summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between group hover:border-teal-300 transition">
-          <div>
-            <span className="text-[11px] uppercase tracking-wider text-slate-500 font-bold block">{language === 'fa' ? 'سفارشات در انتظار' : language === 'ps' ? 'د انتظار فرمایشونه' : 'Pending Orders'}</span>
-            <span className="text-2xl font-black text-slate-900 font-mono mt-1 block">{summary.pending}</span>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
-            <Clock className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between group hover:border-violet-300 transition">
-          <div>
-            <span className="text-[11px] uppercase tracking-wider text-slate-500 font-bold block">{language === 'fa' ? 'مهلت‌های تحویل (۷ روز)' : language === 'ps' ? 'د تحویل نېټې (۷ ورځې)' : 'Upcoming Deadlines (7 days)'}</span>
-            <span className="text-2xl font-black text-violet-700 font-mono mt-1 block">{summary.upcomingDeadlines}</span>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center">
-            <Calendar className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between group hover:border-emerald-300 transition">
-          <div>
-            <span className="text-[11px] uppercase tracking-wider text-slate-500 font-bold block">{language === 'fa' ? 'عواید دریافت‌شده این ماه' : language === 'ps' ? 'د دې میاشتې ترلاسه شوي عواید' : 'Current Month Revenue'}</span>
-            <span className="text-xl font-black text-emerald-700 font-mono mt-1 block">{summary.monthRevenue.toLocaleString()} <span className="text-xs font-sans font-medium">{currencySymbol}</span></span>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <TrendingUp className="w-5 h-5" />
-          </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onNewOrder}
+            id="dashboard-new-order-btn"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#D4AF37] hover:bg-[#C29E2E] active:scale-98 text-[#1A1A1A] font-black rounded-xl text-sm transition cursor-pointer shadow-xs"
+          >
+            <Plus className="w-5 h-5 stroke-[2.5]" />
+            <span>{t.newOrder}</span>
+          </button>
         </div>
       </div>
 
-      {/* 7-Day Daily Revenue Visualization (Recharts Bar Chart) */}
+      {/* 4 KPI Summary Cards: Tailor + Retail Revenue & Records */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="dashboard-summary-cards">
+        {/* Card 1: Today's Total Activity (Orders + Retail) */}
+        <div className="bg-white p-4.5 rounded-2xl border border-stone-200 shadow-xs hover:border-[#D4AF37] transition-all duration-200 flex flex-col justify-between relative overflow-hidden group">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <span className="text-[11px] uppercase tracking-wider text-stone-500 font-bold block">
+                {t.todaysOrders} & {language === 'fa' ? 'پرچون' : 'Retail'}
+              </span>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-3xl font-black text-[#1A1A1A] font-mono">
+                  {summary.todayOrdersCount + summary.todaySalesCount}
+                </span>
+                <span className="text-xs text-stone-500 font-bold">
+                  {summary.todayOrdersCount} ✂️ + {summary.todaySalesCount} 🛍️
+                </span>
+              </div>
+            </div>
+            <div className="w-11 h-11 rounded-xl bg-amber-50 text-[#B39025] flex items-center justify-center shrink-0 border border-amber-200/60 group-hover:scale-105 transition">
+              <ShoppingBag className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-between text-xs text-stone-600">
+            <span className="text-[11px] font-medium text-stone-500">
+              {language === 'fa' ? 'عواید امروز:' : "Today's Total:"}
+            </span>
+            <span className="font-mono font-bold text-[#1A1A1A]">
+              {(summary.todayOrdersTotalAmount + summary.todaySalesRevenue).toLocaleString()} {currencySymbol}
+            </span>
+          </div>
+        </div>
+
+        {/* Card 2: Pending Deliveries */}
+        <div className="bg-white p-4.5 rounded-2xl border border-stone-200 shadow-xs hover:border-blue-300 transition-all duration-200 flex flex-col justify-between relative overflow-hidden group">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <span className="text-[11px] uppercase tracking-wider text-stone-500 font-bold block">
+                {t.pendingDeliveries}
+              </span>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-3xl font-black text-blue-700 font-mono">
+                  {summary.pendingDeliveriesCount}
+                </span>
+                <span className="text-xs text-stone-500 font-bold">
+                  {language === 'fa' ? 'در نوبت تحویل' : 'awaiting delivery'}
+                </span>
+              </div>
+            </div>
+            <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-200/60 group-hover:scale-105 transition">
+              <PackageCheck className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-between text-[11px]">
+            <span className="text-emerald-700 font-bold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              {summary.readyForPickupCount} {t.statusReady}
+            </span>
+            <span className="text-blue-700 font-bold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+              {summary.inTailoringCount} {t.statusInProgress}
+            </span>
+          </div>
+        </div>
+
+        {/* Card 3: Total Monthly Revenue */}
+        <div className="bg-white p-4.5 rounded-2xl border border-stone-200 shadow-xs hover:border-emerald-300 transition-all duration-200 flex flex-col justify-between relative overflow-hidden group">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <span className="text-[11px] uppercase tracking-wider text-stone-500 font-bold block">
+                {t.totalMonthlyRevenue}
+              </span>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-2xl sm:text-3xl font-black text-emerald-700 font-mono">
+                  {summary.totalMonthlyRevenue.toLocaleString()}
+                </span>
+                <span className="text-xs font-bold text-emerald-800 font-sans">{currencySymbol}</span>
+              </div>
+            </div>
+            <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-200/60 group-hover:scale-105 transition">
+              <TrendingUp className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
+            <span className="text-[11px]">
+              ✂️ {summary.orderMonthlyRevenue.toLocaleString()}
+            </span>
+            <span className="text-[11px] font-bold text-emerald-800">
+              🛍️ +{summary.productMonthlyRevenue.toLocaleString()}
+            </span>
+          </div>
+        </div>
+
+        {/* Card 4: Retail Boutique Sales & Profit */}
+        <div className="bg-white p-4.5 rounded-2xl border border-stone-200 shadow-xs hover:border-amber-300 transition-all duration-200 flex flex-col justify-between relative overflow-hidden group">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <span className="text-[11px] uppercase tracking-wider text-stone-500 font-bold block">
+                {t.retailRevenue} ({t.profit})
+              </span>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-2xl sm:text-3xl font-black text-amber-800 font-mono">
+                  {metrics.retailRevenue.toLocaleString()}
+                </span>
+                <span className="text-xs font-bold text-amber-900 font-sans">{currencySymbol}</span>
+              </div>
+            </div>
+            <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0 border border-amber-200/60 group-hover:scale-105 transition">
+              <Tag className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-between text-xs text-emerald-800 font-bold">
+            <span>{metrics.totalSales} {language === 'fa' ? 'معامله پرچون' : 'retail sales'}</span>
+            <span className="font-mono font-black">+{metrics.retailProfit.toLocaleString()} {currencySymbol} {t.profit}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 7-Day Daily Revenue Visualization */}
       <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-3">
           <div className="flex items-center gap-2.5">
@@ -336,39 +611,35 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <p className="text-[11px] text-stone-500">
                 {language === 'fa' 
                   ? 'مقایسه عواید روزانه حاصل از سفارشات خیاطی و فروشات محصولات' 
-                  : language === 'ps' 
-                  ? 'د خیاطۍ فرمایشونو او اجناسو پلور ورځني عواید' 
-                  : 'Daily earnings breakdown from tailoring orders & boutique product sales'}
+                  : 'Daily earnings breakdown from tailoring orders & retail product sales'}
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-xs">
-            {/* Total 7 Days Badge */}
             <div className="bg-stone-50 px-3 py-1.5 rounded-xl border border-stone-200 flex items-center gap-2 font-mono">
               <span className="text-stone-500 font-sans text-[11px] font-bold">
-                {language === 'fa' ? 'مجموع ۷ روز:' : language === 'ps' ? 'د ۷ ورځو مجموعه:' : '7-Day Total:'}
+                {language === 'fa' ? 'مجموع ۷ روز:' : '7-Day Total:'}
               </span>
               <span className="font-black text-[#1A1A1A]">
                 {last7DaysRevenueData.total7DayRevenue.toLocaleString()} {currencySymbol}
               </span>
             </div>
 
-            {/* Legend Chips */}
             <div className="flex items-center gap-3 text-[11px] font-bold">
               <span className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-xs bg-[#D4AF37]" />
-                <span className="text-stone-700">{language === 'fa' ? 'سفارشات' : language === 'ps' ? 'فرمایشونه' : 'Orders'} ({last7DaysRevenueData.total7DayOrdersRevenue.toLocaleString()})</span>
+                <span className="text-stone-700">{t.tailoringStream} ({last7DaysRevenueData.total7DayOrdersRevenue.toLocaleString()})</span>
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-xs bg-[#059669]" />
-                <span className="text-stone-700">{language === 'fa' ? 'فروشات محصولات' : language === 'ps' ? 'د اجناسو پلور' : 'Products'} ({last7DaysRevenueData.total7DayProductsRevenue.toLocaleString()})</span>
+                <span className="text-stone-700">{t.retailStream} ({last7DaysRevenueData.total7DayProductsRevenue.toLocaleString()})</span>
               </span>
             </div>
           </div>
         </div>
 
-        {/* Chart Container */}
+        {/* Chart */}
         <div className="w-full h-64 pt-2">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
@@ -402,19 +673,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         <div className="flex items-center justify-between gap-4">
                           <span className="text-[#D4AF37] flex items-center gap-1">
                             <span className="w-2 h-2 rounded-xs bg-[#D4AF37]" />
-                            {language === 'fa' ? 'سفارشات:' : 'Orders:'}
+                            {t.tailorRevenue}:
                           </span>
                           <span className="font-mono font-bold">{ordRev.toLocaleString()} {currencySymbol}</span>
                         </div>
                         <div className="flex items-center justify-between gap-4">
                           <span className="text-emerald-400 flex items-center gap-1">
                             <span className="w-2 h-2 rounded-xs bg-[#059669]" />
-                            {language === 'fa' ? 'محصولات:' : 'Products:'}
+                            {t.retailRevenue}:
                           </span>
                           <span className="font-mono font-bold">{prodRev.toLocaleString()} {currencySymbol}</span>
                         </div>
                         <div className="flex items-center justify-between gap-4 pt-1 border-t border-stone-800 font-bold">
-                          <span className="text-white">{language === 'fa' ? 'مجموع روز:' : 'Daily Total:'}</span>
+                          <span className="text-white">{t.totalAmount}:</span>
                           <span className="font-mono text-[#D4AF37]">{totRev.toLocaleString()} {currencySymbol}</span>
                         </div>
                       </div>
@@ -425,14 +696,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
               />
               <Bar 
                 dataKey="orderRevenue" 
-                name={language === 'fa' ? 'عواید سفارشات' : language === 'ps' ? 'د فرمایشونو عواید' : 'Order Revenue'} 
+                name={t.tailorRevenue} 
                 fill="#D4AF37" 
                 radius={[4, 4, 0, 0]} 
                 maxBarSize={32}
               />
               <Bar 
                 dataKey="productRevenue" 
-                name={language === 'fa' ? 'عواید محصولات' : language === 'ps' ? 'د اجناسو عواید' : 'Product Sales'} 
+                name={t.retailRevenue} 
                 fill="#059669" 
                 radius={[4, 4, 0, 0]} 
                 maxBarSize={32}
@@ -442,196 +713,539 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
+      {/* Stream Selector Navigation Tabs */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-stone-100 p-1.5 rounded-2xl border border-stone-200">
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setActiveStream('orders')}
+            className={`px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 cursor-pointer ${
+              activeStream === 'orders'
+                ? 'bg-[#1A1A1A] text-white shadow-xs'
+                : 'text-stone-700 hover:bg-white hover:text-stone-900'
+            }`}
+          >
+            <Scissors className="w-3.5 h-3.5 text-[#D4AF37]" />
+            <span>{t.tailorRecords}</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+              activeStream === 'orders' ? 'bg-[#D4AF37] text-[#1A1A1A]' : 'bg-stone-200'
+            }`}>
+              {filteredOrders.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveStream('retail')}
+            className={`px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 cursor-pointer ${
+              activeStream === 'retail'
+                ? 'bg-emerald-700 text-white shadow-xs'
+                : 'text-stone-700 hover:bg-white hover:text-stone-900'
+            }`}
+          >
+            <ShoppingBag className="w-3.5 h-3.5 text-emerald-300" />
+            <span>{t.retailRecords}</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+              activeStream === 'retail' ? 'bg-white text-emerald-900 font-bold' : 'bg-stone-200'
+            }`}>
+              {filteredSales.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveStream('all')}
+            className={`px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 cursor-pointer ${
+              activeStream === 'all'
+                ? 'bg-[#173b3b] text-white shadow-xs'
+                : 'text-stone-700 hover:bg-white hover:text-stone-900'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5 text-[#e4bd63]" />
+            <span>{t.allRecords}</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+              activeStream === 'all' ? 'bg-white text-stone-900 font-bold' : 'bg-stone-200'
+            }`}>
+              {filteredOrders.length + filteredSales.length}
+            </span>
+          </button>
+        </div>
+
+        <div className="text-xs font-bold text-stone-500 px-3 hidden sm:block">
+          {activeStream === 'orders' 
+            ? `${filteredOrders.length} ${t.totalOrders}`
+            : activeStream === 'retail'
+            ? `${filteredSales.length} ${t.totalRetailSales}`
+            : `${filteredOrders.length + filteredSales.length} ${t.allRecords}`}
+        </div>
+      </div>
+
       {/* Search & Filter Toolbar */}
       <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-3">
         <div className="flex flex-col md:flex-row gap-3">
-          {/* Main Search Input: Order #, Contact Number, Customer Name, Date, Fabric */}
+          {/* Main Real-Time Search */}
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-stone-400 absolute start-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              placeholder={t.searchPlaceholder}
+              placeholder={language === 'fa' 
+                ? 'جستجوی لحظه‌ای بر اساس نام مشتری، شماره تماس، شماره فرمایش یا جنس...' 
+                : language === 'ps' 
+                ? 'د پېرودونکي نوم، ټلیفون شمېرې، بِل یا جنس له مخې لټون...' 
+                : 'Real-time search across orders, retail products, customers...'}
               className="w-full ps-10 pe-9 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:bg-white focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] outline-hidden"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute end-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 p-1"
+                title="Clear search"
+                className="absolute end-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 p-1 cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
 
-          {/* Status Filter Tabs with Counts */}
-          <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl overflow-x-auto pb-1 md:pb-1">
-            {[
-              { id: 'all', label: t.all, count: metrics.total },
-              { id: 'pending', label: t.statusPending, count: metrics.pending },
-              { id: 'in_progress', label: t.statusInProgress, count: metrics.inProgress },
-              { id: 'ready', label: t.statusReady, count: metrics.ready },
-              { id: 'delivered', label: t.statusDelivered, count: metrics.delivered },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setStatusFilter(tab.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
-                  statusFilter === tab.id
-                    ? 'bg-[#1A1A1A] text-white shadow-xs font-black'
-                    : 'text-stone-600 hover:text-[#1A1A1A] hover:bg-stone-200'
-                }`}
-              >
-                <span>{tab.label}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                  statusFilter === tab.id ? 'bg-[#D4AF37] text-[#1A1A1A] font-bold' : 'bg-stone-200 text-stone-600'
-                }`}>
-                  {tab.count}
-                </span>
-              </button>
-            ))}
-          </div>
+          {/* Status Filter for Orders */}
+          {activeStream !== 'retail' && (
+            <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl overflow-x-auto pb-1 md:pb-1">
+              {[
+                { id: 'all', label: t.all, count: metrics.total },
+                { id: 'pending', label: t.statusPending, count: metrics.pending },
+                { id: 'in_progress', label: t.statusInProgress, count: metrics.inProgress },
+                { id: 'ready', label: t.statusReady, count: metrics.ready },
+                { id: 'delivered', label: t.statusDelivered, count: metrics.delivered },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setStatusFilter(tab.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                    statusFilter === tab.id
+                      ? 'bg-[#1A1A1A] text-white shadow-xs font-black'
+                      : 'text-stone-600 hover:text-[#1A1A1A] hover:bg-stone-200'
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                    statusFilter === tab.id ? 'bg-[#D4AF37] text-[#1A1A1A] font-bold' : 'bg-stone-200 text-stone-600'
+                  }`}>
+                    {tab.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Payment Filter */}
-          <select
-            value={paymentFilter}
-            onChange={e => setPaymentFilter(e.target.value)}
-            className="px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold text-stone-700 outline-hidden focus:border-[#D4AF37]"
-          >
-            <option value="all">{t.paymentStatus}: {t.all}</option>
-            <option value="paid">{t.paid}</option>
-            <option value="balance">{t.balanceRemaining} ({t.partial})</option>
-          </select>
+          {activeStream === 'orders' && (
+            <select
+              value={paymentFilter}
+              onChange={e => setPaymentFilter(e.target.value)}
+              className="px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold text-stone-700 outline-hidden focus:border-[#D4AF37] cursor-pointer"
+            >
+              <option value="all">{t.paymentStatus}: {t.all}</option>
+              <option value="paid">{t.paid}</option>
+              <option value="balance">{t.balanceRemaining} ({t.partial})</option>
+            </select>
+          )}
+
+          {/* Sorting Dropdown */}
+          <div className="flex items-center gap-1 bg-stone-50 border border-stone-200 rounded-xl px-2 py-1 shadow-2xs">
+            <ArrowUpDown className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value as SortOption)}
+              className="bg-transparent text-xs font-bold text-stone-700 outline-hidden cursor-pointer pe-1"
+              title={t.sortBy}
+            >
+              <option value="newest">📅 {t.sortNewest}</option>
+              <option value="oldest">📅 {t.sortOldest}</option>
+              <option value="delivery_asc">⏰ {t.sortDeliveryNearest}</option>
+              <option value="delivery_desc">⏰ {t.sortDeliveryFurthest}</option>
+            </select>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (sortBy === 'newest') setSortBy('oldest');
+                else if (sortBy === 'oldest') setSortBy('newest');
+                else if (sortBy === 'delivery_asc') setSortBy('delivery_desc');
+                else setSortBy('delivery_asc');
+              }}
+              className="p-1 text-stone-500 hover:text-stone-900 hover:bg-stone-200 rounded-md transition cursor-pointer"
+              title="Reverse sort"
+            >
+              {sortBy === 'newest' || sortBy === 'delivery_desc' ? (
+                <ArrowDown className="w-3.5 h-3.5 text-[#B39025]" />
+              ) : (
+                <ArrowUp className="w-3.5 h-3.5 text-[#B39025]" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Orders List / Table */}
-      {filteredOrders.length === 0 ? (
-        <div className="bg-white p-12 text-center rounded-2xl border border-[#E5E5E5] shadow-xs">
-          <div className="w-16 h-16 rounded-full bg-stone-100 border border-stone-200 mx-auto flex items-center justify-center text-[#D4AF37] mb-3">
-            <Search className="w-8 h-8" />
+      {/* RETAIL SALES TABLE (When activeStream === 'retail' or 'all') */}
+      {(activeStream === 'retail' || activeStream === 'all') && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-black text-[#1A1A1A] flex items-center gap-2">
+              <ShoppingBag className="w-4 h-4 text-emerald-600" />
+              <span>{t.retailRecords} ({filteredSales.length})</span>
+            </h3>
           </div>
-          <h3 className="text-sm font-bold text-stone-800">{t.noDataFound}</h3>
-          <p className="text-xs text-stone-500 mt-1 max-w-sm mx-auto">
-            {searchTerm 
-              ? (language === 'fa' ? 'هیچ سفارشی با این مشخصات یافت نشد. جستجوی دیگری را امتحان کنید.' : 'No orders matched your search criteria.') 
-              : (language === 'fa' ? 'هنوز فرمایشی ثبت نشده است.' : 'No orders registered yet.')}
-          </p>
-          {searchTerm ? (
-            <button
-              onClick={() => { setSearchTerm(''); setStatusFilter('all'); setPaymentFilter('all'); }}
-              className="mt-4 px-4 py-2 bg-stone-100 text-stone-700 hover:bg-stone-200 rounded-xl text-xs font-bold transition cursor-pointer"
-            >
-              {language === 'fa' ? 'پاک کردن فیلترها' : 'Clear Filters'}
-            </button>
+
+          {filteredSales.length === 0 ? (
+            <div className="bg-white p-8 text-center rounded-2xl border border-stone-200">
+              <p className="text-xs text-stone-500">{t.noDataFound}</p>
+            </div>
           ) : (
-            <button
-              onClick={onNewOrder}
-              className="mt-4 px-5 py-2.5 bg-[#D4AF37] hover:bg-[#C29E2E] text-[#1A1A1A] rounded-xl text-xs font-black transition cursor-pointer shadow-xs"
-            >
-              + {t.newOrder}
-            </button>
+            <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-start text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-emerald-50/60 border-b border-emerald-100 text-emerald-950 font-bold uppercase tracking-wider text-[11px]">
+                      <th className="py-3 px-4 text-start">ID / {t.date}</th>
+                      <th className="py-3 px-4 text-start">{t.product}</th>
+                      <th className="py-3 px-4 text-start">{t.customer}</th>
+                      <th className="py-3 px-4 text-start">{t.qty} & {t.sellingPrice}</th>
+                      <th className="py-3 px-4 text-start">{t.totalAmount} ({t.profit})</th>
+                      <th className="py-3 px-4 text-end">{t.actions}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-stone-100">
+                    {filteredSales.map(sale => (
+                      <tr key={sale.id} className="hover:bg-emerald-50/30 transition">
+                        <td className="py-3 px-4 align-middle">
+                          <span className="font-mono font-bold text-xs text-stone-900 block">
+                            SL-{sale.id.slice(-6).toUpperCase()}
+                          </span>
+                          <span className="text-[10px] text-stone-500">
+                            {new Date(sale.saleDate).toLocaleDateString()}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 align-middle">
+                          <span className="font-bold text-stone-900 block">{sale.productName}</span>
+                          <span className="text-[10px] text-stone-500">{sale.category} {sale.brand ? `• ${sale.brand}` : ''}</span>
+                        </td>
+                        <td className="py-3 px-4 align-middle">
+                          {sale.customerId ? (
+                            <button
+                              type="button"
+                              onClick={() => onSelectCustomer(sale.customerId!)}
+                              className="font-bold text-emerald-900 hover:underline flex items-center gap-1 cursor-pointer"
+                            >
+                              <span>{sale.customerName || 'Customer'}</span>
+                              <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                            </button>
+                          ) : (
+                            <span className="font-medium text-stone-700">{sale.customerName || 'Cash Customer'}</span>
+                          )}
+                          {sale.customerPhone && <span className="text-[10px] text-stone-500 block font-mono">{sale.customerPhone}</span>}
+                        </td>
+                        <td className="py-3 px-4 align-middle font-mono">
+                          <span className="font-bold">{sale.quantity}x</span> @ {Number(sale.sellingPrice).toLocaleString()} {currencySymbol}
+                        </td>
+                        <td className="py-3 px-4 align-middle">
+                          <span className="font-mono font-black text-sm text-emerald-900 block">
+                            {Number(sale.totalAmount).toLocaleString()} {currencySymbol}
+                          </span>
+                          <span className="text-[10px] font-bold text-emerald-700">
+                            +{Number(sale.profit).toLocaleString()} {currencySymbol} {t.profit}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 align-middle text-end">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setActiveRetailReceipt(sale)}
+                              title={t.quickPrintSlip}
+                              className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow-2xs transition cursor-pointer"
+                            >
+                              <Printer className="w-3.5 h-3.5" />
+                              <span>{t.quickPrintSlip}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteSale(sale)}
+                              title={t.delete}
+                              className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           )}
         </div>
-      ) : (
+      )}
+
+      {/* TAILORING ORDERS TABLE (When activeStream === 'orders' or 'all') */}
+      {(activeStream === 'orders' || activeStream === 'all') && (
         <div className="space-y-3">
-          {/* Responsive Card Layout for Mobile, Table Layout for Desktop */}
-          <div className="hidden lg:block bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden shadow-xs">
-            <table className="w-full text-start text-xs border-collapse">
-              <thead>
-                <tr className="bg-stone-50 border-b border-[#E5E5E5] text-stone-600 font-bold uppercase tracking-wider text-[11px]">
-                  <th className="py-3.5 px-4 text-start">{t.orderNumber}</th>
-                  <th className="py-3.5 px-4 text-start">{t.customerDetails}</th>
-                  <th className="py-3.5 px-4 text-start">{t.garmentType} & {t.fabric}</th>
-                  <th className="py-3.5 px-4 text-start">{t.dates}</th>
-                  <th className="py-3.5 px-4 text-start">{t.orderStatus}</th>
-                  <th className="py-3.5 px-4 text-start">{t.paymentStatus}</th>
-                  <th className="py-3.5 px-4 text-end">{t.actions}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E5E5E5]">
-                {filteredOrders.map(order => {
-                  return (
-                    <tr 
-                      key={order.id} 
-                      className="hover:bg-amber-50/40 transition group"
-                    >
-                      {/* Order Number */}
-                      <td className="py-3 px-4 align-middle">
-                        <div className="flex flex-col gap-1">
-                          <span className="font-mono font-black text-sm text-[#1A1A1A] tracking-wider">
-                            {order.orderNumber}
-                          </span>
-                        </div>
-                      </td>
+          {activeStream === 'all' && (
+            <div className="flex items-center justify-between pt-4 border-t border-stone-200">
+              <h3 className="text-sm font-black text-[#1A1A1A] flex items-center gap-2">
+                <Scissors className="w-4 h-4 text-[#D4AF37]" />
+                <span>{t.tailorRecords} ({filteredOrders.length})</span>
+              </h3>
+            </div>
+          )}
 
-                      {/* Customer Info */}
-                      <td className="py-3 px-4 align-middle">
-                        <div className="space-y-0.5">
-                          <button
-                            type="button"
-                            onClick={() => onSelectCustomer(order.customerId)}
-                            className="font-extrabold text-[#1A1A1A] hover:text-[#B39025] transition text-start block"
-                          >
-                            {order.customerName}
-                          </button>
-                          <div className="flex items-center gap-2 text-stone-500 font-mono text-[11px]">
-                            <span>{order.customerPhone}</span>
-                            {order.customerWhatsApp && (
-                              <a
-                                href={`https://wa.me/${order.customerWhatsApp.replace(/\D/g, '')}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-emerald-600 hover:text-emerald-700"
-                                title="WhatsApp"
+          {filteredOrders.length === 0 ? (
+            <div className="bg-white p-12 text-center rounded-2xl border border-[#E5E5E5] shadow-xs">
+              <div className="w-16 h-16 rounded-full bg-stone-100 border border-stone-200 mx-auto flex items-center justify-center text-[#D4AF37] mb-3">
+                <Search className="w-8 h-8" />
+              </div>
+              <h3 className="text-sm font-bold text-stone-800">{t.noDataFound}</h3>
+              <p className="text-xs text-stone-500 mt-1 max-w-sm mx-auto">
+                {searchTerm 
+                  ? (language === 'fa' ? `هیچ فرمایشی مطابق با "${searchTerm}" یافت نشد.` : `No orders matched "${searchTerm}".`) 
+                  : (language === 'fa' ? 'هنوز فرمایشی ثبت نشده است.' : 'No orders registered yet.')}
+              </p>
+              {searchTerm ? (
+                <button
+                  onClick={() => { setSearchTerm(''); setStatusFilter('all'); setPaymentFilter('all'); }}
+                  className="mt-4 px-4 py-2 bg-stone-100 text-stone-700 hover:bg-stone-200 rounded-xl text-xs font-bold transition cursor-pointer"
+                >
+                  {language === 'fa' ? 'پاک کردن جستجو' : 'Clear Search'}
+                </button>
+              ) : (
+                <button
+                  onClick={onNewOrder}
+                  className="mt-4 px-5 py-2.5 bg-[#D4AF37] hover:bg-[#C29E2E] text-[#1A1A1A] rounded-xl text-xs font-black transition cursor-pointer shadow-xs"
+                >
+                  + {t.newOrder}
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {/* Desktop Table Layout */}
+              <div className="hidden lg:block bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden shadow-xs">
+                <table className="w-full text-start text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-stone-50 border-b border-[#E5E5E5] text-stone-600 font-bold uppercase tracking-wider text-[11px]">
+                      <th className="py-3.5 px-4 text-start">{t.orderNumber}</th>
+                      <th className="py-3.5 px-4 text-start">{t.customerDetails}</th>
+                      <th className="py-3.5 px-4 text-start">{t.garmentType} & {t.fabric}</th>
+                      <th className="py-3.5 px-4 text-start">{t.dates}</th>
+                      <th className="py-3.5 px-4 text-start">{t.orderStatus}</th>
+                      <th className="py-3.5 px-4 text-start">{t.paymentStatus}</th>
+                      <th className="py-3.5 px-4 text-end">{t.actions}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#E5E5E5]">
+                    {filteredOrders.map(order => {
+                      const statusConfig = getStatusBadgeConfig(order.status);
+                      const StatusIcon = statusConfig.icon;
+
+                      return (
+                        <tr 
+                          key={order.id} 
+                          className="hover:bg-amber-50/40 transition group"
+                        >
+                          <td className="py-3 px-4 align-middle">
+                            <span className="font-mono font-black text-sm text-[#1A1A1A] tracking-wider block">
+                              {order.orderNumber}
+                            </span>
+                          </td>
+
+                          <td className="py-3 px-4 align-middle">
+                            <div className="space-y-0.5">
+                              <button
+                                type="button"
+                                onClick={() => onSelectCustomer(order.customerId)}
+                                title={t.viewCustomerHistory}
+                                className="font-extrabold text-[#1A1A1A] hover:text-[#B39025] hover:underline transition text-start inline-flex items-center gap-1.5 group/cust cursor-pointer"
                               >
-                                <MessageCircle className="w-3.5 h-3.5" />
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      </td>
+                                <span>{order.customerName}</span>
+                                <ExternalLink className="w-3 h-3 text-stone-400 group-hover/cust:text-[#B39025] opacity-0 group-hover/cust:opacity-100 transition shrink-0" />
+                              </button>
+                              <div className="flex items-center gap-2 text-stone-500 font-mono text-[11px]">
+                                <span>{order.customerPhone}</span>
+                                {order.customerWhatsApp && (
+                                  <a
+                                    href={`https://wa.me/${order.customerWhatsApp.replace(/\D/g, '')}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-emerald-600 hover:text-emerald-700"
+                                    title="WhatsApp"
+                                  >
+                                    <MessageCircle className="w-3.5 h-3.5" />
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          </td>
 
-                      {/* Garment Type & Fabric */}
-                      <td className="py-3 px-4 align-middle">
-                        <div className="space-y-0.5">
-                          <span className="font-bold text-[#1A1A1A] block">{order.garmentType}</span>
-                          <span className="text-[11px] text-stone-500 block truncate max-w-[180px]">
-                            {order.fabricName ? `🧵 ${order.fabricName}` : '—'}
-                          </span>
-                        </div>
-                      </td>
+                          <td className="py-3 px-4 align-middle">
+                            <div className="space-y-0.5">
+                              <span className="font-bold text-[#1A1A1A] block">{order.garmentType}</span>
+                              <span className="text-[11px] text-stone-500 block truncate max-w-[180px]">
+                                {order.fabricName ? `🧵 ${order.fabricName}` : '—'}
+                              </span>
+                            </div>
+                          </td>
 
-                      {/* Dates */}
-                      <td className="py-3 px-4 align-middle font-mono text-[11px]">
-                        <div className="space-y-0.5">
-                          <div className="text-stone-500 flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-stone-400" />
-                            <span>{order.orderDate.slice(0, 10)}</span>
-                          </div>
-                          <div className="text-[#1A1A1A] font-bold flex items-center gap-1">
-                            <Calendar className="w-3 h-3 text-[#D4AF37]" />
-                            <span>{order.deliveryDate}</span>
-                          </div>
-                        </div>
-                      </td>
+                          <td className="py-3 px-4 align-middle font-mono text-[11px]">
+                            <div className="space-y-0.5">
+                              <div className="text-stone-500 flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-stone-400" />
+                                <span>{order.orderDate.slice(0, 10)}</span>
+                              </div>
+                              <div className="text-[#1A1A1A] font-bold flex items-center gap-1">
+                                <Calendar className="w-3 h-3 text-[#D4AF37]" />
+                                <span>{order.deliveryDate}</span>
+                              </div>
+                            </div>
+                          </td>
 
-                      {/* Status Color-Coded Badge */}
-                      <td className="py-3 px-4 align-middle">
-                        <div className="relative inline-block">
+                          <td className="py-3 px-4 align-middle">
+                            <div className="relative inline-flex items-center group/badge">
+                              <div 
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black border shadow-2xs transition-all ${statusConfig.badgeClass}`}
+                              >
+                                <span className="relative flex h-2 w-2 shrink-0">
+                                  {statusConfig.pulse && (
+                                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${statusConfig.dotClass}`} />
+                                  )}
+                                  <span className={`relative inline-flex rounded-full h-2 w-2 ${statusConfig.dotClass}`} />
+                                </span>
+                                <StatusIcon className={`w-3.5 h-3.5 shrink-0 ${statusConfig.iconClass}`} />
+                                <span className="whitespace-nowrap">{statusConfig.label}</span>
+                                <ChevronDown className="w-3 h-3 opacity-60 ml-0.5 group-hover/badge:opacity-100 transition" />
+                              </div>
+                              <select
+                                value={order.status}
+                                onChange={e => handleUpdateStatus(order, e.target.value as OrderStatus)}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer text-xs"
+                                title="Change status"
+                              >
+                                <option value="pending">⏳ {t.statusPending}</option>
+                                <option value="in_progress">✂️ {t.statusInProgress}</option>
+                                <option value="ready">✅ {t.statusReady}</option>
+                                <option value="delivered">📦 {t.statusDelivered}</option>
+                              </select>
+                            </div>
+                          </td>
+
+                          <td className="py-3 px-4 align-middle">
+                            <button
+                              type="button"
+                              onClick={() => openPaymentModal(order)}
+                              className="text-start hover:opacity-80 transition cursor-pointer"
+                            >
+                              <div className="flex items-center gap-1.5 mb-0.5">
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                  order.balanceAmount === 0
+                                    ? 'bg-emerald-100 text-emerald-800'
+                                    : order.paidAmount > 0
+                                    ? 'bg-amber-100 text-amber-800'
+                                    : 'bg-rose-100 text-rose-800'
+                                }`}>
+                                  {order.balanceAmount === 0 ? t.paid : order.paidAmount > 0 ? t.partial : t.unpaid}
+                                </span>
+                              </div>
+                              <div className="font-mono text-xs">
+                                <span className="font-bold text-[#1A1A1A]">{order.totalAmount} {currencySymbol}</span>
+                                {order.balanceAmount > 0 && (
+                                  <span className="text-rose-600 font-bold block text-[11px]">
+                                    ({t.balanceRemaining}: {order.balanceAmount})
+                                  </span>
+                                )}
+                              </div>
+                            </button>
+                          </td>
+
+                          <td className="py-3 px-4 align-middle text-end">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <div className="relative inline-flex items-center">
+                                <select
+                                  value={order.status}
+                                  onChange={e => handleUpdateStatus(order, e.target.value as OrderStatus)}
+                                  className="text-[11px] font-bold py-1.5 ps-2 pe-6 bg-stone-50 hover:bg-stone-100 border border-stone-300 rounded-lg text-stone-800 cursor-pointer outline-hidden focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition appearance-none"
+                                  title={t.quickStatus}
+                                >
+                                  <option value="pending">⏳ {t.markPending}</option>
+                                  <option value="in_progress">✂️ {t.markInProgress}</option>
+                                  <option value="ready">✅ {t.markReady}</option>
+                                  <option value="delivered">📦 {t.markDelivered}</option>
+                                </select>
+                                <ChevronDown className="w-3 h-3 text-stone-500 absolute end-1.5 pointer-events-none" />
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => onViewReceipt(order)}
+                                title={t.print}
+                                className="p-1.5 bg-[#D4AF37] hover:bg-[#C29E2E] text-[#1A1A1A] rounded-lg transition cursor-pointer shadow-2xs"
+                              >
+                                <Printer className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => onEditOrder(order)}
+                                title={t.edit}
+                                className="p-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg transition cursor-pointer"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteOrder(order)}
+                                title={t.delete}
+                                className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition cursor-pointer"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile / Tablet Friendly Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:hidden gap-3.5">
+                {filteredOrders.map(order => {
+                  const statusConfig = getStatusBadgeConfig(order.status);
+                  const StatusIcon = statusConfig.icon;
+
+                  return (
+                    <div
+                      key={order.id}
+                      className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-3"
+                    >
+                      <div className="flex items-center justify-between gap-2 border-b border-stone-100 pb-2.5">
+                        <span className="font-mono font-black text-sm text-[#1A1A1A]">
+                          {order.orderNumber}
+                        </span>
+
+                        <div className="relative inline-flex items-center">
+                          <div 
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black border shadow-2xs ${statusConfig.badgeClass}`}
+                          >
+                            <span className="relative flex h-2 w-2 shrink-0">
+                              {statusConfig.pulse && (
+                                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${statusConfig.dotClass}`} />
+                              )}
+                              <span className={`relative inline-flex rounded-full h-2 w-2 ${statusConfig.dotClass}`} />
+                            </span>
+                            <StatusIcon className={`w-3.5 h-3.5 shrink-0 ${statusConfig.iconClass}`} />
+                            <span className="whitespace-nowrap">{statusConfig.label}</span>
+                            <ChevronDown className="w-3 h-3 opacity-60 ml-0.5" />
+                          </div>
                           <select
                             value={order.status}
                             onChange={e => handleUpdateStatus(order, e.target.value as OrderStatus)}
-                            className={`text-xs font-black px-3 py-1.5 rounded-full border shadow-2xs outline-hidden cursor-pointer transition-all duration-150 ${
-                              order.status === 'ready'
-                                ? 'bg-emerald-100 text-emerald-900 border-emerald-400 hover:bg-emerald-200 ring-1 ring-emerald-500/20'
-                                : order.status === 'in_progress'
-                                ? 'bg-blue-100 text-blue-900 border-blue-400 hover:bg-blue-200 ring-1 ring-blue-500/20'
-                                : order.status === 'delivered'
-                                ? 'bg-purple-100 text-purple-900 border-purple-400 hover:bg-purple-200 ring-1 ring-purple-500/20'
-                                : 'bg-amber-100 text-amber-900 border-amber-400 hover:bg-amber-200 ring-1 ring-amber-500/20'
-                            }`}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer text-xs"
                           >
                             <option value="pending">⏳ {t.statusPending}</option>
                             <option value="in_progress">✂️ {t.statusInProgress}</option>
@@ -639,183 +1253,86 @@ export const Dashboard: React.FC<DashboardProps> = ({
                             <option value="delivered">📦 {t.statusDelivered}</option>
                           </select>
                         </div>
-                      </td>
+                      </div>
 
-                      {/* Payment Status & Balance */}
-                      <td className="py-3 px-4 align-middle">
-                        <button
-                          type="button"
-                          onClick={() => openPaymentModal(order)}
-                          className="text-start hover:opacity-80 transition cursor-pointer"
-                        >
-                          <div className="flex items-center gap-1.5 mb-0.5">
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                              order.balanceAmount === 0
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : order.paidAmount > 0
-                                ? 'bg-amber-100 text-amber-800'
-                                : 'bg-rose-100 text-rose-800'
-                            }`}>
-                              {order.balanceAmount === 0 ? t.paid : order.paidAmount > 0 ? t.partial : t.unpaid}
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <button
+                            type="button"
+                            onClick={() => onSelectCustomer(order.customerId)}
+                            className="font-extrabold text-sm text-[#1A1A1A] hover:text-[#B39025] hover:underline text-start inline-flex items-center gap-1 cursor-pointer"
+                          >
+                            <span>{order.customerName}</span>
+                            <ExternalLink className="w-3 h-3 text-stone-400 shrink-0" />
+                          </button>
+                          <p className="text-xs text-stone-500 font-mono mt-0.5">{order.customerPhone}</p>
+                        </div>
+                        <div className="text-end">
+                          <span className="text-xs font-bold text-stone-800 block">{order.garmentType}</span>
+                          {order.fabricName && (
+                            <span className="text-[11px] text-stone-500 block truncate max-w-[140px]">
+                              🧵 {order.fabricName}
                             </span>
-                          </div>
-                          <div className="font-mono text-xs">
-                            <span className="font-bold text-[#1A1A1A]">{order.totalAmount}</span>
-                            {order.balanceAmount > 0 && (
-                              <span className="text-rose-600 font-bold block text-[11px]">
-                                ({t.balanceRemaining}: {order.balanceAmount})
-                              </span>
-                            )}
-                          </div>
-                        </button>
-                      </td>
+                          )}
+                        </div>
+                      </div>
 
-                      {/* Actions */}
-                      <td className="py-3 px-4 align-middle text-end">
-                        <div className="flex items-center justify-end gap-1.5">
+                      <div className="p-2.5 bg-stone-50 rounded-xl border border-stone-200 flex items-center justify-between text-xs">
+                        <div>
+                          <span className="text-stone-500 text-[11px] block">{t.totalAmount}</span>
+                          <span className="font-mono font-bold text-[#1A1A1A]">{order.totalAmount} {currencySymbol}</span>
+                        </div>
+                        <div>
+                          <span className="text-emerald-700 text-[11px] block">{t.paidAmount}</span>
+                          <span className="font-mono font-bold text-emerald-800">{order.paidAmount} {currencySymbol}</span>
+                        </div>
+                        <div>
+                          <span className="text-rose-600 text-[11px] block">{t.balanceRemaining}</span>
+                          <span className="font-mono font-bold text-rose-600">{order.balanceAmount} {currencySymbol}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-stone-100">
+                        <div className="text-[11px] text-stone-500 font-mono flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5 text-[#D4AF37]" />
+                          <span>{order.deliveryDate}</span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 ms-auto">
                           <button
                             type="button"
                             onClick={() => onViewReceipt(order)}
-                            title={t.printReceipt}
-                            className="p-1.5 bg-[#D4AF37] hover:bg-[#C29E2E] text-[#1A1A1A] rounded-lg transition cursor-pointer shadow-2xs"
+                            className="px-2.5 py-1 bg-[#D4AF37] hover:bg-[#C29E2E] text-[#1A1A1A] rounded-lg text-xs font-black flex items-center gap-1 shadow-2xs"
                           >
-                            <Printer className="w-4 h-4" />
+                            <Printer className="w-3.5 h-3.5" />
+                            <span>{t.receipt}</span>
                           </button>
                           <button
                             type="button"
                             onClick={() => onEditOrder(order)}
-                            title={t.edit}
-                            className="p-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg transition cursor-pointer"
+                            className="p-1 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg"
                           >
-                            <Edit3 className="w-4 h-4" />
+                            <Edit3 className="w-3.5 h-3.5" />
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDeleteOrder(order)}
-                            title={t.delete}
-                            className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition cursor-pointer"
+                            className="p-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
-                      </td>
-                    </tr>
+                      </div>
+                    </div>
                   );
                 })}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile / Tablet Friendly Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:hidden gap-3.5">
-            {filteredOrders.map(order => {
-              return (
-                <div
-                  key={order.id}
-                  className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-3"
-                >
-                  {/* Card Top: Order Number & Status */}
-                  <div className="flex items-center justify-between gap-2 border-b border-stone-100 pb-2.5">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono font-black text-sm text-[#1A1A1A]">
-                        {order.orderNumber}
-                      </span>
-                    </div>
-
-                    <select
-                      value={order.status}
-                      onChange={e => handleUpdateStatus(order, e.target.value as OrderStatus)}
-                      className={`text-xs font-black px-2.5 py-1 rounded-full border shadow-2xs outline-hidden cursor-pointer ${
-                        order.status === 'ready'
-                          ? 'bg-emerald-100 text-emerald-900 border-emerald-400'
-                          : order.status === 'in_progress'
-                          ? 'bg-blue-100 text-blue-900 border-blue-400'
-                          : order.status === 'delivered'
-                          ? 'bg-purple-100 text-purple-900 border-purple-400'
-                          : 'bg-amber-100 text-amber-900 border-amber-400'
-                      }`}
-                    >
-                      <option value="pending">⏳ {t.statusPending}</option>
-                      <option value="in_progress">✂️ {t.statusInProgress}</option>
-                      <option value="ready">✅ {t.statusReady}</option>
-                      <option value="delivered">📦 {t.statusDelivered}</option>
-                    </select>
-                  </div>
-
-                  {/* Customer & Garment */}
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-extrabold text-sm text-[#1A1A1A]">
-                        {order.customerName}
-                      </h3>
-                      <p className="text-xs text-stone-500 font-mono mt-0.5">{order.customerPhone}</p>
-                    </div>
-                    <div className="text-end">
-                      <span className="text-xs font-bold text-stone-800 block">{order.garmentType}</span>
-                      {order.fabricName && (
-                        <span className="text-[11px] text-stone-500 block truncate max-w-[140px]">
-                          🧵 {order.fabricName}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Pricing & Balance Info */}
-                  <div className="p-2.5 bg-stone-50 rounded-xl border border-stone-200 flex items-center justify-between text-xs">
-                    <div>
-                      <span className="text-stone-500 text-[11px] block">{t.totalAmount}</span>
-                      <span className="font-mono font-bold text-[#1A1A1A]">{order.totalAmount} {currencySymbol}</span>
-                    </div>
-                    <div>
-                      <span className="text-emerald-700 text-[11px] block">{t.paidAmount}</span>
-                      <span className="font-mono font-bold text-emerald-800">{order.paidAmount} {currencySymbol}</span>
-                    </div>
-                    <div>
-                      <span className="text-rose-600 text-[11px] block">{t.balanceRemaining}</span>
-                      <span className="font-mono font-bold text-rose-600">{order.balanceAmount} {currencySymbol}</span>
-                    </div>
-                  </div>
-
-                  {/* Card Bottom Actions */}
-                  <div className="flex items-center justify-between pt-1">
-                    <div className="text-[11px] text-stone-500 font-mono flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5 text-[#D4AF37]" />
-                      <span>{order.deliveryDate}</span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => onViewReceipt(order)}
-                        className="px-3 py-1.5 bg-[#D4AF37] hover:bg-[#C29E2E] text-[#1A1A1A] rounded-xl text-xs font-black flex items-center gap-1 shadow-2xs"
-                      >
-                        <Printer className="w-3.5 h-3.5" />
-                        <span>{t.receipt}</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onEditOrder(order)}
-                        className="p-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteOrder(order)}
-                        className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Quick Payment Modal */}
+      {/* Quick Payment Modal for Orders */}
       {paymentModalOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div className="bg-white w-full max-w-sm rounded-2xl p-5 shadow-2xl border border-stone-200 space-y-4">
@@ -826,7 +1343,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </h3>
               <button
                 onClick={() => setPaymentModalOrder(null)}
-                className="text-stone-400 hover:text-stone-600 p-1"
+                className="text-stone-400 hover:text-stone-600 p-1 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -857,9 +1374,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <button
                   type="button"
                   onClick={() => setNewPaidInput(paymentModalOrder.totalAmount)}
-                  className="text-[11px] text-emerald-700 font-bold hover:underline"
+                  className="text-[11px] text-emerald-700 font-bold hover:underline cursor-pointer"
                 >
-                  {language === 'fa' ? 'تسویه کامل' : 'Full Paid'}
+                  {language === 'fa' ? 'تسویه کامل (پرداخت شد)' : 'Full Paid'}
                 </button>
               </div>
             </div>
@@ -868,16 +1385,140 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <button
                 type="button"
                 onClick={() => setPaymentModalOrder(null)}
-                className="px-3 py-2 bg-stone-100 hover:bg-stone-200 rounded-xl text-xs font-bold text-stone-700"
+                className="px-3 py-2 bg-stone-100 hover:bg-stone-200 rounded-xl text-xs font-bold text-stone-700 cursor-pointer"
               >
                 {t.cancel}
               </button>
               <button
                 type="button"
                 onClick={handleSavePaymentUpdate}
-                className="px-4 py-2 bg-[#D4AF37] hover:bg-[#C29E2E] rounded-xl text-xs font-black text-[#1A1A1A]"
+                className="px-4 py-2 bg-[#D4AF37] hover:bg-[#C29E2E] rounded-xl text-xs font-black text-[#1A1A1A] cursor-pointer"
               >
                 {t.save}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Printable Retail Receipt Modal in Dashboard */}
+      {activeRetailReceipt && (
+        <div id="retail-receipt-modal" className="print-modal-container fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="retail-receipt-container bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-stone-100 bg-stone-50 no-print">
+              <h3 className="font-extrabold text-sm text-[#1A1A1A] flex items-center gap-1.5">
+                <Printer className="w-4 h-4 text-[#B39025]" />
+                <span>{language === 'fa' ? 'بل فروش جنس' : 'Retail Sales Receipt'}</span>
+              </h3>
+              <button
+                onClick={() => setActiveRetailReceipt(null)}
+                className="p-1 text-stone-500 hover:text-stone-800 rounded-lg cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div id="printable-retail-slip" ref={retailReceiptPrintRef} className="p-6 bg-white font-mono text-xs space-y-4 text-stone-900 border-b border-dashed border-stone-300">
+              <div className="text-center space-y-1">
+                <h2 className="font-black text-base text-[#1A1A1A] tracking-wider">
+                  {language === 'fa' 
+                    ? (shopSettings?.shopNameFa || 'مجیب افغان خیاطي او رخت پلورنځی')
+                    : language === 'ps' 
+                    ? (shopSettings?.shopNamePs || 'مجیب افغان خیاطي او رخت پلورنځی')
+                    : (shopSettings?.shopNameEn || 'MUJEEB AFGHAN FASHION HOUSE')}
+                </h2>
+                <p className="text-[10px] text-stone-500">
+                  {language === 'fa' 
+                    ? (shopSettings?.addressFa || '') 
+                    : language === 'ps' 
+                    ? (shopSettings?.addressPs || '') 
+                    : (shopSettings?.addressEn || '')}
+                </p>
+                <p className="text-[10px] text-stone-600 font-bold font-mono">
+                  {shopSettings?.phone1 || shopSettings?.whatsapp || ''}
+                </p>
+                <div className="text-[10px] uppercase border-y border-stone-300 py-1 font-bold tracking-widest text-stone-700">
+                  {language === 'fa' ? 'رسید فروش پرچون' : 'RETAIL SALES RECEIPT'}
+                </div>
+              </div>
+
+              <div className="text-[11px] space-y-1 border-b border-stone-200 pb-2">
+                <div className="flex justify-between">
+                  <span className="text-stone-500">Receipt #:</span>
+                  <span className="font-bold">SL-{activeRetailReceipt.id.slice(-6).toUpperCase()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-stone-500">Date:</span>
+                  <span>{new Date(activeRetailReceipt.saleDate).toLocaleDateString()}</span>
+                </div>
+                {activeRetailReceipt.customerName && (
+                  <div className="flex justify-between">
+                    <span className="text-stone-500">Customer:</span>
+                    <span className="font-bold">{activeRetailReceipt.customerName}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2 border-b border-stone-200 pb-2 text-[11px]">
+                <div className="flex justify-between font-bold">
+                  <span>Item</span>
+                  <span>Total</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>
+                    {activeRetailReceipt.productName} ({activeRetailReceipt.quantity}x @ {activeRetailReceipt.sellingPrice})
+                  </span>
+                  <span className="font-black">{Number(activeRetailReceipt.totalAmount).toLocaleString()} {currencySymbol}</span>
+                </div>
+                {activeRetailReceipt.notes && (
+                  <div className="text-[10px] text-stone-500 italic">
+                    Note: {activeRetailReceipt.notes}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between font-black text-sm text-[#1A1A1A] pt-1">
+                  <span>TOTAL PAID:</span>
+                  <span>{Number(activeRetailReceipt.totalAmount).toLocaleString()} {currencySymbol}</span>
+                </div>
+                <div className="flex justify-between text-[10px] text-stone-500">
+                  <span>Payment Method:</span>
+                  <span className="uppercase">{activeRetailReceipt.paymentMethod || 'CASH'}</span>
+                </div>
+              </div>
+
+              <div className="text-center text-[10px] text-stone-500 pt-3 border-t border-stone-200">
+                {language === 'fa' ? 'از خرید و اعتماد شما سپاسگزاریم!' : 'Thank you for your purchase!'}
+              </div>
+            </div>
+
+            <div className="p-4 bg-stone-50 flex items-center justify-end gap-2 no-print">
+              <button
+                type="button"
+                onClick={() => setActiveRetailReceipt(null)}
+                className="px-3.5 py-2 bg-stone-200 hover:bg-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer"
+              >
+                {t.close}
+              </button>
+              <button
+                type="button"
+                onClick={handleDownloadRetailPdf}
+                disabled={isGeneratingRetailPdf}
+                className="px-3.5 py-2 bg-white hover:bg-stone-100 border border-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                title="Download PDF"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>{isGeneratingRetailPdf ? '...' : 'PDF'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={handlePrintRetailReceipt}
+                disabled={isPrintingRetail}
+                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl text-xs font-black shadow-xs transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+              >
+                <Printer className="w-4 h-4" />
+                <span>{isPrintingRetail ? t.loading : (language === 'fa' ? 'چاپ رسید' : 'Print Slip')}</span>
               </button>
             </div>
           </div>

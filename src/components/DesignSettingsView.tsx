@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   DesignCategory, 
   DesignOption, 
   MeasurementField, 
+  GarmentTypeConfig,
   ShopSettings, 
   Language 
 } from '../types';
@@ -10,26 +11,22 @@ import { translations } from '../translations/i18n';
 import { storageService } from '../services/storage';
 import { 
   Sparkles, 
-  Settings, 
   Scissors, 
   Plus, 
   Trash2, 
-  Edit2, 
-  Pencil,
-  Save, 
+  Pencil, 
   Download, 
   Upload, 
   RotateCcw, 
   Check, 
   Building2, 
-  Phone, 
-  MapPin, 
-  FileText, 
-  DollarSign, 
-  Layers, 
-  CheckCircle2, 
   X,
-  Database
+  Database,
+  Shirt,
+  Layers,
+  Filter,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 
 interface DesignSettingsViewProps {
@@ -37,12 +34,17 @@ interface DesignSettingsViewProps {
   measurementFields: MeasurementField[];
   shopSettings: ShopSettings;
   language: Language;
-  activeSubTab?: 'design' | 'measurements' | 'shop' | 'backup';
-  onSubTabChange?: (sub: 'design' | 'measurements' | 'shop' | 'backup') => void;
-  onUpdateDesignCategories: (cats: DesignCategory[]) => void;
-  onUpdateMeasurementFields: (fields: MeasurementField[]) => void;
-  onUpdateShopSettings: (settings: ShopSettings) => void;
-  onDataReset: () => void;
+  activeSubTab?: 'design' | 'measurements' | 'garments' | 'shop' | 'backup';
+  onSubTabChange?: (sub: 'design' | 'measurements' | 'garments' | 'shop' | 'backup') => void;
+  onUpdateDesignCategories?: (cats: DesignCategory[]) => void;
+  onUpdateMeasurementFields?: (fields: MeasurementField[]) => void;
+  onUpdateShopSettings?: (settings: ShopSettings) => void;
+  onDataReset?: () => void;
+  // Alternative handler names for maximum backwards compatibility
+  onCategoryUpdated?: () => void;
+  onMeasurementFieldsUpdated?: () => void;
+  onSettingsUpdated?: () => void;
+  onDatabaseRestored?: () => void;
 }
 
 export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
@@ -56,43 +58,57 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
   onUpdateMeasurementFields,
   onUpdateShopSettings,
   onDataReset,
+  onCategoryUpdated,
+  onMeasurementFieldsUpdated,
+  onSettingsUpdated,
+  onDatabaseRestored,
 }) => {
   const t = translations[language];
 
-  // Active Tab in Settings: 'design' | 'measurements' | 'shop' | 'backup'
-  const [activeTab, setActiveTab] = useState<'design' | 'measurements' | 'shop' | 'backup'>(activeSubTab);
+  // Active Tab: 'garments' | 'measurements' | 'design' | 'shop' | 'backup'
+  const [activeTab, setActiveTab] = useState<'garments' | 'measurements' | 'design' | 'shop' | 'backup'>(
+    (activeSubTab as any) || 'design'
+  );
 
-  // Sync when activeSubTab changes from sidebar
   React.useEffect(() => {
     if (activeSubTab) {
-      setActiveTab(activeSubTab);
+      setActiveTab(activeSubTab as any);
     }
   }, [activeSubTab]);
 
-  const handleTabClick = (tab: 'design' | 'measurements' | 'shop' | 'backup') => {
+  const handleTabClick = (tab: 'garments' | 'measurements' | 'design' | 'shop' | 'backup') => {
     setActiveTab(tab);
-    if (onSubTabChange) onSubTabChange(tab);
+    if (onSubTabChange) onSubTabChange(tab as any);
   };
+
+  // Garment Types Local State
+  const [garmentTypes, setGarmentTypes] = useState<GarmentTypeConfig[]>(() => 
+    storageService.getGarmentTypes()
+  );
+
+  // Selected Garment Category Filter for Tabs (e.g. 'all', 'perahan_tunban', 'wescott', etc.)
+  const [selectedGarmentFilter, setSelectedGarmentFilter] = useState<string>('all');
 
   // Categories Local State
   const [categories, setCategories] = useState<DesignCategory[]>(designCategories);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [newCatGarment, setNewCatGarment] = useState<string>('perahan_tunban');
   const [newCatTitleFa, setNewCatTitleFa] = useState('');
   const [newCatTitlePs, setNewCatTitlePs] = useState('');
   const [newCatTitleEn, setNewCatTitleEn] = useState('');
 
-  // Category editing state
-  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  // Category Edit State
+  const [editCatGarment, setEditCatGarment] = useState<string>('perahan_tunban');
   const [editCatTitleFa, setEditCatTitleFa] = useState('');
   const [editCatTitlePs, setEditCatTitlePs] = useState('');
   const [editCatTitleEn, setEditCatTitleEn] = useState('');
 
-  // Option adding state per category
+  // Option Adding / Editing State
   const [addingOptionForCatId, setAddingOptionForCatId] = useState<string | null>(null);
   const [newOptionNameFa, setNewOptionNameFa] = useState('');
   const [newOptionNamePs, setNewOptionNamePs] = useState('');
   const [newOptionNameEn, setNewOptionNameEn] = useState('');
 
-  // Option editing state
   const [editingOption, setEditingOption] = useState<{
     catId: string;
     optId: string;
@@ -103,26 +119,161 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
   // Measurements Local State
   const [fields, setFields] = useState<MeasurementField[]>(measurementFields);
+  const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
+  const [newFieldGarment, setNewFieldGarment] = useState<string>('perahan_tunban');
   const [newFieldKey, setNewFieldKey] = useState('');
   const [newFieldFa, setNewFieldFa] = useState('');
   const [newFieldPs, setNewFieldPs] = useState('');
   const [newFieldEn, setNewFieldEn] = useState('');
+  const [newFieldUnit, setNewFieldUnit] = useState<'in' | 'cm'>('in');
 
-  // Shop Settings Local State
+  // Field Edit State
+  const [editFieldGarment, setEditFieldGarment] = useState<string>('perahan_tunban');
+  const [editFieldFa, setEditFieldFa] = useState('');
+  const [editFieldPs, setEditFieldPs] = useState('');
+  const [editFieldEn, setEditFieldEn] = useState('');
+  const [editFieldUnit, setEditFieldUnit] = useState<'in' | 'cm'>('in');
+
+  // Garment Types Management State
+  const [editingGarmentKey, setEditingGarmentKey] = useState<string | null>(null);
+  const [newGarmentKey, setNewGarmentKey] = useState('');
+  const [newGarmentFa, setNewGarmentFa] = useState('');
+  const [newGarmentPs, setNewGarmentPs] = useState('');
+  const [newGarmentEn, setNewGarmentEn] = useState('');
+  const [newGarmentIcon, setNewGarmentIcon] = useState('✂️');
+
+  const [editGarmentFa, setEditGarmentFa] = useState('');
+  const [editGarmentPs, setEditGarmentPs] = useState('');
+  const [editGarmentEn, setEditGarmentEn] = useState('');
+  const [editGarmentIcon, setEditGarmentIcon] = useState('');
+
+  // Shop Profile State
   const [shop, setShop] = useState<ShopSettings>({ ...shopSettings });
 
-  // Notifications
+  // Notification Toast
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   const showNotification = (msg: string) => {
     setSaveMessage(msg);
-    setTimeout(() => setSaveMessage(null), 3000);
+    setTimeout(() => setSaveMessage(null), 3500);
   };
 
-  // --- Category Actions ---
+  // Sync incoming props
+  React.useEffect(() => {
+    setCategories(designCategories);
+  }, [designCategories]);
+
+  React.useEffect(() => {
+    setFields(measurementFields);
+  }, [measurementFields]);
+
+  React.useEffect(() => {
+    setShop({ ...shopSettings });
+  }, [shopSettings]);
+
+  // Helper to get localized name of garment type
+  const getGarmentName = (key: string) => {
+    if (key === 'all') {
+      return language === 'fa' ? 'تمام لباس‌ها (عمومی)' : language === 'ps' ? 'ټول کالي (عمومي)' : 'All Garments (General)';
+    }
+    const found = garmentTypes.find(g => g.key === key || g.id === key);
+    if (found) {
+      return language === 'ps' ? found.namePs : language === 'fa' ? found.nameFa : found.nameEn;
+    }
+    return key;
+  };
+
+  // Filtered fields based on selected garment filter
+  const filteredMeasurementFields = useMemo(() => {
+    if (selectedGarmentFilter === 'all') return fields;
+    return fields.filter(f => f.garmentCategory === selectedGarmentFilter || !f.garmentCategory || f.garmentCategory === 'all');
+  }, [fields, selectedGarmentFilter]);
+
+  // Filtered design categories based on selected garment filter
+  const filteredDesignCategories = useMemo(() => {
+    if (selectedGarmentFilter === 'all') return categories;
+    return categories.filter(c => c.garmentCategory === selectedGarmentFilter || !c.garmentCategory || c.garmentCategory === 'all');
+  }, [categories, selectedGarmentFilter]);
+
+  // ================= GARMENT TYPES ACTIONS =================
+  const handleAddGarmentType = () => {
+    if (!newGarmentFa.trim() && !newGarmentPs.trim() && !newGarmentEn.trim()) {
+      alert(language === 'fa' ? 'لطفاً نام لباس را وارد نمایید' : 'Please enter garment name');
+      return;
+    }
+    const key = (newGarmentKey.trim() || newGarmentEn.trim().toLowerCase().replace(/[^a-z0-9]/g, '_') || 'garment_' + Date.now());
+    const nameFa = newGarmentFa.trim() || newGarmentPs.trim() || newGarmentEn.trim();
+    const namePs = newGarmentPs.trim() || nameFa;
+    const nameEn = newGarmentEn.trim() || nameFa;
+
+    const newGarment: GarmentTypeConfig = {
+      id: key,
+      key,
+      nameFa,
+      namePs,
+      nameEn,
+      icon: newGarmentIcon.trim() || '✂️',
+      isStandard: false,
+      sortOrder: garmentTypes.length + 1,
+    };
+
+    const updated = [...garmentTypes, newGarment];
+    setGarmentTypes(updated);
+    storageService.saveGarmentTypes(updated);
+
+    setNewGarmentKey('');
+    setNewGarmentFa('');
+    setNewGarmentPs('');
+    setNewGarmentEn('');
+    setNewGarmentIcon('✂️');
+    showNotification(t.savedSuccessfully);
+  };
+
+  const startEditGarment = (g: GarmentTypeConfig) => {
+    setEditingGarmentKey(g.key);
+    setEditGarmentFa(g.nameFa);
+    setEditGarmentPs(g.namePs);
+    setEditGarmentEn(g.nameEn);
+    setEditGarmentIcon(g.icon || '✂️');
+  };
+
+  const handleSaveGarmentEdit = () => {
+    if (!editingGarmentKey) return;
+    const updated = garmentTypes.map(g => {
+      if (g.key === editingGarmentKey) {
+        return {
+          ...g,
+          nameFa: editGarmentFa.trim() || g.nameFa,
+          namePs: editGarmentPs.trim() || g.namePs,
+          nameEn: editGarmentEn.trim() || g.nameEn,
+          icon: editGarmentIcon.trim() || g.icon,
+        };
+      }
+      return g;
+    });
+
+    setGarmentTypes(updated);
+    storageService.saveGarmentTypes(updated);
+    setEditingGarmentKey(null);
+    showNotification(t.savedSuccessfully);
+  };
+
+  const handleDeleteGarment = (key: string) => {
+    if (window.confirm(t.confirmDelete || 'Are you sure you want to delete this garment type?')) {
+      const updated = garmentTypes.filter(g => g.key !== key);
+      setGarmentTypes(updated);
+      storageService.saveGarmentTypes(updated);
+      if (selectedGarmentFilter === key) {
+        setSelectedGarmentFilter('all');
+      }
+      showNotification(t.deletedSuccessfully);
+    }
+  };
+
+  // ================= DESIGN CATEGORIES ACTIONS =================
   const handleAddCategory = () => {
     if (!newCatTitleFa.trim() && !newCatTitlePs.trim() && !newCatTitleEn.trim()) {
-      alert(language === 'fa' ? 'لطفاً نام دسته را وارد کنید' : 'Please enter category title');
+      alert(language === 'fa' ? 'لطفاً نام دسته دیزاین را وارد نمایید' : 'Please enter category title');
       return;
     }
 
@@ -134,6 +285,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     const newCat: DesignCategory = {
       id: 'cat_' + Date.now(),
       key,
+      garmentCategory: newCatGarment,
       titleFa,
       titlePs,
       titleEn,
@@ -146,7 +298,8 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     const updated = [...categories, newCat];
     setCategories(updated);
     storageService.saveDesignCategories(updated);
-    onUpdateDesignCategories(updated);
+    if (onUpdateDesignCategories) onUpdateDesignCategories(updated);
+    if (onCategoryUpdated) onCategoryUpdated();
 
     setNewCatTitleFa('');
     setNewCatTitlePs('');
@@ -156,6 +309,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
   const startEditCategory = (cat: DesignCategory) => {
     setEditingCategoryId(cat.id);
+    setEditCatGarment(cat.garmentCategory || 'perahan_tunban');
     setEditCatTitleFa(cat.titleFa);
     setEditCatTitlePs(cat.titlePs);
     setEditCatTitleEn(cat.titleEn);
@@ -171,6 +325,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
       if (c.id === editingCategoryId) {
         return {
           ...c,
+          garmentCategory: editCatGarment,
           titleFa,
           titlePs,
           titleEn,
@@ -181,7 +336,8 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
     setCategories(updated);
     storageService.saveDesignCategories(updated);
-    onUpdateDesignCategories(updated);
+    if (onUpdateDesignCategories) onUpdateDesignCategories(updated);
+    if (onCategoryUpdated) onCategoryUpdated();
     setEditingCategoryId(null);
     showNotification(t.savedSuccessfully);
   };
@@ -191,7 +347,8 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
       const updated = categories.filter(c => c.id !== catId);
       setCategories(updated);
       storageService.saveDesignCategories(updated);
-      onUpdateDesignCategories(updated);
+      if (onUpdateDesignCategories) onUpdateDesignCategories(updated);
+      if (onCategoryUpdated) onCategoryUpdated();
       showNotification(t.deletedSuccessfully);
     }
   };
@@ -214,14 +371,18 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
     const updated = categories.map(c => {
       if (c.id === catId) {
-        return { ...c, options: [...c.options, newOpt] };
+        return {
+          ...c,
+          options: [...c.options, newOpt],
+        };
       }
       return c;
     });
 
     setCategories(updated);
     storageService.saveDesignCategories(updated);
-    onUpdateDesignCategories(updated);
+    if (onUpdateDesignCategories) onUpdateDesignCategories(updated);
+    if (onCategoryUpdated) onCategoryUpdated();
 
     setNewOptionNameFa('');
     setNewOptionNamePs('');
@@ -263,7 +424,8 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
     setCategories(updated);
     storageService.saveDesignCategories(updated);
-    onUpdateDesignCategories(updated);
+    if (onUpdateDesignCategories) onUpdateDesignCategories(updated);
+    if (onCategoryUpdated) onCategoryUpdated();
     setEditingOption(null);
     showNotification(t.savedSuccessfully);
   };
@@ -271,42 +433,49 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
   const handleDeleteOption = (catId: string, optId: string) => {
     const updated = categories.map(c => {
       if (c.id === catId) {
-        return { ...c, options: c.options.filter(o => o.id !== optId) };
+        return {
+          ...c,
+          options: c.options.filter(o => o.id !== optId),
+        };
       }
       return c;
     });
 
     setCategories(updated);
     storageService.saveDesignCategories(updated);
-    onUpdateDesignCategories(updated);
+    if (onUpdateDesignCategories) onUpdateDesignCategories(updated);
+    if (onCategoryUpdated) onCategoryUpdated();
     showNotification(t.deletedSuccessfully);
   };
 
-  // --- Measurement Fields Actions ---
+  // ================= MEASUREMENT FIELDS ACTIONS =================
   const handleAddField = () => {
     if (!newFieldFa.trim() && !newFieldPs.trim() && !newFieldEn.trim()) {
+      alert(language === 'fa' ? 'لطفاً نام اندازه را وارد کنید' : 'Please enter measurement label');
       return;
     }
 
     const labelFa = newFieldFa.trim() || newFieldPs.trim() || newFieldEn.trim();
     const labelPs = newFieldPs.trim() || labelFa;
     const labelEn = newFieldEn.trim() || labelFa;
-    const key = newFieldKey.trim() || 'meas_' + Date.now();
+    const key = newFieldKey.trim() || 'f_' + Date.now();
 
     const newF: MeasurementField = {
-      id: 'mf_' + Date.now(),
+      id: 'field_' + Date.now(),
       key,
+      garmentCategory: newFieldGarment,
       labelFa,
       labelPs,
       labelEn,
-      unit: 'in',
+      unit: newFieldUnit,
       isStandard: false,
     };
 
     const updated = [...fields, newF];
     setFields(updated);
     storageService.saveMeasurementFields(updated);
-    onUpdateMeasurementFields(updated);
+    if (onUpdateMeasurementFields) onUpdateMeasurementFields(updated);
+    if (onMeasurementFieldsUpdated) onMeasurementFieldsUpdated();
 
     setNewFieldKey('');
     setNewFieldFa('');
@@ -315,30 +484,71 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     showNotification(t.savedSuccessfully);
   };
 
-  const handleDeleteField = (fieldId: string) => {
-    const updated = fields.filter(f => f.id !== fieldId);
-    setFields(updated);
-    storageService.saveMeasurementFields(updated);
-    onUpdateMeasurementFields(updated);
-    showNotification(t.deletedSuccessfully);
+  const startEditField = (field: MeasurementField) => {
+    setEditingFieldId(field.id);
+    setEditFieldGarment(field.garmentCategory || 'perahan_tunban');
+    setEditFieldFa(field.labelFa);
+    setEditFieldPs(field.labelPs);
+    setEditFieldEn(field.labelEn);
+    setEditFieldUnit((field.unit as any) || 'in');
   };
 
-  // --- Shop Settings Actions ---
-  const handleSaveShopSettings = (e: React.FormEvent) => {
-    e.preventDefault();
-    storageService.saveShopSettings(shop);
-    onUpdateShopSettings(shop);
+  const handleSaveFieldEdit = () => {
+    if (!editingFieldId) return;
+    const labelFa = editFieldFa.trim() || editFieldPs.trim() || editFieldEn.trim();
+    const labelPs = editFieldPs.trim() || labelFa;
+    const labelEn = editFieldEn.trim() || labelFa;
+
+    const updated = fields.map(f => {
+      if (f.id === editingFieldId) {
+        return {
+          ...f,
+          garmentCategory: editFieldGarment,
+          labelFa,
+          labelPs,
+          labelEn,
+          unit: editFieldUnit,
+        };
+      }
+      return f;
+    });
+
+    setFields(updated);
+    storageService.saveMeasurementFields(updated);
+    if (onUpdateMeasurementFields) onUpdateMeasurementFields(updated);
+    if (onMeasurementFieldsUpdated) onMeasurementFieldsUpdated();
+    setEditingFieldId(null);
     showNotification(t.savedSuccessfully);
   };
 
-  // --- Backup & Restore Actions ---
+  const handleDeleteField = (fieldId: string) => {
+    if (window.confirm(t.confirmDelete || 'Are you sure?')) {
+      const updated = fields.filter(f => f.id !== fieldId);
+      setFields(updated);
+      storageService.saveMeasurementFields(updated);
+      if (onUpdateMeasurementFields) onUpdateMeasurementFields(updated);
+      if (onMeasurementFieldsUpdated) onMeasurementFieldsUpdated();
+      showNotification(t.deletedSuccessfully);
+    }
+  };
+
+  // ================= SHOP PROFILE ACTIONS =================
+  const handleSaveShopSettings = (e: React.FormEvent) => {
+    e.preventDefault();
+    storageService.saveShopSettings(shop);
+    if (onUpdateShopSettings) onUpdateShopSettings(shop);
+    if (onSettingsUpdated) onSettingsUpdated();
+    showNotification(t.savedSuccessfully);
+  };
+
+  // ================= BACKUP ACTIONS =================
   const handleExportBackup = () => {
     const json = storageService.exportFullDatabase();
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `TailorShop_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `Mujeeb_Afghan_Fashion_${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
     showNotification(language === 'fa' ? 'فایل پشتیبان با موفقیت دانلود شد' : 'Backup downloaded successfully');
@@ -352,7 +562,8 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     reader.onload = (event) => {
       const content = event.target?.result as string;
       if (content && storageService.importFullDatabase(content)) {
-        onDataReset();
+        if (onDataReset) onDataReset();
+        if (onDatabaseRestored) onDatabaseRestored();
         showNotification(language === 'fa' ? 'اطلاعات با موفقیت بازیابی شد' : 'Backup restored successfully');
       } else {
         alert('Invalid backup file');
@@ -364,14 +575,15 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
   const handleResetToDemo = () => {
     if (window.confirm(t.areYouSure)) {
       storageService.resetAllToDemo();
-      onDataReset();
+      if (onDataReset) onDataReset();
+      if (onDatabaseRestored) onDatabaseRestored();
       showNotification(t.savedSuccessfully);
     }
   };
 
   return (
-    <div className="space-y-6 pb-12 animate-in fade-in duration-200">
-      {/* Header Banner - Bento Style */}
+    <div className="space-y-6 pb-16 animate-in fade-in duration-200">
+      {/* Header Banner */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs">
         <div>
           <div className="flex items-center gap-2">
@@ -381,7 +593,11 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
             </h1>
           </div>
           <p className="text-xs text-[#706E6B] mt-0.5">
-            {language === 'fa' ? 'تنظیم طرح‌های خیاطی، فیلدهای اندازه و اطلاعات هټۍ' : language === 'ps' ? 'د ډیزاینونو، اندازو او د هټۍ د معلوماتو تنظیمول' : 'Customize design styles, measurements & shop profile'}
+            {language === 'fa' 
+              ? 'مدیریت انواع لباس‌ها، فیلدهای اندازه و طرح‌های خیاطی به تفکیک هر لباس' 
+              : language === 'ps' 
+              ? 'د جامو د ډولونو، اندازو او د خیاطۍ ډیزاینونو تنظیمول' 
+              : 'Configure garment categories, measurements, design options and shop profile'}
           </p>
         </div>
 
@@ -394,40 +610,58 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
         )}
       </div>
 
-      {/* Tabs Row - Bento Style Pills */}
+      {/* Main Tabs Navigation */}
       <div className="flex flex-wrap items-center gap-2 border-b border-[#E5E5E5] pb-2">
         <button
-          onClick={() => handleTabClick('design')}
-          id="tab-design-templates"
+          onClick={() => handleTabClick('garments')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-            activeTab === 'design'
-              ? 'bg-[#D4AF37] text-[#1A1A1A] font-black shadow-xs'
+            activeTab === 'garments'
+              ? 'bg-[#1A1A1A] text-[#D4AF37] font-black shadow-xs'
               : 'bg-white text-[#706E6B] hover:bg-[#F9F7F2] border border-[#E5E5E5]'
           }`}
         >
-          <Sparkles className="w-4 h-4" />
-          <span>{t.designTemplates}</span>
+          <Shirt className="w-4 h-4" />
+          <span>{t.garmentCategories || 'انواع لباس / کالي'}</span>
+          <span className="px-1.5 py-0.2 bg-[#D4AF37]/20 text-[#D4AF37] rounded-full text-[10px] font-mono font-bold">
+            {garmentTypes.length}
+          </span>
         </button>
 
         <button
           onClick={() => handleTabClick('measurements')}
-          id="tab-measurement-settings"
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
             activeTab === 'measurements'
-              ? 'bg-[#D4AF37] text-[#1A1A1A] font-black shadow-xs'
+              ? 'bg-[#1A1A1A] text-[#D4AF37] font-black shadow-xs'
               : 'bg-white text-[#706E6B] hover:bg-[#F9F7F2] border border-[#E5E5E5]'
           }`}
         >
           <Scissors className="w-4 h-4" />
           <span>{t.measurementSettings}</span>
+          <span className="px-1.5 py-0.2 bg-[#D4AF37]/20 text-[#D4AF37] rounded-full text-[10px] font-mono font-bold">
+            {fields.length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => handleTabClick('design')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+            activeTab === 'design'
+              ? 'bg-[#1A1A1A] text-[#D4AF37] font-black shadow-xs'
+              : 'bg-white text-[#706E6B] hover:bg-[#F9F7F2] border border-[#E5E5E5]'
+          }`}
+        >
+          <Sparkles className="w-4 h-4" />
+          <span>{t.designTemplates}</span>
+          <span className="px-1.5 py-0.2 bg-[#D4AF37]/20 text-[#D4AF37] rounded-full text-[10px] font-mono font-bold">
+            {categories.length}
+          </span>
         </button>
 
         <button
           onClick={() => handleTabClick('shop')}
-          id="tab-shop-profile"
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
             activeTab === 'shop'
-              ? 'bg-[#D4AF37] text-[#1A1A1A] font-black shadow-xs'
+              ? 'bg-[#1A1A1A] text-[#D4AF37] font-black shadow-xs'
               : 'bg-white text-[#706E6B] hover:bg-[#F9F7F2] border border-[#E5E5E5]'
           }`}
         >
@@ -437,10 +671,9 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
         <button
           onClick={() => handleTabClick('backup')}
-          id="tab-backup-restore"
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
             activeTab === 'backup'
-              ? 'bg-[#D4AF37] text-[#1A1A1A] font-black shadow-xs'
+              ? 'bg-[#1A1A1A] text-[#D4AF37] font-black shadow-xs'
               : 'bg-white text-[#706E6B] hover:bg-[#F9F7F2] border border-[#E5E5E5]'
           }`}
         >
@@ -449,46 +682,550 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
         </button>
       </div>
 
-      {/* TAB 1: DESIGN TEMPLATES CUSTOMIZER */}
-      {activeTab === 'design' && (
+      {/* ================= TAB 1: GARMENT CATEGORIES ================= */}
+      {activeTab === 'garments' && (
         <div className="space-y-6">
-          {/* Add New Category Box */}
+          {/* Add New Garment Category Box */}
           <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-3">
             <h3 className="font-bold text-sm text-[#1A1A1A] flex items-center gap-2">
               <span className="w-1 h-3.5 bg-[#D4AF37] rounded-full inline-block" />
               <Plus className="w-4 h-4 text-[#D4AF37]" />
-              <span>{t.addCategory} (e.g. Embroidery / خامک، Pocket Flap...)</span>
+              <span>{t.addGarmentType || 'افزودن نوع لباس جدید (Add Garment Type)'}</span>
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
               <div>
                 <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">دری (Dari)</label>
                 <input
                   type="text"
-                  value={newCatTitleFa}
-                  onChange={e => setNewCatTitleFa(e.target.value)}
-                  placeholder="مثال: نوعیت خامک / یخن بر"
-                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs focus:outline-hidden focus:border-[#D4AF37]"
+                  value={newGarmentFa}
+                  onChange={e => setNewGarmentFa(e.target.value)}
+                  placeholder="مثال: پیراهن و تنبان"
+                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
                 />
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">پښتو (Pashto)</label>
                 <input
                   type="text"
-                  value={newCatTitlePs}
-                  onChange={e => setNewCatTitlePs(e.target.value)}
-                  placeholder="مثال: د خامک ډول / د یخن پلنوالی"
-                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs focus:outline-hidden focus:border-[#D4AF37]"
+                  value={newGarmentPs}
+                  onChange={e => setNewGarmentPs(e.target.value)}
+                  placeholder="مثال: کمیس او پرتوګ"
+                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
                 />
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">English</label>
                 <input
                   type="text"
+                  value={newGarmentEn}
+                  onChange={e => setNewGarmentEn(e.target.value)}
+                  placeholder="e.g. Perahan Tunban / Kurta"
+                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">آیکون / Icon</label>
+                <input
+                  type="text"
+                  value={newGarmentIcon}
+                  onChange={e => setNewGarmentIcon(e.target.value)}
+                  placeholder="✂️, 🥻, 🧥, 👔"
+                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-1">
+              <button
+                type="button"
+                onClick={handleAddGarmentType}
+                className="px-5 py-2 bg-[#1A1A1A] hover:bg-black text-[#D4AF37] text-xs font-bold rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>{t.addGarmentType || 'افزودن لباس'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Existing Garment Types Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {garmentTypes.map(g => {
+              const displayName = language === 'ps' ? g.namePs : language === 'fa' ? g.nameFa : g.nameEn;
+              const isEditing = editingGarmentKey === g.key;
+              const measCount = fields.filter(f => f.garmentCategory === g.key).length;
+              const designCount = categories.filter(c => c.garmentCategory === g.key).length;
+
+              return (
+                <div key={g.key} className="bg-white rounded-2xl border border-[#E5E5E5] p-4 space-y-3 shadow-xs">
+                  {isEditing ? (
+                    <div className="space-y-2 text-xs">
+                      <div className="font-bold text-[#1A1A1A] flex items-center justify-between">
+                        <span>{language === 'fa' ? 'ویرایش مشخصات لباس' : 'Edit Garment'}</span>
+                        <button onClick={() => setEditingGarmentKey(null)} className="text-stone-400 hover:text-stone-600">
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-stone-500 mb-0.5">دری</label>
+                        <input
+                          type="text"
+                          value={editGarmentFa}
+                          onChange={e => setEditGarmentFa(e.target.value)}
+                          className="w-full px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-stone-500 mb-0.5">پښتو</label>
+                        <input
+                          type="text"
+                          value={editGarmentPs}
+                          onChange={e => setEditGarmentPs(e.target.value)}
+                          className="w-full px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-stone-500 mb-0.5">English</label>
+                        <input
+                          type="text"
+                          value={editGarmentEn}
+                          onChange={e => setEditGarmentEn(e.target.value)}
+                          className="w-full px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-stone-500 mb-0.5">Icon</label>
+                        <input
+                          type="text"
+                          value={editGarmentIcon}
+                          onChange={e => setEditGarmentIcon(e.target.value)}
+                          className="w-full px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
+                        />
+                      </div>
+                      <div className="flex justify-end gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setEditingGarmentKey(null)}
+                          className="px-2.5 py-1 text-stone-600 hover:bg-stone-100 rounded text-xs"
+                        >
+                          {t.cancel}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveGarmentEdit}
+                          className="px-3 py-1 bg-[#D4AF37] hover:bg-[#B39025] text-[#1A1A1A] font-bold rounded text-xs shadow-xs"
+                        >
+                          {t.save}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">{g.icon || '✂️'}</span>
+                          <div>
+                            <h4 className="font-extrabold text-sm text-[#1A1A1A]">{displayName}</h4>
+                            <span className="text-[10px] text-stone-400 font-mono">key: {g.key}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => startEditGarment(g)}
+                            className="p-1.5 text-stone-400 hover:text-[#D4AF37] hover:bg-stone-100 rounded-lg transition"
+                            title={t.edit}
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          {!g.isStandard && (
+                            <button
+                              onClick={() => handleDeleteGarment(g.key)}
+                              className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                              title={t.delete}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-2 border-t border-stone-100 text-[11px] text-stone-600">
+                        <span className="px-2 py-0.5 bg-stone-100 rounded-md font-bold">
+                          {measCount} {t.measurementSettings}
+                        </span>
+                        <span className="px-2 py-0.5 bg-stone-100 rounded-md font-bold">
+                          {designCount} {t.designTemplates}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ================= TAB 2: MEASUREMENT SETTINGS ================= */}
+      {activeTab === 'measurements' && (
+        <div className="space-y-6">
+          {/* Garment Selector Filter Bar */}
+          <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-2">
+            <div className="flex items-center gap-2 text-xs font-bold text-stone-700">
+              <Filter className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span>{language === 'fa' ? 'فیلتر بر اساس نوع لباس:' : language === 'ps' ? 'د جامو د ډول پر بنسټ فلټر:' : 'Filter by Garment Type:'}</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                onClick={() => setSelectedGarmentFilter('all')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                  selectedGarmentFilter === 'all'
+                    ? 'bg-[#1A1A1A] text-[#D4AF37] font-black shadow-xs'
+                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                }`}
+              >
+                <span>🌐 {language === 'fa' ? 'همه اندازه‌ها' : language === 'ps' ? 'ټولې اندازې' : 'All Measurements'}</span>
+                <span className="ms-1.5 px-1.5 py-0.2 bg-stone-200 text-stone-700 rounded-full text-[10px]">
+                  {fields.length}
+                </span>
+              </button>
+              {garmentTypes.map(g => {
+                const name = language === 'ps' ? g.namePs : language === 'fa' ? g.nameFa : g.nameEn;
+                const count = fields.filter(f => f.garmentCategory === g.key).length;
+                return (
+                  <button
+                    key={g.key}
+                    type="button"
+                    onClick={() => setSelectedGarmentFilter(g.key)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                      selectedGarmentFilter === g.key
+                        ? 'bg-[#1A1A1A] text-[#D4AF37] font-black shadow-xs'
+                        : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                    }`}
+                  >
+                    <span>{g.icon || '✂️'}</span>
+                    <span>{name}</span>
+                    <span className="px-1.5 py-0.2 bg-stone-200 text-stone-700 rounded-full text-[10px]">
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Add New Measurement Field Box */}
+          <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-3">
+            <h3 className="font-bold text-sm text-[#1A1A1A] flex items-center gap-2">
+              <span className="w-1 h-3.5 bg-[#D4AF37] rounded-full inline-block" />
+              <Plus className="w-4 h-4 text-[#D4AF37]" />
+              <span>{t.addMeasurementField}</span>
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+              <div>
+                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+                  {t.garmentType || 'نوع لباس'}
+                </label>
+                <select
+                  value={newFieldGarment}
+                  onChange={e => setNewFieldGarment(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-bold focus:outline-hidden focus:border-[#D4AF37]"
+                >
+                  <option value="all">{language === 'fa' ? 'عمومی (تمام لباس‌ها)' : 'General (All Garments)'}</option>
+                  {garmentTypes.map(g => (
+                    <option key={g.key} value={g.key}>
+                      {language === 'ps' ? g.namePs : language === 'fa' ? g.nameFa : g.nameEn}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">دری (Dari)</label>
+                <input
+                  type="text"
+                  value={newFieldFa}
+                  onChange={e => setNewFieldFa(e.target.value)}
+                  placeholder="مثال: قد / بغل / آستین"
+                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">پښتو (Pashto)</label>
+                <input
+                  type="text"
+                  value={newFieldPs}
+                  onChange={e => setNewFieldPs(e.target.value)}
+                  placeholder="مثال: قد / لستوڼی"
+                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">English</label>
+                <input
+                  type="text"
+                  value={newFieldEn}
+                  onChange={e => setNewFieldEn(e.target.value)}
+                  placeholder="e.g. Length / Chest"
+                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">واحد / Unit</label>
+                <select
+                  value={newFieldUnit}
+                  onChange={e => setNewFieldUnit(e.target.value as any)}
+                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-bold focus:outline-hidden focus:border-[#D4AF37]"
+                >
+                  <option value="in">انچ / Inch (in)</option>
+                  <option value="cm">سانتی‌متر / Centimeter (cm)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-1">
+              <button
+                type="button"
+                onClick={handleAddField}
+                className="px-5 py-2 bg-[#1A1A1A] hover:bg-black text-[#D4AF37] text-xs font-bold rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>{t.addMeasurementField}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Current Measurement Fields List */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {filteredMeasurementFields.map(f => {
+              const label = language === 'ps' ? f.labelPs : language === 'fa' ? f.labelFa : f.labelEn;
+              const isEditing = editingFieldId === f.id;
+              const garmentName = getGarmentName(f.garmentCategory || 'all');
+
+              return (
+                <div 
+                  key={f.id}
+                  className="p-3.5 bg-white rounded-xl border border-[#E5E5E5] shadow-xs space-y-2 hover:border-[#D4AF37]/50 transition"
+                >
+                  {isEditing ? (
+                    <div className="space-y-2 text-xs">
+                      <div className="font-bold text-[#1A1A1A] flex items-center justify-between">
+                        <span>{language === 'fa' ? 'ویرایش فیلد اندازه' : 'Edit Measurement'}</span>
+                        <button onClick={() => setEditingFieldId(null)} className="text-stone-400 hover:text-stone-600">
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-stone-500 mb-0.5">لباس مربوطه</label>
+                        <select
+                          value={editFieldGarment}
+                          onChange={e => setEditFieldGarment(e.target.value)}
+                          className="w-full px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs font-bold"
+                        >
+                          <option value="all">عمومی (همه)</option>
+                          {garmentTypes.map(g => (
+                            <option key={g.key} value={g.key}>
+                              {language === 'ps' ? g.namePs : language === 'fa' ? g.nameFa : g.nameEn}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-stone-500 mb-0.5">دری</label>
+                        <input
+                          type="text"
+                          value={editFieldFa}
+                          onChange={e => setEditFieldFa(e.target.value)}
+                          className="w-full px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-stone-500 mb-0.5">پښتو</label>
+                        <input
+                          type="text"
+                          value={editFieldPs}
+                          onChange={e => setEditFieldPs(e.target.value)}
+                          className="w-full px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-stone-500 mb-0.5">English</label>
+                        <input
+                          type="text"
+                          value={editFieldEn}
+                          onChange={e => setEditFieldEn(e.target.value)}
+                          className="w-full px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
+                        />
+                      </div>
+                      <div className="flex justify-end gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setEditingFieldId(null)}
+                          className="px-2.5 py-1 text-stone-600 hover:bg-stone-100 rounded text-xs"
+                        >
+                          {t.cancel}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveFieldEdit}
+                          className="px-3 py-1 bg-[#D4AF37] hover:bg-[#B39025] text-[#1A1A1A] font-bold rounded text-xs shadow-xs"
+                        >
+                          {t.save}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="font-extrabold text-xs text-[#1A1A1A] block">{label}</span>
+                          <span className="text-[10px] text-stone-400 font-mono">key: {f.key} ({f.unit || 'in'})</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => startEditField(f)}
+                            className="p-1 text-stone-400 hover:text-[#D4AF37] hover:bg-stone-100 rounded-md transition"
+                            title={t.edit}
+                          >
+                            <Pencil className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteField(f.id)}
+                            className="p-1 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition"
+                            title={t.delete}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="pt-1 flex items-center justify-between text-[10px]">
+                        <span className="px-2 py-0.5 bg-amber-50 text-[#B39025] border border-[#D4AF37]/30 rounded-md font-bold">
+                          {garmentName}
+                        </span>
+                        <span className="text-stone-400 font-mono font-bold">{f.unit || 'in'}</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ================= TAB 3: DESIGN TEMPLATES ================= */}
+      {activeTab === 'design' && (
+        <div className="space-y-6">
+          {/* Garment Selector Filter Bar */}
+          <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-2">
+            <div className="flex items-center gap-2 text-xs font-bold text-stone-700">
+              <Filter className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span>{language === 'fa' ? 'فیلتر دیزاین‌ها بر اساس نوع لباس:' : language === 'ps' ? 'د جامو د ډول پر بنسټ د ډیزاینونو فلټر:' : 'Filter Design Options by Garment:'}</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                onClick={() => setSelectedGarmentFilter('all')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                  selectedGarmentFilter === 'all'
+                    ? 'bg-[#1A1A1A] text-[#D4AF37] font-black shadow-xs'
+                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                }`}
+              >
+                <span>🌐 {language === 'fa' ? 'تمام دیزاین‌ها' : language === 'ps' ? 'ټول ډیزاینونه' : 'All Design Styles'}</span>
+                <span className="ms-1.5 px-1.5 py-0.2 bg-stone-200 text-stone-700 rounded-full text-[10px]">
+                  {categories.length}
+                </span>
+              </button>
+              {garmentTypes.map(g => {
+                const name = language === 'ps' ? g.namePs : language === 'fa' ? g.nameFa : g.nameEn;
+                const count = categories.filter(c => c.garmentCategory === g.key).length;
+                return (
+                  <button
+                    key={g.key}
+                    type="button"
+                    onClick={() => setSelectedGarmentFilter(g.key)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                      selectedGarmentFilter === g.key
+                        ? 'bg-[#1A1A1A] text-[#D4AF37] font-black shadow-xs'
+                        : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                    }`}
+                  >
+                    <span>{g.icon || '✂️'}</span>
+                    <span>{name}</span>
+                    <span className="px-1.5 py-0.2 bg-stone-200 text-stone-700 rounded-full text-[10px]">
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Add New Category Box */}
+          <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-3">
+            <h3 className="font-bold text-sm text-[#1A1A1A] flex items-center gap-2">
+              <span className="w-1 h-3.5 bg-[#D4AF37] rounded-full inline-block" />
+              <Plus className="w-4 h-4 text-[#D4AF37]" />
+              <span>{t.addCategory} (e.g. Collar Type / Collar / یخن، Pocket Flap, Cuff...)</span>
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+              <div>
+                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+                  {t.garmentType || 'نوع لباس'}
+                </label>
+                <select
+                  value={newCatGarment}
+                  onChange={e => setNewCatGarment(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-bold focus:outline-hidden focus:border-[#D4AF37]"
+                >
+                  <option value="all">{language === 'fa' ? 'عمومی (تمام لباس‌ها)' : 'General (All Garments)'}</option>
+                  {garmentTypes.map(g => (
+                    <option key={g.key} value={g.key}>
+                      {language === 'ps' ? g.namePs : language === 'fa' ? g.nameFa : g.nameEn}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">دری (Dari)</label>
+                <input
+                  type="text"
+                  value={newCatTitleFa}
+                  onChange={e => setNewCatTitleFa(e.target.value)}
+                  placeholder="مثال: نوعیت یخن / جیب / پاچه"
+                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">پښتو (Pashto)</label>
+                <input
+                  type="text"
+                  value={newCatTitlePs}
+                  onChange={e => setNewCatTitlePs(e.target.value)}
+                  placeholder="مثال: د یخن ډول / جیب / پاچه"
+                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">English</label>
+                <input
+                  type="text"
                   value={newCatTitleEn}
                   onChange={e => setNewCatTitleEn(e.target.value)}
-                  placeholder="e.g. Embroidery Type"
-                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs focus:outline-hidden focus:border-[#D4AF37]"
+                  placeholder="e.g. Collar Type / Pocket"
+                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
                 />
               </div>
             </div>
@@ -497,16 +1234,17 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
               <button
                 type="button"
                 onClick={handleAddCategory}
-                className="px-4 py-2 bg-[#1A1A1A] hover:bg-black text-[#D4AF37] text-xs font-bold rounded-xl transition cursor-pointer shadow-xs"
+                className="px-5 py-2 bg-[#1A1A1A] hover:bg-black text-[#D4AF37] text-xs font-bold rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5"
               >
-                + {t.addCategory}
+                <Plus className="w-3.5 h-3.5" />
+                <span>{t.addCategory}</span>
               </button>
             </div>
           </div>
 
           {/* Existing Categories & Options List */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {categories.map(category => {
+            {filteredDesignCategories.map(category => {
               const catTitle = language === 'ps' 
                 ? category.titlePs 
                 : language === 'fa' 
@@ -514,6 +1252,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 : category.titleEn;
 
               const isEditingThisCategory = editingCategoryId === category.id;
+              const garmentName = getGarmentName(category.garmentCategory || 'all');
 
               return (
                 <div 
@@ -524,7 +1263,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                   {isEditingThisCategory ? (
                     <div className="p-3 bg-[#F9F7F2] rounded-xl border border-[#D4AF37]/50 space-y-2.5">
                       <div className="text-xs font-bold text-[#1A1A1A] flex items-center justify-between">
-                        <span>{language === 'fa' ? 'ویرایش نام دسته' : language === 'ps' ? 'د کټګورۍ نوم سمول' : 'Edit Category Title'}</span>
+                        <span>{language === 'fa' ? 'ویرایش نام دسته دیزاین' : 'Edit Design Category'}</span>
                         <button
                           onClick={() => setEditingCategoryId(null)}
                           className="text-stone-400 hover:text-stone-600"
@@ -532,7 +1271,23 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                           <X className="w-3.5 h-3.5" />
                         </button>
                       </div>
-                      <div className="grid grid-cols-3 gap-2">
+
+                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                        <div>
+                          <label className="block text-[10px] font-bold text-stone-500 mb-0.5">لباس مربوطه</label>
+                          <select
+                            value={editCatGarment}
+                            onChange={e => setEditCatGarment(e.target.value)}
+                            className="w-full px-2 py-1 bg-white border border-[#E5E5E5] rounded text-xs font-bold"
+                          >
+                            <option value="all">عمومی (همه)</option>
+                            {garmentTypes.map(g => (
+                              <option key={g.key} value={g.key}>
+                                {language === 'ps' ? g.namePs : language === 'fa' ? g.nameFa : g.nameEn}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                         <div>
                           <label className="block text-[10px] font-bold text-stone-500 mb-0.5">دری</label>
                           <input
@@ -561,6 +1316,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                           />
                         </div>
                       </div>
+
                       <div className="flex justify-end gap-2 pt-1">
                         <button
                           type="button"
@@ -583,6 +1339,9 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                       <div className="flex items-center gap-2">
                         <Sparkles className="w-4 h-4 text-[#D4AF37]" />
                         <h4 className="font-bold text-sm text-[#1A1A1A]">{catTitle}</h4>
+                        <span className="text-[10px] px-2 py-0.5 bg-amber-50 text-[#B39025] border border-[#D4AF37]/30 rounded-md font-bold">
+                          {garmentName}
+                        </span>
                         <span className="text-[10px] text-[#706E6B] font-mono">({category.options.length})</span>
                       </div>
 
@@ -609,7 +1368,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                   {editingOption && editingOption.catId === category.id && (
                     <div className="p-3 bg-[#F9F7F2] rounded-xl border border-[#D4AF37]/50 space-y-2 text-xs">
                       <div className="text-[11px] font-bold text-[#1A1A1A] flex items-center justify-between">
-                        <span>{language === 'fa' ? 'ویرایش طرح / نوعیت' : language === 'ps' ? 'د طرحې / ډول سمول' : 'Edit Design Option'}</span>
+                        <span>{language === 'fa' ? 'ویرایش گزینه دیزاین' : 'Edit Design Option'}</span>
                         <button
                           onClick={() => setEditingOption(null)}
                           className="text-stone-400 hover:text-stone-600"
@@ -703,58 +1462,60 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                     })}
                   </div>
 
-                  {/* Add Option to this Category */}
+                  {/* Add Option Box */}
                   {addingOptionForCatId === category.id ? (
-                    <div className="p-3 bg-[#F9F7F2] rounded-xl border border-[#E5E5E5] space-y-2 text-xs">
+                    <div className="pt-2 border-t border-[#E5E5E5] space-y-2 text-xs">
                       <div className="grid grid-cols-3 gap-2">
                         <input
                           type="text"
                           value={newOptionNameFa}
                           onChange={e => setNewOptionNameFa(e.target.value)}
-                          placeholder="دری (Dari)..."
-                          className="px-2 py-1 bg-white border border-[#E5E5E5] rounded text-xs"
+                          placeholder="دری (مثال: یخن قاق)"
+                          className="px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
                         />
                         <input
                           type="text"
                           value={newOptionNamePs}
                           onChange={e => setNewOptionNamePs(e.target.value)}
-                          placeholder="پښتو (Pashto)..."
-                          className="px-2 py-1 bg-white border border-[#E5E5E5] rounded text-xs"
+                          placeholder="پښتو (مثال: قاق یخن)"
+                          className="px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
                         />
                         <input
                           type="text"
                           value={newOptionNameEn}
                           onChange={e => setNewOptionNameEn(e.target.value)}
-                          placeholder="English..."
-                          className="px-2 py-1 bg-white border border-[#E5E5E5] rounded text-xs"
+                          placeholder="English (e.g. Straight)"
+                          className="px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
                         />
                       </div>
                       <div className="flex justify-end gap-2">
                         <button
                           type="button"
                           onClick={() => setAddingOptionForCatId(null)}
-                          className="px-2.5 py-1 text-[#706E6B] hover:bg-stone-200 rounded"
+                          className="px-2.5 py-1 text-stone-500 hover:bg-stone-100 rounded text-xs"
                         >
                           {t.cancel}
                         </button>
                         <button
                           type="button"
                           onClick={() => handleAddOptionToCategory(category.id)}
-                          className="px-3 py-1 bg-[#D4AF37] hover:bg-[#B39025] text-[#1A1A1A] font-bold rounded"
+                          className="px-3 py-1 bg-[#1A1A1A] hover:bg-black text-[#D4AF37] font-bold rounded text-xs shadow-xs"
                         >
-                          {t.save}
+                          + {t.add}
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={() => setAddingOptionForCatId(category.id)}
-                      className="w-full py-1.5 bg-[#F9F7F2] hover:bg-stone-200 text-[#1A1A1A] font-bold rounded-xl text-xs border border-dashed border-[#E5E5E5] flex items-center justify-center gap-1 transition cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>{t.addOption}</span>
-                    </button>
+                    <div className="pt-2 border-t border-stone-100 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setAddingOptionForCatId(category.id)}
+                        className="text-xs font-bold text-[#B39025] hover:text-[#D4AF37] flex items-center gap-1 transition"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>{t.addOption}</span>
+                      </button>
+                    </div>
                   )}
                 </div>
               );
@@ -763,105 +1524,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
         </div>
       )}
 
-      {/* TAB 2: MEASUREMENT FIELDS CUSTOMIZER */}
-      {activeTab === 'measurements' && (
-        <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-6">
-          <div>
-            <h3 className="font-bold text-sm text-[#1A1A1A]">
-              {t.measurementSettings}
-            </h3>
-            <p className="text-xs text-[#706E6B] mt-0.5">
-              {language === 'fa' ? 'فیلدهای اندازه‌گیری استاندارد و سفارشی خیاطی' : 'Standard and custom tailoring measurement fields'}
-            </p>
-          </div>
-
-          {/* Add Field Box */}
-          <div className="p-4 bg-[#F9F7F2] rounded-xl border border-[#E5E5E5] space-y-3">
-            <h4 className="font-bold text-xs text-[#1A1A1A] flex items-center gap-1.5">
-              <Plus className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span>{t.addMeasurementField} (e.g. Wrist / مچ دست, Hip / باسن)</span>
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-              <div>
-                <label className="block text-[10px] font-bold text-[#706E6B] mb-1">Key (Code)</label>
-                <input
-                  type="text"
-                  value={newFieldKey}
-                  onChange={e => setNewFieldKey(e.target.value)}
-                  placeholder="e.g. wrist, hip..."
-                  className="w-full px-2.5 py-1.5 bg-white border border-[#E5E5E5] rounded-lg text-xs font-mono"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-[#706E6B] mb-1">دری (Dari)</label>
-                <input
-                  type="text"
-                  value={newFieldFa}
-                  onChange={e => setNewFieldFa(e.target.value)}
-                  placeholder="مثال: مچ دست"
-                  className="w-full px-2.5 py-1.5 bg-white border border-[#E5E5E5] rounded-lg text-xs"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-[#706E6B] mb-1">پښتو (Pashto)</label>
-                <input
-                  type="text"
-                  value={newFieldPs}
-                  onChange={e => setNewFieldPs(e.target.value)}
-                  placeholder="مثال: د لاس مچ"
-                  className="w-full px-2.5 py-1.5 bg-white border border-[#E5E5E5] rounded-lg text-xs"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-[#706E6B] mb-1">English</label>
-                <input
-                  type="text"
-                  value={newFieldEn}
-                  onChange={e => setNewFieldEn(e.target.value)}
-                  placeholder="e.g. Wrist"
-                  className="w-full px-2.5 py-1.5 bg-white border border-[#E5E5E5] rounded-lg text-xs"
-                />
-              </div>
-            </div>
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={handleAddField}
-                className="px-4 py-1.5 bg-[#1A1A1A] hover:bg-black text-[#D4AF37] text-xs font-bold rounded-lg transition cursor-pointer"
-              >
-                + {t.addMeasurementField}
-              </button>
-            </div>
-          </div>
-
-          {/* Current Measurement Fields List */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {fields.map(f => (
-              <div 
-                key={f.id}
-                className="p-3 bg-[#F9F7F2] rounded-xl border border-[#E5E5E5] flex items-center justify-between"
-              >
-                <div>
-                  <span className="font-bold text-xs text-[#1A1A1A] block">
-                    {language === 'ps' ? f.labelPs : language === 'fa' ? f.labelFa : f.labelEn}
-                  </span>
-                  <span className="text-[10px] text-[#706E6B] font-mono">key: {f.key}</span>
-                </div>
-                {!f.isStandard && (
-                  <button
-                    onClick={() => handleDeleteField(f.id)}
-                    className="text-stone-400 hover:text-rose-600 p-1 cursor-pointer"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* TAB 3: SHOP PROFILE & RECEIPT SETTINGS */}
+      {/* ================= TAB 4: SHOP PROFILE ================= */}
       {activeTab === 'shop' && (
         <form onSubmit={handleSaveShopSettings} className="bg-white p-6 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-6">
           <div className="border-b border-[#E5E5E5] pb-3">
@@ -921,7 +1584,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 value={shop.phone1}
                 onChange={e => setShop({ ...shop, phone1: e.target.value })}
                 placeholder="0772559881"
-                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-mono"
+                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-mono font-bold"
               />
             </div>
             <div>
@@ -945,7 +1608,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 value={shop.whatsapp}
                 onChange={e => setShop({ ...shop, whatsapp: e.target.value })}
                 placeholder="0782220194"
-                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-mono"
+                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-mono font-bold"
               />
             </div>
           </div>
@@ -1071,7 +1734,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
         </form>
       )}
 
-      {/* TAB 4: BACKUP & RESTORE */}
+      {/* ================= TAB 5: BACKUP & RESTORE ================= */}
       {activeTab === 'backup' && (
         <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-6">
           <div>
@@ -1092,16 +1755,17 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                   <span>{t.exportBackup}</span>
                 </h4>
                 <p className="text-[11px] text-[#706E6B] mt-1">
-                  {language === 'fa' ? 'یک نسخه کامل از تمام سفارشات، مشتریان و تنظیمات دانلود کنید.' : 'Download complete JSON database backup.'}
+                  {language === 'fa' ? 'یک نسخه کامل از تمام سفارشات، مشتریان، رخت‌ها، محصولات و تنظیمات دانلود کنید.' : 'Download complete JSON database backup.'}
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={handleExportBackup}
-                className="w-full py-2.5 bg-[#1A1A1A] hover:bg-black text-[#D4AF37] font-bold rounded-xl text-xs transition cursor-pointer"
+                className="w-full py-2.5 bg-[#1A1A1A] hover:bg-black text-[#D4AF37] text-xs font-bold rounded-xl transition cursor-pointer flex items-center justify-center gap-2 shadow-xs"
               >
-                {t.exportBackup}
+                <Download className="w-4 h-4" />
+                <span>{t.exportBackup}</span>
               </button>
             </div>
 
@@ -1109,15 +1773,16 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
             <div className="p-5 bg-[#F9F7F2] rounded-2xl border border-[#E5E5E5] space-y-3 flex flex-col justify-between">
               <div>
                 <h4 className="font-bold text-xs text-[#1A1A1A] flex items-center gap-2">
-                  <Upload className="w-4 h-4 text-emerald-600" />
+                  <Upload className="w-4 h-4 text-[#D4AF37]" />
                   <span>{t.importBackup}</span>
                 </h4>
                 <p className="text-[11px] text-[#706E6B] mt-1">
-                  {language === 'fa' ? 'فایل پشتیبان قبلی را برای بازگردانی اطلاعات انتخاب کنید.' : 'Restore previous JSON database backup.'}
+                  {language === 'fa' ? 'فایل نسخه پشتیبان قبلی (JSON) را بارگذاری نمایید.' : 'Restore previous JSON database backup.'}
                 </p>
               </div>
 
-              <label className="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs transition cursor-pointer text-center block">
+              <label className="w-full py-2.5 bg-white border border-[#E5E5E5] hover:border-[#D4AF37] text-[#1A1A1A] text-xs font-bold rounded-xl transition cursor-pointer flex items-center justify-center gap-2 shadow-xs text-center">
+                <Upload className="w-4 h-4 text-[#D4AF37]" />
                 <span>{t.importBackup}</span>
                 <input
                   type="file"
@@ -1128,24 +1793,25 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
               </label>
             </div>
 
-            {/* Reset to Demo */}
+            {/* Reset to Default Demo */}
             <div className="p-5 bg-rose-50/50 rounded-2xl border border-rose-200 space-y-3 flex flex-col justify-between">
               <div>
-                <h4 className="font-bold text-xs text-rose-900 flex items-center gap-2">
-                  <RotateCcw className="w-4 h-4 text-rose-500" />
-                  <span>{t.resetDemoData}</span>
+                <h4 className="font-bold text-xs text-rose-800 flex items-center gap-2">
+                  <RotateCcw className="w-4 h-4 text-rose-600" />
+                  <span>{t.resetDatabase}</span>
                 </h4>
-                <p className="text-[11px] text-rose-700/80 mt-1">
-                  {language === 'fa' ? 'بازگردانی اطلاعات به نمونه اولیه (فرهاد، شکیل خان، عطا الله).' : 'Reset to initial sample orders and receipts.'}
+                <p className="text-[11px] text-rose-600 mt-1">
+                  {language === 'fa' ? 'بازگردانی تمام اطلاعات، اندازه‌ها و تنظیمات به حالت اولیه نمایشی.' : 'Reset all data and demo configs to default.'}
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={handleResetToDemo}
-                className="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition cursor-pointer"
+                className="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition cursor-pointer flex items-center justify-center gap-2 shadow-xs"
               >
-                {t.resetDemoData}
+                <RotateCcw className="w-4 h-4" />
+                <span>{t.resetDatabase}</span>
               </button>
             </div>
           </div>

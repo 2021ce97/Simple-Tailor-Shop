@@ -8,6 +8,7 @@ import {
   ProductCategory 
 } from '../types';
 import { translations } from '../translations/i18n';
+import { printReceiptElement, downloadReceiptPdf } from '../services/printService';
 import { 
   TrendingUp, 
   Plus, 
@@ -305,9 +306,43 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
     }
   };
 
-  // Print receipt function
-  const handlePrintReceipt = () => {
-    window.print();
+  // Direct Print and PDF for Retail Slip
+  const [isPrintingReceipt, setIsPrintingReceipt] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+  const handlePrintReceipt = async () => {
+    if (!receiptPrintRef.current || !activeReceiptSale) return;
+    const shopName = language === 'fa' 
+      ? (shopSettings?.shopNameFa || 'Mujeeb Afghan') 
+      : language === 'ps' 
+      ? (shopSettings?.shopNamePs || 'Mujeeb Afghan') 
+      : (shopSettings?.shopNameEn || 'MUJEEB AFGHAN FASHION HOUSE');
+    
+    await printReceiptElement(receiptPrintRef.current, {
+      title: `${shopName} - SL-${activeReceiptSale.id.slice(-6).toUpperCase()}`,
+      pageFormat: 'thermal80',
+      dir: language === 'en' ? 'ltr' : 'rtl',
+      onStart: () => setIsPrintingReceipt(true),
+      onComplete: () => setIsPrintingReceipt(false),
+      onError: () => setIsPrintingReceipt(false)
+    });
+  };
+
+  const handleDownloadReceiptPdf = async () => {
+    if (!receiptPrintRef.current || !activeReceiptSale) return;
+    const safeCustomerName = activeReceiptSale.customerName ? activeReceiptSale.customerName.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_') : 'Customer';
+    const filename = `Retail_Receipt_SL_${activeReceiptSale.id.slice(-6).toUpperCase()}_${safeCustomerName}`;
+    await downloadReceiptPdf(receiptPrintRef.current, {
+      filename,
+      pageFormat: 'thermal80',
+      onStart: () => setIsGeneratingPdf(true),
+      onComplete: () => setIsGeneratingPdf(false),
+      onError: (err) => {
+        console.error('Retail PDF error:', err);
+        setIsGeneratingPdf(false);
+        handlePrintReceipt();
+      }
+    });
   };
 
   return (
@@ -799,15 +834,22 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                   <input
                     type="number"
                     required
-                    min="1"
-                    step="10"
-                    value={sellingPrice || ''}
-                    onChange={e => setSellingPrice(parseFloat(e.target.value) || 0)}
-                    placeholder="قیمت فروش فی دانه..."
+                    min="0"
+                    step="any"
+                    value={sellingPrice === 0 ? '' : sellingPrice}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setSellingPrice(val === '' ? 0 : parseFloat(val) || 0);
+                    }}
+                    placeholder="قیمت فروش دلخواه..."
                     className="w-full px-3.5 py-2.5 bg-emerald-50/40 border-2 border-emerald-500 rounded-xl text-sm font-mono font-black text-[#1A1A1A] focus:bg-white focus:border-emerald-600 outline-hidden"
                   />
                   <span className="text-[10px] text-stone-500 mt-0.5 block">
-                    {language === 'fa' ? 'قیمت توافق شده با مشتری' : 'Agreed selling price per unit'}
+                    {language === 'fa' 
+                      ? 'قیمت فروش توافقی و دلخواه شما برای این معامله' 
+                      : language === 'ps' 
+                      ? 'د دې معاملې لپاره ستاسو د خوښې د پلور بیه' 
+                      : 'Enter your custom agreed selling price for this transaction'}
                   </span>
                 </div>
               </div>
@@ -935,8 +977,8 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
 
       {/* 6. MODAL: Printable Receipt Slip for Sale */}
       {activeReceiptSale && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col">
+        <div id="retail-receipt-modal" className="print-modal-container fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="retail-receipt-container bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col">
             <div className="flex items-center justify-between px-4 py-3 border-b border-stone-100 bg-stone-50 no-print">
               <h3 className="font-extrabold text-sm text-[#1A1A1A] flex items-center gap-1.5">
                 <Printer className="w-4 h-4 text-[#B39025]" />
@@ -944,21 +986,21 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
               </h3>
               <button
                 onClick={() => setActiveReceiptSale(null)}
-                className="p-1 text-stone-500 hover:text-stone-800 rounded-lg"
+                className="p-1 text-stone-500 hover:text-stone-800 rounded-lg cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Printable Receipt Paper */}
-            <div ref={receiptPrintRef} className="p-6 bg-white font-mono text-xs space-y-4 text-stone-900 border-b border-dashed border-stone-300">
+            <div id="printable-retail-slip" ref={receiptPrintRef} className="p-6 bg-white font-mono text-xs space-y-4 text-stone-900 border-b border-dashed border-stone-300">
               <div className="text-center space-y-1">
                 <h2 className="font-black text-base text-[#1A1A1A] tracking-wider">
                   {language === 'fa' 
                     ? (shopSettings?.shopNameFa || 'مجیب افغان خیاطي او رخت پلورنځی')
                     : language === 'ps' 
                     ? (shopSettings?.shopNamePs || 'مجیب افغان خیاطي او رخت پلورنځی')
-                    : (shopSettings?.shopNameEn || 'MUJEEB AFGHAN FASION HOUSE')}
+                    : (shopSettings?.shopNameEn || 'MUJEEB AFGHAN FASHION HOUSE')}
                 </h2>
                 <p className="text-[10px] text-stone-500">
                   {language === 'fa' 
@@ -1031,17 +1073,30 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
             {/* Modal Actions */}
             <div className="p-4 bg-stone-50 flex items-center justify-end gap-2 no-print">
               <button
+                type="button"
                 onClick={() => setActiveReceiptSale(null)}
-                className="px-4 py-2 bg-stone-200 hover:bg-stone-300 text-stone-700 rounded-xl text-xs font-bold cursor-pointer"
+                className="px-3.5 py-2 bg-stone-200 hover:bg-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer"
               >
                 {t.close || 'Close'}
               </button>
               <button
+                type="button"
+                onClick={handleDownloadReceiptPdf}
+                disabled={isGeneratingPdf}
+                className="px-3.5 py-2 bg-white hover:bg-stone-100 border border-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                title="Download PDF"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>{isGeneratingPdf ? '...' : 'PDF'}</span>
+              </button>
+              <button
+                type="button"
                 onClick={handlePrintReceipt}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-xs transition cursor-pointer flex items-center gap-1.5"
+                disabled={isPrintingReceipt}
+                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl text-xs font-black shadow-xs transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
               >
                 <Printer className="w-4 h-4" />
-                <span>{t.print || 'Print Receipt'}</span>
+                <span>{isPrintingReceipt ? t.loading : (t.print || 'Print Receipt')}</span>
               </button>
             </div>
           </div>

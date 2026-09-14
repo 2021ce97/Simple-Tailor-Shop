@@ -49,48 +49,58 @@
 [class~="focus:ring-[#D4AF37]"]:focus { --tw-ring-color: #14b8a6 !important; }
 
 @media print {
-  body {
+  html, body {
     background: white !important;
     color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
   }
-  .no-print {
+  .no-print, nav, header, aside, .receipt-actions, .receipt-modal-footer, button:not(.print-allow) {
     display: none !important;
   }
-  .receipt-modal-shell.is-printing {
+  .receipt-modal-shell, #retail-receipt-modal, .print-modal-container {
     display: block !important;
     position: static !important;
     inset: auto !important;
     padding: 0 !important;
+    margin: 0 !important;
     overflow: visible !important;
     background: white !important;
   }
-  .receipt-modal-shell.is-printing #receipt-modal-container {
+  #receipt-modal-container, .retail-receipt-container {
     display: block !important;
-    width: auto !important;
+    width: 100% !important;
     max-width: none !important;
     max-height: none !important;
     overflow: visible !important;
     border: 0 !important;
     box-shadow: none !important;
+    background: white !important;
   }
-  .receipt-modal-shell.is-printing #authentic-receipt-slip {
+  #authentic-receipt-slip, #printable-retail-slip {
     margin: 0 auto !important;
     box-shadow: none !important;
     border: 0 !important;
+    overflow: visible !important;
+    background: white !important;
   }
-  .receipt-modal-shell.is-printing[data-print-format="a4"] #authentic-receipt-slip {
+  [data-print-format="a4"] #authentic-receipt-slip {
     width: 186mm !important;
     max-width: 186mm !important;
   }
-  .receipt-modal-shell.is-printing[data-print-format="thermal58"] #authentic-receipt-slip {
+  [data-print-format="thermal58"] #authentic-receipt-slip,
+  .thermal58-slip {
     width: 54mm !important;
     max-width: 54mm !important;
   }
-  .receipt-modal-shell.is-printing[data-print-format="thermal80"] #authentic-receipt-slip {
+  [data-print-format="thermal80"] #authentic-receipt-slip,
+  .thermal80-slip {
     width: 76mm !important;
     max-width: 76mm !important;
   }
-  .receipt-modal-shell.is-printing .overflow-y-auto {
+  .overflow-y-auto {
     overflow: visible !important;
     padding: 0 !important;
     background: white !important;
@@ -99,7 +109,7 @@
     display: block !important;
   }
   @page {
-    margin: 4mm;
+    margin: 3mm;
     size: auto;
   }
 }

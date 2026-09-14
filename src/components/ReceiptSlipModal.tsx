@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { toPng } from 'html-to-image';
+import { printReceiptElement, downloadReceiptPdf } from '../services/printService';
 
 interface ReceiptSlipModalProps {
   order: Order;
@@ -95,88 +96,39 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
     : shopSettings.currencyEn;
   const logoUrl = shopSettings.logoUrl || '/mujeeb-afghan-logo.jpeg';
 
-  // Print Handler
-  const handlePrint = () => {
+  // Print Handler (100% reliable across browsers, iframes, and thermal printers)
+  const handlePrint = async () => {
     if (!receiptRef.current) return;
-    const printWindow = window.open('', '_blank', 'width=900,height=900');
-    if (!printWindow) {
-      window.alert('Please allow pop-ups to print this receipt.');
-      return;
-    }
-
-    const printSize = printFormat === 'a4' ? 'A4 portrait' : printFormat === 'thermal58' ? '58mm auto' : '80mm auto';
-    const receiptHtml = receiptRef.current.outerHTML;
-    printWindow.document.open();
-    printWindow.document.write(`<!doctype html><html dir="${language === 'en' ? 'ltr' : 'rtl'}"><head>${document.head.innerHTML}<style>
-      @page { size: ${printSize}; margin: ${printFormat === 'a4' ? '10mm' : '2mm'}; }
-      html, body { margin: 0; padding: 0; background: white; }
-      #authentic-receipt-slip { margin: 0 auto; box-shadow: none !important; border: 0 !important; }
-      ${printFormat === 'a4' ? '#authentic-receipt-slip { width: 186mm !important; max-width: 186mm !important; }' : ''}
-      ${printFormat === 'thermal58' ? '#authentic-receipt-slip { width: 54mm !important; max-width: 54mm !important; }' : ''}
-      ${printFormat === 'thermal80' ? '#authentic-receipt-slip { width: 76mm !important; max-width: 76mm !important; }' : ''}
-    </style></head><body>${receiptHtml}</body></html>`);
-    printWindow.document.close();
-    printWindow.onload = () => {
-      printWindow.focus();
-      printWindow.print();
-      printWindow.onafterprint = () => printWindow.close();
-    };
+    await printReceiptElement(receiptRef.current, {
+      title: `${shopName} - ${order.orderNumber}`,
+      pageFormat: printFormat,
+      dir: language === 'en' ? 'ltr' : 'rtl',
+      onStart: () => setIsPrinting(true),
+      onComplete: () => setIsPrinting(false),
+      onError: (err) => {
+        console.error('Print failed:', err);
+        setIsPrinting(false);
+      }
+    });
   };
 
-  // PDF Generator using html-to-image and jsPDF (safe from oklch parser errors)
+  // PDF Generator using printService
   const handleDownloadPdf = async () => {
     if (!receiptRef.current) return;
-    try {
-      setIsGeneratingPdf(true);
-      const element = receiptRef.current;
-      
-      const dataUrl = await toPng(element, {
-        pixelRatio: 2.5,
-        backgroundColor: '#ffffff',
-        cacheBust: true,
-      });
-
-      const img = new Image();
-      img.src = dataUrl;
-      await new Promise((resolve) => {
-        img.onload = resolve;
-      });
-
-      const pdfWidth = printFormat === 'a4' ? 210 : printFormat === 'thermal58' ? 58 : 80;
-      const margin = printFormat === 'a4' ? 12 : 3;
-      const printableWidth = pdfWidth - (margin * 2);
-      const imgHeight = (img.naturalHeight * printableWidth) / img.naturalWidth;
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: printFormat === 'a4' ? 'a4' : [pdfWidth, imgHeight + (margin * 2)],
-      });
-      if (printFormat === 'a4') {
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        const pageContentHeight = pageHeight - (margin * 2);
-        let imageY = margin;
-        let remainingHeight = imgHeight;
-        pdf.addImage(dataUrl, 'PNG', margin, imageY, printableWidth, imgHeight);
-        remainingHeight -= pageContentHeight;
-        while (remainingHeight > 0) {
-          pdf.addPage();
-          imageY -= pageContentHeight;
-          pdf.addImage(dataUrl, 'PNG', margin, imageY, printableWidth, imgHeight);
-          remainingHeight -= pageContentHeight;
-        }
-      } else {
-        pdf.addImage(dataUrl, 'PNG', margin, margin, printableWidth, imgHeight);
+    const safeCustomerName = order.customerName ? order.customerName.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_') : 'Customer';
+    const filename = `Mujeeb_Afghan_${order.orderNumber || 'Order'}_${printFormat}_${safeCustomerName}`;
+    await downloadReceiptPdf(receiptRef.current, {
+      filename,
+      pageFormat: printFormat,
+      onStart: () => setIsGeneratingPdf(true),
+      onComplete: () => setIsGeneratingPdf(false),
+      onError: (err) => {
+        console.error('PDF error:', err);
+        setIsGeneratingPdf(false);
+        // Fallback to direct print
+        handlePrint();
       }
-      
-      const safeCustomerName = order.customerName ? order.customerName.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_') : 'Customer';
-      pdf.save(`Mujeeb_Afghan_Fashion_House_${order.orderNumber || 'Order'}_${printFormat}_${safeCustomerName}.pdf`);
-    } catch (err) {
-      console.error('Error generating PDF:', err);
-      // Fallback to print
-      window.print();
-    } finally {
-      setIsGeneratingPdf(false);
-    }
+    });
   };
 
   // WhatsApp Share text generator

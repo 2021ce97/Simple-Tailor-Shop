@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Order, 
   Customer, 
@@ -8,7 +8,8 @@ import {
   Language, 
   OrderStatus,
   PaymentStatus,
-  Fabric
+  Fabric,
+  GarmentTypeConfig
 } from '../types';
 import { translations } from '../translations/i18n';
 import { storageService } from '../services/storage';
@@ -32,7 +33,9 @@ import {
   Plus,
   Minus,
   AlertCircle,
-  PackageCheck
+  PackageCheck,
+  Filter,
+  Shirt
 } from 'lucide-react';
 
 interface OrderFormProps {
@@ -63,6 +66,9 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   // Available Fabrics in Inventory
   const [fabricsList] = useState<Fabric[]>(() => storageService.getFabrics());
 
+  // Garment Types from Storage
+  const [garmentTypes] = useState<GarmentTypeConfig[]>(() => storageService.getGarmentTypes());
+
   // Form State
   const [orderNumber] = useState<string>(
     initialOrder?.orderNumber || storageService.generateNextOrderNumber()
@@ -80,10 +86,22 @@ export const OrderForm: React.FC<OrderFormProps> = ({
     initialOrder?.customerId || prefilledCustomer?.id || ''
   );
 
-  const [garmentType, setGarmentType] = useState<string>(
-    initialOrder?.garmentType || prefilledCustomer?.preferredGarmentType || 'پیراهن و تنبان (Perahan Tunban)'
-  );
+  // Selected Garment Type State
+  const defaultGarmentName = () => {
+    if (initialOrder?.garmentType) return initialOrder.garmentType;
+    if (prefilledCustomer?.preferredGarmentType) return prefilledCustomer.preferredGarmentType;
+    const first = garmentTypes[0];
+    if (first) {
+      return language === 'ps' ? first.namePs : language === 'fa' ? first.nameFa : first.nameEn;
+    }
+    return 'پیراهن و تنبان (Perahan Tunban)';
+  };
+
+  const [garmentType, setGarmentType] = useState<string>(defaultGarmentName);
   const [quantity, setQuantity] = useState<number>(initialOrder?.quantity || 1);
+
+  // Toggle to see all fields or only garment-specific fields
+  const [showAllFields, setShowAllFields] = useState<boolean>(false);
   
   // Fabric Inventory Selection State
   const [isCustomerFabric, setIsCustomerFabric] = useState<boolean>(
@@ -157,6 +175,40 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   const paymentStatus: PaymentStatus = 
     balanceAmount === 0 ? 'paid' : (Number(paidAmount) || 0) > 0 ? 'partial' : 'unpaid';
 
+  // Determine active garment category key
+  const activeGarmentKey = useMemo(() => {
+    const match = garmentTypes.find(g => 
+      g.nameEn === garmentType ||
+      g.nameFa === garmentType ||
+      g.namePs === garmentType ||
+      garmentType.toLowerCase().includes(g.key.toLowerCase()) ||
+      garmentType.toLowerCase().includes(g.nameEn.toLowerCase())
+    );
+    return match ? match.key : 'perahan_tunban';
+  }, [garmentType, garmentTypes]);
+
+  // Filtered Measurement Fields based on Selected Garment
+  const filteredMeasurementFields = useMemo(() => {
+    if (showAllFields) return measurementFields;
+    const list = measurementFields.filter(f => 
+      !f.garmentCategory || 
+      f.garmentCategory === 'all' || 
+      f.garmentCategory === activeGarmentKey
+    );
+    return list.length > 0 ? list : measurementFields;
+  }, [measurementFields, activeGarmentKey, showAllFields]);
+
+  // Filtered Design Categories based on Selected Garment
+  const filteredDesignCategories = useMemo(() => {
+    if (showAllFields) return designCategories;
+    const list = designCategories.filter(c => 
+      !c.garmentCategory || 
+      c.garmentCategory === 'all' || 
+      c.garmentCategory === activeGarmentKey
+    );
+    return list.length > 0 ? list : designCategories;
+  }, [designCategories, activeGarmentKey, showAllFields]);
+
   // Check matching customers on phone/name change
   useEffect(() => {
     if (customerPhone.trim().length >= 3 || customerName.trim().length >= 2) {
@@ -225,16 +277,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({
     setDeliveryDate(d.toISOString().slice(0, 10));
   };
 
-  // Garment Presets
-  const garmentOptions = [
-    { key: 'perahanTunban', label: t.perahanTunban },
-    { key: 'waistcoat', label: t.waistcoat },
-    { key: 'suit', label: t.suit },
-    { key: 'coatKorti', label: t.coatKorti },
-    { key: 'kameezShalwar', label: t.kameezShalwar },
-    { key: 'kurta', label: t.kurta },
-  ];
-
   // Save handler
   const handleSave = (shouldPrint: boolean) => {
     if (!customerName.trim()) {
@@ -293,10 +335,10 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             </div>
             <p className="text-xs text-stone-500 mt-0.5">
               {language === 'fa' 
-                ? 'ثبت دقیق اندازه‌ها، انتخاب رخت، دیزاین و مشخصات سفارش' 
+                ? 'ثبت دقیق اندازه‌ها، انتخاب رخت، دیزاین و مشخصات سفارش بر اساس نوع لباس' 
                 : language === 'ps' 
-                ? 'د فرمایش، رخت، ډیزاین او اندازو بشپړ ثبت' 
-                : 'Complete Afghan tailoring order slip, fabric & measurements'}
+                ? 'د کالي د ډول پر بنسټ د فرمایش، رخت، ډیزاین او اندازو ثبت' 
+                : 'Complete Afghan tailoring order slip, fabric & measurements per garment type'}
             </p>
           </div>
         </div>
@@ -330,7 +372,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
 
       {/* Main Grid: 2 Columns on Desktop, 1 Column on Mobile */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Columns: Customer Info, Fabric Selection, Measurements & Designs */}
+        {/* Left 2 Columns: Customer Info, Garment Selection, Fabric, Measurements & Designs */}
         <div className="lg:col-span-2 space-y-6">
           {/* 1. Customer Information Card */}
           <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
@@ -423,40 +465,51 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               </div>
             </div>
 
-            {/* Garment Type & Quantity */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-bold text-stone-600 mb-1">
-                  {t.garmentType}
+            {/* Garment Selection Bar (Interactive Pills from Garment Categories) */}
+            <div className="space-y-2 pt-2 border-t border-stone-100">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold text-stone-700 flex items-center gap-1.5">
+                  <Shirt className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>{t.garmentType} (انتخاب نوع لباس برای اندازه و دیزاین)</span>
                 </label>
-                <div className="flex flex-wrap gap-1.5">
-                  {garmentOptions.map(opt => (
+                <span className="text-[10px] text-stone-400">
+                  {garmentTypes.length} {language === 'fa' ? 'نوع لباس فعال' : 'Active types'}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {garmentTypes.map(g => {
+                  const localizedName = language === 'ps' ? g.namePs : language === 'fa' ? g.nameFa : g.nameEn;
+                  const isSelected = garmentType === localizedName || garmentType === g.nameEn || garmentType === g.nameFa || garmentType === g.namePs;
+
+                  return (
                     <button
-                      key={opt.key}
+                      key={g.key}
                       type="button"
-                      onClick={() => setGarmentType(opt.label)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                        garmentType === opt.label
-                          ? 'bg-[#1A1A1A] text-white shadow-xs'
-                          : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                      onClick={() => setGarmentType(localizedName)}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-xs ${
+                        isSelected
+                          ? 'bg-[#1A1A1A] text-[#D4AF37] font-black ring-2 ring-[#D4AF37]'
+                          : 'bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-200'
                       }`}
                     >
-                      {opt.label}
+                      <span className="text-sm">{g.icon || '✂️'}</span>
+                      <span>{localizedName}</span>
                     </button>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
 
               {/* Quantity */}
-              <div>
-                <label className="block text-xs font-bold text-stone-600 mb-1">
-                  {t.quantity}
-                </label>
+              <div className="pt-2 flex items-center justify-between">
+                <span className="text-xs font-bold text-stone-600">
+                  {t.quantity} (تعداد دست لباس):
+                </span>
                 <div className="flex items-center border border-stone-200 rounded-xl bg-stone-50 overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-2 hover:bg-stone-200 text-stone-600 cursor-pointer"
+                    className="px-3 py-1 hover:bg-stone-200 text-stone-600 cursor-pointer"
                   >
                     <Minus className="w-3.5 h-3.5" />
                   </button>
@@ -465,12 +518,12 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                     min="1"
                     value={quantity}
                     onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-full text-center bg-transparent text-xs font-mono font-bold text-[#1A1A1A] focus:outline-hidden"
+                    className="w-16 text-center bg-transparent text-xs font-mono font-bold text-[#1A1A1A] focus:outline-hidden"
                   />
                   <button
                     type="button"
                     onClick={() => setQuantity(quantity + 1)}
-                    className="p-2 hover:bg-stone-200 text-stone-600 cursor-pointer"
+                    className="px-3 py-1 hover:bg-stone-200 text-stone-600 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
@@ -479,7 +532,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             </div>
           </div>
 
-          {/* 2. Fabric Inventory Selection (NEW REQUESTED FEATURE) */}
+          {/* 2. Fabric Inventory Selection */}
           <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
             <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-3">
               <div className="flex items-center gap-2 text-[#1A1A1A] font-extrabold text-sm">
@@ -693,21 +746,39 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             )}
           </div>
 
-          {/* 3. Measurement Fields Grid */}
+          {/* 3. Measurement Fields Grid (DYNAMIC FOR SELECTED GARMENT) */}
           <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
-            <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-3">
+            <div className="flex flex-wrap items-center justify-between border-b border-[#E5E5E5] pb-3 gap-2">
               <div className="flex items-center gap-2 text-[#1A1A1A] font-extrabold text-sm">
                 <span className="w-1.5 h-5 bg-[#D4AF37] rounded-full inline-block" />
                 <Scissors className="w-4 h-4 text-[#D4AF37]" />
                 <span>{t.bodyMeasurements}</span>
+                <span className="px-2 py-0.5 bg-amber-50 text-[#B39025] rounded-md text-xs font-bold border border-[#D4AF37]/30">
+                  {garmentType}
+                </span>
               </div>
-              <span className="text-[11px] font-mono text-stone-500 font-semibold">
-                {t.unitInch} (in)
-              </span>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowAllFields(!showAllFields)}
+                  className="text-[11px] font-bold text-stone-600 hover:text-[#B39025] flex items-center gap-1 cursor-pointer transition"
+                >
+                  <Filter className="w-3 h-3 text-[#D4AF37]" />
+                  <span>
+                    {showAllFields 
+                      ? (language === 'fa' ? 'فقط اندازه‌های این لباس' : 'Show Only Garment Fields')
+                      : (language === 'fa' ? 'نمایش همه اندازه‌ها' : 'Show All Fields')}
+                  </span>
+                </button>
+                <span className="text-[11px] font-mono text-stone-500 font-semibold">
+                  {t.unitInch} (in)
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {measurementFields.map(field => {
+              {filteredMeasurementFields.map(field => {
                 const label = language === 'ps' 
                   ? field.labelPs 
                   : language === 'fa' 
@@ -723,7 +794,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                   >
                     <div className="flex items-center justify-between text-xs font-bold text-stone-700">
                       <span>{label}</span>
-                      <span className="text-[10px] font-mono text-stone-400">in</span>
+                      <span className="text-[10px] font-mono text-stone-400">{field.unit || 'in'}</span>
                     </div>
 
                     <div className="relative">
@@ -776,16 +847,24 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             </div>
           </div>
 
-          {/* 4. Afghan Tailoring Design Options */}
+          {/* 4. Garment Design Options (DYNAMIC FOR SELECTED GARMENT) */}
           <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
-            <div className="flex items-center gap-2 text-[#1A1A1A] font-extrabold text-sm border-b border-[#E5E5E5] pb-3">
-              <span className="w-1.5 h-5 bg-[#D4AF37] rounded-full inline-block" />
-              <Sparkles className="w-4 h-4 text-[#D4AF37]" />
-              <span>{t.garmentDesign}</span>
+            <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-3">
+              <div className="flex items-center gap-2 text-[#1A1A1A] font-extrabold text-sm">
+                <span className="w-1.5 h-5 bg-[#D4AF37] rounded-full inline-block" />
+                <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+                <span>{t.garmentDesign}</span>
+                <span className="px-2 py-0.5 bg-amber-50 text-[#B39025] rounded-md text-xs font-bold border border-[#D4AF37]/30">
+                  {garmentType}
+                </span>
+              </div>
+              <span className="text-xs text-stone-400">
+                {filteredDesignCategories.length} {language === 'fa' ? 'گزینه دیزاین' : 'options'}
+              </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {designCategories.map(cat => {
+              {filteredDesignCategories.map(cat => {
                 const title = language === 'ps' 
                   ? cat.titlePs 
                   : language === 'fa' 
@@ -852,7 +931,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
 
         {/* Right Column: Order Status, Dates, Pricing & Quick Actions */}
         <div className="space-y-6">
-          {/* 1. Order Status Field (REQUESTED EXPLICIT FEATURE) */}
+          {/* 1. Order Status Field */}
           <div className="bg-white p-5 rounded-2xl border-2 border-[#1A1A1A] shadow-xs space-y-3">
             <div className="flex items-center gap-2 text-[#1A1A1A] font-extrabold text-sm border-b border-[#E5E5E5] pb-2">
               <span className="w-1.5 h-4 bg-[#D4AF37] rounded-full inline-block" />
@@ -960,7 +1039,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 </button>
               </div>
             </div>
-
           </div>
 
           {/* 3. Special Instructions & Notes */}

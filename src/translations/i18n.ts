@@ -55,6 +55,9 @@ export interface Translations {
 
   // Dashboard stats
   totalOrders: string;
+  todaysOrders: string;
+  pendingDeliveries: string;
+  totalMonthlyRevenue: string;
   pendingOrders: string;
   inProgressOrders: string;
   readyOrders: string;
@@ -69,6 +72,19 @@ export interface Translations {
   statusInProgress: string;
   statusReady: string;
   statusDelivered: string;
+  quickStatus: string;
+  markPending: string;
+  markInProgress: string;
+  markReady: string;
+  markDelivered: string;
+
+  // Sorting
+  sortBy: string;
+  sortNewest: string;
+  sortOldest: string;
+  sortDeliveryNearest: string;
+  sortDeliveryFurthest: string;
+  viewCustomerHistory: string;
 
   // Payment status
   paymentStatus: string;
@@ -257,11 +273,73 @@ export interface Translations {
   standardA4: string;
   thermal58: string;
   thermal80: string;
+
+  // Garment Categories & Dynamic Measurement Settings
+  garmentTypesNav: string;
+  garmentCategory: string;
+  allGarments: string;
+  editMeasurementField: string;
+  fieldNameEn: string;
+  fieldNameFa: string;
+  fieldNamePs: string;
+  defaultVal: string;
+  stepIncrement: string;
+  isRequired: string;
+  addDesignCategory: string;
+  editDesignCategory: string;
+  optionNameEn: string;
+  optionNameFa: string;
+  optionNamePs: string;
+  garmentTypeSelect: string;
+  itemPeranTonban: string;
+  itemWasoat: string;
+  itemShirt: string;
+  itemKurta: string;
+  itemTwoPiece: string;
+  itemSuit: string;
+  itemCoatKorti: string;
+  itemOther: string;
+  saveMeasurementFieldBtn: string;
+  selectGarmentTypePrompt: string;
+  garmentSpecificFields: string;
+  manageGarmentsSubTab: string;
+  filterByGarment: string;
+  addGarmentType: string;
+  editGarmentType: string;
+  garmentTypeNameEn: string;
+  garmentTypeNameFa: string;
+  garmentTypeNamePs: string;
+
+  // Reports & Business Streams
+  reportsNav: string;
+  tailorRevenue: string;
+  tailorCollected: string;
+  tailorBalance: string;
+  tailorProfit: string;
+  retailRevenue: string;
+  retailCollected: string;
+  retailCost: string;
+  retailProfit: string;
+  totalShopRevenue: string;
+  totalShopCollected: string;
+  totalShopProfit: string;
+  tailoringStream: string;
+  retailStream: string;
+  combinedStream: string;
+  moneyCollectedBreakdown: string;
+  retailRecords: string;
+  viewRetailSales: string;
+  allRecords: string;
+  tailorRecords: string;
+  quickPrintSlip: string;
+  totalRetailSales: string;
+  todaysRetailRevenue: string;
+  customSellingPrice: string;
 }
 
 export const translations: Record<Language, Translations> = {
   en: {
-    appName: 'MUJEEB AFGHAN FASION HOUSE',
+    appName: 'MUJEEB AFGHAN FASHION HOUSE',
     appSubtitle: 'Orders, Measurements & Customer Management',
     save: 'Save',
     cancel: 'Cancel',
@@ -312,6 +390,9 @@ export const translations: Record<Language, Translations> = {
     menu: 'Main Navigation',
 
     totalOrders: 'Total Orders',
+    todaysOrders: "Total Today's Orders",
+    pendingDeliveries: 'Pending Deliveries',
+    totalMonthlyRevenue: 'Total Monthly Revenue',
     pendingOrders: 'Pending',
     inProgressOrders: 'In Progress',
     readyOrders: 'Ready for Pickup',
@@ -325,6 +406,18 @@ export const translations: Record<Language, Translations> = {
     statusInProgress: 'In-Progress',
     statusReady: 'Ready',
     statusDelivered: 'Delivered',
+    quickStatus: 'Quick Status',
+    markPending: 'Change to Pending',
+    markInProgress: 'Change to In Progress',
+    markReady: 'Change to Ready',
+    markDelivered: 'Change to Delivered',
+
+    sortBy: 'Sort By',
+    sortNewest: 'Newest First',
+    sortOldest: 'Oldest First',
+    sortDeliveryNearest: 'Upcoming Delivery (Earliest)',
+    sortDeliveryFurthest: 'Delivery Date (Furthest)',
+    viewCustomerHistory: 'View Customer History',
 
     paymentStatus: 'Payment Status',
     paid: 'Paid in Full',
@@ -490,7 +583,7 @@ export const translations: Record<Language, Translations> = {
     retailPurchasesHistory: 'Retail Products Purchased',
     totalSpent: 'Total Customer Spend',
 
-    loginTitle: 'Sign In to MUJEEB AFGHAN FASION HOUSE',
+    loginTitle: 'Sign In to MUJEEB AFGHAN FASHION HOUSE',
     loginSubtitle: 'Enter your credentials to access the management portal',
     email: 'Email Address',
     password: 'Password',
@@ -504,6 +597,67 @@ export const translations: Record<Language, Translations> = {
     standardA4: 'Standard A4',
     thermal58: 'Thermal 58 mm',
     thermal80: 'Thermal 80 mm',
+
+    garmentTypesNav: 'Garment Categories',
+    garmentCategory: 'Garment Category',
+    allGarments: 'All Garments / Universal',
+    editMeasurementField: 'Edit Measurement Field',
+    fieldNameEn: 'Field Name (English)',
+    fieldNameFa: 'Field Name (Dari)',
+    fieldNamePs: 'Field Name (Pashto)',
+    defaultVal: 'Default Value',
+    stepIncrement: 'Step (Increment)',
+    isRequired: 'Required Field',
+    addDesignCategory: 'Add Design Category',
+    editDesignCategory: 'Edit Design Category',
+    optionNameEn: 'Option Name (English)',
+    optionNameFa: 'Option Name (Dari)',
+    optionNamePs: 'Option Name (Pashto)',
+    garmentTypeSelect: 'Select Garment Type',
+    itemPeranTonban: 'Perahan / Tumban (Afghan Suit)',
+    itemWasoat: 'Wescott / Wasqat',
+    itemShirt: 'Shirt (Long Sleeve)',
+    itemKurta: 'Kurta Style',
+    itemTwoPiece: 'Two Piece',
+    itemSuit: 'Suit (Drishi / Coat & Pant)',
+    itemCoatKorti: 'Coat / Korti',
+    itemOther: 'Custom / Other',
+    saveMeasurementFieldBtn: 'Save Measurement Field',
+    selectGarmentTypePrompt: 'What would you like to make for the customer?',
+    garmentSpecificFields: 'Garment-Specific Measurement & Design Fields',
+    manageGarmentsSubTab: 'Garment Types',
+    filterByGarment: 'Filter by Garment Type',
+    addGarmentType: 'Add New Garment Type',
+    editGarmentType: 'Edit Garment Type',
+    garmentTypeNameEn: 'Garment Name (English)',
+    garmentTypeNameFa: 'Garment Name (Dari)',
+    garmentTypeNamePs: 'Garment Name (Pashto)',
+
+    // Reports & Business Streams
+    reportsNav: 'Reports & Analytics',
+    tailorRevenue: 'Tailoring Revenue / Billed',
+    tailorCollected: 'Tailoring Money Collected',
+    tailorBalance: 'Tailoring Outstanding',
+    tailorProfit: 'Tailoring Net Profit',
+    retailRevenue: 'Retail Revenue',
+    retailCollected: 'Retail Money Collected',
+    retailCost: 'Retail Cost (Purchase)',
+    retailProfit: 'Retail Net Profit',
+    totalShopRevenue: 'Total Combined Revenue',
+    totalShopCollected: 'Total Money Collected',
+    totalShopProfit: 'Total Combined Profit',
+    tailoringStream: 'Tailoring Orders',
+    retailStream: 'Retail Products Sales',
+    combinedStream: 'Combined Overview',
+    moneyCollectedBreakdown: 'Collected Money Breakdown',
+    retailRecords: 'Retail Sales Records',
+    viewRetailSales: 'View Retail Sales',
+    allRecords: 'All Transactions',
+    tailorRecords: 'Tailoring Records',
+    quickPrintSlip: 'Print Slip',
+    totalRetailSales: 'Total Retail Sales',
+    todaysRetailRevenue: "Today's Retail Revenue",
+    customSellingPrice: 'Flexible Selling Price',
   },
 
   fa: {
@@ -558,6 +712,9 @@ export const translations: Record<Language, Translations> = {
     menu: 'منوی اصلی',
 
     totalOrders: 'مجموع فرمایشات',
+    todaysOrders: 'سفارشات امروز',
+    pendingDeliveries: 'سفارشات در انتظار تحویل',
+    totalMonthlyRevenue: 'عواید مجموعی این ماه',
     pendingOrders: 'در انتظار',
     inProgressOrders: 'تحت دوخت',
     readyOrders: 'آماده تحویل',
@@ -571,6 +728,18 @@ export const translations: Record<Language, Translations> = {
     statusInProgress: 'تحت دوخت',
     statusReady: 'آماده تحویل',
     statusDelivered: 'تحویل شده',
+    quickStatus: 'تغییر وضعیت سریع',
+    markPending: 'تغییر به در انتظار',
+    markInProgress: 'تغییر به تحت دوخت',
+    markReady: 'تغییر به آماده تحویل',
+    markDelivered: 'تغییر به تحویل شده',
+
+    sortBy: 'ترتیب نمایش',
+    sortNewest: 'جدیدترین‌ها اول',
+    sortOldest: 'قدیمی‌ترین‌ها اول',
+    sortDeliveryNearest: 'نزدیک‌ترین مهلت تحویل',
+    sortDeliveryFurthest: 'دورترین مهلت تحویل',
+    viewCustomerHistory: 'مشاهده سابقه مشتری',
 
     paymentStatus: 'وضعیت پرداخت',
     paid: 'تکمیل پرداخت شده',
@@ -750,6 +919,67 @@ export const translations: Record<Language, Translations> = {
     standardA4: 'سند استاندارد A4',
     thermal58: 'پرینتر حرارتی ۵۸ میلی‌متر',
     thermal80: 'پرینتر حرارتی ۸۰ میلی‌متر',
+
+    garmentTypesNav: 'دسته‌بندی لباس‌ها',
+    garmentCategory: 'کتگوری لباس',
+    allGarments: 'تمام لباس‌ها (عمومی)',
+    editMeasurementField: 'ویرایش فیلد اندازه‌گیری',
+    fieldNameEn: 'نام فیلد (انگلیسی)',
+    fieldNameFa: 'نام فیلد (دری)',
+    fieldNamePs: 'نام فیلد (پښتو)',
+    defaultVal: 'مقدار پیش‌فرض',
+    stepIncrement: 'مرحله افزایش (Step)',
+    isRequired: 'فیلد الزامی / ضروری',
+    addDesignCategory: 'افزودن بخش دیزاین جدید',
+    editDesignCategory: 'ویرایش بخش دیزاین',
+    optionNameEn: 'نام گزینه (انگلیسی)',
+    optionNameFa: 'نام گزینه (دری)',
+    optionNamePs: 'نام گزینه (پښتو)',
+    garmentTypeSelect: 'انتخاب نوع لباس',
+    itemPeranTonban: 'پیراهن و تنبان (افغانی)',
+    itemWasoat: 'واسکت (واسکټ)',
+    itemShirt: 'قمیص (پیراهن آستین‌دار)',
+    itemKurta: 'کرته (کورته)',
+    itemTwoPiece: 'دو تکه (ست دو پارچه)',
+    itemSuit: 'دریشی (کوت و پتلون)',
+    itemCoatKorti: 'کرتی (کوت تک)',
+    itemOther: 'سایر فرمایشات',
+    saveMeasurementFieldBtn: 'ذخیره فیلد اندازه',
+    selectGarmentTypePrompt: 'برای مشتری چه نوع لباسی دوخته می‌شود؟',
+    garmentSpecificFields: 'اندازه‌ها و دیزاین‌های اختصاصی هر نوع لباس',
+    manageGarmentsSubTab: 'انواع لباس‌ها',
+    filterByGarment: 'فیلتر بر اساس نوع لباس',
+    addGarmentType: 'افزودن نوع لباس جدید',
+    editGarmentType: 'ویرایش نوع لباس',
+    garmentTypeNameEn: 'نام لباس (انگلیسی)',
+    garmentTypeNameFa: 'نام لباس (دری)',
+    garmentTypeNamePs: 'نام لباس (پښتو)',
+
+    // Reports & Business Streams
+    reportsNav: 'گزارشات و تحلیل مالی',
+    tailorRevenue: 'عواید فرمایشات خیاطی',
+    tailorCollected: 'پول نقد دریافت شده خیاطی',
+    tailorBalance: 'باقیمانده طلبات خیاطی',
+    tailorProfit: 'مفاد خالص خیاطی',
+    retailRevenue: 'عواید فروشات پرچون',
+    retailCollected: 'پول نقد دریافت شده پرچون',
+    retailCost: 'قیمت خرید اجناس (هزینه)',
+    retailProfit: 'مفاد خالص پرچون',
+    totalShopRevenue: 'مجموع کل عواید دکان',
+    totalShopCollected: 'مجموع کل پول جمع‌آوری شده',
+    totalShopProfit: 'مجموع کل مفاد خالص',
+    tailoringStream: 'سفارشات خیاطی',
+    retailStream: 'فروشات پرچون',
+    combinedStream: 'گزارش مجموعی',
+    moneyCollectedBreakdown: 'تفکیک پول جمع‌آوری شده',
+    retailRecords: 'لیست معاملات پرچون',
+    viewRetailSales: 'مشاهده فروشات پرچون',
+    allRecords: 'همه معاملات',
+    tailorRecords: 'سفارشات خیاطی',
+    quickPrintSlip: 'چاپ بل',
+    totalRetailSales: 'مجموع فروشات پرچون',
+    todaysRetailRevenue: 'عواید امروز پرچون',
+    customSellingPrice: 'قیمت فروش دلخواه',
   },
 
   ps: {
@@ -804,6 +1034,9 @@ export const translations: Record<Language, Translations> = {
     menu: 'اصلي مینو',
 
     totalOrders: 'ټول فرمایشونه',
+    todaysOrders: 'د نن ورځې ټول فرمایشونه',
+    pendingDeliveries: 'نا تسلیم شوي / چمتو فرمایشونه',
+    totalMonthlyRevenue: 'د دې میاشتې ټول عواید',
     pendingOrders: 'په تمه',
     inProgressOrders: 'تر کار لاندې',
     readyOrders: 'چمتو شوي',
@@ -817,6 +1050,18 @@ export const translations: Record<Language, Translations> = {
     statusInProgress: 'تر ګنډلو لاندې',
     statusReady: 'چمتو شوی',
     statusDelivered: 'تسلیم شوی',
+    quickStatus: 'د وضعیت چټک بدلون',
+    markPending: 'په تمه حالت ته اړول',
+    markInProgress: 'تر کار لاندې حالت ته اړول',
+    markReady: 'چمتو شوي حالت ته اړول',
+    markDelivered: 'تسلیم شوي حالت ته اړول',
+
+    sortBy: 'ترتیب پر اساس',
+    sortNewest: 'تر ټولو نوي لومړی',
+    sortOldest: 'تر ټولو پخواني لومړی',
+    sortDeliveryNearest: 'د تحویل نږدې نېټه',
+    sortDeliveryFurthest: 'د تحویل لرې نېټه',
+    viewCustomerHistory: 'د پېرودونکي تاریخچه کتل',
 
     paymentStatus: 'د پیسو حالت',
     paid: 'بشپړ ورکړل شوی',
@@ -996,5 +1241,66 @@ export const translations: Record<Language, Translations> = {
     standardA4: 'معیاري A4 سند',
     thermal58: 'حرارتي ۵۸ ملي متره',
     thermal80: 'حرارتي ۸۰ ملي متره',
+
+    garmentTypesNav: 'د جامو وېشنیزې',
+    garmentCategory: 'د جامو کټګوري',
+    allGarments: 'ټول کالي (عمومي)',
+    editMeasurementField: 'د اندازې فیلډ سمول',
+    fieldNameEn: 'د فیلډ نوم (انګلیسي)',
+    fieldNameFa: 'د فیلډ نوم (دري)',
+    fieldNamePs: 'د فیلډ نوم (پښتو)',
+    defaultVal: 'اصلي (ډیفالټ) اندازه',
+    stepIncrement: 'د زیاتوالي ګام (Step)',
+    isRequired: 'اړین / لازمي فیلډ',
+    addDesignCategory: 'د نوي ډیزاین برخه زیاتول',
+    editDesignCategory: 'د ډیزاین برخه سمول',
+    optionNameEn: 'د غوره توب نوم (انګلیسي)',
+    optionNameFa: 'د غوره توب نوم (دري)',
+    optionNamePs: 'د غوره توب نوم (پښتو)',
+    garmentTypeSelect: 'د جامو ډول وټاکئ',
+    itemPeranTonban: 'پیرهن او پرتوګ (افغاني کالي)',
+    itemWasoat: 'واسکټ',
+    itemShirt: 'کمیس (لستوڼي لرونکی)',
+    itemKurta: 'کورته',
+    itemTwoPiece: 'دوه ټوټې ست کالي',
+    itemSuit: 'دریشي (کوت او پتلون)',
+    itemCoatKorti: 'کورټۍ (کوت)',
+    itemOther: 'نور فرمایشونه',
+    saveMeasurementFieldBtn: 'د اندازې فیلډ خوندي کول',
+    selectGarmentTypePrompt: 'د پیرودونکي لپاره کوم ډول کالي ګنډل کېږي؟',
+    garmentSpecificFields: 'د هر ډول کالیو لپاره ځانګړې اندازې او ډیزاینونه',
+    manageGarmentsSubTab: 'د کاليو ډولونه',
+    filterByGarment: 'د کاليو د ډول له مخې فلټر',
+    addGarmentType: 'د کالیو نوی ډول زیاتول',
+    editGarmentType: 'د کالیو ډول سمول',
+    garmentTypeNameEn: 'د جامو نوم (انګلیسي)',
+    garmentTypeNameFa: 'د جامو نوم (دري)',
+    garmentTypeNamePs: 'د جامو نوم (پښتو)',
+
+    // Reports & Business Streams
+    reportsNav: 'راپورونه او مالي شننه',
+    tailorRevenue: 'د خیاطۍ د فرمایشونو عواید',
+    tailorCollected: 'د خیاطۍ راټولې شوې نغدې پیسې',
+    tailorBalance: 'د خیاطۍ پاتې پیسې',
+    tailorProfit: 'د خیاطۍ خالص مفاد',
+    retailRevenue: 'د پرچون پلور عواید',
+    retailCollected: 'د پرچون راټولې شوې پیسې',
+    retailCost: 'د توکو د پېرلو بیه (لګښت)',
+    retailProfit: 'د پرچون خالص مفاد',
+    totalShopRevenue: 'د هټۍ ټول عواید',
+    totalShopCollected: 'ټولې راټولې شوې نغدې پیسې',
+    totalShopProfit: 'ټول خالص مفاد',
+    tailoringStream: 'د خیاطۍ فرمایشونه',
+    retailStream: 'د پرچون پلور',
+    combinedStream: 'عمومي راپور',
+    moneyCollectedBreakdown: 'د راټولو شویو پیسو تفکیک',
+    retailRecords: 'د پرچون پلور ریکارډونه',
+    viewRetailSales: 'د پرچون پلور لیدل',
+    allRecords: 'ټولې معاملې',
+    tailorRecords: 'د خیاطۍ ریکارډونه',
+    quickPrintSlip: 'د بِل چاپ',
+    totalRetailSales: 'د پرچون ټول پلور',
+    todaysRetailRevenue: 'د نن ورځې پرچون عواید',
+    customSellingPrice: 'خپله خوښه د پلور بیه',
   },
 };
