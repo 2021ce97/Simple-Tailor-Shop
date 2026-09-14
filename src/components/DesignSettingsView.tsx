@@ -26,16 +26,18 @@ import {
   Layers,
   Filter,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Printer
 } from 'lucide-react';
+import { ReceiptSettingsPanel } from './ReceiptSettingsPanel';
 
 interface DesignSettingsViewProps {
   designCategories: DesignCategory[];
   measurementFields: MeasurementField[];
   shopSettings: ShopSettings;
   language: Language;
-  activeSubTab?: 'design' | 'measurements' | 'garments' | 'shop' | 'backup';
-  onSubTabChange?: (sub: 'design' | 'measurements' | 'garments' | 'shop' | 'backup') => void;
+  activeSubTab?: 'design' | 'measurements' | 'garments' | 'shop' | 'receipt' | 'backup';
+  onSubTabChange?: (sub: 'design' | 'measurements' | 'garments' | 'shop' | 'receipt' | 'backup') => void;
   onUpdateDesignCategories?: (cats: DesignCategory[]) => void;
   onUpdateMeasurementFields?: (fields: MeasurementField[]) => void;
   onUpdateShopSettings?: (settings: ShopSettings) => void;
@@ -65,8 +67,8 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 }) => {
   const t = translations[language];
 
-  // Active Tab: 'garments' | 'measurements' | 'design' | 'shop' | 'backup'
-  const [activeTab, setActiveTab] = useState<'garments' | 'measurements' | 'design' | 'shop' | 'backup'>(
+  // Active Tab: 'garments' | 'measurements' | 'design' | 'shop' | 'receipt' | 'backup'
+  const [activeTab, setActiveTab] = useState<'garments' | 'measurements' | 'design' | 'shop' | 'receipt' | 'backup'>(
     (activeSubTab as any) || 'design'
   );
 
@@ -76,7 +78,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     }
   }, [activeSubTab]);
 
-  const handleTabClick = (tab: 'garments' | 'measurements' | 'design' | 'shop' | 'backup') => {
+  const handleTabClick = (tab: 'garments' | 'measurements' | 'design' | 'shop' | 'receipt' | 'backup') => {
     setActiveTab(tab);
     if (onSubTabChange) onSubTabChange(tab as any);
   };
@@ -667,6 +669,21 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
         >
           <Building2 className="w-4 h-4" />
           <span>{t.shopProfile}</span>
+        </button>
+
+        <button
+          onClick={() => handleTabClick('receipt')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+            activeTab === 'receipt'
+              ? 'bg-[#1A1A1A] text-[#D4AF37] font-black shadow-xs'
+              : 'bg-white text-[#706E6B] hover:bg-[#F9F7F2] border border-[#E5E5E5]'
+          }`}
+        >
+          <Printer className="w-4 h-4" />
+          <span>{language === 'fa' ? 'تنظیمات رسید و پرینتر' : language === 'ps' ? 'د رسید او پرینټر ترتیبات' : 'Receipt Settings'}</span>
+          <span className="px-1.5 py-0.2 bg-[#D4AF37]/20 text-[#D4AF37] rounded-full text-[10px] font-mono font-bold uppercase">
+            {shop.receiptFormat === 'a4' ? 'A4' : shop.receiptFormat === 'thermal58' ? '58mm' : '80mm'}
+          </span>
         </button>
 
         <button
@@ -1723,6 +1740,66 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
             </div>
           </div>
 
+          {/* Quick Receipt Format Selector in Shop Profile */}
+          <div className="p-4 bg-[#F9F7F2] rounded-xl border border-[#E5E5E5] space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Printer className="w-4 h-4 text-[#D4AF37]" />
+                <h4 className="text-xs font-bold text-[#1A1A1A]">
+                  {language === 'fa' ? 'فرمت پیش‌فرض چاپ رسید و بل' : language === 'ps' ? 'د بِل د چاپ بڼه' : 'Default Receipt Format'}
+                </h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleTabClick('receipt')}
+                className="text-[11px] font-bold text-[#B39025] hover:text-[#D4AF37] underline cursor-pointer"
+              >
+                {language === 'fa' ? 'مدیریت کامل تنظیمات رسید ←' : language === 'ps' ? 'د بِل بشپړ ترتیبات ←' : 'Open Detailed Receipt Settings →'}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <button
+                type="button"
+                onClick={() => setShop({ ...shop, receiptFormat: 'thermal80' })}
+                className={`p-3 rounded-lg border text-right sm:text-center transition cursor-pointer ${
+                  (shop.receiptFormat || 'thermal80') === 'thermal80'
+                    ? 'border-[#D4AF37] bg-white text-[#1A1A1A] font-bold shadow-xs'
+                    : 'border-[#E5E5E5] bg-white/60 text-[#706E6B]'
+                }`}
+              >
+                <div className="font-bold">{language === 'fa' ? 'حرارتی ۸۰ میلی‌متر (POS)' : 'Thermal 80mm POS'}</div>
+                <div className="text-[10px] text-stone-500 font-normal">رول استاندارد دکان</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShop({ ...shop, receiptFormat: 'thermal58' })}
+                className={`p-3 rounded-lg border text-right sm:text-center transition cursor-pointer ${
+                  shop.receiptFormat === 'thermal58'
+                    ? 'border-[#D4AF37] bg-white text-[#1A1A1A] font-bold shadow-xs'
+                    : 'border-[#E5E5E5] bg-white/60 text-[#706E6B]'
+                }`}
+              >
+                <div className="font-bold">{language === 'fa' ? 'حرارتی ۵۸ میلی‌متر (کوچک)' : 'Thermal 58mm Mini'}</div>
+                <div className="text-[10px] text-stone-500 font-normal">پرینتر جیبی / بلوتوث</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShop({ ...shop, receiptFormat: 'a4' })}
+                className={`p-3 rounded-lg border text-right sm:text-center transition cursor-pointer ${
+                  shop.receiptFormat === 'a4'
+                    ? 'border-[#D4AF37] bg-white text-[#1A1A1A] font-bold shadow-xs'
+                    : 'border-[#E5E5E5] bg-white/60 text-[#706E6B]'
+                }`}
+              >
+                <div className="font-bold">{language === 'fa' ? 'کاغذ رسمی A4' : 'Standard A4 Sheet'}</div>
+                <div className="text-[10px] text-stone-500 font-normal">پرینتر دفتری / لیزری</div>
+              </button>
+            </div>
+          </div>
+
           <div className="flex justify-end pt-2">
             <button
               type="submit"
@@ -1734,7 +1811,21 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
         </form>
       )}
 
-      {/* ================= TAB 5: BACKUP & RESTORE ================= */}
+      {/* ================= TAB 5: RECEIPT SETTINGS ================= */}
+      {activeTab === 'receipt' && (
+        <ReceiptSettingsPanel
+          shopSettings={shop}
+          language={language}
+          onUpdateShopSettings={(updated) => {
+            setShop(updated);
+            if (onUpdateShopSettings) onUpdateShopSettings(updated);
+            showNotification(language === 'fa' ? 'تنظیمات رسید ذخیره شد' : 'Receipt settings saved');
+          }}
+          onSettingsUpdated={onSettingsUpdated}
+        />
+      )}
+
+      {/* ================= TAB 6: BACKUP & RESTORE ================= */}
       {activeTab === 'backup' && (
         <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-6">
           <div>

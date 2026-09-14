@@ -187,6 +187,16 @@ export const DEFAULT_SHOP_SETTINGS: ShopSettings = {
   receiptFooterPs: 'مهرباني وکړئ د فرمایش د اخیستلو پر مهال دا بِل له ځان سره ولرئ.',
   logoUrl: '/mujeeb-afghan-logo.jpeg',
   logoType: 'emblem',
+  receiptFormat: 'thermal80',
+  receiptThermalStyle: 'standard',
+  receiptShowLogo: true,
+  receiptShowBarcode: true,
+  receiptShowQrCode: true,
+  receiptShowNotes: true,
+  receiptShowTerms: true,
+  receiptHeaderNoteFa: 'بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ',
+  receiptHeaderNotePs: 'بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ',
+  receiptHeaderNoteEn: 'IN THE NAME OF ALLAH',
 };
 
 export const DEFAULT_GARMENT_TYPES: GarmentTypeConfig[] = [

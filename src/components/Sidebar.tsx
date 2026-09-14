@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 export type MainNavTab = 'dashboard' | 'new_order' | 'customers' | 'fabrics' | 'products' | 'sales_history' | 'reports' | 'settings';
-export type SettingsSubTab = 'design' | 'measurements' | 'shop' | 'backup';
+export type SettingsSubTab = 'design' | 'measurements' | 'garments' | 'shop' | 'receipt' | 'backup';
 
 interface SidebarProps {
   currentTab: MainNavTab;
@@ -322,7 +322,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span>{t.designAndSettings}</span>
             </div>
             <span className="text-[10px] font-mono px-2 py-0.5 bg-stone-800 rounded text-stone-400">
-              4
+              6
             </span>
           </button>
         </div>

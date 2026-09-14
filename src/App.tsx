@@ -439,6 +439,8 @@ function ShopApp() {
               shopSettings={shopSettings}
               language={language}
               activeSubTab={settingsSubTab}
+              onSubTabChange={setSettingsSubTab}
+              onUpdateShopSettings={setShopSettings}
               onCategoryUpdated={reloadData}
               onMeasurementFieldsUpdated={reloadData}
               onSettingsUpdated={reloadData}

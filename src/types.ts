@@ -178,6 +178,9 @@ export interface Order {
   updatedAt: string;
 }
 
+export type ReceiptPaperFormat = 'thermal80' | 'thermal58' | 'a4';
+export type ThermalReceiptStyle = 'standard' | 'classic' | 'compact';
+
 export interface ShopSettings {
   shopNameEn: string;
   shopNameFa: string;
@@ -200,4 +203,15 @@ export interface ShopSettings {
   receiptFooterPs?: string;
   logoUrl?: string;
   logoType?: 'emblem' | 'scissors' | 'sewing' | 'custom';
+  // Receipt Settings configuration
+  receiptFormat?: ReceiptPaperFormat;
+  receiptThermalStyle?: ThermalReceiptStyle;
+  receiptShowLogo?: boolean;
+  receiptShowBarcode?: boolean;
+  receiptShowQrCode?: boolean;
+  receiptShowNotes?: boolean;
+  receiptShowTerms?: boolean;
+  receiptHeaderNoteFa?: string;
+  receiptHeaderNotePs?: string;
+  receiptHeaderNoteEn?: string;
 }

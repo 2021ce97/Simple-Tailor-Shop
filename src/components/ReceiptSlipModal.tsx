@@ -73,8 +73,27 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
   const receiptRef = useRef<HTMLDivElement>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [printFormat, setPrintFormat] = useState<PrintFormat>('a4');
+  const [printFormat, setPrintFormat] = useState<PrintFormat>(
+    (shopSettings.receiptFormat as PrintFormat) || 'thermal80'
+  );
   const [isPrinting, setIsPrinting] = useState(false);
+
+  // Sync with shopSettings.receiptFormat if changed externally
+  React.useEffect(() => {
+    if (shopSettings.receiptFormat) {
+      setPrintFormat(shopSettings.receiptFormat as PrintFormat);
+    }
+  }, [shopSettings.receiptFormat]);
+
+  const thermalStyle = shopSettings.receiptThermalStyle || 'standard';
+  const showLogo = shopSettings.receiptShowLogo !== false;
+  const showBarcode = shopSettings.receiptShowBarcode !== false;
+  const showNotes = shopSettings.receiptShowNotes !== false;
+  const headerBlessing = language === 'ps'
+    ? shopSettings.receiptHeaderNotePs
+    : language === 'fa'
+    ? shopSettings.receiptHeaderNoteFa
+    : shopSettings.receiptHeaderNoteEn;
 
   // Shop Name & Details based on language or dual
   const shopName = language === 'ps' 
@@ -268,16 +287,37 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
             ref={receiptRef}
             id="authentic-receipt-slip"
             dir={language === 'en' ? 'ltr' : 'rtl'}
-            className={`bg-white border border-[#E5E5E5] shadow-xs p-4 text-[#1A1A1A] text-sm font-sans relative select-text rounded-xl ${printFormat === 'a4' ? 'w-full max-w-[380px]' : printFormat === 'thermal58' ? 'w-[280px]' : 'w-[380px]'}`}
+            className={`bg-white border border-[#E5E5E5] shadow-xs p-4 text-[#1A1A1A] text-sm relative select-text rounded-xl transition-all ${
+              printFormat === 'a4' 
+                ? 'w-full max-w-[420px]' 
+                : printFormat === 'thermal58' 
+                ? 'w-[280px]' 
+                : 'w-[380px]'
+            } ${
+              thermalStyle === 'classic' 
+                ? 'font-mono' 
+                : thermalStyle === 'compact' 
+                ? 'p-2.5 text-xs' 
+                : 'font-sans'
+            }`}
             style={{ minHeight: '520px' }}
           >
+            {/* Header Blessing / Bismillah */}
+            {headerBlessing && (
+              <div className="text-center font-serif text-[11px] text-stone-700 pb-1 mb-1 border-b border-stone-200">
+                {headerBlessing}
+              </div>
+            )}
+
             {/* Top Header with Seal and Contacts */}
             <div className="text-center pb-3 border-b-2 border-stone-900">
-              <img
-                src={logoUrl}
-                alt="Mujeeb Afghan Fashion"
-                className="mx-auto mb-2 h-20 w-20 rounded-lg object-contain"
-              />
+              {showLogo && (
+                <img
+                  src={logoUrl}
+                  alt="Mujeeb Afghan Fashion"
+                  className="mx-auto mb-2 h-20 w-20 rounded-lg object-contain"
+                />
+              )}
               <div className="flex items-center justify-center gap-2 mb-1">
                 <div>
                   <h1 className="text-lg font-black tracking-tight text-stone-950 font-serif leading-tight">
@@ -373,29 +413,31 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
             </div>
 
             {/* Barcodes Row (Contact Barcode & Order Barcode) as shown in uploaded photos */}
-            <div className="py-2 px-1 border-b border-dashed border-stone-400 flex items-center justify-between">
-              {/* Phone Barcode */}
-              <div className="flex-1 text-center">
-                <BarcodeView 
-                  value={order.customerPhone || '0780000000'} 
-                  height={28}
-                  width={1.2}
-                  fontSize={9}
-                />
-                <span className="text-[9px] text-stone-500 block">{t.phoneBarcode}</span>
-              </div>
+            {showBarcode && (
+              <div className="py-2 px-1 border-b border-dashed border-stone-400 flex items-center justify-between">
+                {/* Phone Barcode */}
+                <div className="flex-1 text-center">
+                  <BarcodeView 
+                    value={order.customerPhone || '0780000000'} 
+                    height={28}
+                    width={1.2}
+                    fontSize={9}
+                  />
+                  <span className="text-[9px] text-stone-500 block">{t.phoneBarcode}</span>
+                </div>
 
-              {/* Order Number Barcode */}
-              <div className="flex-1 text-center">
-                <BarcodeView 
-                  value={order.orderNumber} 
-                  height={28}
-                  width={1.4}
-                  fontSize={9}
-                />
-                <span className="text-[9px] text-stone-500 block">{t.billBarcode}</span>
+                {/* Order Number Barcode */}
+                <div className="flex-1 text-center">
+                  <BarcodeView 
+                    value={order.orderNumber} 
+                    height={28}
+                    width={1.4}
+                    fontSize={9}
+                  />
+                  <span className="text-[9px] text-stone-500 block">{t.billBarcode}</span>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Garment and quantity */}
             <div className="grid grid-cols-2 border-b border-stone-900 text-xs py-1.5 px-2 font-bold bg-stone-100/70 text-center">
