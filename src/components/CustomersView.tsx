@@ -49,6 +49,37 @@ interface CustomersViewProps {
   onCustomerUpdated: () => void;
 }
 
+const normalizeMeasurementText = (value: string) => value.toLowerCase().replace(/[\s_-]+/g, '');
+
+const isWaistcoatSpecificMeasurement = (field: MeasurementField) => {
+  const fieldText = normalizeMeasurementText(`${field.key} ${field.labelEn} ${field.labelFa} ${field.labelPs}`);
+  return fieldText.includes('waistcoat') || fieldText.includes('wescott') || fieldText.includes('westcoat') || fieldText.includes('vest');
+};
+
+const isWaistcoatMeasurement = (field: MeasurementField) => {
+  const key = normalizeMeasurementText(field.key);
+  const sharedWaistcoatKeys = ['qad', 'shana', 'chati', 'baghal', 'kamar', 'daman', 'yakhan'];
+  return isWaistcoatSpecificMeasurement(field) || sharedWaistcoatKeys.includes(key);
+};
+
+const isLowerBodyMeasurement = (field: MeasurementField) => {
+  const fieldText = normalizeMeasurementText(`${field.key} ${field.labelEn} ${field.labelFa} ${field.labelPs}`);
+  return fieldText.includes('tunban') || fieldText.includes('trouser') || fieldText.includes('pacha') || fieldText.includes('bottom') || fieldText.includes('surin') || fieldText.includes('seat') || fieldText.includes('hip');
+};
+
+const getMeasurementFieldsForGarment = (fields: MeasurementField[], garmentType: string) => {
+  const garmentText = normalizeMeasurementText(garmentType);
+  if (garmentText.includes('waistcoat') || garmentText.includes('wescott') || garmentText.includes('westcoat') || garmentText.includes('vest') || garmentText.includes('واسکت')) {
+    return fields.filter(isWaistcoatMeasurement);
+  }
+
+  if (garmentText.includes('tunban') || garmentText.includes('kameezshalwar') || garmentText.includes('perahan') || garmentText.includes('kurta') || garmentText.includes('پیراهن') || garmentText.includes('کورت')) {
+    return fields.filter(field => !isWaistcoatSpecificMeasurement(field));
+  }
+
+  return fields.filter(field => !isWaistcoatSpecificMeasurement(field) && !isLowerBodyMeasurement(field));
+};
+
 export const CustomersView: React.FC<CustomersViewProps> = ({
   customers,
   orders,
@@ -82,6 +113,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [historyTab, setHistoryTab] = useState<'all' | 'orders' | 'products'>('all');
   const [customerTypeFilter, setCustomerTypeFilter] = useState<'all' | 'tailoring' | 'products'>('all');
+  const [selectedMeasurementGarment, setSelectedMeasurementGarment] = useState('');
 
   // Currency
   const currencySymbol = language === 'ps' 
@@ -167,6 +199,25 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
     if (!activeCustomer) return [];
     return orders.filter(o => o.customerId === activeCustomer.id || o.customerPhone === activeCustomer.phone);
   }, [orders, activeCustomer]);
+
+  const measurementGarments = useMemo(() => {
+    const garmentTypes = activeCustomerOrders.map(order => order.garmentType).filter(Boolean);
+    if (garmentTypes.length === 0 && activeCustomer?.preferredGarmentType) {
+      garmentTypes.push(activeCustomer.preferredGarmentType);
+    }
+    return Array.from(new Set(garmentTypes));
+  }, [activeCustomerOrders, activeCustomer]);
+
+  useEffect(() => {
+    if (!measurementGarments.includes(selectedMeasurementGarment)) {
+      setSelectedMeasurementGarment(measurementGarments[0] || '');
+    }
+  }, [measurementGarments, selectedMeasurementGarment]);
+
+  const visibleMeasurementFields = useMemo(() => {
+    if (!selectedMeasurementGarment) return [];
+    return getMeasurementFieldsForGarment(measurementFields, selectedMeasurementGarment);
+  }, [measurementFields, selectedMeasurementGarment]);
 
   // Customer product purchases
   const activeCustomerSales = useMemo(() => {
@@ -338,7 +389,14 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                 return (
                   <div
                     key={cust.id}
-                    onClick={() => setActiveCustomer(cust)}
+                    onClick={() => {
+                      setActiveCustomer(cust);
+                      const customerGarmentTypes = orders
+                        .filter(order => order.customerId === cust.id || order.customerPhone === cust.phone)
+                        .map(order => order.garmentType)
+                        .filter(Boolean);
+                      setSelectedMeasurementGarment(customerGarmentTypes[0] || cust.preferredGarmentType || '');
+                    }}
                     className={`p-4 rounded-2xl border transition cursor-pointer flex items-center justify-between gap-3 ${
                       isSelected
                         ? 'bg-[#F9F7F2] border-[#D4AF37] shadow-xs ring-1 ring-[#D4AF37]'
@@ -451,8 +509,27 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                   </span>
                 </div>
 
+                {measurementGarments.length > 1 && (
+                  <div className="flex flex-wrap gap-1.5 rounded-xl bg-stone-100 p-1.5">
+                    {measurementGarments.map(garmentType => (
+                      <button
+                        key={garmentType}
+                        type="button"
+                        onClick={() => setSelectedMeasurementGarment(garmentType)}
+                        className={`rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                          selectedMeasurementGarment === garmentType
+                            ? 'bg-white text-[#1A1A1A] shadow-xs'
+                            : 'text-stone-600 hover:bg-white/70'
+                        }`}
+                      >
+                        {garmentType}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
-                  {measurementFields.map(field => {
+                  {visibleMeasurementFields.map(field => {
                     const label = language === 'ps' 
                       ? field.labelPs 
                       : language === 'fa' 
@@ -475,6 +552,11 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                     );
                   })}
                 </div>
+                {selectedMeasurementGarment && visibleMeasurementFields.length === 0 && (
+                  <p className="py-4 text-center text-xs italic text-stone-500">
+                    {language === 'fa' ? 'برای این لباس اندازه‌ای ثبت نشده است.' : language === 'ps' ? 'د دې کالي لپاره اندازه نه ده ثبت شوې.' : 'No measurements recorded for this garment.'}
+                  </p>
+                )}
               </div>
 
               {/* Notes & Address */}
