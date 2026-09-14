@@ -309,6 +309,41 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
   // Direct Print and PDF for Retail Slip
   const [isPrintingReceipt, setIsPrintingReceipt] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [quickPrintSale, setQuickPrintSale] = useState<ProductSale | null>(null);
+  const quickPrintRef = useRef<HTMLDivElement>(null);
+
+  // Quick print handler directly from list without opening modal
+  const handleQuickPrint = async (sale: ProductSale, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    setQuickPrintSale(sale);
+    
+    // Give DOM a microtask to render the quickPrintRef content
+    setTimeout(async () => {
+      if (!quickPrintRef.current) return;
+      const shopName = language === 'fa' 
+        ? (shopSettings?.shopNameFa || 'Mujeeb Afghan') 
+        : language === 'ps' 
+        ? (shopSettings?.shopNamePs || 'Mujeeb Afghan') 
+        : (shopSettings?.shopNameEn || 'MUJEEB AFGHAN FASHION HOUSE');
+      
+      await printReceiptElement(quickPrintRef.current, {
+        title: `${shopName} - SL-${sale.id.slice(-6).toUpperCase()}`,
+        pageFormat: shopSettings?.receiptFormat || 'thermal80',
+        dir: language === 'en' ? 'ltr' : 'rtl',
+        onStart: () => setIsPrintingReceipt(true),
+        onComplete: () => {
+          setIsPrintingReceipt(false);
+          setQuickPrintSale(null);
+        },
+        onError: () => {
+          setIsPrintingReceipt(false);
+          setQuickPrintSale(null);
+        }
+      });
+    }, 50);
+  };
 
   const handlePrintReceipt = async () => {
     if (!receiptPrintRef.current || !activeReceiptSale) return;
@@ -320,7 +355,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
     
     await printReceiptElement(receiptPrintRef.current, {
       title: `${shopName} - SL-${activeReceiptSale.id.slice(-6).toUpperCase()}`,
-      pageFormat: 'thermal80',
+      pageFormat: shopSettings?.receiptFormat || 'thermal80',
       dir: language === 'en' ? 'ltr' : 'rtl',
       onStart: () => setIsPrintingReceipt(true),
       onComplete: () => setIsPrintingReceipt(false),
@@ -698,13 +733,28 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                       </span>
                     </div>
 
-                    <button
-                      onClick={() => setActiveReceiptSale(sale)}
-                      title={t.print || 'Print Receipt'}
-                      className="p-2 text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-xl transition cursor-pointer"
-                    >
-                      <Printer className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={(e) => handleQuickPrint(sale, e)}
+                        disabled={isPrintingReceipt && quickPrintSale?.id === sale.id}
+                        title={language === 'fa' ? 'چاپ سریع رسید (مستقیم)' : language === 'ps' ? 'د بِل سملاسي چاپ' : 'Quick Print Receipt'}
+                        className="flex items-center gap-1 px-2.5 py-1.5 bg-[#D4AF37] hover:bg-[#B39025] text-[#1A1A1A] text-[11px] font-black rounded-lg transition cursor-pointer shadow-xs disabled:opacity-50 shrink-0"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">
+                          {isPrintingReceipt && quickPrintSale?.id === sale.id 
+                            ? '...' 
+                            : (language === 'fa' ? 'چاپ رسید' : language === 'ps' ? 'چاپ' : 'Print')}
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => setActiveReceiptSale(sale)}
+                        title={language === 'fa' ? 'مشاهده و چاپ کامل رسید' : 'View Receipt Modal'}
+                        className="p-1.5 text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-lg transition cursor-pointer"
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -1098,6 +1148,123 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                 <Printer className="w-4 h-4" />
                 <span>{isPrintingReceipt ? t.loading : (t.print || 'Print Receipt')}</span>
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 7. Hidden Quick Print Container (For 1-click Direct Print from List) */}
+      {quickPrintSale && (
+        <div style={{ position: 'fixed', left: '-9999px', top: '0', opacity: 0, pointerEvents: 'none' }}>
+          <div
+            ref={quickPrintRef}
+            id="printable-quick-retail-slip"
+            className="p-4 bg-white font-mono text-xs text-stone-900 border-b border-stone-300"
+            style={{ width: '320px', maxWidth: '320px' }}
+          >
+            {/* Header */}
+            <div className="text-center font-serif text-[10px] text-stone-600 pb-1 mb-1 border-b border-stone-200">
+              {shopSettings?.receiptHeaderNoteFa || 'بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ'}
+            </div>
+            <div className="text-center pb-2 border-b-2 border-stone-900">
+              {shopSettings?.receiptShowLogo !== false && (
+                <img
+                  src={shopSettings?.logoUrl || '/mujeeb-afghan-logo.jpeg'}
+                  alt="Shop Logo"
+                  className="mx-auto h-12 w-12 object-contain mb-1 rounded"
+                />
+              )}
+              <h2 className="font-black text-sm text-stone-950 font-serif leading-tight">
+                {language === 'fa' 
+                  ? (shopSettings?.shopNameFa || 'مجیب افغان خیاطي او رخت پلورنځی')
+                  : language === 'ps' 
+                  ? (shopSettings?.shopNamePs || 'مجیب افغان خیاطي او رخت پلورنځی')
+                  : (shopSettings?.shopNameEn || 'MUJEEB AFGHAN FASHION HOUSE')}
+              </h2>
+              <p className="text-[10px] text-stone-500 mt-0.5">
+                {language === 'fa' 
+                  ? (shopSettings?.addressFa || '') 
+                  : language === 'ps' 
+                  ? (shopSettings?.addressPs || '') 
+                  : (shopSettings?.addressEn || '')}
+              </p>
+              <div className="flex justify-center gap-2 text-[10px] text-stone-600 font-mono mt-0.5">
+                <span>📞 {shopSettings?.phone1}</span>
+                {shopSettings?.whatsapp && <span>💬 {shopSettings?.whatsapp}</span>}
+              </div>
+            </div>
+
+            {/* Title */}
+            <div className="text-center py-1 border-b border-stone-900 bg-stone-50 my-1">
+              <h3 className="text-xs font-black tracking-wider text-stone-900">
+                {language === 'fa' ? 'رسید فروش پرچون' : language === 'ps' ? 'د پرچون پلور بِل' : 'RETAIL SALES RECEIPT'}
+              </h3>
+              <p className="text-[9px] text-stone-500 font-mono">
+                {new Date(quickPrintSale.saleDate).toLocaleDateString()} | {new Date(quickPrintSale.saleDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
+            </div>
+
+            {/* Receipt Info */}
+            <div className="py-1 border-b border-stone-300 text-[10px] space-y-0.5">
+              <div className="flex justify-between">
+                <span className="text-stone-500">{language === 'fa' ? 'شماره بِل:' : 'Receipt #:'}</span>
+                <span className="font-mono font-bold">SL-{quickPrintSale.id.slice(-6).toUpperCase()}</span>
+              </div>
+              {quickPrintSale.customerName && (
+                <div className="flex justify-between">
+                  <span className="text-stone-500">{language === 'fa' ? 'مشتری:' : 'Customer:'}</span>
+                  <span className="font-bold">{quickPrintSale.customerName}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Items */}
+            <div className="py-1.5 border-b border-stone-300">
+              <table className="w-full text-right text-[10px]">
+                <thead className="bg-stone-100 border-y border-stone-800">
+                  <tr className="text-[10px] text-stone-800 font-bold">
+                    <th className="py-0.5 px-1 text-right">{language === 'fa' ? 'شرح جنس' : 'Item'}</th>
+                    <th className="py-0.5 px-1 text-center">{language === 'fa' ? 'تعداد' : 'Qty'}</th>
+                    <th className="py-0.5 px-1 text-center">{language === 'fa' ? 'قیمت' : 'Price'}</th>
+                    <th className="py-0.5 px-1 text-left">{language === 'fa' ? 'مجموع' : 'Total'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="py-1 px-1 font-bold text-stone-900">{quickPrintSale.productName}</td>
+                    <td className="py-1 px-1 text-center font-mono font-bold">{quickPrintSale.quantity}</td>
+                    <td className="py-1 px-1 text-center font-mono">{Number(quickPrintSale.sellingPrice).toLocaleString()}</td>
+                    <td className="py-1 px-1 text-left font-mono font-bold">{Number(quickPrintSale.totalAmount).toLocaleString()}</td>
+                  </tr>
+                </tbody>
+              </table>
+              {quickPrintSale.notes && (
+                <div className="mt-1 text-[9px] text-stone-600 italic">
+                  Note: {quickPrintSale.notes}
+                </div>
+              )}
+            </div>
+
+            {/* Totals */}
+            <div className="py-1 text-[10px] space-y-1">
+              <div className="flex justify-between font-black text-xs text-stone-950 pt-1 border-t-2 border-stone-900 bg-stone-50 px-1 py-0.5">
+                <span>{language === 'fa' ? 'مجموع پرداختی:' : 'TOTAL PAID:'}</span>
+                <span className="font-mono">{Number(quickPrintSale.totalAmount).toLocaleString()} {currencySymbol}</span>
+              </div>
+              <div className="flex justify-between text-stone-700 text-[10px]">
+                <span>{language === 'fa' ? 'روش پرداخت:' : 'Payment:'}</span>
+                <span className="font-bold uppercase">{quickPrintSale.paymentMethod || 'CASH'}</span>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="text-center text-[9px] text-stone-500 pt-1.5 border-t border-dashed border-stone-300">
+              <p className="font-medium">
+                {shopSettings?.receiptFooterFa || 'تشکر از انتخاب و خرید شما! اجناس تا ۳ روز قابل تعویض می‌باشد.'}
+              </p>
+              <p className="text-[7px] text-stone-400 mt-0.5">
+                Mujeeb Afghan Fashion • Rayan Tech Solution
+              </p>
             </div>
           </div>
         </div>

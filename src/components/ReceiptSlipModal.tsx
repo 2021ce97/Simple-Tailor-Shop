@@ -216,12 +216,37 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
 
   return (
     <div data-print-format={printFormat} className={`receipt-modal-shell fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto ${isPrinting ? 'is-printing' : ''}`}>
+      {/* Dynamic CSS Media Query for Thermal Printer Widths (58mm / 80mm / A4) */}
+      <style>{`
+        @media print {
+          @page {
+            size: ${printFormat === 'thermal58' ? '58mm auto' : printFormat === 'thermal80' ? '80mm auto' : 'A4 portrait'};
+            margin: ${printFormat === 'thermal58' ? '0mm' : printFormat === 'thermal80' ? '1mm' : '8mm'};
+          }
+          html, body {
+            width: ${printFormat === 'thermal58' ? '54mm' : printFormat === 'thermal80' ? '76mm' : '100%'} !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          #authentic-receipt-slip {
+            width: ${printFormat === 'thermal58' ? '54mm' : printFormat === 'thermal80' ? '76mm' : '100%'} !important;
+            max-width: ${printFormat === 'thermal58' ? '54mm' : printFormat === 'thermal80' ? '76mm' : '186mm'} !important;
+            margin: 0 auto !important;
+            padding: ${printFormat === 'thermal58' ? '2mm 1mm' : printFormat === 'thermal80' ? '3mm 2mm' : '6mm'} !important;
+            font-size: ${printFormat === 'thermal58' ? '10px' : printFormat === 'thermal80' ? '11px' : '13px'} !important;
+            box-shadow: none !important;
+            border: none !important;
+          }
+        }
+      `}</style>
       <div 
         id="receipt-modal-container"
         className="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-200 border border-[#E5E5E5]"
       >
         {/* Header Action Bar */}
-        <div className="receipt-actions flex items-center justify-between px-5 py-3.5 bg-[#1A1A1A] text-white border-b border-black no-print">
+        <div className="receipt-actions flex flex-wrap items-center justify-between px-5 py-3.5 bg-[#1A1A1A] text-white border-b border-black no-print gap-2">
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-4 bg-[#D4AF37] rounded-full inline-block" />
             <Scissors className="w-4 h-4 text-[#D4AF37]" />
@@ -230,15 +255,46 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
             </h2>
           </div>
           
-          <div className="flex items-center gap-2">
-            <label className="flex items-center gap-1.5 text-[10px] font-bold text-stone-300">
-              <span>{t.printFormat}</span>
-              <select value={printFormat} onChange={event => setPrintFormat(event.target.value as PrintFormat)} className="rounded-md border border-white/20 bg-white/10 px-1.5 py-1 text-[10px] text-white outline-none">
-                <option value="a4" className="text-stone-900">{t.standardA4}</option>
-                <option value="thermal58" className="text-stone-900">{t.thermal58}</option>
-                <option value="thermal80" className="text-stone-900">{t.thermal80}</option>
-              </select>
-            </label>
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Thermal Print-Size Selector */}
+            <div className="flex items-center gap-1 bg-white/10 rounded-lg p-0.5 border border-white/15">
+              <button
+                type="button"
+                onClick={() => setPrintFormat('thermal80')}
+                className={`px-2 py-1 text-[10px] font-black rounded-md transition cursor-pointer ${
+                  printFormat === 'thermal80'
+                    ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
+                    : 'text-stone-300 hover:text-white'
+                }`}
+                title="80mm Thermal Paper (POS/Receipt Printer like MY-P80)"
+              >
+                80mm
+              </button>
+              <button
+                type="button"
+                onClick={() => setPrintFormat('thermal58')}
+                className={`px-2 py-1 text-[10px] font-black rounded-md transition cursor-pointer ${
+                  printFormat === 'thermal58'
+                    ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
+                    : 'text-stone-300 hover:text-white'
+                }`}
+                title="58mm Mini Thermal Paper"
+              >
+                58mm
+              </button>
+              <button
+                type="button"
+                onClick={() => setPrintFormat('a4')}
+                className={`px-2 py-1 text-[10px] font-black rounded-md transition cursor-pointer ${
+                  printFormat === 'a4'
+                    ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
+                    : 'text-stone-300 hover:text-white'
+                }`}
+                title="Standard A4 Paper"
+              >
+                A4
+              </button>
+            </div>
             <button
               onClick={handlePrint}
               id="print-slip-btn"
