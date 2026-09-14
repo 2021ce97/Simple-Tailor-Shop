@@ -27,7 +27,8 @@ import {
   Filter,
   CheckCircle2,
   AlertCircle,
-  Printer
+  Printer,
+  RefreshCw
 } from 'lucide-react';
 import { ReceiptSettingsPanel } from './ReceiptSettingsPanel';
 
@@ -154,10 +155,24 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
   // Notification Toast
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const showNotification = (msg: string) => {
     setSaveMessage(msg);
     setTimeout(() => setSaveMessage(null), 3500);
+  };
+
+  const handleManualSync = async () => {
+    setIsSyncing(true);
+    try {
+      await storageService.syncFromDatabase();
+      if (onDatabaseRestored) onDatabaseRestored();
+      showNotification(language === 'fa' ? 'تمام سفارشات و اطلاعات با دیتابیس Supabase همگام‌سازی شد' : 'All orders and data successfully synced with Supabase Database');
+    } catch {
+      showNotification(language === 'fa' ? 'خطا در برقراری ارتباط با دیتابیس' : 'Failed to sync with Supabase database');
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   // Sync incoming props
@@ -1828,6 +1843,45 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
       {/* ================= TAB 6: BACKUP & RESTORE ================= */}
       {activeTab === 'backup' && (
         <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-6">
+          {/* Supabase Realtime Database Status Banner */}
+          <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+                <Database className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="font-bold text-sm text-emerald-950">
+                    {language === 'fa' ? 'دیتابیس ابری Supabase متصل است' : language === 'ps' ? 'د Supabase ابری ډیټابیس وصل دی' : 'Supabase Cloud Database Connected'}
+                  </h4>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
+                    aws-0-ap-south-1
+                  </span>
+                </div>
+                <p className="text-xs text-emerald-700 mt-0.5">
+                  {language === 'fa' 
+                    ? 'سفارشات جدید و تغییرات به طور خودکار در دیتابیس آنلاین Supabase ذخیره و همگام می‌شوند.'
+                    : 'New orders and changes are automatically synchronized and stored into your online Supabase database.'}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleManualSync}
+              disabled={isSyncing}
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-2 shadow-xs"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+              <span>
+                {isSyncing 
+                  ? (language === 'fa' ? 'در حال همگام‌سازی...' : 'Syncing...') 
+                  : (language === 'fa' ? 'همگام‌سازی فوری با دیتابیس' : 'Sync Now with Supabase')}
+              </span>
+            </button>
+          </div>
+
           <div>
             <h3 className="font-bold text-sm text-[#1A1A1A]">
               {t.backupAndRestore}

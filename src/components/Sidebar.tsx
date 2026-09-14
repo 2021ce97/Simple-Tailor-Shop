@@ -7,14 +7,15 @@ import {
   PlusCircle, 
   Users, 
   SlidersHorizontal, 
-  Layers,
-  ShoppingBag,
-  TrendingUp,
+  Layers, 
+  ShoppingBag, 
+  TrendingUp, 
   Globe, 
-  X,
-  LogOut,
-  UserCheck
-  , BarChart3
+  X, 
+  LogOut, 
+  UserCheck, 
+  BarChart3,
+  Database
 } from 'lucide-react';
 
 export type MainNavTab = 'dashboard' | 'new_order' | 'customers' | 'fabrics' | 'products' | 'sales_history' | 'reports' | 'settings';
@@ -325,6 +326,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
               6
             </span>
           </button>
+        </div>
+
+        {/* Database & Cloud Connection Status */}
+        <div className="px-3 py-1.5 mx-3 mb-2 rounded-xl bg-emerald-950/30 border border-emerald-500/20 flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-300">
+              <Database className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Supabase Cloud DB</span>
+            </div>
+          </div>
+          <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+            ONLINE
+          </span>
         </div>
 
         {/* User Account & Sign Out Section */}

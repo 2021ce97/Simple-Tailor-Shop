@@ -7,14 +7,21 @@ let dbCheckAttempted = false;
 
 // Database connection configuration
 // Handles DATABASE_URL, POSTGRES_URL, or direct pooler settings
+const DEFAULT_USER_SUPABASE_URL = 'postgresql://postgres.ubllqqimhdkubpqpbyvk:Rayantailor999@aws-0-ap-south-1.pooler.supabase.com:6543/postgres';
+
 export function getDbPool(): pg.Pool | null {
   if (pool) return pool;
 
-  const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.SUPABASE_DATABASE_URL;
+  let rawUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.SUPABASE_DATABASE_URL;
+  
+  // If the environment contains an unconfigured placeholder like '<project-ref>', fallback to user's real Supabase URL
+  if (!rawUrl || rawUrl.includes('<project-ref>') || rawUrl.includes('<url-encoded-database-password>')) {
+    rawUrl = DEFAULT_USER_SUPABASE_URL;
+  }
 
   try {
-    if (databaseUrl) {
-      const parsedDatabaseUrl = new URL(databaseUrl);
+    if (rawUrl) {
+      const parsedDatabaseUrl = new URL(rawUrl);
       if (parsedDatabaseUrl.hostname.endsWith('.pooler.supabase.com') && parsedDatabaseUrl.port === '5432') {
         parsedDatabaseUrl.port = '6543';
       }
@@ -66,11 +73,15 @@ export async function safeQuery(text: string, params?: any[]): Promise<any | nul
   const p = getDbPool();
   if (!p) return null;
 
+  // Convert undefined to null because pg throws an error on undefined parameters
+  const safeParams = params ? params.map(p => p === undefined ? null : p) : undefined;
+
   try {
-    const result = await p.query(text, params);
+    const result = await p.query(text, safeParams);
     isDbAvailable = true;
     return result;
   } catch (err: any) {
+    console.error('safeQuery error:', err.message, '\nQuery:', text, '\nParams:', safeParams);
     isDbAvailable = false;
     // Do not crash, return null so calling route can fallback to memory cache
     return null;
@@ -216,6 +227,14 @@ export async function initDatabase() {
         notes TEXT,
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
+
+      -- Ensure non-breaking schema migrations if tables pre-existed
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS fabric_meters NUMERIC DEFAULT 0;
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS is_customer_fabric BOOLEAN DEFAULT false;
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS cabinet_slot TEXT;
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_whatsapp TEXT;
+      ALTER TABLE fabrics ADD COLUMN IF NOT EXISTS code TEXT;
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS sku TEXT;
     `);
     isDbAvailable = true;
     console.log('PostgreSQL database tables verified and connected.');
