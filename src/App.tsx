@@ -241,8 +241,8 @@ function ShopApp() {
   };
 
   // Save Order Handler
-  const handleSaveOrder = (savedOrder: Order, shouldPrint: boolean) => {
-    storageService.saveOrder(savedOrder);
+  const handleSaveOrder = async (savedOrder: Order, shouldPrint: boolean) => {
+    await storageService.saveOrderAsync(savedOrder);
     reloadData();
     setEditingOrder(null);
     setPrefilledCustomer(null);

@@ -981,9 +981,11 @@ async function apiSync(endpoint: string, method = 'GET', data?: any) {
     });
     if (res.ok) {
       return await res.json();
+    } else {
+      console.warn(`API ${method} /api/${endpoint} returned status ${res.status}`);
     }
-  } catch {
-    // Graceful offline fallback
+  } catch (err: any) {
+    console.warn(`API ${method} /api/${endpoint} connection error:`, err?.message || err);
   }
   return null;
 }
@@ -1287,9 +1289,34 @@ export const storageService = {
 
     setStoredItem(STORAGE_KEYS.ORDERS, orders);
     this.syncCustomerFromOrder(order);
-    apiSync('orders', 'POST', order);
+
+    // Sync to PostgreSQL database
+    apiSync('orders', 'POST', order).then(res => {
+      if (res && res.persistedToDb) {
+        console.log(`[PostgreSQL] Order ${order.orderNumber} successfully saved to DB.`);
+      }
+    }).catch(() => {});
+
+    const cust = this.getCustomerById(order.customerId);
+    if (cust) {
+      apiSync('customers', 'POST', cust).catch(() => {});
+    }
 
     return order;
+  },
+
+  async saveOrderAsync(order: Order): Promise<Order> {
+    const saved = this.saveOrder(order);
+    try {
+      await apiSync('orders', 'POST', order);
+      const cust = this.getCustomerById(order.customerId);
+      if (cust) {
+        await apiSync('customers', 'POST', cust);
+      }
+    } catch (e) {
+      console.warn('saveOrderAsync sync notice:', e);
+    }
+    return saved;
   },
 
   deleteOrder(id: string): void {
@@ -1662,17 +1689,24 @@ export const storageService = {
     return `MA-${String(max + 1).padStart(4, '0')}`;
   },
 
-  // Pull latest data from PostgreSQL database if available
-  async syncFromDatabase(): Promise<void> {
+  // Pull and push data with PostgreSQL database
+  async syncFromDatabase(): Promise<boolean> {
     try {
-      // Older installations stored orders only in the browser. Send those
-      // records first so they become available to the public tracking page
-      // and to staff on another device after upgrading the application.
       const localOrdersBeforeSync = this.getOrders();
-      if (localOrdersBeforeSync.length > 0) {
-        await Promise.all(localOrdersBeforeSync.map(order => apiSync('orders', 'POST', order)));
+      const localCustomersBeforeSync = this.getCustomers();
+
+      // 1. Batch push any local orders and customers directly into PostgreSQL table
+      if (localOrdersBeforeSync.length > 0 || localCustomersBeforeSync.length > 0) {
+        const syncRes = await apiSync('sync/all', 'POST', {
+          orders: localOrdersBeforeSync,
+          customers: localCustomersBeforeSync
+        });
+        if (syncRes && Array.isArray(syncRes.orders) && syncRes.orders.length > 0) {
+          setStoredItem(STORAGE_KEYS.ORDERS, syncRes.orders);
+        }
       }
 
+      // 2. Fetch all collections from server
       const [fabricsRes, ordersRes, customersRes, productsRes, productSalesRes, measurementFieldsRes, designCategoriesRes, shopSettingsRes] = await Promise.all([
         fetch('/api/fabrics').catch(() => null),
         fetch('/api/orders').catch(() => null),
@@ -1729,8 +1763,11 @@ export const storageService = {
         const data = await shopSettingsRes.json();
         if (data && typeof data === 'object') setStoredItem(STORAGE_KEYS.SHOP_SETTINGS, data);
       }
+
+      return true;
     } catch (e) {
-      console.log('Database initial sync handled in local mode');
+      console.log('Database sync handled in local mode');
+      return false;
     }
   }
 };

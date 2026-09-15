@@ -1,5 +1,5 @@
 import express, { Router, Request, Response } from 'express';
-import { safeQuery, isDatabaseConnected } from '../db/db.js';
+import { safeQuery, isDatabaseConnected, verifyDbConnection } from '../db/db.js';
 import { 
   DEFAULT_MEASUREMENT_FIELDS, 
   DEFAULT_DESIGN_CATEGORIES, 
@@ -20,18 +20,22 @@ let inMemoryDesignCategories: any[] = [...DEFAULT_DESIGN_CATEGORIES];
 
 // Health check endpoint
 apiRouter.get('/health', async (req: Request, res: Response) => {
-  let isConnected = isDatabaseConnected();
-  if (!isConnected) {
-    const ping = await safeQuery('SELECT 1');
-    if (ping) isConnected = true;
-  }
+  const isConnected = await verifyDbConnection();
+  const dbOrdersCountRes = isConnected ? await safeQuery('SELECT count(*) FROM orders') : null;
+  const dbCustomersCountRes = isConnected ? await safeQuery('SELECT count(*) FROM customers') : null;
+  const dbFabricsCountRes = isConnected ? await safeQuery('SELECT count(*) FROM fabrics') : null;
+
+  const dbOrdersCount = dbOrdersCountRes?.rows?.[0]?.count ? parseInt(dbOrdersCountRes.rows[0].count, 10) : inMemoryOrders.length;
+  const dbCustomersCount = dbCustomersCountRes?.rows?.[0]?.count ? parseInt(dbCustomersCountRes.rows[0].count, 10) : inMemoryCustomers.length;
+  const dbFabricsCount = dbFabricsCountRes?.rows?.[0]?.count ? parseInt(dbFabricsCountRes.rows[0].count, 10) : inMemoryFabrics.length;
+
   res.json({
     status: 'ok',
     time: new Date().toISOString(),
     database: isConnected ? 'PostgreSQL Connected' : 'Local / Offline Sync Mode',
-    ordersCount: inMemoryOrders.length,
-    customersCount: inMemoryCustomers.length,
-    fabricsCount: inMemoryFabrics.length
+    ordersCount: dbOrdersCount,
+    customersCount: dbCustomersCount,
+    fabricsCount: dbFabricsCount
   });
 });
 
@@ -220,22 +224,55 @@ apiRouter.get('/orders', async (req: Request, res: Response) => {
   res.json(inMemoryOrders);
 });
 
-apiRouter.post('/orders', async (req: Request, res: Response) => {
-  const order = req.body;
-  if (!order || !order.id) {
-    return res.status(400).json({ error: 'Order data with id is required' });
+// Database order saver helper
+async function saveOrderToDb(order: any): Promise<boolean> {
+  if (!order || !order.id) return false;
+
+  const orderId = String(order.id);
+  const orderNumber = String(order.orderNumber || 'ORD-' + Math.floor(1000 + Math.random() * 9000));
+  const customerId = order.customerId ? String(order.customerId) : null;
+  const customerName = String(order.customerName || 'مشتری').trim();
+  const customerPhone = String(order.customerPhone || '').trim();
+  const customerWhatsApp = String(order.customerWhatsApp || customerPhone).trim();
+  const garmentType = String(order.garmentType || 'perahanTunban');
+  const quantity = Number(order.quantity) || 1;
+  const fabricId = order.fabricId ? String(order.fabricId) : null;
+  const fabricName = order.fabricName ? String(order.fabricName) : null;
+  const fabricColor = order.fabricColor ? String(order.fabricColor) : null;
+  const fabricMeters = Number(order.fabricMeters) || 0;
+  const isCustomerFabric = Boolean(order.isCustomerFabric);
+
+  let measurementsJson: string;
+  try {
+    measurementsJson = typeof order.measurements === 'string'
+      ? order.measurements
+      : JSON.stringify(order.measurements || {});
+  } catch {
+    measurementsJson = '{}';
   }
 
-  // Update in-memory
-  const idx = inMemoryOrders.findIndex(o => o.id === order.id);
-  if (idx >= 0) {
-    inMemoryOrders[idx] = { ...order, updatedAt: new Date().toISOString() };
-  } else {
-    inMemoryOrders.unshift({ ...order, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+  let designSelectionsJson: string;
+  try {
+    designSelectionsJson = typeof order.designSelections === 'string'
+      ? order.designSelections
+      : JSON.stringify(order.designSelections || {});
+  } catch {
+    designSelectionsJson = '{}';
   }
 
-  // Persist to PostgreSQL if connected
-  await safeQuery(`
+  const specialInstructions = order.specialInstructions ? String(order.specialInstructions) : null;
+  const cabinetSlot = order.cabinetSlot ? String(order.cabinetSlot) : null;
+  const totalAmount = Number(order.totalAmount) || 0;
+  const paidAmount = Number(order.paidAmount) || 0;
+  const balanceAmount = Number(order.balanceAmount) || Math.max(0, totalAmount - paidAmount);
+  const paymentStatus = String(order.paymentStatus || (balanceAmount === 0 ? 'paid' : paidAmount > 0 ? 'partial' : 'unpaid'));
+  const status = String(order.status || 'pending');
+  const orderDate = String(order.orderDate || new Date().toISOString().slice(0, 10));
+  const deliveryDate = String(order.deliveryDate || new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10));
+  const completedDate = order.completedDate ? String(order.completedDate) : null;
+  const deliveredDate = order.deliveredDate ? String(order.deliveredDate) : null;
+
+  const result = await safeQuery(`
     INSERT INTO orders (
       id, order_number, customer_id, customer_name, customer_phone, customer_whatsapp,
       garment_type, quantity, fabric_id, fabric_name, fabric_color, fabric_meters,
@@ -247,6 +284,7 @@ apiRouter.post('/orders', async (req: Request, res: Response) => {
     )
     ON CONFLICT (id) DO UPDATE SET
       order_number = EXCLUDED.order_number,
+      customer_id = EXCLUDED.customer_id,
       customer_name = EXCLUDED.customer_name,
       customer_phone = EXCLUDED.customer_phone,
       customer_whatsapp = EXCLUDED.customer_whatsapp,
@@ -272,14 +310,133 @@ apiRouter.post('/orders', async (req: Request, res: Response) => {
       delivered_date = EXCLUDED.delivered_date,
       updated_at = NOW();
   `, [
-    order.id, order.orderNumber, order.customerId, order.customerName, order.customerPhone, order.customerWhatsApp,
-    order.garmentType, order.quantity, order.fabricId, order.fabricName, order.fabricColor, order.fabricMeters || 0,
-    order.isCustomerFabric || false, JSON.stringify(order.measurements || {}), JSON.stringify(order.designSelections || {}),
-    order.specialInstructions, null, order.totalAmount || 0, order.paidAmount || 0, order.balanceAmount || 0,
-    order.paymentStatus || 'unpaid', order.status || 'pending', order.orderDate, order.deliveryDate, order.completedDate, order.deliveredDate
+    orderId, orderNumber, customerId, customerName, customerPhone, customerWhatsApp,
+    garmentType, quantity, fabricId, fabricName, fabricColor, fabricMeters,
+    isCustomerFabric, measurementsJson, designSelectionsJson, specialInstructions,
+    cabinetSlot, totalAmount, paidAmount, balanceAmount, paymentStatus,
+    status, orderDate, deliveryDate, completedDate, deliveredDate
   ]);
 
-  res.json({ success: true, order });
+  if (customerName) {
+    const custId = customerId || 'cust_' + (customerPhone ? customerPhone.replace(/\D/g, '') : Date.now());
+    await safeQuery(`
+      INSERT INTO customers (id, name, phone, whatsapp, preferred_garment_type, total_orders_count, total_spent, total_balance, updated_at)
+      VALUES ($1, $2, $3, $4, $5, 1, $6, $7, NOW())
+      ON CONFLICT (id) DO UPDATE SET
+        name = EXCLUDED.name,
+        phone = CASE WHEN EXCLUDED.phone <> '' THEN EXCLUDED.phone ELSE customers.phone END,
+        whatsapp = EXCLUDED.whatsapp,
+        total_orders_count = customers.total_orders_count + 1,
+        total_spent = customers.total_spent + EXCLUDED.total_spent,
+        total_balance = customers.total_balance + EXCLUDED.total_balance,
+        updated_at = NOW();
+    `, [
+      custId, customerName, customerPhone, customerWhatsApp, garmentType, totalAmount, balanceAmount
+    ]);
+  }
+
+  return result !== null;
+}
+
+apiRouter.post('/orders', async (req: Request, res: Response) => {
+  const order = req.body;
+  if (!order || !order.id) {
+    return res.status(400).json({ error: 'Order data with id is required' });
+  }
+
+  // Update in-memory
+  const idx = inMemoryOrders.findIndex(o => o.id === order.id);
+  if (idx >= 0) {
+    inMemoryOrders[idx] = { ...order, updatedAt: new Date().toISOString() };
+  } else {
+    inMemoryOrders.unshift({ ...order, createdAt: order.createdAt || new Date().toISOString(), updatedAt: new Date().toISOString() });
+  }
+
+  // Persist to PostgreSQL
+  const persisted = await saveOrderToDb(order);
+  res.json({ success: true, order, persistedToDb: persisted });
+});
+
+// Dedicated Batch & Realtime Sync endpoint
+apiRouter.post('/sync/all', async (req: Request, res: Response) => {
+  const { orders = [], customers = [] } = req.body;
+
+  let syncedOrdersCount = 0;
+  if (Array.isArray(orders) && orders.length > 0) {
+    for (const ord of orders) {
+      if (ord && ord.id) {
+        const ok = await saveOrderToDb(ord);
+        if (ok) syncedOrdersCount++;
+      }
+    }
+  }
+
+  // Also upsert any incoming customers
+  if (Array.isArray(customers) && customers.length > 0) {
+    for (const c of customers) {
+      if (c && c.id && c.name) {
+        await safeQuery(`
+          INSERT INTO customers (id, name, phone, whatsapp, address, notes, standard_measurements, preferred_garment_type, total_orders_count, total_spent, total_balance, updated_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
+          ON CONFLICT (id) DO UPDATE SET
+            name = EXCLUDED.name,
+            phone = EXCLUDED.phone,
+            whatsapp = EXCLUDED.whatsapp,
+            address = EXCLUDED.address,
+            notes = EXCLUDED.notes,
+            standard_measurements = EXCLUDED.standard_measurements,
+            preferred_garment_type = EXCLUDED.preferred_garment_type,
+            updated_at = NOW();
+        `, [
+          c.id, c.name, c.phone || '', c.whatsapp || '', c.address || '', c.notes || '',
+          typeof c.standardMeasurements === 'string' ? c.standardMeasurements : JSON.stringify(c.standardMeasurements || {}),
+          c.preferredGarmentType || null, c.totalOrdersCount || 0, c.totalSpent || 0, c.totalBalance || 0
+        ]);
+      }
+    }
+  }
+
+  // Query fresh consolidated orders directly from PostgreSQL
+  const result = await safeQuery('SELECT * FROM orders ORDER BY created_at DESC');
+  if (result && result.rows) {
+    inMemoryOrders = result.rows.map((row: any) => ({
+      id: row.id,
+      orderNumber: row.order_number,
+      customerId: row.customer_id,
+      customerName: row.customer_name,
+      customerPhone: row.customer_phone,
+      customerWhatsApp: row.customer_whatsapp,
+      garmentType: row.garment_type,
+      quantity: row.quantity,
+      fabricId: row.fabric_id,
+      fabricName: row.fabric_name,
+      fabricColor: row.fabric_color,
+      fabricMeters: parseFloat(row.fabric_meters) || 0,
+      isCustomerFabric: row.is_customer_fabric,
+      measurements: row.measurements || {},
+      designSelections: row.design_selections || {},
+      specialInstructions: row.special_instructions,
+      cabinetSlot: row.cabinet_slot,
+      totalAmount: parseFloat(row.total_amount) || 0,
+      paidAmount: parseFloat(row.paid_amount) || 0,
+      balanceAmount: parseFloat(row.balance_amount) || 0,
+      paymentStatus: row.payment_status,
+      status: row.status,
+      orderDate: row.order_date,
+      deliveryDate: row.delivery_date,
+      completedDate: row.completed_date,
+      deliveredDate: row.delivered_date,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    }));
+  }
+
+  res.json({
+    success: true,
+    syncedOrdersCount,
+    orders: inMemoryOrders,
+    database: isDatabaseConnected() ? 'PostgreSQL Connected' : 'Local Mode'
+  });
 });
 
 apiRouter.delete('/orders/:id', async (req: Request, res: Response) => {

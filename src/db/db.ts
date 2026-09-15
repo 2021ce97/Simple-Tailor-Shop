@@ -84,15 +84,43 @@ export async function safeQuery(text: string, params?: any[]): Promise<any | nul
     isDbAvailable = true;
     return result;
   } catch (err: any) {
-    console.warn('safeQuery notice:', err.message);
-    isDbAvailable = false;
+    console.error('PostgreSQL query notice:', err.message);
+    const msg = String(err.message || '').toLowerCase();
+    const code = String(err.code || '');
+    if (
+      code === 'ECONNREFUSED' ||
+      code === 'ENOTFOUND' ||
+      code === '28P01' ||
+      code === '57P01' ||
+      code === '57P02' ||
+      code === '57P03' ||
+      msg.includes('connection terminated') ||
+      msg.includes('password authentication failed') ||
+      msg.includes('connect econnrefused')
+    ) {
+      isDbAvailable = false;
+    }
     // Do not crash, return null so calling route can fallback to memory cache
     return null;
   }
 }
 
 export function isDatabaseConnected(): boolean {
-  return isDbAvailable;
+  return isDbAvailable && pool !== null;
+}
+
+export async function verifyDbConnection(): Promise<boolean> {
+  const p = getDbPool();
+  if (!p) return false;
+  try {
+    await p.query('SELECT 1');
+    isDbAvailable = true;
+    return true;
+  } catch (err: any) {
+    console.warn('Database verify connection failed:', err.message);
+    isDbAvailable = false;
+    return false;
+  }
 }
 
 // Schema initialization ensuring all tables exist if PostgreSQL is available
@@ -124,7 +152,7 @@ export async function initDatabase(): Promise<boolean> {
       CREATE TABLE IF NOT EXISTS customers (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
-        phone TEXT NOT NULL,
+        phone TEXT,
         whatsapp TEXT,
         address TEXT,
         notes TEXT,
@@ -142,9 +170,9 @@ export async function initDatabase(): Promise<boolean> {
         order_number TEXT NOT NULL,
         customer_id TEXT,
         customer_name TEXT NOT NULL,
-        customer_phone TEXT NOT NULL,
+        customer_phone TEXT,
         customer_whatsapp TEXT,
-        garment_type TEXT NOT NULL,
+        garment_type TEXT,
         quantity INT DEFAULT 1,
         fabric_id TEXT,
         fabric_name TEXT,
@@ -160,8 +188,8 @@ export async function initDatabase(): Promise<boolean> {
         balance_amount NUMERIC DEFAULT 0,
         payment_status TEXT DEFAULT 'unpaid',
         status TEXT DEFAULT 'pending',
-        order_date TEXT NOT NULL,
-        delivery_date TEXT NOT NULL,
+        order_date TEXT,
+        delivery_date TEXT,
         completed_date TEXT,
         delivered_date TEXT,
         created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -235,6 +263,11 @@ export async function initDatabase(): Promise<boolean> {
       ALTER TABLE orders ADD COLUMN IF NOT EXISTS is_customer_fabric BOOLEAN DEFAULT false;
       ALTER TABLE orders ADD COLUMN IF NOT EXISTS cabinet_slot TEXT;
       ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_whatsapp TEXT;
+      ALTER TABLE orders ALTER COLUMN customer_phone DROP NOT NULL;
+      ALTER TABLE orders ALTER COLUMN order_date DROP NOT NULL;
+      ALTER TABLE orders ALTER COLUMN delivery_date DROP NOT NULL;
+      ALTER TABLE orders ALTER COLUMN garment_type DROP NOT NULL;
+      ALTER TABLE customers ALTER COLUMN phone DROP NOT NULL;
       ALTER TABLE fabrics ADD COLUMN IF NOT EXISTS code TEXT;
       ALTER TABLE products ADD COLUMN IF NOT EXISTS sku TEXT;
     `);
