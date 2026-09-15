@@ -2,63 +2,62 @@ import pg from 'pg';
 const { Pool } = pg;
 
 let pool: pg.Pool | null = null;
+let currentConnectionString: string | null = null;
 let isDbAvailable = false;
-let dbCheckAttempted = false;
+let isInitialized = false;
 
 // Database connection configuration
 // Handles DATABASE_URL, POSTGRES_URL, or direct pooler settings
-const DEFAULT_USER_SUPABASE_URL = 'postgresql://postgres.ubllqqimhdkubpqpbyvk:Rayantailor999@aws-0-ap-south-1.pooler.supabase.com:6543/postgres';
-
 export function getDbPool(): pg.Pool | null {
-  if (pool) return pool;
-
   let rawUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.SUPABASE_DATABASE_URL;
   
-  // If the environment contains an unconfigured placeholder like '<project-ref>', fallback to user's real Supabase URL
+  // If no database URL or unconfigured placeholder, operate in local in-memory mode
   if (!rawUrl || rawUrl.includes('<project-ref>') || rawUrl.includes('<url-encoded-database-password>')) {
-    rawUrl = DEFAULT_USER_SUPABASE_URL;
+    if (pool) {
+      pool.end().catch(() => {});
+      pool = null;
+      currentConnectionString = null;
+      isDbAvailable = false;
+      isInitialized = false;
+    }
+    return null;
+  }
+
+  // If pool exists and connection string is unchanged, reuse it
+  if (pool && currentConnectionString === rawUrl) {
+    return pool;
+  }
+
+  // If connection string changed, dispose old pool
+  if (pool) {
+    pool.end().catch(() => {});
+    pool = null;
+    isInitialized = false;
   }
 
   try {
-    if (rawUrl) {
-      const parsedDatabaseUrl = new URL(rawUrl);
-      if (parsedDatabaseUrl.hostname.endsWith('.pooler.supabase.com') && parsedDatabaseUrl.port === '5432') {
-        parsedDatabaseUrl.port = '6543';
-      }
-      parsedDatabaseUrl.searchParams.delete('sslmode');
-      parsedDatabaseUrl.searchParams.delete('sslrootcert');
-      pool = new Pool({
-        connectionString: parsedDatabaseUrl.toString(),
-        ssl: {
-          rejectUnauthorized: false
-        },
-        connectionTimeoutMillis: 15000,
-        idleTimeoutMillis: 10000,
-        keepAlive: true,
-      });
-    } else if (process.env.DB_PASSWORD && process.env.DB_HOST) {
-      pool = new Pool({
-        user: process.env.DB_USER || 'postgres',
-        password: process.env.DB_PASSWORD,
-        host: process.env.DB_HOST,
-        port: parseInt(process.env.DB_PORT || '5432', 10),
-        database: process.env.DB_NAME || 'postgres',
-        ssl: {
-          rejectUnauthorized: false
-        },
-        connectionTimeoutMillis: 15000,
-        idleTimeoutMillis: 10000,
-        keepAlive: true,
-      });
-    } else {
-      // No explicit credentials configured - skip database pool to avoid unneeded connection errors
-      return null;
+    const parsedDatabaseUrl = new URL(rawUrl);
+    if (parsedDatabaseUrl.hostname.endsWith('.pooler.supabase.com') && parsedDatabaseUrl.port === '5432') {
+      parsedDatabaseUrl.port = '6543';
     }
+    parsedDatabaseUrl.searchParams.delete('sslmode');
+    parsedDatabaseUrl.searchParams.delete('sslrootcert');
+
+    pool = new Pool({
+      connectionString: parsedDatabaseUrl.toString(),
+      ssl: {
+        rejectUnauthorized: false
+      },
+      connectionTimeoutMillis: 10000,
+      idleTimeoutMillis: 30000,
+      keepAlive: true,
+    });
+    currentConnectionString = rawUrl;
 
     // Attach error listener to prevent uncaught exceptions on idle clients
     pool.on('error', (err) => {
+      // Idle client notifications in pooled connections (e.g. PgBouncer/Supabase) are routine disconnects
       console.warn('PostgreSQL idle client notice:', err.message);
-      isDbAvailable = false;
     });
 
     return pool;
@@ -73,6 +72,10 @@ export async function safeQuery(text: string, params?: any[]): Promise<any | nul
   const p = getDbPool();
   if (!p) return null;
 
+  if (!isInitialized) {
+    await initDatabase().catch(() => {});
+  }
+
   // Convert undefined to null because pg throws an error on undefined parameters
   const safeParams = params ? params.map(p => p === undefined ? null : p) : undefined;
 
@@ -81,7 +84,7 @@ export async function safeQuery(text: string, params?: any[]): Promise<any | nul
     isDbAvailable = true;
     return result;
   } catch (err: any) {
-    console.error('safeQuery error:', err.message, '\nQuery:', text, '\nParams:', safeParams);
+    console.warn('safeQuery notice:', err.message);
     isDbAvailable = false;
     // Do not crash, return null so calling route can fallback to memory cache
     return null;
@@ -93,18 +96,17 @@ export function isDatabaseConnected(): boolean {
 }
 
 // Schema initialization ensuring all tables exist if PostgreSQL is available
-export async function initDatabase() {
-  if (dbCheckAttempted) return;
-  dbCheckAttempted = true;
+export async function initDatabase(): Promise<boolean> {
+  if (isInitialized) return true;
 
   const p = getDbPool();
   if (!p) {
     console.log('Database operating in standalone local mode (no external PostgreSQL configured).');
-    return;
+    return false;
   }
 
   try {
-    const res = await p.query(`
+    await p.query(`
       CREATE TABLE IF NOT EXISTS fabrics (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
@@ -237,9 +239,12 @@ export async function initDatabase() {
       ALTER TABLE products ADD COLUMN IF NOT EXISTS sku TEXT;
     `);
     isDbAvailable = true;
+    isInitialized = true;
     console.log('PostgreSQL database tables verified and connected.');
+    return true;
   } catch (err: any) {
     isDbAvailable = false;
-    console.log('PostgreSQL database not available (' + (err?.message || 'connection failed') + '). Falling back to local storage.');
+    console.warn('PostgreSQL database not available (' + (err?.message || 'connection failed') + '). Falling back to local storage.');
+    return false;
   }
 }

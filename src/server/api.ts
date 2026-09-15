@@ -20,7 +20,11 @@ let inMemoryDesignCategories: any[] = [...DEFAULT_DESIGN_CATEGORIES];
 
 // Health check endpoint
 apiRouter.get('/health', async (req: Request, res: Response) => {
-  const isConnected = isDatabaseConnected();
+  let isConnected = isDatabaseConnected();
+  if (!isConnected) {
+    const ping = await safeQuery('SELECT 1');
+    if (ping) isConnected = true;
+  }
   res.json({
     status: 'ok',
     time: new Date().toISOString(),

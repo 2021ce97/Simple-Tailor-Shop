@@ -27,11 +27,32 @@ import { PublicTrackingView } from './components/PublicTrackingView';
 import { ReportsView } from './components/ReportsView';
 
 export default function App() {
-  if (window.location.pathname === '/' || window.location.pathname === '/track' || window.location.pathname === '/customer-tracking' || window.location.pathname === '/customer-search') {
-    return <PublicTrackingView />;
-  }
+  const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
 
-  if (window.location.pathname === '/login') {
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    const handleClick = (e: MouseEvent) => {
+      const target = (e.target as HTMLElement)?.closest('a');
+      if (target) {
+        const href = target.getAttribute('href');
+        if (href && (href === '/' || href === '/login' || href === '/track' || href === '/customer-tracking' || href === '/customer-search')) {
+          e.preventDefault();
+          window.history.pushState({}, '', href);
+          setCurrentPath(href);
+        }
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    document.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      document.removeEventListener('click', handleClick);
+    };
+  }, []);
+
+  if (currentPath === '/login') {
     return <ShopApp />;
   }
 

@@ -12,9 +12,11 @@ async function startServer() {
   app.use(express.json());
 
   // Initialize Database tables on startup
-  initDatabase().catch(err => {
+  try {
+    await initDatabase();
+  } catch (err: any) {
     console.warn('Database startup check:', err.message);
-  });
+  }
 
   // Mount API routes
   app.use('/api', apiRouter);
