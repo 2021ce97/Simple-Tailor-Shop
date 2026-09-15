@@ -110,11 +110,20 @@ function ShopApp() {
     storageService.saveLanguage(language);
   }, [language]);
 
-  // Initial Database Sync from Supabase PostgreSQL in background
+  // Initial & Periodic Database Sync from Supabase PostgreSQL in background
   useEffect(() => {
     storageService.syncFromDatabase().then(() => {
       reloadData();
     });
+
+    // Auto-sync every 30 seconds to keep fresh state with Supabase
+    const syncInterval = setInterval(() => {
+      storageService.syncFromDatabase().then(() => {
+        reloadData();
+      });
+    }, 30000);
+
+    return () => clearInterval(syncInterval);
   }, []);
 
   // Keyboard shortcuts (e.g. F2 for new order)

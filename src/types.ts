@@ -161,6 +161,7 @@ export interface Order {
   isCustomerFabric?: boolean;
   
   specialInstructions?: string;
+  cabinetSlot?: string;
   // Financials
   totalAmount: number;
   paidAmount: number;

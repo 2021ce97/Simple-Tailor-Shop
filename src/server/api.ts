@@ -18,8 +18,8 @@ let inMemorySettings: any = { ...DEFAULT_SHOP_SETTINGS };
 let inMemoryMeasurementFields: any[] = [...DEFAULT_MEASUREMENT_FIELDS];
 let inMemoryDesignCategories: any[] = [...DEFAULT_DESIGN_CATEGORIES];
 
-// Health check endpoint
-apiRouter.get('/health', async (req: Request, res: Response) => {
+// Health check & DB status endpoint
+const healthHandler = async (req: Request, res: Response) => {
   const isConnected = await verifyDbConnection();
   const dbOrdersCountRes = isConnected ? await safeQuery('SELECT count(*) FROM orders') : null;
   const dbCustomersCountRes = isConnected ? await safeQuery('SELECT count(*) FROM customers') : null;
@@ -31,13 +31,18 @@ apiRouter.get('/health', async (req: Request, res: Response) => {
 
   res.json({
     status: 'ok',
+    connected: isConnected,
     time: new Date().toISOString(),
     database: isConnected ? 'PostgreSQL Connected' : 'Local / Offline Sync Mode',
     ordersCount: dbOrdersCount,
     customersCount: dbCustomersCount,
     fabricsCount: dbFabricsCount
   });
-});
+};
+
+apiRouter.get('/health', healthHandler);
+apiRouter.get('/db-status', healthHandler);
+apiRouter.get('/status', healthHandler);
 
 // Public tracking endpoint. It intentionally exposes no customer contact,
 // measurements, payment data, internal notes, or shop inventory.
@@ -206,6 +211,8 @@ apiRouter.get('/orders', async (req: Request, res: Response) => {
       measurements: row.measurements || {},
       designSelections: row.design_selections || {},
       specialInstructions: row.special_instructions,
+      cabinetSlot: row.cabinet_slot,
+      items: Array.isArray(row.items) ? row.items : [],
       totalAmount: parseFloat(row.total_amount) || 0,
       paidAmount: parseFloat(row.paid_amount) || 0,
       balanceAmount: parseFloat(row.balance_amount) || 0,
@@ -260,6 +267,17 @@ async function saveOrderToDb(order: any): Promise<boolean> {
     designSelectionsJson = '{}';
   }
 
+  let itemsJson: string;
+  try {
+    itemsJson = Array.isArray(order.items)
+      ? JSON.stringify(order.items)
+      : typeof order.items === 'string'
+      ? order.items
+      : '[]';
+  } catch {
+    itemsJson = '[]';
+  }
+
   const specialInstructions = order.specialInstructions ? String(order.specialInstructions) : null;
   const cabinetSlot = order.cabinetSlot ? String(order.cabinetSlot) : null;
   const totalAmount = Number(order.totalAmount) || 0;
@@ -277,10 +295,10 @@ async function saveOrderToDb(order: any): Promise<boolean> {
       id, order_number, customer_id, customer_name, customer_phone, customer_whatsapp,
       garment_type, quantity, fabric_id, fabric_name, fabric_color, fabric_meters,
       is_customer_fabric, measurements, design_selections, special_instructions,
-      cabinet_slot, total_amount, paid_amount, balance_amount, payment_status,
+      cabinet_slot, items, total_amount, paid_amount, balance_amount, payment_status,
       status, order_date, delivery_date, completed_date, delivered_date, updated_at
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, NOW()
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14::jsonb, $15::jsonb, $16, $17, $18::jsonb, $19, $20, $21, $22, $23, $24, $25, $26, $27, NOW()
     )
     ON CONFLICT (id) DO UPDATE SET
       order_number = EXCLUDED.order_number,
@@ -299,6 +317,7 @@ async function saveOrderToDb(order: any): Promise<boolean> {
       design_selections = EXCLUDED.design_selections,
       special_instructions = EXCLUDED.special_instructions,
       cabinet_slot = EXCLUDED.cabinet_slot,
+      items = EXCLUDED.items,
       total_amount = EXCLUDED.total_amount,
       paid_amount = EXCLUDED.paid_amount,
       balance_amount = EXCLUDED.balance_amount,
@@ -313,26 +332,79 @@ async function saveOrderToDb(order: any): Promise<boolean> {
     orderId, orderNumber, customerId, customerName, customerPhone, customerWhatsApp,
     garmentType, quantity, fabricId, fabricName, fabricColor, fabricMeters,
     isCustomerFabric, measurementsJson, designSelectionsJson, specialInstructions,
-    cabinetSlot, totalAmount, paidAmount, balanceAmount, paymentStatus,
+    cabinetSlot, itemsJson, totalAmount, paidAmount, balanceAmount, paymentStatus,
     status, orderDate, deliveryDate, completedDate, deliveredDate
   ]);
 
+  // Insert individual items into order_items table if present
+  if (Array.isArray(order.items) && order.items.length > 0) {
+    for (const item of order.items) {
+      if (item) {
+        const itemId = String(item.id || 'item_' + orderId + '_' + Math.random().toString(36).substr(2, 6));
+        await safeQuery(`
+          INSERT INTO order_items (
+            id, order_id, garment_type, quantity, price_per_unit, total_price,
+            measurements, design_selections, fabric_notes, special_instructions, created_at
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8::jsonb, $9, $10, NOW())
+          ON CONFLICT (id) DO UPDATE SET
+            garment_type = EXCLUDED.garment_type,
+            quantity = EXCLUDED.quantity,
+            price_per_unit = EXCLUDED.price_per_unit,
+            total_price = EXCLUDED.total_price,
+            measurements = EXCLUDED.measurements,
+            design_selections = EXCLUDED.design_selections,
+            fabric_notes = EXCLUDED.fabric_notes,
+            special_instructions = EXCLUDED.special_instructions;
+        `, [
+          itemId, orderId, item.garmentType || garmentType, Number(item.quantity) || 1,
+          Number(item.pricePerUnit) || 0, Number(item.totalPrice) || 0,
+          JSON.stringify(item.measurements || {}), JSON.stringify(item.designSelections || {}),
+          item.fabricNotes || null, item.specialInstructions || null
+        ]);
+      }
+    }
+  }
+
+  // Deduct inventory fabric meters in database if shop fabric was selected
+  if (fabricId && fabricMeters > 0 && !isCustomerFabric) {
+    await safeQuery(`
+      UPDATE fabrics
+      SET stock_meters = GREATEST(0, stock_meters - $1), updated_at = NOW()
+      WHERE id = $2;
+    `, [fabricMeters, fabricId]);
+  }
+
+  // Ensure customer record is accurately maintained with measurements and aggregated stats
   if (customerName) {
     const custId = customerId || 'cust_' + (customerPhone ? customerPhone.replace(/\D/g, '') : Date.now());
     await safeQuery(`
-      INSERT INTO customers (id, name, phone, whatsapp, preferred_garment_type, total_orders_count, total_spent, total_balance, updated_at)
-      VALUES ($1, $2, $3, $4, $5, 1, $6, $7, NOW())
+      INSERT INTO customers (
+        id, name, phone, whatsapp, preferred_garment_type, standard_measurements, notes,
+        total_orders_count, total_spent, total_balance, created_at, updated_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7, 1, $8, $9, NOW(), NOW())
       ON CONFLICT (id) DO UPDATE SET
         name = EXCLUDED.name,
         phone = CASE WHEN EXCLUDED.phone <> '' THEN EXCLUDED.phone ELSE customers.phone END,
-        whatsapp = EXCLUDED.whatsapp,
-        total_orders_count = customers.total_orders_count + 1,
-        total_spent = customers.total_spent + EXCLUDED.total_spent,
-        total_balance = customers.total_balance + EXCLUDED.total_balance,
+        whatsapp = CASE WHEN EXCLUDED.whatsapp <> '' THEN EXCLUDED.whatsapp ELSE customers.whatsapp END,
+        preferred_garment_type = EXCLUDED.preferred_garment_type,
+        standard_measurements = CASE WHEN EXCLUDED.standard_measurements <> '{}'::jsonb THEN EXCLUDED.standard_measurements ELSE customers.standard_measurements END,
+        notes = CASE WHEN EXCLUDED.notes IS NOT NULL THEN EXCLUDED.notes ELSE customers.notes END,
         updated_at = NOW();
     `, [
-      custId, customerName, customerPhone, customerWhatsApp, garmentType, totalAmount, balanceAmount
+      custId, customerName, customerPhone, customerWhatsApp, garmentType, measurementsJson, specialInstructions, totalAmount, balanceAmount
     ]);
+
+    // Recalculate customer statistics from all orders in database
+    await safeQuery(`
+      UPDATE customers
+      SET 
+        total_orders_count = COALESCE((SELECT COUNT(*) FROM orders WHERE customer_id = $1 OR (customer_phone = $2 AND customer_phone != '')), 0),
+        total_spent = COALESCE((SELECT SUM(total_amount) FROM orders WHERE customer_id = $1 OR (customer_phone = $2 AND customer_phone != '')), 0),
+        total_balance = COALESCE((SELECT SUM(balance_amount) FROM orders WHERE customer_id = $1 OR (customer_phone = $2 AND customer_phone != '')), 0),
+        updated_at = NOW()
+      WHERE id = $1;
+    `, [custId, customerPhone]);
   }
 
   return result !== null;
@@ -417,6 +489,7 @@ apiRouter.post('/sync/all', async (req: Request, res: Response) => {
       designSelections: row.design_selections || {},
       specialInstructions: row.special_instructions,
       cabinetSlot: row.cabinet_slot,
+      items: Array.isArray(row.items) ? row.items : [],
       totalAmount: parseFloat(row.total_amount) || 0,
       paidAmount: parseFloat(row.paid_amount) || 0,
       balanceAmount: parseFloat(row.balance_amount) || 0,
@@ -442,6 +515,7 @@ apiRouter.post('/sync/all', async (req: Request, res: Response) => {
 apiRouter.delete('/orders/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
   inMemoryOrders = inMemoryOrders.filter(o => o.id !== id);
+  await safeQuery('DELETE FROM order_items WHERE order_id = $1', [id]);
   await safeQuery('DELETE FROM orders WHERE id = $1', [id]);
   res.json({ success: true });
 });

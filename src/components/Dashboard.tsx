@@ -343,19 +343,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
   }, [orders, productSales, language]);
 
   // Status Updater
-  const handleUpdateStatus = (order: Order, newStatus: OrderStatus) => {
+  const handleUpdateStatus = async (order: Order, newStatus: OrderStatus) => {
     const updated: Order = {
       ...order,
       status: newStatus,
       completedDate: newStatus === 'ready' ? new Date().toISOString() : order.completedDate,
       deliveredDate: newStatus === 'delivered' ? new Date().toISOString() : order.deliveredDate,
     };
-    storageService.saveOrder(updated);
+    await storageService.saveOrderAsync(updated);
     onOrderUpdated();
+    checkDbStatus();
   };
 
   // Payment update
-  const handleSavePaymentUpdate = () => {
+  const handleSavePaymentUpdate = async () => {
     if (!paymentModalOrder) return;
     const paid = Number(newPaidInput) || 0;
     const total = Number(paymentModalOrder.totalAmount) || 0;
@@ -368,9 +369,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
       paymentStatus: balance === 0 ? 'paid' : paid > 0 ? 'partial' : 'unpaid',
     };
 
-    storageService.saveOrder(updated);
+    await storageService.saveOrderAsync(updated);
     setPaymentModalOrder(null);
     onOrderUpdated();
+    checkDbStatus();
   };
 
   const openPaymentModal = (order: Order) => {
@@ -378,10 +380,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
     setNewPaidInput(order.paidAmount);
   };
 
-  const handleDeleteOrder = (order: Order) => {
+  const handleDeleteOrder = async (order: Order) => {
     if (window.confirm(`${t.confirmDelete} (${t.orderNumber}: ${order.orderNumber})`)) {
       storageService.deleteOrder(order.id);
       onOrderUpdated();
+      setTimeout(() => checkDbStatus(), 500);
     }
   };
 

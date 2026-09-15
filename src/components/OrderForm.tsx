@@ -131,10 +131,14 @@ export const OrderForm: React.FC<OrderFormProps> = ({
     initialOrder?.designSelections || {}
   );
 
-  // Notes
+  // Notes & Storage Location
   const [specialInstructions, setSpecialInstructions] = useState<string>(
     initialOrder?.specialInstructions || ''
   );
+  const [cabinetSlot, setCabinetSlot] = useState<string>(
+    initialOrder?.cabinetSlot || ''
+  );
+  const [isSaving, setIsSaving] = useState(false);
 
   // Pricing & Payment
   const [totalAmount, setTotalAmount] = useState<number>(initialOrder?.totalAmount || 1800);
@@ -278,42 +282,48 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   };
 
   // Save handler
-  const handleSave = (shouldPrint: boolean) => {
+  const handleSave = async (shouldPrint: boolean) => {
     if (!customerName.trim()) {
       alert(language === 'fa' ? 'لطفاً نام مشتری را وارد نمایید' : language === 'ps' ? 'مهرباني وکړئ د مشتري نوم ولیکئ' : 'Please enter customer name');
       return;
     }
 
-    const orderData: Order = {
-      id: initialOrder?.id || 'ord_' + Date.now(),
-      orderNumber: orderNumber || storageService.generateNextOrderNumber(),
-      customerId: customerId || 'cust_' + Date.now(),
-      customerName: customerName.trim(),
-      customerPhone: customerPhone.trim(),
-      customerWhatsApp: customerWhatsApp.trim() || customerPhone.trim(),
-      garmentType,
-      quantity: Number(quantity) || 1,
-      fabricId: isCustomerFabric ? undefined : selectedFabricId,
-      fabricName: isCustomerFabric ? (fabricName || 'رخت از خود مشتری') : fabricName,
-      fabricColor: fabricColor,
-      fabricMeters: isCustomerFabric ? undefined : Number(fabricMeters) || 0,
-      isCustomerFabric: isCustomerFabric,
-      measurements,
-      designSelections,
-      specialInstructions,
-      items: [],
-      totalAmount: Number(totalAmount) || 0,
-      paidAmount: Number(paidAmount) || 0,
-      balanceAmount,
-      paymentStatus,
-      status,
-      orderDate,
-      deliveryDate,
-      createdAt: initialOrder?.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    setIsSaving(true);
+    try {
+      const orderData: Order = {
+        id: initialOrder?.id || 'ord_' + Date.now(),
+        orderNumber: orderNumber || storageService.generateNextOrderNumber(),
+        customerId: customerId || 'cust_' + Date.now(),
+        customerName: customerName.trim(),
+        customerPhone: customerPhone.trim(),
+        customerWhatsApp: customerWhatsApp.trim() || customerPhone.trim(),
+        garmentType,
+        quantity: Number(quantity) || 1,
+        fabricId: isCustomerFabric ? undefined : selectedFabricId,
+        fabricName: isCustomerFabric ? (fabricName || 'رخت از خود مشتری') : fabricName,
+        fabricColor: fabricColor,
+        fabricMeters: isCustomerFabric ? undefined : Number(fabricMeters) || 0,
+        isCustomerFabric: isCustomerFabric,
+        measurements,
+        designSelections,
+        specialInstructions,
+        cabinetSlot: cabinetSlot.trim() || undefined,
+        items: initialOrder?.items || [],
+        totalAmount: Number(totalAmount) || 0,
+        paidAmount: Number(paidAmount) || 0,
+        balanceAmount,
+        paymentStatus,
+        status,
+        orderDate,
+        deliveryDate,
+        createdAt: initialOrder?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-    onSave(orderData, shouldPrint);
+      await onSave(orderData, shouldPrint);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -1041,8 +1051,8 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             </div>
           </div>
 
-          {/* 3. Special Instructions & Notes */}
-          <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-2">
+          {/* 3. Special Instructions & Storage Location */}
+          <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-3">
             <div className="flex items-center gap-2 text-[#1A1A1A] font-extrabold text-sm border-b border-[#E5E5E5] pb-2">
               <span className="w-1.5 h-4 bg-[#D4AF37] rounded-full inline-block" />
               <FileText className="w-4 h-4 text-[#D4AF37]" />
@@ -1055,6 +1065,19 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               placeholder={language === 'fa' ? 'مثال: کالر یی 1.75 راشی، دوخت زنجیری...' : language === 'ps' ? 'مثال: کالر یی 1.75 راشی، تنګ دوخت...' : 'e.g. Collar 1.75 inch, soft fusing...'}
               className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:bg-white focus:border-[#D4AF37] outline-hidden"
             />
+
+            <div>
+              <label className="block text-xs font-bold text-stone-600 mb-1">
+                {language === 'fa' ? 'شماره الماری / رف نگهداری لباس (اختیاری)' : language === 'ps' ? 'د المارۍ یا د کالیو د ایښودلو ځای شمېره' : 'Cabinet / Shelf Storage Slot (Optional)'}
+              </label>
+              <input
+                type="text"
+                value={cabinetSlot}
+                onChange={e => setCabinetSlot(e.target.value)}
+                placeholder={language === 'fa' ? 'مثال: A-05 یا الماری ۲' : 'e.g. A-05, Shelf 2'}
+                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-[#1A1A1A] focus:bg-white focus:border-[#D4AF37] outline-hidden"
+              />
+            </div>
           </div>
 
           {/* 4. Pricing, Advance & Balance Card */}
@@ -1144,20 +1167,30 @@ export const OrderForm: React.FC<OrderFormProps> = ({
           <div className="space-y-2.5">
             <button
               type="button"
+              disabled={isSaving}
               onClick={() => handleSave(true)}
-              className="w-full py-3.5 px-4 bg-[#D4AF37] hover:bg-[#C29E2E] active:scale-98 text-[#1A1A1A] font-black rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+              className="w-full py-3.5 px-4 bg-[#D4AF37] hover:bg-[#C29E2E] active:scale-98 text-[#1A1A1A] font-black rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-sm cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <Printer className="w-5 h-5" />
-              <span>{t.saveAndPrint}</span>
+              {isSaving ? (
+                <div className="w-5 h-5 border-2 border-[#1A1A1A] border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Printer className="w-5 h-5" />
+              )}
+              <span>{isSaving ? (language === 'fa' ? 'در حال ثبت در دیتابیس...' : 'Saving to Database...') : t.saveAndPrint}</span>
             </button>
 
             <button
               type="button"
+              disabled={isSaving}
               onClick={() => handleSave(false)}
-              className="w-full py-3 px-4 bg-[#1A1A1A] hover:bg-black text-white font-bold rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+              className="w-full py-3 px-4 bg-[#1A1A1A] hover:bg-black text-white font-bold rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <Save className="w-4 h-4 text-[#D4AF37]" />
-              <span>{t.saveOrder}</span>
+              {isSaving ? (
+                <div className="w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Save className="w-4 h-4 text-[#D4AF37]" />
+              )}
+              <span>{isSaving ? (language === 'fa' ? 'در حال ثبت در دیتابیس...' : 'Saving to Database...') : t.saveOrder}</span>
             </button>
           </div>
         </div>

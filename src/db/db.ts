@@ -258,7 +258,22 @@ export async function initDatabase(): Promise<boolean> {
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
 
+      CREATE TABLE IF NOT EXISTS order_items (
+        id TEXT PRIMARY KEY,
+        order_id TEXT NOT NULL,
+        garment_type TEXT,
+        quantity INT DEFAULT 1,
+        price_per_unit NUMERIC DEFAULT 0,
+        total_price NUMERIC DEFAULT 0,
+        measurements JSONB DEFAULT '{}'::jsonb,
+        design_selections JSONB DEFAULT '{}'::jsonb,
+        fabric_notes TEXT,
+        special_instructions TEXT,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+
       -- Ensure non-breaking schema migrations if tables pre-existed
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS items JSONB DEFAULT '[]'::jsonb;
       ALTER TABLE orders ADD COLUMN IF NOT EXISTS fabric_meters NUMERIC DEFAULT 0;
       ALTER TABLE orders ADD COLUMN IF NOT EXISTS is_customer_fabric BOOLEAN DEFAULT false;
       ALTER TABLE orders ADD COLUMN IF NOT EXISTS cabinet_slot TEXT;
@@ -271,6 +286,192 @@ export async function initDatabase(): Promise<boolean> {
       ALTER TABLE fabrics ADD COLUMN IF NOT EXISTS code TEXT;
       ALTER TABLE products ADD COLUMN IF NOT EXISTS sku TEXT;
     `);
+
+    // Seed measurement_fields if empty
+    const mfCount = await p.query('SELECT COUNT(*) FROM measurement_fields');
+    if (parseInt(mfCount.rows[0].count, 10) === 0) {
+      const defaultFields = [
+        ['m1', 'qad', 'Length (Qad)', 'قد', 'قد', 'in', '40', true, 1],
+        ['m2', 'shana', 'Shoulder (Shana)', 'شانه', 'شانه', 'in', '18.5', true, 2],
+        ['m3', 'asteen', 'Sleeve (Asteen)', 'آستین', 'آستین', 'in', '23', true, 3],
+        ['m4', 'yakhan', 'Collar (Yakhan)', 'یخن', 'یخن', 'in', '16.5', true, 4],
+        ['m5', 'chati', 'Chest (Chati)', 'چاتی (سینه)', 'چاتی (سینه)', 'in', '22', true, 5],
+        ['m6', 'baghal', 'Armpit (Baghal)', 'بغل', 'بغل', 'in', '21', true, 6],
+        ['m7', 'kamar', 'Waist (Kamar)', 'کمر', 'کمر', 'in', '22.5', true, 7],
+        ['m8', 'daman', 'Daman (Hem)', 'دامن', 'دامن', 'in', '25', true, 8],
+        ['m9', 'tunban', 'Trouser (Tunban)', 'تنبان', 'تنبان / پرتوګ', 'in', '38', true, 9],
+        ['m10', 'pacha', 'Bottom (Pacha)', 'پاچه', 'پاچه', 'in', '8.5', true, 10],
+        ['m11', 'surin', 'Seat/Hip (Surin)', 'سورین', 'سورین', 'in', '24', true, 11],
+        ['m12', 'machDast', 'Wrist (Mach Dast)', 'مچ دست', 'مچ لاس', 'in', '9', false, 12]
+      ];
+      for (const f of defaultFields) {
+        await p.query(`
+          INSERT INTO measurement_fields (id, key, label_en, label_fa, label_ps, unit, default_value, is_standard, sort_order)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          ON CONFLICT (id) DO NOTHING;
+        `, f);
+      }
+    }
+
+    // Seed design_categories if empty
+    const dcCount = await p.query('SELECT COUNT(*) FROM design_categories');
+    if (parseInt(dcCount.rows[0].count, 10) === 0) {
+      const defaultCategories = [
+        ['d1', 'yakhanShape', 'Collar Shape / Style', 'شیپ یخن / کالر', 'د یخن ډول / شیپ', JSON.stringify([
+          { id: 'o1_1', nameEn: 'Collar (Standard)', nameFa: 'کالر', namePs: 'کالر' },
+          { id: 'o1_2', nameEn: 'V-Neck (Haft Ghara)', nameFa: 'هفت غاره', namePs: 'هفت غاړه' },
+          { id: 'o1_3', nameEn: 'Mandarin Band (Bayn)', nameFa: 'بین ساده', namePs: 'ساده بین' },
+          { id: 'o1_4', nameEn: 'Semi-Collar', nameFa: 'نیم کالر', namePs: 'نیم کالر' },
+          { id: 'o1_5', nameEn: 'Sherwani Collar', nameFa: 'شروانی', namePs: 'شرواني یخن' },
+          { id: 'o1_6', nameEn: 'Piped Collar (Moghzi)', nameFa: 'مغزی دار', namePs: 'مغزي لرونکی' }
+        ])],
+        ['d2', 'cuffStyle', 'Sleeve Cuff Style', 'کف یا استین', 'کف یا لستوڼی', JSON.stringify([
+          { id: 'o2_1', nameEn: 'Round Cuff (9.25)', nameFa: 'کول کف (9.25)', namePs: 'کول کف (9.25)' },
+          { id: 'o2_2', nameEn: 'Cut Cuff', nameFa: 'کټ کف', namePs: 'کټ کف' },
+          { id: 'o2_3', nameEn: 'Plain Sleeve (No Cuff)', nameFa: 'استین ساده', namePs: 'ساده لستوڼی' },
+          { id: 'o2_4', nameEn: 'Double Button Cuff', nameFa: 'کف دو دکمه', namePs: 'دوه تڼۍ کف' }
+        ])],
+        ['d3', 'damanStyle', 'Daman Style (Hem)', 'شیپ دامن', 'د دامن ډول', JSON.stringify([
+          { id: 'o3_1', nameEn: 'Round Daman (Kol)', nameFa: 'کول دامن', namePs: 'ګرد دامن' },
+          { id: 'o3_2', nameEn: 'Square / Straight Daman (Chakor)', nameFa: 'چوکات / مستقیم دامن', namePs: 'چوکات دامن' },
+          { id: 'o3_3', nameEn: 'Double Border Daman', nameFa: 'دامن دو پله', namePs: 'دوه پله دامن' }
+        ])],
+        ['d4', 'pocketStyle', 'Pocket Configuration', 'جیب‌ها', 'جیبونه', JSON.stringify([
+          { id: 'o4_1', nameEn: 'Two Side + One Front', nameFa: 'دو جیب بغل + یک جیب رو', namePs: 'دوه بغل + یو مخ جیب' },
+          { id: 'o4_2', nameEn: 'Two Side Pockets Only', nameFa: 'فقط دو جیب بغل', namePs: 'یوازې دوه بغل جیبونه' },
+          { id: 'o4_3', nameEn: 'One Side + One Front', nameFa: 'یک جیب بغل + یک جیب رو', namePs: 'یو بغل + یو مخ جیب' },
+          { id: 'o4_4', nameEn: 'Trouser Pocket (Jib Tunban)', nameFa: 'همراه با جیب تنبان', namePs: 'د پرتوګ له جیب سره' }
+        ])]
+      ];
+      for (const c of defaultCategories) {
+        await p.query(`
+          INSERT INTO design_categories (id, key, title_en, title_fa, title_ps, options)
+          VALUES ($1, $2, $3, $4, $5, $6::jsonb)
+          ON CONFLICT (id) DO NOTHING;
+        `, c);
+      }
+    }
+
+    // Seed demo orders if orders table is currently empty
+    const ordersCount = await p.query('SELECT COUNT(*) FROM orders');
+    if (parseInt(ordersCount.rows[0].count, 10) === 0) {
+      const demoOrders = [
+        {
+          id: 'ord_1',
+          order_number: 'MA-0001',
+          customer_id: 'cust_1',
+          customer_name: 'فرهاد',
+          customer_phone: '0765445309',
+          customer_whatsapp: '0765445309',
+          garment_type: 'پیراهن و تنبان (Perahan Tunban)',
+          quantity: 1,
+          fabric_id: 'fab_1',
+          fabric_name: 'لته سفید اعلا (Classic White Latha)',
+          fabric_color: 'سفید / White',
+          fabric_meters: 4,
+          is_customer_fabric: false,
+          measurements: JSON.stringify({ qad: '40', shana: '19.5', asteen: '21', yakhan: '16.75', chati: '23.5', baghal: '23.5', kamar: '24', daman: '25', tunban: '37.5', pacha: '8' }),
+          design_selections: JSON.stringify({ yakhanShape: 'کالر', cuffStyle: 'کول کف (9.25)', damanStyle: 'کول دامن', pocketStyle: 'دو جیب بغل + یک جیب رو' }),
+          special_instructions: 'کالر یی 1.75 راشی',
+          cabinet_slot: 'A-01',
+          total_amount: 1800,
+          paid_amount: 1800,
+          balance_amount: 0,
+          payment_status: 'paid',
+          status: 'ready',
+          order_date: '2026-08-23',
+          delivery_date: '2026-08-28'
+        },
+        {
+          id: 'ord_2',
+          order_number: 'MA-0002',
+          customer_id: 'cust_2',
+          customer_name: 'شکیل خان',
+          customer_phone: '0782930005',
+          customer_whatsapp: '0782930005',
+          garment_type: 'پیراهن و تنبان (Perahan Tunban)',
+          quantity: 1,
+          fabric_id: 'fab_2',
+          fabric_name: 'ابریشم بوسکی کرمی (Silk Boski Cream)',
+          fabric_color: 'کرمی / Off-White',
+          fabric_meters: 4,
+          is_customer_fabric: false,
+          measurements: JSON.stringify({ qad: '26.75', shana: '16.25', asteen: '17', yakhan: '17', chati: '39.5', kamar: '36.25', surin: '40' }),
+          design_selections: JSON.stringify({ yakhanShape: 'هفت غاره' }),
+          special_instructions: 'دوخت دقیق و نرم',
+          cabinet_slot: 'B-04',
+          total_amount: 1600,
+          paid_amount: 1600,
+          balance_amount: 0,
+          payment_status: 'paid',
+          status: 'in_progress',
+          order_date: '2026-08-23',
+          delivery_date: '2026-08-29'
+        },
+        {
+          id: 'ord_3',
+          order_number: 'MA-0003',
+          customer_id: 'cust_3',
+          customer_name: 'حاجی بشیر احمد',
+          customer_phone: '0700223344',
+          customer_whatsapp: '0700223344',
+          garment_type: 'واسکټ / Wescott',
+          quantity: 1,
+          fabric_id: 'fab_3',
+          fabric_name: 'پشم کشمیر سرمه‌ای',
+          fabric_color: 'سرمه‌ای / Navy',
+          fabric_meters: 1.5,
+          is_customer_fabric: false,
+          measurements: JSON.stringify({ wescott_qad: '27', wescott_shana: '17', wescott_chati: '40', wescott_kamar: '38' }),
+          design_selections: JSON.stringify({ pocketStyle: 'دو جیب بغل' }),
+          special_instructions: 'دکمه های برنجی طلایی',
+          cabinet_slot: 'C-08',
+          total_amount: 2200,
+          paid_amount: 1000,
+          balance_amount: 1200,
+          payment_status: 'partial',
+          status: 'pending',
+          order_date: '2026-09-01',
+          delivery_date: '2026-09-08'
+        }
+      ];
+
+      for (const ord of demoOrders) {
+        await p.query(`
+          INSERT INTO orders (
+            id, order_number, customer_id, customer_name, customer_phone, customer_whatsapp,
+            garment_type, quantity, fabric_id, fabric_name, fabric_color, fabric_meters,
+            is_customer_fabric, measurements, design_selections, special_instructions,
+            cabinet_slot, total_amount, paid_amount, balance_amount, payment_status,
+            status, order_date, delivery_date, items, created_at, updated_at
+          ) VALUES (
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14::jsonb, $15::jsonb, $16, $17, $18, $19, $20, $21, $22, $23, $24, '[]'::jsonb, NOW(), NOW()
+          ) ON CONFLICT (id) DO NOTHING;
+        `, [
+          ord.id, ord.order_number, ord.customer_id, ord.customer_name, ord.customer_phone, ord.customer_whatsapp,
+          ord.garment_type, ord.quantity, ord.fabric_id, ord.fabric_name, ord.fabric_color, ord.fabric_meters,
+          ord.is_customer_fabric, ord.measurements, ord.design_selections, ord.special_instructions,
+          ord.cabinet_slot, ord.total_amount, ord.paid_amount, ord.balance_amount, ord.payment_status,
+          ord.status, ord.order_date, ord.delivery_date
+        ]);
+
+        // Also ensure customer exists
+        await p.query(`
+          INSERT INTO customers (
+            id, name, phone, whatsapp, standard_measurements, preferred_garment_type, total_orders_count, total_spent, total_balance, created_at, updated_at
+          ) VALUES (
+            $1, $2, $3, $4, $5::jsonb, $6, 1, $7, $8, NOW(), NOW()
+          ) ON CONFLICT (id) DO UPDATE SET
+            name = EXCLUDED.name,
+            phone = EXCLUDED.phone,
+            standard_measurements = EXCLUDED.standard_measurements,
+            updated_at = NOW();
+        `, [
+          ord.customer_id, ord.customer_name, ord.customer_phone, ord.customer_whatsapp,
+          ord.measurements, ord.garment_type, ord.total_amount, ord.balance_amount
+        ]);
+      }
+    }
     isDbAvailable = true;
     isInitialized = true;
     console.log('PostgreSQL database tables verified and connected.');
