@@ -1048,20 +1048,15 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
               ref={receiptPrintRef} 
               dir={language === 'en' ? 'ltr' : 'rtl'}
               className="p-3 bg-white font-mono text-xs text-stone-950 border-2 border-stone-950"
-              style={{ width: '360px', maxWidth: '360px', margin: '0 auto' }}
+              style={{ width: '340px', maxWidth: '100%', margin: '0 auto', boxSizing: 'border-box' }}
             >
-              {/* Header Blessing */}
-              <div className="text-center font-serif text-[10px] text-stone-600 pb-1 mb-1 border-b border-stone-200">
-                {shopSettings?.receiptHeaderNoteFa || 'بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ'}
-              </div>
-
               {/* Top Header */}
               <div className="text-center pb-2 border-b-2 border-stone-950">
                 {shopSettings?.receiptShowLogo !== false && (
                   <img
-                    src={shopSettings?.logoUrl || '/mujeeb-afghan-logo.jpeg'}
+                    src="/receipt-logo.svg"
                     alt="Shop Logo"
-                    className="mx-auto h-14 w-14 object-contain mb-1 rounded-md"
+                    className="mx-auto h-12 w-12 object-contain mb-1"
                   />
                 )}
                 <h2 className="font-black text-sm text-stone-950 font-serif leading-tight">
@@ -1088,17 +1083,19 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
               </div>
 
               {/* Order Info Table */}
-              <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 text-[11px] font-bold bg-stone-50 my-1.5">
-                <div className="p-1.5 flex items-center justify-between">
-                  <span className="text-stone-600 text-[10px]">{language === 'fa' ? 'شماره بِل:' : 'Receipt #:'}</span>
-                  <span className="font-black font-mono text-stone-950 text-xs">SL-{activeReceiptSale.id.slice(-6).toUpperCase()}</span>
-                </div>
-                <div className="p-1.5 flex items-center justify-between">
-                  <span className="text-stone-600 text-[10px]">{language === 'fa' ? 'تاریخ:' : 'Date:'}</span>
-                  <span className="font-mono text-stone-950 text-[10px]">{new Date(activeReceiptSale.saleDate).toLocaleDateString()}</span>
+              <div className="border-2 border-stone-950 my-1.5 bg-white text-xs">
+                <div className="flex border-b border-stone-950">
+                  <div className="w-1/2 p-1.5 border-r border-stone-950 flex items-center justify-between">
+                    <span className="text-stone-600 text-[10px]">{language === 'fa' ? 'شماره بِل:' : 'Receipt #:'}</span>
+                    <span className="font-black font-mono text-stone-950 text-xs">SL-{activeReceiptSale.id.slice(-6).toUpperCase()}</span>
+                  </div>
+                  <div className="w-1/2 p-1.5 flex items-center justify-between">
+                    <span className="text-stone-600 text-[10px]">{language === 'fa' ? 'تاریخ:' : 'Date:'}</span>
+                    <span className="font-mono text-stone-950 text-[10px]">{new Date(activeReceiptSale.saleDate).toLocaleDateString()}</span>
+                  </div>
                 </div>
                 {activeReceiptSale.customerName && (
-                  <div className="col-span-2 p-1.5 border-t-2 border-stone-950 flex items-center justify-between bg-white">
+                  <div className="p-1.5 flex items-center justify-between bg-stone-50">
                     <span className="text-stone-600 text-[10px]">{language === 'fa' ? 'مشتری:' : 'Customer:'}</span>
                     <span className="font-black text-stone-950 text-xs">{activeReceiptSale.customerName}</span>
                   </div>
@@ -1107,41 +1104,51 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
 
               {/* Items Table with Complete 4-Sided Borders */}
               <div className="border-2 border-stone-950 my-1.5 bg-white">
-                <div className="grid grid-cols-12 border-b-2 border-stone-950 bg-stone-100 text-[10px] font-black text-center divide-x-2 divide-stone-950">
-                  <div className="col-span-6 py-1 px-1 text-right">{language === 'fa' ? 'شرح جنس' : 'Item'}</div>
-                  <div className="col-span-2 py-1 px-1">{language === 'fa' ? 'تعداد' : 'Qty'}</div>
-                  <div className="col-span-4 py-1 px-1 text-left">{language === 'fa' ? 'مجموع' : 'Total'}</div>
-                </div>
-                <div className="grid grid-cols-12 text-[11px] divide-x-2 divide-stone-950 items-center">
-                  <div className="col-span-6 p-1.5 font-bold text-stone-950 text-right leading-tight">
-                    {activeReceiptSale.productName}
-                    <div className="text-[9px] text-stone-500 font-normal">
-                      @{Number(activeReceiptSale.sellingPrice).toLocaleString()} {currencySymbol}
-                    </div>
-                  </div>
-                  <div className="col-span-2 p-1.5 text-center font-mono font-black text-stone-950">
-                    {activeReceiptSale.quantity}
-                  </div>
-                  <div className="col-span-4 p-1.5 text-left font-mono font-black text-stone-950 text-xs">
-                    {Number(activeReceiptSale.totalAmount).toLocaleString()} {currencySymbol}
-                  </div>
-                </div>
-                {activeReceiptSale.notes && (
-                  <div className="p-1.5 bg-amber-50/70 border-t-2 border-stone-950 text-[10px] text-stone-800 italic">
-                    <span className="font-bold text-amber-900 not-italic">Note:</span> {activeReceiptSale.notes}
-                  </div>
-                )}
+                <table className="w-full text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-stone-100 border-b-2 border-stone-950 text-[10px] font-black text-stone-950">
+                      <th className="p-1.5 text-start border-r border-stone-950 w-6/12">{language === 'fa' ? 'شرح جنس' : 'Item'}</th>
+                      <th className="p-1.5 text-center border-r border-stone-950 w-2/12">{language === 'fa' ? 'تعداد' : 'Qty'}</th>
+                      <th className="p-1.5 text-end w-4/12">{language === 'fa' ? 'مجموع' : 'Total'}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-stone-950">
+                      <td className="p-1.5 text-start font-bold text-stone-950 border-r border-stone-950 align-top">
+                        <div className="leading-tight">{activeReceiptSale.productName}</div>
+                        <div className="text-[9px] text-stone-500 font-normal mt-0.5 font-mono">
+                          @{Number(activeReceiptSale.sellingPrice).toLocaleString()} {currencySymbol}
+                        </div>
+                      </td>
+                      <td className="p-1.5 text-center font-mono font-black text-stone-950 border-r border-stone-950 align-top">
+                        {activeReceiptSale.quantity}
+                      </td>
+                      <td className="p-1.5 text-end font-mono font-black text-stone-950 align-top text-xs whitespace-nowrap">
+                        {Number(activeReceiptSale.totalAmount).toLocaleString()} {currencySymbol}
+                      </td>
+                    </tr>
+                    {activeReceiptSale.notes && (
+                      <tr>
+                        <td colSpan={3} className="p-1.5 bg-stone-50 text-[10px] text-stone-800 italic">
+                          <span className="font-bold text-stone-900 not-italic">Note:</span> {activeReceiptSale.notes}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
 
               {/* Total Summary Table */}
-              <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 my-1.5 bg-stone-50">
-                <div className="p-1.5 flex items-center justify-between">
-                  <span className="text-[10px] text-stone-600 font-bold uppercase">{language === 'fa' ? 'روش پرداخت:' : 'Payment:'}</span>
-                  <span className="font-black text-stone-950 text-[11px] uppercase">{activeReceiptSale.paymentMethod || 'CASH'}</span>
-                </div>
-                <div className="p-1.5 flex items-center justify-between bg-emerald-50/60">
-                  <span className="text-[10px] text-emerald-900 font-black uppercase">{language === 'fa' ? 'مجموع پرداخت:' : 'TOTAL:'}</span>
-                  <span className="font-mono font-black text-sm text-emerald-800">{Number(activeReceiptSale.totalAmount).toLocaleString()} {currencySymbol}</span>
+              <div className="border-2 border-stone-950 my-1.5 bg-white">
+                <div className="flex bg-stone-50">
+                  <div className="w-1/2 p-1.5 border-r border-stone-950 flex items-center justify-between">
+                    <span className="text-[10px] text-stone-600 font-bold uppercase">{language === 'fa' ? 'روش پرداخت:' : 'Payment:'}</span>
+                    <span className="font-black text-stone-950 text-xs uppercase">{activeReceiptSale.paymentMethod || 'CASH'}</span>
+                  </div>
+                  <div className="w-1/2 p-1.5 flex items-center justify-between bg-stone-100">
+                    <span className="text-[10px] text-stone-950 font-black uppercase">{language === 'fa' ? 'مجموع کل:' : 'TOTAL:'}</span>
+                    <span className="font-mono font-black text-sm text-stone-950 whitespace-nowrap">{Number(activeReceiptSale.totalAmount).toLocaleString()} {currencySymbol}</span>
+                  </div>
                 </div>
               </div>
 
@@ -1195,18 +1202,14 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
             id="printable-quick-retail-slip"
             dir={language === 'en' ? 'ltr' : 'rtl'}
             className="p-3 bg-white font-mono text-xs text-stone-950 border-2 border-stone-950"
-            style={{ width: '360px', maxWidth: '360px' }}
+            style={{ width: '340px', maxWidth: '100%', boxSizing: 'border-box' }}
           >
-            {/* Header Blessing */}
-            <div className="text-center font-serif text-[10px] text-stone-600 pb-1 mb-1 border-b border-stone-200">
-              {shopSettings?.receiptHeaderNoteFa || 'بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ'}
-            </div>
             <div className="text-center pb-2 border-b-2 border-stone-950">
               {shopSettings?.receiptShowLogo !== false && (
                 <img
-                  src={shopSettings?.logoUrl || '/mujeeb-afghan-logo.jpeg'}
+                  src="/receipt-logo.svg"
                   alt="Shop Logo"
-                  className="mx-auto h-14 w-14 object-contain mb-1 rounded-md"
+                  className="mx-auto h-12 w-12 object-contain mb-1"
                 />
               )}
               <h2 className="font-black text-sm text-stone-950 font-serif leading-tight">
@@ -1233,17 +1236,19 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
             </div>
 
             {/* Order Info Table */}
-            <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 text-[11px] font-bold bg-stone-50 my-1.5">
-              <div className="p-1.5 flex items-center justify-between">
-                <span className="text-stone-600 text-[10px]">{language === 'fa' ? 'شماره بِل:' : 'Receipt #:'}</span>
-                <span className="font-black font-mono text-stone-950 text-xs">SL-{quickPrintSale.id.slice(-6).toUpperCase()}</span>
-              </div>
-              <div className="p-1.5 flex items-center justify-between">
-                <span className="text-stone-600 text-[10px]">{language === 'fa' ? 'تاریخ:' : 'Date:'}</span>
-                <span className="font-mono text-stone-950 text-[10px]">{new Date(quickPrintSale.saleDate).toLocaleDateString()}</span>
+            <div className="border-2 border-stone-950 my-1.5 bg-white text-xs">
+              <div className="flex border-b border-stone-950">
+                <div className="w-1/2 p-1.5 border-r border-stone-950 flex items-center justify-between">
+                  <span className="text-stone-600 text-[10px]">{language === 'fa' ? 'شماره بِل:' : 'Receipt #:'}</span>
+                  <span className="font-black font-mono text-stone-950 text-xs">SL-{quickPrintSale.id.slice(-6).toUpperCase()}</span>
+                </div>
+                <div className="w-1/2 p-1.5 flex items-center justify-between">
+                  <span className="text-stone-600 text-[10px]">{language === 'fa' ? 'تاریخ:' : 'Date:'}</span>
+                  <span className="font-mono text-stone-950 text-[10px]">{new Date(quickPrintSale.saleDate).toLocaleDateString()}</span>
+                </div>
               </div>
               {quickPrintSale.customerName && (
-                <div className="col-span-2 p-1.5 border-t-2 border-stone-950 flex items-center justify-between bg-white">
+                <div className="p-1.5 flex items-center justify-between bg-stone-50">
                   <span className="text-stone-600 text-[10px]">{language === 'fa' ? 'مشتری:' : 'Customer:'}</span>
                   <span className="font-black text-stone-950 text-xs">{quickPrintSale.customerName}</span>
                 </div>
@@ -1252,41 +1257,51 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
 
             {/* Items Table with Complete 4-Sided Borders */}
             <div className="border-2 border-stone-950 my-1.5 bg-white">
-              <div className="grid grid-cols-12 border-b-2 border-stone-950 bg-stone-100 text-[10px] font-black text-center divide-x-2 divide-stone-950">
-                <div className="col-span-6 py-1 px-1 text-right">{language === 'fa' ? 'شرح جنس' : 'Item'}</div>
-                <div className="col-span-2 py-1 px-1">{language === 'fa' ? 'تعداد' : 'Qty'}</div>
-                <div className="col-span-4 py-1 px-1 text-left">{language === 'fa' ? 'مجموع' : 'Total'}</div>
-              </div>
-              <div className="grid grid-cols-12 text-[11px] divide-x-2 divide-stone-950 items-center">
-                <div className="col-span-6 p-1.5 font-bold text-stone-950 text-right leading-tight">
-                  {quickPrintSale.productName}
-                  <div className="text-[9px] text-stone-500 font-normal">
-                    @{Number(quickPrintSale.sellingPrice).toLocaleString()} {currencySymbol}
-                  </div>
-                </div>
-                <div className="col-span-2 p-1.5 text-center font-mono font-black text-stone-950">
-                  {quickPrintSale.quantity}
-                </div>
-                <div className="col-span-4 p-1.5 text-left font-mono font-black text-stone-950 text-xs">
-                  {Number(quickPrintSale.totalAmount).toLocaleString()} {currencySymbol}
-                </div>
-              </div>
-              {quickPrintSale.notes && (
-                <div className="p-1.5 bg-amber-50/70 border-t-2 border-stone-950 text-[10px] text-stone-800 italic">
-                  <span className="font-bold text-amber-900 not-italic">Note:</span> {quickPrintSale.notes}
-                </div>
-              )}
+              <table className="w-full text-xs border-collapse">
+                <thead>
+                  <tr className="bg-stone-100 border-b-2 border-stone-950 text-[10px] font-black text-stone-950">
+                    <th className="p-1.5 text-start border-r border-stone-950 w-6/12">{language === 'fa' ? 'شرح جنس' : 'Item'}</th>
+                    <th className="p-1.5 text-center border-r border-stone-950 w-2/12">{language === 'fa' ? 'تعداد' : 'Qty'}</th>
+                    <th className="p-1.5 text-end w-4/12">{language === 'fa' ? 'مجموع' : 'Total'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-stone-950">
+                    <td className="p-1.5 text-start font-bold text-stone-950 border-r border-stone-950 align-top">
+                      <div className="leading-tight">{quickPrintSale.productName}</div>
+                      <div className="text-[9px] text-stone-500 font-normal mt-0.5 font-mono">
+                        @{Number(quickPrintSale.sellingPrice).toLocaleString()} {currencySymbol}
+                      </div>
+                    </td>
+                    <td className="p-1.5 text-center font-mono font-black text-stone-950 border-r border-stone-950 align-top">
+                      {quickPrintSale.quantity}
+                    </td>
+                    <td className="p-1.5 text-end font-mono font-black text-stone-950 align-top text-xs whitespace-nowrap">
+                      {Number(quickPrintSale.totalAmount).toLocaleString()} {currencySymbol}
+                    </td>
+                  </tr>
+                  {quickPrintSale.notes && (
+                    <tr>
+                      <td colSpan={3} className="p-1.5 bg-stone-50 text-[10px] text-stone-800 italic">
+                        <span className="font-bold text-stone-900 not-italic">Note:</span> {quickPrintSale.notes}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
 
             {/* Total Summary Table */}
-            <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 my-1.5 bg-stone-50">
-              <div className="p-1.5 flex items-center justify-between">
-                <span className="text-[10px] text-stone-600 font-bold uppercase">{language === 'fa' ? 'روش پرداخت:' : 'Payment:'}</span>
-                <span className="font-black text-stone-950 text-[11px] uppercase">{quickPrintSale.paymentMethod || 'CASH'}</span>
-              </div>
-              <div className="p-1.5 flex items-center justify-between bg-emerald-50/60">
-                <span className="text-[10px] text-emerald-900 font-black uppercase">{language === 'fa' ? 'مجموع پرداخت:' : 'TOTAL:'}</span>
-                <span className="font-mono font-black text-sm text-emerald-800">{Number(quickPrintSale.totalAmount).toLocaleString()} {currencySymbol}</span>
+            <div className="border-2 border-stone-950 my-1.5 bg-white">
+              <div className="flex bg-stone-50">
+                <div className="w-1/2 p-1.5 border-r border-stone-950 flex items-center justify-between">
+                  <span className="text-[10px] text-stone-600 font-bold uppercase">{language === 'fa' ? 'روش پرداخت:' : 'Payment:'}</span>
+                  <span className="font-black text-stone-950 text-xs uppercase">{quickPrintSale.paymentMethod || 'CASH'}</span>
+                </div>
+                <div className="w-1/2 p-1.5 flex items-center justify-between bg-stone-100">
+                  <span className="text-[10px] text-stone-950 font-black uppercase">{language === 'fa' ? 'مجموع کل:' : 'TOTAL:'}</span>
+                  <span className="font-mono font-black text-sm text-stone-950 whitespace-nowrap">{Number(quickPrintSale.totalAmount).toLocaleString()} {currencySymbol}</span>
+                </div>
               </div>
             </div>
 

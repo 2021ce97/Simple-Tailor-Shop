@@ -199,7 +199,7 @@ export async function downloadReceiptPdf(
   element: HTMLElement,
   options: {
     filename?: string;
-    pageFormat?: 'a4' | 'thermal58' | 'thermal80';
+    pageFormat?: 'a4' | 'thermal58' | 'thermal80' | 'auto';
     onStart?: () => void;
     onComplete?: () => void;
     onError?: (err: unknown) => void;
@@ -221,10 +221,27 @@ export async function downloadReceiptPdf(
   try {
     onStart?.();
 
+    // Ensure all internal images are ready
+    const images = Array.from(element.querySelectorAll('img'));
+    await Promise.all(
+      images.map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise(resolve => {
+          img.onload = resolve;
+          img.onerror = resolve;
+          setTimeout(resolve, 500);
+        });
+      })
+    );
+
     const dataUrl = await toPng(element, {
       pixelRatio: 3,
       backgroundColor: '#ffffff',
       cacheBust: true,
+      style: {
+        margin: '0',
+        transform: 'none',
+      },
     });
 
     const img = new Image();
@@ -234,18 +251,21 @@ export async function downloadReceiptPdf(
       img.onerror = resolve;
     });
 
-    const pdfWidth = pageFormat === 'a4' ? 210 : pageFormat === 'thermal58' ? 58 : 80;
-    const margin = pageFormat === 'a4' ? 10 : 3;
+    const isA4 = pageFormat === 'a4';
+    const isThermal58 = pageFormat === 'thermal58';
+    const pdfWidth = isA4 ? 210 : isThermal58 ? 58 : 80;
+    const margin = isA4 ? 10 : 2; // 2mm margin for thermal ensures all borders remain intact
     const printableWidth = pdfWidth - margin * 2;
     const imgHeight = (img.naturalHeight * printableWidth) / (img.naturalWidth || 1);
+    const pdfHeight = isA4 ? 297 : Math.ceil(imgHeight + margin * 2);
 
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
-      format: pageFormat === 'a4' ? 'a4' : [pdfWidth, Math.max(80, Math.ceil(imgHeight + margin * 2))],
+      format: isA4 ? 'a4' : [pdfWidth, Math.max(30, pdfHeight)],
     });
 
-    if (pageFormat === 'a4') {
+    if (isA4) {
       const pageHeight = pdf.internal.pageSize.getHeight();
       const pageContentHeight = pageHeight - margin * 2;
       let imageY = margin;

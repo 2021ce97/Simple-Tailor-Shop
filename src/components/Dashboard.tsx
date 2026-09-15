@@ -1500,78 +1500,121 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </button>
             </div>
 
-            <div id="printable-retail-slip" ref={retailReceiptPrintRef} className="p-6 bg-white font-mono text-xs space-y-4 text-stone-900 border-b border-dashed border-stone-300">
-              <div className="text-center space-y-1">
-                <h2 className="font-black text-base text-[#1A1A1A] tracking-wider">
+            <div 
+              id="printable-retail-slip" 
+              ref={retailReceiptPrintRef} 
+              dir={language === 'en' ? 'ltr' : 'rtl'}
+              className="p-3 bg-white font-mono text-xs text-stone-950 border-2 border-stone-950"
+              style={{ width: '340px', maxWidth: '100%', margin: '0 auto', boxSizing: 'border-box' }}
+            >
+              {/* Top Header */}
+              <div className="text-center pb-2 border-b-2 border-stone-950">
+                {shopSettings?.receiptShowLogo !== false && (
+                  <img
+                    src="/receipt-logo.svg"
+                    alt="Shop Logo"
+                    className="mx-auto h-12 w-12 object-contain mb-1"
+                  />
+                )}
+                <h2 className="font-black text-sm text-stone-950 font-serif leading-tight">
                   {language === 'fa' 
                     ? (shopSettings?.shopNameFa || 'مجیب افغان خیاطي او رخت پلورنځی')
                     : language === 'ps' 
                     ? (shopSettings?.shopNamePs || 'مجیب افغان خیاطي او رخت پلورنځی')
                     : (shopSettings?.shopNameEn || 'MUJEEB AFGHAN FASHION HOUSE')}
                 </h2>
-                <p className="text-[10px] text-stone-500">
+                <p className="text-[10px] text-stone-600 mt-0.5">
                   {language === 'fa' 
                     ? (shopSettings?.addressFa || '') 
                     : language === 'ps' 
                     ? (shopSettings?.addressPs || '') 
                     : (shopSettings?.addressEn || '')}
                 </p>
-                <p className="text-[10px] text-stone-600 font-bold font-mono">
-                  {shopSettings?.phone1 || shopSettings?.whatsapp || ''}
-                </p>
-                <div className="text-[10px] uppercase border-y border-stone-300 py-1 font-bold tracking-widest text-stone-700">
-                  {language === 'fa' ? 'رسید فروش پرچون' : 'RETAIL SALES RECEIPT'}
+                <div className="flex justify-center gap-2 text-[10px] text-stone-700 font-mono mt-0.5 font-bold">
+                  <span>📞 {shopSettings?.phone1 || '0782220194'}</span>
+                  {shopSettings?.whatsapp && <span>💬 {shopSettings?.whatsapp}</span>}
+                </div>
+                <div className="text-[10px] uppercase bg-stone-100 border border-stone-950 py-0.5 mt-1.5 font-black tracking-widest text-stone-900">
+                  {language === 'fa' ? 'رسید فروش پرچون' : language === 'ps' ? 'د پرچون پلور بِل' : 'RETAIL SALES RECEIPT'}
                 </div>
               </div>
 
-              <div className="text-[11px] space-y-1 border-b border-stone-200 pb-2">
-                <div className="flex justify-between">
-                  <span className="text-stone-500">Receipt #:</span>
-                  <span className="font-bold">SL-{activeRetailReceipt.id.slice(-6).toUpperCase()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-stone-500">Date:</span>
-                  <span>{new Date(activeRetailReceipt.saleDate).toLocaleDateString()}</span>
+              {/* Order Info Table */}
+              <div className="border-2 border-stone-950 my-1.5 bg-white text-xs">
+                <div className="flex border-b border-stone-950">
+                  <div className="w-1/2 p-1.5 border-r border-stone-950 flex items-center justify-between">
+                    <span className="text-stone-600 text-[10px]">{language === 'fa' ? 'شماره بِل:' : 'Receipt #:'}</span>
+                    <span className="font-black font-mono text-stone-950 text-xs">SL-{activeRetailReceipt.id.slice(-6).toUpperCase()}</span>
+                  </div>
+                  <div className="w-1/2 p-1.5 flex items-center justify-between">
+                    <span className="text-stone-600 text-[10px]">{language === 'fa' ? 'تاریخ:' : 'Date:'}</span>
+                    <span className="font-mono text-stone-950 text-[10px]">{new Date(activeRetailReceipt.saleDate).toLocaleDateString()}</span>
+                  </div>
                 </div>
                 {activeRetailReceipt.customerName && (
-                  <div className="flex justify-between">
-                    <span className="text-stone-500">Customer:</span>
-                    <span className="font-bold">{activeRetailReceipt.customerName}</span>
+                  <div className="p-1.5 flex items-center justify-between bg-stone-50">
+                    <span className="text-stone-600 text-[10px]">{language === 'fa' ? 'مشتری:' : 'Customer:'}</span>
+                    <span className="font-black text-stone-950 text-xs">{activeRetailReceipt.customerName}</span>
                   </div>
                 )}
               </div>
 
-              <div className="space-y-2 border-b border-stone-200 pb-2 text-[11px]">
-                <div className="flex justify-between font-bold">
-                  <span>Item</span>
-                  <span>Total</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>
-                    {activeRetailReceipt.productName} ({activeRetailReceipt.quantity}x @ {activeRetailReceipt.sellingPrice})
-                  </span>
-                  <span className="font-black">{Number(activeRetailReceipt.totalAmount).toLocaleString()} {currencySymbol}</span>
-                </div>
-                {activeRetailReceipt.notes && (
-                  <div className="text-[10px] text-stone-500 italic">
-                    Note: {activeRetailReceipt.notes}
+              {/* Items Table with Complete 4-Sided Borders */}
+              <div className="border-2 border-stone-950 my-1.5 bg-white">
+                <table className="w-full text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-stone-100 border-b-2 border-stone-950 text-[10px] font-black text-stone-950">
+                      <th className="p-1.5 text-start border-r border-stone-950 w-6/12">{language === 'fa' ? 'شرح جنس' : 'Item'}</th>
+                      <th className="p-1.5 text-center border-r border-stone-950 w-2/12">{language === 'fa' ? 'تعداد' : 'Qty'}</th>
+                      <th className="p-1.5 text-end w-4/12">{language === 'fa' ? 'مجموع' : 'Total'}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-stone-950">
+                      <td className="p-1.5 text-start font-bold text-stone-950 border-r border-stone-950 align-top">
+                        <div className="leading-tight">{activeRetailReceipt.productName}</div>
+                        <div className="text-[9px] text-stone-500 font-normal mt-0.5 font-mono">
+                          @{Number(activeRetailReceipt.sellingPrice).toLocaleString()} {currencySymbol}
+                        </div>
+                      </td>
+                      <td className="p-1.5 text-center font-mono font-black text-stone-950 border-r border-stone-950 align-top">
+                        {activeRetailReceipt.quantity}
+                      </td>
+                      <td className="p-1.5 text-end font-mono font-black text-stone-950 align-top text-xs whitespace-nowrap">
+                        {Number(activeRetailReceipt.totalAmount).toLocaleString()} {currencySymbol}
+                      </td>
+                    </tr>
+                    {activeRetailReceipt.notes && (
+                      <tr>
+                        <td colSpan={3} className="p-1.5 bg-stone-50 text-[10px] text-stone-800 italic">
+                          <span className="font-bold text-stone-900 not-italic">Note:</span> {activeRetailReceipt.notes}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Total Summary Table */}
+              <div className="border-2 border-stone-950 my-1.5 bg-white">
+                <div className="flex bg-stone-50">
+                  <div className="w-1/2 p-1.5 border-r border-stone-950 flex items-center justify-between">
+                    <span className="text-[10px] text-stone-600 font-bold uppercase">{language === 'fa' ? 'روش پرداخت:' : 'Payment:'}</span>
+                    <span className="font-black text-stone-950 text-xs uppercase">{activeRetailReceipt.paymentMethod || 'CASH'}</span>
                   </div>
-                )}
-              </div>
-
-              <div className="space-y-1 text-xs">
-                <div className="flex justify-between font-black text-sm text-[#1A1A1A] pt-1">
-                  <span>TOTAL PAID:</span>
-                  <span>{Number(activeRetailReceipt.totalAmount).toLocaleString()} {currencySymbol}</span>
-                </div>
-                <div className="flex justify-between text-[10px] text-stone-500">
-                  <span>Payment Method:</span>
-                  <span className="uppercase">{activeRetailReceipt.paymentMethod || 'CASH'}</span>
+                  <div className="w-1/2 p-1.5 flex items-center justify-between bg-stone-100">
+                    <span className="text-[10px] text-stone-950 font-black uppercase">{language === 'fa' ? 'مجموع کل:' : 'TOTAL:'}</span>
+                    <span className="font-mono font-black text-sm text-stone-950 whitespace-nowrap">{Number(activeRetailReceipt.totalAmount).toLocaleString()} {currencySymbol}</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="text-center text-[10px] text-stone-500 pt-3 border-t border-stone-200">
-                {language === 'fa' ? 'از خرید و اعتماد شما سپاسگزاریم!' : 'Thank you for your purchase!'}
+              {/* Footer */}
+              <div className="text-center text-[10px] text-stone-600 pt-2 border-t border-dashed border-stone-400">
+                <p>{shopSettings?.receiptFooterFa || 'تشکر از انتخاب و خرید شما! اجناس تا ۳ روز قابل تعویض می‌باشد.'}</p>
+                <a href="https://rayan-tech-solution.tech" target="_blank" rel="noreferrer" className="mt-1 inline-block text-[8px] text-stone-400 underline">
+                  Developed by: Rayan Tech solution
+                </a>
               </div>
             </div>
 
