@@ -40,14 +40,14 @@ export async function printReceiptElement(
 
   onStart?.();
 
-  // Width calculations for thermal vs A4
+  // Width calculations for thermal (Xprinter XP-80 series is 72mm printable width) vs A4
   const widthCss = pageFormat === 'thermal58' 
-    ? 'width: 58mm; max-width: 58mm;' 
+    ? 'width: 48mm; max-width: 48mm;' 
     : pageFormat === 'thermal80'
-    ? 'width: 78mm; max-width: 78mm;'
-    : 'width: 100%; max-width: 190mm;';
+    ? 'width: 72mm; max-width: 72mm;'
+    : 'width: 100%; max-width: 180mm;';
 
-  const marginCss = pageFormat === 'a4' ? '10mm' : '2mm';
+  const marginCss = pageFormat === 'a4' ? '8mm' : '0mm';
 
   // Gather existing stylesheets & fonts
   let styleTags = '';
@@ -65,7 +65,7 @@ export async function printReceiptElement(
         ${styleTags}
         <style>
           @page {
-            size: ${pageFormat === 'a4' ? 'A4 portrait' : 'auto'};
+            size: ${pageFormat === 'a4' ? 'A4 portrait' : pageFormat === 'thermal58' ? '58mm auto' : '80mm auto'};
             margin: ${marginCss};
           }
           * {
@@ -73,14 +73,14 @@ export async function printReceiptElement(
             print-color-adjust: exact !important;
             box-sizing: border-box !important;
           }
-          body {
+          html, body {
             margin: 0 !important;
-            padding: 4px !important;
+            padding: 0 !important;
             background: #ffffff !important;
             color: #000000 !important;
             font-family: 'Plus Jakarta Sans', 'Vazirmatn', system-ui, -apple-system, sans-serif !important;
-            font-size: 12px !important;
-            line-height: 1.4 !important;
+            font-size: 11px !important;
+            line-height: 1.35 !important;
             display: flex !important;
             justify-content: center !important;
           }
@@ -89,7 +89,8 @@ export async function printReceiptElement(
             background: #ffffff !important;
             color: #000000 !important;
             margin: 0 auto !important;
-            padding: 0 !important;
+            padding: ${pageFormat === 'a4' ? '4mm' : '1mm'} !important;
+            box-sizing: border-box !important;
           }
           .no-print, button, .receipt-actions, .receipt-modal-footer {
             display: none !important;
@@ -105,6 +106,10 @@ export async function printReceiptElement(
           table {
             width: 100% !important;
             border-collapse: collapse !important;
+          }
+          /* Ensure high-contrast solid lines for thermal printers */
+          .border-stone-900, .border-stone-950, .border-black {
+            border-color: #000000 !important;
           }
         </style>
       </head>
@@ -217,7 +222,7 @@ export async function downloadReceiptPdf(
     onStart?.();
 
     const dataUrl = await toPng(element, {
-      pixelRatio: 2.5,
+      pixelRatio: 3,
       backgroundColor: '#ffffff',
       cacheBust: true,
     });
@@ -230,14 +235,14 @@ export async function downloadReceiptPdf(
     });
 
     const pdfWidth = pageFormat === 'a4' ? 210 : pageFormat === 'thermal58' ? 58 : 80;
-    const margin = pageFormat === 'a4' ? 12 : 3;
+    const margin = pageFormat === 'a4' ? 10 : 3;
     const printableWidth = pdfWidth - margin * 2;
     const imgHeight = (img.naturalHeight * printableWidth) / (img.naturalWidth || 1);
 
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
-      format: pageFormat === 'a4' ? 'a4' : [pdfWidth, Math.max(100, imgHeight + margin * 2)],
+      format: pageFormat === 'a4' ? 'a4' : [pdfWidth, Math.max(80, Math.ceil(imgHeight + margin * 2))],
     });
 
     if (pageFormat === 'a4') {

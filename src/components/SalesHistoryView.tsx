@@ -1043,80 +1043,114 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
             </div>
 
             {/* Printable Receipt Paper */}
-            <div id="printable-retail-slip" ref={receiptPrintRef} className="p-6 bg-white font-mono text-xs space-y-4 text-stone-900 border-b border-dashed border-stone-300">
-              <div className="text-center space-y-1">
-                <h2 className="font-black text-base text-[#1A1A1A] tracking-wider">
+            <div 
+              id="printable-retail-slip" 
+              ref={receiptPrintRef} 
+              dir={language === 'en' ? 'ltr' : 'rtl'}
+              className="p-3 bg-white font-mono text-xs text-stone-950 border-2 border-stone-950"
+              style={{ width: '360px', maxWidth: '360px', margin: '0 auto' }}
+            >
+              {/* Header Blessing */}
+              <div className="text-center font-serif text-[10px] text-stone-600 pb-1 mb-1 border-b border-stone-200">
+                {shopSettings?.receiptHeaderNoteFa || 'بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ'}
+              </div>
+
+              {/* Top Header */}
+              <div className="text-center pb-2 border-b-2 border-stone-950">
+                {shopSettings?.receiptShowLogo !== false && (
+                  <img
+                    src={shopSettings?.logoUrl || '/mujeeb-afghan-logo.jpeg'}
+                    alt="Shop Logo"
+                    className="mx-auto h-14 w-14 object-contain mb-1 rounded-md"
+                  />
+                )}
+                <h2 className="font-black text-sm text-stone-950 font-serif leading-tight">
                   {language === 'fa' 
                     ? (shopSettings?.shopNameFa || 'مجیب افغان خیاطي او رخت پلورنځی')
                     : language === 'ps' 
                     ? (shopSettings?.shopNamePs || 'مجیب افغان خیاطي او رخت پلورنځی')
                     : (shopSettings?.shopNameEn || 'MUJEEB AFGHAN FASHION HOUSE')}
                 </h2>
-                <p className="text-[10px] text-stone-500">
+                <p className="text-[10px] text-stone-600 mt-0.5">
                   {language === 'fa' 
                     ? (shopSettings?.addressFa || '') 
                     : language === 'ps' 
                     ? (shopSettings?.addressPs || '') 
                     : (shopSettings?.addressEn || '')}
                 </p>
-                <p className="text-[10px] text-stone-600 font-bold font-mono">
-                  {shopSettings?.phone1 || shopSettings?.whatsapp || ''}
-                </p>
-                <div className="text-[10px] uppercase border-y border-stone-300 py-1 font-bold tracking-widest text-stone-700">
-                  {language === 'fa' ? 'رسید فروش پرچون' : 'RETAIL SALES RECEIPT'}
+                <div className="flex justify-center gap-2 text-[10px] text-stone-700 font-mono mt-0.5 font-bold">
+                  <span>📞 {shopSettings?.phone1 || '0782220194'}</span>
+                  {shopSettings?.whatsapp && <span>💬 {shopSettings?.whatsapp}</span>}
+                </div>
+                <div className="text-[10px] uppercase bg-stone-100 border border-stone-950 py-0.5 mt-1.5 font-black tracking-widest text-stone-900">
+                  {language === 'fa' ? 'رسید فروش پرچون' : language === 'ps' ? 'د پرچون پلور بِل' : 'RETAIL SALES RECEIPT'}
                 </div>
               </div>
 
-              <div className="text-[11px] space-y-1 border-b border-stone-200 pb-2">
-                <div className="flex justify-between">
-                  <span className="text-stone-500">Receipt #:</span>
-                  <span className="font-bold">SL-{activeReceiptSale.id.slice(-6).toUpperCase()}</span>
+              {/* Order Info Table */}
+              <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 text-[11px] font-bold bg-stone-50 my-1.5">
+                <div className="p-1.5 flex items-center justify-between">
+                  <span className="text-stone-600 text-[10px]">{language === 'fa' ? 'شماره بِل:' : 'Receipt #:'}</span>
+                  <span className="font-black font-mono text-stone-950 text-xs">SL-{activeReceiptSale.id.slice(-6).toUpperCase()}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-stone-500">Date:</span>
-                  <span>{new Date(activeReceiptSale.saleDate).toLocaleDateString()}</span>
+                <div className="p-1.5 flex items-center justify-between">
+                  <span className="text-stone-600 text-[10px]">{language === 'fa' ? 'تاریخ:' : 'Date:'}</span>
+                  <span className="font-mono text-stone-950 text-[10px]">{new Date(activeReceiptSale.saleDate).toLocaleDateString()}</span>
                 </div>
                 {activeReceiptSale.customerName && (
-                  <div className="flex justify-between">
-                    <span className="text-stone-500">Customer:</span>
-                    <span className="font-bold">{activeReceiptSale.customerName}</span>
+                  <div className="col-span-2 p-1.5 border-t-2 border-stone-950 flex items-center justify-between bg-white">
+                    <span className="text-stone-600 text-[10px]">{language === 'fa' ? 'مشتری:' : 'Customer:'}</span>
+                    <span className="font-black text-stone-950 text-xs">{activeReceiptSale.customerName}</span>
                   </div>
                 )}
               </div>
 
-              {/* Items Line */}
-              <div className="space-y-2 border-b border-stone-200 pb-2 text-[11px]">
-                <div className="flex justify-between font-bold">
-                  <span>Item</span>
-                  <span>Total</span>
+              {/* Items Table with Complete 4-Sided Borders */}
+              <div className="border-2 border-stone-950 my-1.5 bg-white">
+                <div className="grid grid-cols-12 border-b-2 border-stone-950 bg-stone-100 text-[10px] font-black text-center divide-x-2 divide-stone-950">
+                  <div className="col-span-6 py-1 px-1 text-right">{language === 'fa' ? 'شرح جنس' : 'Item'}</div>
+                  <div className="col-span-2 py-1 px-1">{language === 'fa' ? 'تعداد' : 'Qty'}</div>
+                  <div className="col-span-4 py-1 px-1 text-left">{language === 'fa' ? 'مجموع' : 'Total'}</div>
                 </div>
-                <div className="flex justify-between">
-                  <span>
-                    {activeReceiptSale.productName} ({activeReceiptSale.quantity}x @ {activeReceiptSale.sellingPrice})
-                  </span>
-                  <span className="font-black">{Number(activeReceiptSale.totalAmount).toLocaleString()} {currencySymbol}</span>
+                <div className="grid grid-cols-12 text-[11px] divide-x-2 divide-stone-950 items-center">
+                  <div className="col-span-6 p-1.5 font-bold text-stone-950 text-right leading-tight">
+                    {activeReceiptSale.productName}
+                    <div className="text-[9px] text-stone-500 font-normal">
+                      @{Number(activeReceiptSale.sellingPrice).toLocaleString()} {currencySymbol}
+                    </div>
+                  </div>
+                  <div className="col-span-2 p-1.5 text-center font-mono font-black text-stone-950">
+                    {activeReceiptSale.quantity}
+                  </div>
+                  <div className="col-span-4 p-1.5 text-left font-mono font-black text-stone-950 text-xs">
+                    {Number(activeReceiptSale.totalAmount).toLocaleString()} {currencySymbol}
+                  </div>
                 </div>
                 {activeReceiptSale.notes && (
-                  <div className="text-[10px] text-stone-500 italic">
-                    Note: {activeReceiptSale.notes}
+                  <div className="p-1.5 bg-amber-50/70 border-t-2 border-stone-950 text-[10px] text-stone-800 italic">
+                    <span className="font-bold text-amber-900 not-italic">Note:</span> {activeReceiptSale.notes}
                   </div>
                 )}
               </div>
 
-              {/* Total Summary */}
-              <div className="space-y-1 text-xs">
-                <div className="flex justify-between font-black text-sm text-[#1A1A1A] pt-1">
-                  <span>TOTAL PAID:</span>
-                  <span>{Number(activeReceiptSale.totalAmount).toLocaleString()} {currencySymbol}</span>
+              {/* Total Summary Table */}
+              <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 my-1.5 bg-stone-50">
+                <div className="p-1.5 flex items-center justify-between">
+                  <span className="text-[10px] text-stone-600 font-bold uppercase">{language === 'fa' ? 'روش پرداخت:' : 'Payment:'}</span>
+                  <span className="font-black text-stone-950 text-[11px] uppercase">{activeReceiptSale.paymentMethod || 'CASH'}</span>
                 </div>
-                <div className="flex justify-between text-[10px] text-stone-500">
-                  <span>Payment Method:</span>
-                  <span className="uppercase">{activeReceiptSale.paymentMethod || 'CASH'}</span>
+                <div className="p-1.5 flex items-center justify-between bg-emerald-50/60">
+                  <span className="text-[10px] text-emerald-900 font-black uppercase">{language === 'fa' ? 'مجموع پرداخت:' : 'TOTAL:'}</span>
+                  <span className="font-mono font-black text-sm text-emerald-800">{Number(activeReceiptSale.totalAmount).toLocaleString()} {currencySymbol}</span>
                 </div>
               </div>
 
-              <div className="text-center text-[10px] text-stone-500 pt-3 border-t border-stone-200">
-                {language === 'fa' ? 'از خرید و اعتماد شما سپاسگزاریم!' : 'Thank you for your purchase!'}
+              {/* Footer */}
+              <div className="text-center text-[10px] text-stone-600 pt-2 border-t border-dashed border-stone-400">
+                <p>{shopSettings?.receiptFooterFa || 'تشکر از انتخاب و خرید شما! اجناس تا ۳ روز قابل تعویض می‌باشد.'}</p>
+                <a href="https://rayan-tech-solution.tech" target="_blank" rel="noreferrer" className="mt-1 inline-block text-[8px] text-stone-400 underline">
+                  Developed by: Rayan Tech solution
+                </a>
               </div>
             </div>
 
@@ -1159,19 +1193,20 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
           <div
             ref={quickPrintRef}
             id="printable-quick-retail-slip"
-            className="p-4 bg-white font-mono text-xs text-stone-900 border-b border-stone-300"
-            style={{ width: '320px', maxWidth: '320px' }}
+            dir={language === 'en' ? 'ltr' : 'rtl'}
+            className="p-3 bg-white font-mono text-xs text-stone-950 border-2 border-stone-950"
+            style={{ width: '360px', maxWidth: '360px' }}
           >
-            {/* Header */}
+            {/* Header Blessing */}
             <div className="text-center font-serif text-[10px] text-stone-600 pb-1 mb-1 border-b border-stone-200">
               {shopSettings?.receiptHeaderNoteFa || 'بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ'}
             </div>
-            <div className="text-center pb-2 border-b-2 border-stone-900">
+            <div className="text-center pb-2 border-b-2 border-stone-950">
               {shopSettings?.receiptShowLogo !== false && (
                 <img
                   src={shopSettings?.logoUrl || '/mujeeb-afghan-logo.jpeg'}
                   alt="Shop Logo"
-                  className="mx-auto h-12 w-12 object-contain mb-1 rounded"
+                  className="mx-auto h-14 w-14 object-contain mb-1 rounded-md"
                 />
               )}
               <h2 className="font-black text-sm text-stone-950 font-serif leading-tight">
@@ -1181,90 +1216,86 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                   ? (shopSettings?.shopNamePs || 'مجیب افغان خیاطي او رخت پلورنځی')
                   : (shopSettings?.shopNameEn || 'MUJEEB AFGHAN FASHION HOUSE')}
               </h2>
-              <p className="text-[10px] text-stone-500 mt-0.5">
+              <p className="text-[10px] text-stone-600 mt-0.5">
                 {language === 'fa' 
                   ? (shopSettings?.addressFa || '') 
                   : language === 'ps' 
                   ? (shopSettings?.addressPs || '') 
                   : (shopSettings?.addressEn || '')}
               </p>
-              <div className="flex justify-center gap-2 text-[10px] text-stone-600 font-mono mt-0.5">
-                <span>📞 {shopSettings?.phone1}</span>
+              <div className="flex justify-center gap-2 text-[10px] text-stone-700 font-mono mt-0.5 font-bold">
+                <span>📞 {shopSettings?.phone1 || '0782220194'}</span>
                 {shopSettings?.whatsapp && <span>💬 {shopSettings?.whatsapp}</span>}
               </div>
-            </div>
-
-            {/* Title */}
-            <div className="text-center py-1 border-b border-stone-900 bg-stone-50 my-1">
-              <h3 className="text-xs font-black tracking-wider text-stone-900">
+              <div className="text-[10px] uppercase bg-stone-100 border border-stone-950 py-0.5 mt-1.5 font-black tracking-widest text-stone-900">
                 {language === 'fa' ? 'رسید فروش پرچون' : language === 'ps' ? 'د پرچون پلور بِل' : 'RETAIL SALES RECEIPT'}
-              </h3>
-              <p className="text-[9px] text-stone-500 font-mono">
-                {new Date(quickPrintSale.saleDate).toLocaleDateString()} | {new Date(quickPrintSale.saleDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </p>
+              </div>
             </div>
 
-            {/* Receipt Info */}
-            <div className="py-1 border-b border-stone-300 text-[10px] space-y-0.5">
-              <div className="flex justify-between">
-                <span className="text-stone-500">{language === 'fa' ? 'شماره بِل:' : 'Receipt #:'}</span>
-                <span className="font-mono font-bold">SL-{quickPrintSale.id.slice(-6).toUpperCase()}</span>
+            {/* Order Info Table */}
+            <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 text-[11px] font-bold bg-stone-50 my-1.5">
+              <div className="p-1.5 flex items-center justify-between">
+                <span className="text-stone-600 text-[10px]">{language === 'fa' ? 'شماره بِل:' : 'Receipt #:'}</span>
+                <span className="font-black font-mono text-stone-950 text-xs">SL-{quickPrintSale.id.slice(-6).toUpperCase()}</span>
+              </div>
+              <div className="p-1.5 flex items-center justify-between">
+                <span className="text-stone-600 text-[10px]">{language === 'fa' ? 'تاریخ:' : 'Date:'}</span>
+                <span className="font-mono text-stone-950 text-[10px]">{new Date(quickPrintSale.saleDate).toLocaleDateString()}</span>
               </div>
               {quickPrintSale.customerName && (
-                <div className="flex justify-between">
-                  <span className="text-stone-500">{language === 'fa' ? 'مشتری:' : 'Customer:'}</span>
-                  <span className="font-bold">{quickPrintSale.customerName}</span>
+                <div className="col-span-2 p-1.5 border-t-2 border-stone-950 flex items-center justify-between bg-white">
+                  <span className="text-stone-600 text-[10px]">{language === 'fa' ? 'مشتری:' : 'Customer:'}</span>
+                  <span className="font-black text-stone-950 text-xs">{quickPrintSale.customerName}</span>
                 </div>
               )}
             </div>
 
-            {/* Items */}
-            <div className="py-1.5 border-b border-stone-300">
-              <table className="w-full text-right text-[10px]">
-                <thead className="bg-stone-100 border-y border-stone-800">
-                  <tr className="text-[10px] text-stone-800 font-bold">
-                    <th className="py-0.5 px-1 text-right">{language === 'fa' ? 'شرح جنس' : 'Item'}</th>
-                    <th className="py-0.5 px-1 text-center">{language === 'fa' ? 'تعداد' : 'Qty'}</th>
-                    <th className="py-0.5 px-1 text-center">{language === 'fa' ? 'قیمت' : 'Price'}</th>
-                    <th className="py-0.5 px-1 text-left">{language === 'fa' ? 'مجموع' : 'Total'}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="py-1 px-1 font-bold text-stone-900">{quickPrintSale.productName}</td>
-                    <td className="py-1 px-1 text-center font-mono font-bold">{quickPrintSale.quantity}</td>
-                    <td className="py-1 px-1 text-center font-mono">{Number(quickPrintSale.sellingPrice).toLocaleString()}</td>
-                    <td className="py-1 px-1 text-left font-mono font-bold">{Number(quickPrintSale.totalAmount).toLocaleString()}</td>
-                  </tr>
-                </tbody>
-              </table>
-              {quickPrintSale.notes && (
-                <div className="mt-1 text-[9px] text-stone-600 italic">
-                  Note: {quickPrintSale.notes}
-                </div>
-              )}
-            </div>
-
-            {/* Totals */}
-            <div className="py-1 text-[10px] space-y-1">
-              <div className="flex justify-between font-black text-xs text-stone-950 pt-1 border-t-2 border-stone-900 bg-stone-50 px-1 py-0.5">
-                <span>{language === 'fa' ? 'مجموع پرداختی:' : 'TOTAL PAID:'}</span>
-                <span className="font-mono">{Number(quickPrintSale.totalAmount).toLocaleString()} {currencySymbol}</span>
+            {/* Items Table with Complete 4-Sided Borders */}
+            <div className="border-2 border-stone-950 my-1.5 bg-white">
+              <div className="grid grid-cols-12 border-b-2 border-stone-950 bg-stone-100 text-[10px] font-black text-center divide-x-2 divide-stone-950">
+                <div className="col-span-6 py-1 px-1 text-right">{language === 'fa' ? 'شرح جنس' : 'Item'}</div>
+                <div className="col-span-2 py-1 px-1">{language === 'fa' ? 'تعداد' : 'Qty'}</div>
+                <div className="col-span-4 py-1 px-1 text-left">{language === 'fa' ? 'مجموع' : 'Total'}</div>
               </div>
-              <div className="flex justify-between text-stone-700 text-[10px]">
-                <span>{language === 'fa' ? 'روش پرداخت:' : 'Payment:'}</span>
-                <span className="font-bold uppercase">{quickPrintSale.paymentMethod || 'CASH'}</span>
+              <div className="grid grid-cols-12 text-[11px] divide-x-2 divide-stone-950 items-center">
+                <div className="col-span-6 p-1.5 font-bold text-stone-950 text-right leading-tight">
+                  {quickPrintSale.productName}
+                  <div className="text-[9px] text-stone-500 font-normal">
+                    @{Number(quickPrintSale.sellingPrice).toLocaleString()} {currencySymbol}
+                  </div>
+                </div>
+                <div className="col-span-2 p-1.5 text-center font-mono font-black text-stone-950">
+                  {quickPrintSale.quantity}
+                </div>
+                <div className="col-span-4 p-1.5 text-left font-mono font-black text-stone-950 text-xs">
+                  {Number(quickPrintSale.totalAmount).toLocaleString()} {currencySymbol}
+                </div>
+              </div>
+              {quickPrintSale.notes && (
+                <div className="p-1.5 bg-amber-50/70 border-t-2 border-stone-950 text-[10px] text-stone-800 italic">
+                  <span className="font-bold text-amber-900 not-italic">Note:</span> {quickPrintSale.notes}
+                </div>
+              )}
+            </div>
+
+            {/* Total Summary Table */}
+            <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 my-1.5 bg-stone-50">
+              <div className="p-1.5 flex items-center justify-between">
+                <span className="text-[10px] text-stone-600 font-bold uppercase">{language === 'fa' ? 'روش پرداخت:' : 'Payment:'}</span>
+                <span className="font-black text-stone-950 text-[11px] uppercase">{quickPrintSale.paymentMethod || 'CASH'}</span>
+              </div>
+              <div className="p-1.5 flex items-center justify-between bg-emerald-50/60">
+                <span className="text-[10px] text-emerald-900 font-black uppercase">{language === 'fa' ? 'مجموع پرداخت:' : 'TOTAL:'}</span>
+                <span className="font-mono font-black text-sm text-emerald-800">{Number(quickPrintSale.totalAmount).toLocaleString()} {currencySymbol}</span>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="text-center text-[9px] text-stone-500 pt-1.5 border-t border-dashed border-stone-300">
-              <p className="font-medium">
-                {shopSettings?.receiptFooterFa || 'تشکر از انتخاب و خرید شما! اجناس تا ۳ روز قابل تعویض می‌باشد.'}
-              </p>
-              <p className="text-[7px] text-stone-400 mt-0.5">
-                Mujeeb Afghan Fashion • Rayan Tech Solution
-              </p>
+            <div className="text-center text-[10px] text-stone-600 pt-2 border-t border-dashed border-stone-400">
+              <p>{shopSettings?.receiptFooterFa || 'تشکر از انتخاب و خرید شما! اجناس تا ۳ روز قابل تعویض می‌باشد.'}</p>
+              <a href="https://rayan-tech-solution.tech" target="_blank" rel="noreferrer" className="mt-1 inline-block text-[8px] text-stone-400 underline">
+                Developed by: Rayan Tech solution
+              </a>
             </div>
           </div>
         </div>

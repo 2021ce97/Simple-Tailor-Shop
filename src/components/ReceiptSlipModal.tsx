@@ -44,18 +44,27 @@ const receiptCopy = {
     noStyle: 'Standard style', notes: 'Tailor notes', noMeasurements: 'No measurements recorded',
     delivery: 'Delivery date', orderDate: 'Order date', garment: 'Garment',
     quantity: 'Quantity', total: 'Total', paid: 'Paid', balance: 'Balance', developed: 'Developed by: Rayan Tech solution',
+    measurementsHeader: 'Measurements (Inches)',
+    styleHeader: 'Design & Style Specs',
+    cabinetSlot: 'Cabinet / Shelf',
   },
   fa: {
     contact: 'شماره تماس', address: 'آدرس', bill: 'شماره بل', customer: 'مشتری',
     noStyle: 'استایل ساده', notes: 'یادداشت خیاط', noMeasurements: 'اندازه‌ای ثبت نشده',
     delivery: 'تاریخ تحویل', orderDate: 'تاریخ ثبت سفارش', garment: 'لباس',
     quantity: 'تعداد', total: 'مجموع', paid: 'پرداخت', balance: 'باقی‌مانده', developed: 'ساخته شده توسط: Rayan Tech solution',
+    measurementsHeader: 'اندازه‌های ثبت شده (انچ)',
+    styleHeader: 'مشخصات و استایل دوخت',
+    cabinetSlot: 'الماری / طبقه',
   },
   ps: {
     contact: 'د اړیکې شمېره', address: 'پته', bill: 'د بِل شمېره', customer: 'پېرودونکی',
     noStyle: 'ساده سټایل', notes: 'د خیاط یادښت', noMeasurements: 'اندازې نه دي ثبت شوي',
     delivery: 'د سپارلو نېټه', orderDate: 'د فرمایش نېټه', garment: 'کالي',
     quantity: 'تعداد', total: 'ټول', paid: 'ورکړل شوي', balance: 'پاتې', developed: 'جوړونکی: Rayan Tech solution',
+    measurementsHeader: 'ثبت شوې اندازې (انچ)',
+    styleHeader: 'د ډیزاین او سټایل ځانګړنې',
+    cabinetSlot: 'المارۍ / خونه',
   },
 } as const;
 
@@ -221,23 +230,28 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
         @media print {
           @page {
             size: ${printFormat === 'thermal58' ? '58mm auto' : printFormat === 'thermal80' ? '80mm auto' : 'A4 portrait'};
-            margin: ${printFormat === 'thermal58' ? '0mm' : printFormat === 'thermal80' ? '1mm' : '8mm'};
+            margin: ${printFormat === 'a4' ? '8mm' : '0mm'};
           }
           html, body {
-            width: ${printFormat === 'thermal58' ? '54mm' : printFormat === 'thermal80' ? '76mm' : '100%'} !important;
+            width: ${printFormat === 'thermal58' ? '48mm' : printFormat === 'thermal80' ? '72mm' : '100%'} !important;
             margin: 0 auto !important;
             padding: 0 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            background: #ffffff !important;
+            color: #000000 !important;
           }
           #authentic-receipt-slip {
-            width: ${printFormat === 'thermal58' ? '54mm' : printFormat === 'thermal80' ? '76mm' : '100%'} !important;
-            max-width: ${printFormat === 'thermal58' ? '54mm' : printFormat === 'thermal80' ? '76mm' : '186mm'} !important;
+            width: ${printFormat === 'thermal58' ? '48mm' : printFormat === 'thermal80' ? '72mm' : '100%'} !important;
+            max-width: ${printFormat === 'thermal58' ? '48mm' : printFormat === 'thermal80' ? '72mm' : '180mm'} !important;
             margin: 0 auto !important;
-            padding: ${printFormat === 'thermal58' ? '2mm 1mm' : printFormat === 'thermal80' ? '3mm 2mm' : '6mm'} !important;
-            font-size: ${printFormat === 'thermal58' ? '10px' : printFormat === 'thermal80' ? '11px' : '13px'} !important;
+            padding: ${printFormat === 'thermal58' ? '1mm' : printFormat === 'thermal80' ? '1.5mm' : '4mm'} !important;
+            font-size: ${printFormat === 'thermal58' ? '9.5px' : printFormat === 'thermal80' ? '10.5px' : '12px'} !important;
             box-shadow: none !important;
             border: none !important;
+          }
+          .border-stone-900, .border-stone-950, .border-black {
+            border-color: #000000 !important;
           }
         }
       `}</style>
@@ -400,131 +414,152 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
               </p>
             </div>
 
-            {/* Order Info & Customer Strip */}
-            <div className="grid grid-cols-2 border-b-2 border-stone-900 text-xs font-bold bg-stone-50">
-              <div className="p-2 border-l border-stone-900 flex items-center justify-between">
-                <span className="text-stone-600">{receiptText.bill}:</span>
-                <span className="text-base font-black font-mono text-stone-950">{order.orderNumber}</span>
+            {/* Order Info & Customer Strip Table */}
+            <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 text-xs font-bold bg-stone-50 my-1.5">
+              <div className="p-1.5 flex items-center justify-between">
+                <span className="text-stone-600 text-[10px]">{receiptText.bill}:</span>
+                <span className="text-sm font-black font-mono text-stone-950">{order.orderNumber}</span>
               </div>
-              <div className="p-2 flex items-center justify-between">
-                <span className="text-stone-600">{receiptText.customer}:</span>
-                <span className="text-sm font-black text-stone-950 truncate max-w-[130px]">{order.customerName}</span>
+              <div className="p-1.5 flex items-center justify-between">
+                <span className="text-stone-600 text-[10px]">{receiptText.customer}:</span>
+                <span className="text-xs font-black text-stone-950 truncate max-w-[130px]">{order.customerName}</span>
               </div>
             </div>
 
-            {/* Main Measurements & Styles 2-Column Grid matching receipt in photo */}
-            <div className="grid grid-cols-2 border-b border-stone-900">
-              {/* Left Column: Design & Style Specs */}
-              <div className="border-l border-stone-900 flex flex-col justify-between text-[11px]">
-                <div className="divide-y divide-stone-200">
-                  {activeDesignItems.length > 0 ? (
-                    activeDesignItems.map((item, idx) => (
-                      <div key={idx} className="p-1.5 flex justify-between items-center">
-                        <span className="text-stone-500 font-medium text-[10px]">{item.title}:</span>
-                        <span className="font-bold text-stone-900 text-left">{String(item.value)}</span>
+            {/* Main Measurements & Styles 2-Column Grid with complete 4-sided borders and vertical right-line */}
+            <div className="border-2 border-stone-950 my-1.5 bg-white overflow-hidden">
+              {/* Header labels for both columns */}
+              <div className="grid grid-cols-2 border-b-2 border-stone-950 bg-stone-100 text-[10px] font-black text-center divide-x-2 divide-stone-950">
+                <div className="py-1 px-1 text-stone-800 uppercase tracking-tight">
+                  {receiptText.styleHeader}
+                </div>
+                <div className="py-1 px-1 text-stone-800 uppercase tracking-tight">
+                  {receiptText.measurementsHeader}
+                </div>
+              </div>
+
+              {/* Table Columns with center divider and outer right border */}
+              <div className="grid grid-cols-2 divide-x-2 divide-stone-950">
+                {/* Left Column: Design & Style Specs */}
+                <div className="flex flex-col justify-between text-[11px] bg-white">
+                  <div className="divide-y divide-stone-200">
+                    {activeDesignItems.length > 0 ? (
+                      activeDesignItems.map((item, idx) => (
+                        <div key={idx} className="px-1.5 py-1 flex justify-between items-center text-[10px]">
+                          <span className="text-stone-600 font-medium text-[9.5px]">{item.title}:</span>
+                          <span className="font-bold text-stone-900 text-left truncate max-w-[85px]">{String(item.value)}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-2 text-stone-400 text-center italic text-[10px]">
+                        {receiptText.noStyle}
                       </div>
-                    ))
-                  ) : (
-                    <div className="p-2 text-stone-400 text-center italic text-[10px]">
-                      {receiptText.noStyle}
+                    )}
+                    {order.cabinetSlot && (
+                      <div className="px-1.5 py-1 flex justify-between items-center text-[10px] bg-amber-50/70 border-t border-stone-300">
+                        <span className="text-amber-900 font-bold text-[9.5px]">{receiptText.cabinetSlot}:</span>
+                        <span className="font-mono font-black text-amber-950">{order.cabinetSlot}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Special Tailor Instructions / Note */}
+                  {order.specialInstructions && (
+                    <div className="p-1.5 bg-amber-50/80 border-t-2 border-stone-950 text-[10px] font-semibold text-stone-900 mt-auto">
+                      <span className="text-[9px] text-amber-900 block font-bold">{receiptText.notes}:</span>
+                      <span className="leading-snug">{order.specialInstructions}</span>
                     </div>
                   )}
                 </div>
 
-                {/* Special Tailor Instructions / Note */}
-                {order.specialInstructions && (
-                  <div className="p-2 bg-amber-50/70 border-t border-stone-300 text-[11px] font-semibold text-stone-900 mt-auto">
-                    <span className="text-[10px] text-amber-800 block">{receiptText.notes}:</span>
-                    <span>{order.specialInstructions}</span>
+                {/* Right Column: Measurements Table with right-side border line */}
+                <div className="flex flex-col bg-white">
+                  <div className="divide-y divide-stone-300 text-xs">
+                    {activeMeasurements.map((m, idx) => (
+                      <div key={idx} className="flex justify-between items-center px-2 py-0.5 hover:bg-stone-50">
+                        <span className="font-semibold text-stone-700 text-[10.5px] truncate max-w-[95px]">{m.label}:</span>
+                        <span className="font-mono font-black text-stone-950 text-xs pl-1.5 border-l border-stone-200 min-w-[34px] text-right">{m.value}</span>
+                      </div>
+                    ))}
+                    {activeMeasurements.length === 0 && (
+                      <div className="p-3 text-stone-400 text-center text-xs">
+                        {receiptText.noMeasurements}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-
-              {/* Right Column: Measurements Table (قد, شانه, آستین, یخن, چاتی, etc.) */}
-              <div className="divide-y divide-stone-300 text-xs">
-                {activeMeasurements.map((m, idx) => (
-                  <div key={idx} className="flex justify-between items-center px-2.5 py-1 hover:bg-stone-50">
-                    <span className="font-semibold text-stone-700">{m.label}:</span>
-                    <span className="font-mono font-black text-stone-950 text-sm">{m.value}</span>
-                  </div>
-                ))}
-                {activeMeasurements.length === 0 && (
-                  <div className="p-4 text-stone-400 text-center text-xs">
-                    {receiptText.noMeasurements}
-                  </div>
-                )}
+                </div>
               </div>
             </div>
 
             {/* Delivery Date & Time section */}
-            <div className="p-2 border-b border-dashed border-stone-400 bg-stone-50/50 flex items-center justify-between text-xs">
-              <div>
-                <span className="text-[10px] text-stone-500 block">{receiptText.delivery}:</span>
-                <span className="font-black text-stone-950 font-mono">{order.deliveryDate}</span>
+            <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 bg-stone-50/70 text-xs my-1.5">
+              <div className="p-1.5 flex items-center justify-between">
+                <span className="text-[10px] text-stone-600 font-semibold">{receiptText.delivery}:</span>
+                <span className="font-black text-stone-950 font-mono text-xs">{order.deliveryDate}</span>
               </div>
-              <div className="text-left font-mono text-[11px] text-stone-600">
-                <span className="text-[10px] text-stone-400 block">{receiptText.orderDate}:</span>
-                <span>{order.orderDate || new Date().toISOString().slice(0, 10)}</span>
+              <div className="p-1.5 flex items-center justify-between text-[11px] font-mono">
+                <span className="text-[10px] text-stone-500">{receiptText.orderDate}:</span>
+                <span className="text-stone-800 text-[10px]">{order.orderDate || new Date().toISOString().slice(0, 10)}</span>
               </div>
             </div>
 
             {/* Barcodes Row (Contact Barcode & Order Barcode) as shown in uploaded photos */}
             {showBarcode && (
-              <div className="py-2 px-1 border-b border-dashed border-stone-400 flex items-center justify-between">
+              <div className="py-1.5 px-1 border-2 border-stone-950 my-1.5 flex items-center justify-between divide-x-2 divide-stone-950 bg-white">
                 {/* Phone Barcode */}
-                <div className="flex-1 text-center">
+                <div className="flex-1 text-center px-1">
                   <BarcodeView 
                     value={order.customerPhone || '0780000000'} 
-                    height={28}
-                    width={1.2}
-                    fontSize={9}
+                    height={24}
+                    width={1.1}
+                    fontSize={8}
                   />
-                  <span className="text-[9px] text-stone-500 block">{t.phoneBarcode}</span>
+                  <span className="text-[8px] text-stone-500 block">{t.phoneBarcode}</span>
                 </div>
 
                 {/* Order Number Barcode */}
-                <div className="flex-1 text-center">
+                <div className="flex-1 text-center px-1">
                   <BarcodeView 
                     value={order.orderNumber} 
-                    height={28}
-                    width={1.4}
-                    fontSize={9}
+                    height={24}
+                    width={1.2}
+                    fontSize={8}
                   />
-                  <span className="text-[9px] text-stone-500 block">{t.billBarcode}</span>
+                  <span className="text-[8px] text-stone-500 block">{t.billBarcode}</span>
                 </div>
               </div>
             )}
 
             {/* Garment and quantity */}
-            <div className="grid grid-cols-2 border-b border-stone-900 text-xs py-1.5 px-2 font-bold bg-stone-100/70 text-center">
-              <div>
-                <span className="text-[10px] text-stone-500 block">{receiptText.garment}:</span>
-                <span className="text-stone-900">{displayGarmentType}</span>
+            <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 text-xs py-1 px-2 font-bold bg-stone-100 my-1.5 text-center">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[10px] text-stone-600">{receiptText.garment}:</span>
+                <span className="text-stone-950 text-xs">{displayGarmentType}</span>
               </div>
-              <div>
-                <span className="text-[10px] text-stone-500 block">{receiptText.quantity}:</span>
-                <span className="font-mono text-base text-stone-950">{order.quantity || 1}</span>
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[10px] text-stone-600">{receiptText.quantity}:</span>
+                <span className="font-mono text-sm text-stone-950">{order.quantity || 1}</span>
               </div>
             </div>
 
             {/* Financials Breakdown Table (جمله, جمله پرداخت, جمله باقیات) */}
-            <div className="grid grid-cols-3 border-2 border-stone-950 text-center font-bold mt-2 divide-x divide-x-reverse divide-stone-950 bg-stone-50">
-              <div className="p-1.5">
-                <div className="text-[10px] text-stone-600">{receiptText.total}</div>
-                <div className="font-mono text-sm font-black text-stone-950">
-                  {order.totalAmount} <span className="text-[9px] font-normal">{currencySymbol}</span>
+            <div className="grid grid-cols-3 border-2 border-stone-950 text-center font-bold my-1.5 divide-x-2 divide-stone-950 bg-stone-50">
+              <div className="p-1">
+                <div className="text-[9px] text-stone-600 uppercase font-bold">{receiptText.total}</div>
+                <div className="font-mono text-xs font-black text-stone-950">
+                  {order.totalAmount} <span className="text-[8px] font-normal">{currencySymbol}</span>
                 </div>
               </div>
-              <div className="p-1.5 bg-emerald-50/60">
-                <div className="text-[10px] text-emerald-800">{receiptText.paid}</div>
-                <div className="font-mono text-sm font-black text-emerald-700">
-                  {order.paidAmount} <span className="text-[9px] font-normal">{currencySymbol}</span>
+              <div className="p-1 bg-emerald-50/60">
+                <div className="text-[9px] text-emerald-800 uppercase font-bold">{receiptText.paid}</div>
+                <div className="font-mono text-xs font-black text-emerald-700">
+                  {order.paidAmount} <span className="text-[8px] font-normal">{currencySymbol}</span>
                 </div>
               </div>
-              <div className="p-1.5 bg-amber-50/60">
-                <div className="text-[10px] text-amber-900">{receiptText.balance}</div>
-                <div className={`font-mono text-sm font-black ${order.balanceAmount > 0 ? 'text-rose-600' : 'text-stone-800'}`}>
-                  {order.balanceAmount} <span className="text-[9px] font-normal">{currencySymbol}</span>
+              <div className="p-1 bg-amber-50/60">
+                <div className="text-[9px] text-amber-900 uppercase font-bold">{receiptText.balance}</div>
+                <div className={`font-mono text-xs font-black ${order.balanceAmount > 0 ? 'text-rose-600' : 'text-stone-800'}`}>
+                  {order.balanceAmount} <span className="text-[8px] font-normal">{currencySymbol}</span>
                 </div>
               </div>
             </div>
