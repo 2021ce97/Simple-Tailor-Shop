@@ -171,13 +171,13 @@ function ShopApp() {
 
   // Product Inventory Handlers
   const handleAddProduct = async (prodData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const saved = await storageService.saveProduct(prodData);
+    const saved = await storageService.saveProductAsync(prodData);
     reloadData();
     return saved;
   };
 
   const handleUpdateProduct = async (prod: Product) => {
-    await storageService.saveProduct(prod);
+    await storageService.saveProductAsync(prod);
     reloadData();
   };
 
@@ -209,11 +209,11 @@ function ShopApp() {
         totalSpent: existingCustomer?.totalSpent || 0,
         totalBalance: existingCustomer?.totalBalance || 0,
       };
-      storageService.saveCustomer(customer);
+      await storageService.saveCustomerAsync(customer);
       saleToSave = { ...saleData, customerId: customer.id };
     }
 
-    const saved = await storageService.saveProductSale(saleToSave);
+    const saved = await storageService.saveProductSaleAsync(saleToSave);
     setPendingSaleProduct(null);
     reloadData();
     return saved;

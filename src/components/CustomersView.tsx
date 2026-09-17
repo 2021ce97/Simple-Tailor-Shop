@@ -219,6 +219,58 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
     return getMeasurementFieldsForGarment(measurementFields, selectedMeasurementGarment);
   }, [measurementFields, selectedMeasurementGarment]);
 
+  // Only display measurement fields that have an actual saved value (no extra blank or dash fields)
+  const savedMeasurementsToDisplay = useMemo(() => {
+    if (!activeCustomer?.standardMeasurements) return [];
+
+    const baseFields = visibleMeasurementFields.length > 0 ? visibleMeasurementFields : measurementFields;
+    
+    // Only return fields that have a real, non-empty measurement value and valid label
+    const validFields = baseFields
+      .filter(field => {
+        const label = language === 'ps' ? field.labelPs : language === 'fa' ? field.labelFa : field.labelEn;
+        const val = activeCustomer.standardMeasurements?.[field.key];
+        const hasLabel = Boolean((label || '').trim());
+        const hasVal = val !== undefined && val !== null && String(val).trim() !== '' && String(val).trim() !== '-';
+        return hasLabel && hasVal;
+      })
+      .map(field => {
+        const label = (language === 'ps' ? field.labelPs : language === 'fa' ? field.labelFa : field.labelEn) || field.labelEn || field.key;
+        const val = activeCustomer.standardMeasurements?.[field.key];
+        return {
+          id: field.id || field.key,
+          key: field.key,
+          label: label.trim(),
+          val: String(val).trim()
+        };
+      });
+
+    // Also include any extra non-empty custom measurement keys that have saved values
+    const displayedKeys = new Set(validFields.map(f => f.key));
+    const extraFields: { id: string; key: string; label: string; val: string }[] = [];
+
+    Object.entries(activeCustomer.standardMeasurements).forEach(([k, rawVal]) => {
+      if (displayedKeys.has(k)) return;
+      const valStr = rawVal !== undefined && rawVal !== null ? String(rawVal).trim() : '';
+      if (!valStr || valStr === '-') return;
+
+      const matchedField = measurementFields.find(f => f.key === k);
+      const label = matchedField 
+        ? ((language === 'ps' ? matchedField.labelPs : language === 'fa' ? matchedField.labelFa : matchedField.labelEn) || matchedField.labelEn)
+        : k;
+      if (label && label.trim()) {
+        extraFields.push({
+          id: `custom_${k}`,
+          key: k,
+          label: label.trim(),
+          val: valStr
+        });
+      }
+    });
+
+    return [...validFields, ...extraFields];
+  }, [activeCustomer, visibleMeasurementFields, measurementFields, language]);
+
   // Customer product purchases
   const activeCustomerSales = useMemo(() => {
     if (!activeCustomer) return [];
@@ -269,15 +321,32 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
   };
 
   // Save Customer (from edit modal)
-  const handleSaveCustomer = () => {
+  const handleSaveCustomer = async () => {
     if (!editingCustomer || !editingCustomer.name.trim()) {
       alert(language === 'fa' ? 'لطفاً نام مشتری را وارد نمایید' : 'Please enter customer name');
       return;
     }
 
-    storageService.saveCustomer(editingCustomer);
+    // Clean up measurement values: remove empty or dash entries
+    const cleanedMeasurements: Record<string, string> = {};
+    if (editingCustomer.standardMeasurements) {
+      Object.entries(editingCustomer.standardMeasurements).forEach(([k, v]) => {
+        const trimmed = String(v || '').trim();
+        if (trimmed && trimmed !== '-') {
+          cleanedMeasurements[k] = trimmed;
+        }
+      });
+    }
+
+    const customerToSave: Customer = {
+      ...editingCustomer,
+      name: editingCustomer.name.trim(),
+      standardMeasurements: cleanedMeasurements
+    };
+
+    await storageService.saveCustomerAsync(customerToSave);
     setIsEditingModalOpen(false);
-    setActiveCustomer(editingCustomer);
+    setActiveCustomer(customerToSave);
     onCustomerUpdated();
   };
 
@@ -528,34 +597,32 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
-                  {visibleMeasurementFields.map(field => {
-                    const label = language === 'ps' 
-                      ? field.labelPs 
-                      : language === 'fa' 
-                      ? field.labelFa 
-                      : field.labelEn;
-                    const val = activeCustomer.standardMeasurements?.[field.key];
-
-                    return (
+                {savedMeasurementsToDisplay.length === 0 ? (
+                  <div className="py-6 px-4 bg-[#F9F7F2] rounded-xl border border-dashed border-[#E5E5E5] text-center">
+                    <p className="text-xs text-stone-500 font-medium">
+                      {language === 'fa' 
+                        ? 'هیچ اندازه ثبت شده‌ای برای این مشتری موجود نیست.' 
+                        : language === 'ps' 
+                        ? 'د دې پېرودونکي لپاره اندازه نه ده ثبت شوې.' 
+                        : 'No saved measurements recorded for this customer.'}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+                    {savedMeasurementsToDisplay.map(item => (
                       <div 
-                        key={field.id} 
-                        className="p-2 bg-[#F9F7F2] rounded-xl border border-[#E5E5E5] text-center"
+                        key={item.id} 
+                        className="p-2.5 bg-[#F9F7F2] rounded-xl border border-[#E5E5E5] text-center hover:border-[#D4AF37]/60 transition"
                       >
-                        <span className="text-[11px] font-semibold text-[#706E6B] block">
-                          {label}
+                        <span className="text-[11px] font-semibold text-[#706E6B] block truncate" title={item.label}>
+                          {item.label}
                         </span>
                         <span className="font-mono font-black text-sm text-[#1A1A1A] mt-0.5 block">
-                          {val !== undefined && val !== '' ? val : '-'}
+                          {item.val}
                         </span>
                       </div>
-                    );
-                  })}
-                </div>
-                {selectedMeasurementGarment && visibleMeasurementFields.length === 0 && (
-                  <p className="py-4 text-center text-xs italic text-stone-500">
-                    {language === 'fa' ? 'برای این لباس اندازه‌ای ثبت نشده است.' : language === 'ps' ? 'د دې کالي لپاره اندازه نه ده ثبت شوې.' : 'No measurements recorded for this garment.'}
-                  </p>
+                    ))}
+                  </div>
                 )}
               </div>
 
@@ -886,9 +953,14 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                   {t.savedMeasurements} ({t.unitInches})
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {measurementFields.map(field => {
-                    const label = language === 'ps' ? field.labelPs : language === 'fa' ? field.labelFa : field.labelEn;
-                    const val = editingCustomer.standardMeasurements?.[field.key] || '';
+                  {measurementFields
+                    .filter(field => {
+                      const label = (language === 'ps' ? field.labelPs : language === 'fa' ? field.labelFa : field.labelEn) || field.labelEn;
+                      return field.key && label && label.trim() !== '';
+                    })
+                    .map(field => {
+                      const label = language === 'ps' ? field.labelPs : language === 'fa' ? field.labelFa : field.labelEn;
+                      const val = editingCustomer.standardMeasurements?.[field.key] || '';
 
                     return (
                       <div key={field.id} className="p-2 bg-[#F9F7F2] rounded-lg border border-[#E5E5E5]">

@@ -1029,189 +1029,176 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="space-y-3">
               {/* Desktop Table Layout */}
               <div className="hidden lg:block bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden shadow-xs">
-                <table className="w-full text-start text-xs border-collapse">
-                  <thead>
-                    <tr className="bg-stone-50 border-b border-[#E5E5E5] text-stone-600 font-bold uppercase tracking-wider text-[11px]">
-                      <th className="py-3.5 px-4 text-start">{t.orderNumber}</th>
-                      <th className="py-3.5 px-4 text-start">{t.customerDetails}</th>
-                      <th className="py-3.5 px-4 text-start">{t.garmentType} & {t.fabric}</th>
-                      <th className="py-3.5 px-4 text-start">{t.dates}</th>
-                      <th className="py-3.5 px-4 text-start">{t.orderStatus}</th>
-                      <th className="py-3.5 px-4 text-start">{t.paymentStatus}</th>
-                      <th className="py-3.5 px-4 text-end">{t.actions}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#E5E5E5]">
-                    {filteredOrders.map(order => {
-                      const statusConfig = getStatusBadgeConfig(order.status);
-                      const StatusIcon = statusConfig.icon;
+                <div className="overflow-x-auto w-full">
+                  <table className="w-full text-start text-xs border-collapse min-w-[760px]">
+                    <thead>
+                      <tr className="bg-stone-50 border-b border-[#E5E5E5] text-stone-600 font-bold uppercase tracking-wider text-[11px]">
+                        <th className="py-3 px-3 text-start whitespace-nowrap">{t.orderNumber}</th>
+                        <th className="py-3 px-3 text-start">{t.customerDetails}</th>
+                        <th className="py-3 px-3 text-start">{t.garmentType} & {t.fabric}</th>
+                        <th className="py-3 px-3 text-start whitespace-nowrap">{t.dates}</th>
+                        <th className="py-3 px-3 text-start whitespace-nowrap">{t.orderStatus}</th>
+                        <th className="py-3 px-3 text-start whitespace-nowrap">{t.paymentStatus}</th>
+                        <th className="py-3 px-3 text-end whitespace-nowrap">{t.actions}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#E5E5E5]">
+                      {filteredOrders.map(order => {
+                        const statusConfig = getStatusBadgeConfig(order.status);
+                        const StatusIcon = statusConfig.icon;
 
-                      return (
-                        <tr 
-                          key={order.id} 
-                          className="hover:bg-amber-50/40 transition group"
-                        >
-                          <td className="py-3 px-4 align-middle">
-                            <span className="font-mono font-black text-sm text-[#1A1A1A] tracking-wider block">
-                              {order.orderNumber}
-                            </span>
-                          </td>
-
-                          <td className="py-3 px-4 align-middle">
-                            <div className="space-y-0.5">
-                              <button
-                                type="button"
-                                onClick={() => onSelectCustomer(order.customerId)}
-                                title={t.viewCustomerHistory}
-                                className="font-extrabold text-[#1A1A1A] hover:text-[#B39025] hover:underline transition text-start inline-flex items-center gap-1.5 group/cust cursor-pointer"
-                              >
-                                <span>{order.customerName}</span>
-                                <ExternalLink className="w-3 h-3 text-stone-400 group-hover/cust:text-[#B39025] opacity-0 group-hover/cust:opacity-100 transition shrink-0" />
-                              </button>
-                              <div className="flex items-center gap-2 text-stone-500 font-mono text-[11px]">
-                                <span>{order.customerPhone}</span>
-                                {order.customerWhatsApp && (
-                                  <a
-                                    href={`https://wa.me/${order.customerWhatsApp.replace(/\D/g, '')}`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="text-emerald-600 hover:text-emerald-700"
-                                    title="WhatsApp"
-                                  >
-                                    <MessageCircle className="w-3.5 h-3.5" />
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-
-                          <td className="py-3 px-4 align-middle">
-                            <div className="space-y-0.5">
-                              <span className="font-bold text-[#1A1A1A] block">{order.garmentType}</span>
-                              <span className="text-[11px] text-stone-500 block truncate max-w-[180px]">
-                                {order.fabricName ? `🧵 ${order.fabricName}` : '—'}
+                        return (
+                          <tr 
+                            key={order.id} 
+                            className="hover:bg-amber-50/40 transition group"
+                          >
+                            <td className="py-2.5 px-3 align-middle whitespace-nowrap">
+                              <span className="font-mono font-black text-xs text-[#1A1A1A] tracking-wider block">
+                                {order.orderNumber}
                               </span>
-                            </div>
-                          </td>
+                            </td>
 
-                          <td className="py-3 px-4 align-middle font-mono text-[11px]">
-                            <div className="space-y-0.5">
-                              <div className="text-stone-500 flex items-center gap-1">
-                                <Clock className="w-3 h-3 text-stone-400" />
-                                <span>{order.orderDate.slice(0, 10)}</span>
-                              </div>
-                              <div className="text-[#1A1A1A] font-bold flex items-center gap-1">
-                                <Calendar className="w-3 h-3 text-[#D4AF37]" />
-                                <span>{order.deliveryDate}</span>
-                              </div>
-                            </div>
-                          </td>
-
-                          <td className="py-3 px-4 align-middle">
-                            <div className="relative inline-flex items-center group/badge">
-                              <div 
-                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black border shadow-2xs transition-all ${statusConfig.badgeClass}`}
-                              >
-                                <span className="relative flex h-2 w-2 shrink-0">
-                                  {statusConfig.pulse && (
-                                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${statusConfig.dotClass}`} />
+                            <td className="py-2.5 px-3 align-middle">
+                              <div className="space-y-0.5 min-w-[130px] max-w-[180px]">
+                                <button
+                                  type="button"
+                                  onClick={() => onSelectCustomer(order.customerId)}
+                                  title={t.viewCustomerHistory}
+                                  className="font-extrabold text-[#1A1A1A] hover:text-[#B39025] hover:underline transition text-start inline-flex items-center gap-1 group/cust cursor-pointer truncate max-w-full"
+                                >
+                                  <span className="truncate">{order.customerName}</span>
+                                  <ExternalLink className="w-3 h-3 text-stone-400 group-hover/cust:text-[#B39025] opacity-0 group-hover/cust:opacity-100 transition shrink-0" />
+                                </button>
+                                <div className="flex items-center gap-1.5 text-stone-500 font-mono text-[11px]">
+                                  <span>{order.customerPhone}</span>
+                                  {order.customerWhatsApp && (
+                                    <a
+                                      href={`https://wa.me/${order.customerWhatsApp.replace(/\D/g, '')}`}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="text-emerald-600 hover:text-emerald-700 shrink-0"
+                                      title="WhatsApp"
+                                    >
+                                      <MessageCircle className="w-3.5 h-3.5" />
+                                    </a>
                                   )}
-                                  <span className={`relative inline-flex rounded-full h-2 w-2 ${statusConfig.dotClass}`} />
-                                </span>
-                                <StatusIcon className={`w-3.5 h-3.5 shrink-0 ${statusConfig.iconClass}`} />
-                                <span className="whitespace-nowrap">{statusConfig.label}</span>
-                                <ChevronDown className="w-3 h-3 opacity-60 ml-0.5 group-hover/badge:opacity-100 transition" />
+                                </div>
                               </div>
-                              <select
-                                value={order.status}
-                                onChange={e => handleUpdateStatus(order, e.target.value as OrderStatus)}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer text-xs"
-                                title="Change status"
-                              >
-                                <option value="pending">⏳ {t.statusPending}</option>
-                                <option value="in_progress">✂️ {t.statusInProgress}</option>
-                                <option value="ready">✅ {t.statusReady}</option>
-                                <option value="delivered">📦 {t.statusDelivered}</option>
-                              </select>
-                            </div>
-                          </td>
+                            </td>
 
-                          <td className="py-3 px-4 align-middle">
-                            <button
-                              type="button"
-                              onClick={() => openPaymentModal(order)}
-                              className="text-start hover:opacity-80 transition cursor-pointer"
-                            >
-                              <div className="flex items-center gap-1.5 mb-0.5">
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                                  order.balanceAmount === 0
-                                    ? 'bg-emerald-100 text-emerald-800'
-                                    : order.paidAmount > 0
-                                    ? 'bg-amber-100 text-amber-800'
-                                    : 'bg-rose-100 text-rose-800'
-                                }`}>
-                                  {order.balanceAmount === 0 ? t.paid : order.paidAmount > 0 ? t.partial : t.unpaid}
+                            <td className="py-2.5 px-3 align-middle">
+                              <div className="space-y-0.5 min-w-[110px] max-w-[160px]">
+                                <span className="font-bold text-[#1A1A1A] block truncate">{order.garmentType}</span>
+                                <span className="text-[11px] text-stone-500 block truncate" title={order.fabricName || ''}>
+                                  {order.fabricName ? `🧵 ${order.fabricName}` : '—'}
                                 </span>
                               </div>
-                              <div className="font-mono text-xs">
-                                <span className="font-bold text-[#1A1A1A]">{order.totalAmount} {currencySymbol}</span>
-                                {order.balanceAmount > 0 && (
-                                  <span className="text-rose-600 font-bold block text-[11px]">
-                                    ({t.balanceRemaining}: {order.balanceAmount})
+                            </td>
+
+                            <td className="py-2.5 px-3 align-middle font-mono text-[11px] whitespace-nowrap">
+                              <div className="space-y-0.5">
+                                <div className="text-stone-500 flex items-center gap-1">
+                                  <Clock className="w-3 h-3 text-stone-400 shrink-0" />
+                                  <span>{order.orderDate.slice(0, 10)}</span>
+                                </div>
+                                <div className="text-[#1A1A1A] font-bold flex items-center gap-1">
+                                  <Calendar className="w-3 h-3 text-[#D4AF37] shrink-0" />
+                                  <span>{order.deliveryDate}</span>
+                                </div>
+                              </div>
+                            </td>
+
+                            <td className="py-2.5 px-3 align-middle whitespace-nowrap">
+                              <div className="relative inline-flex items-center group/badge">
+                                <div 
+                                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black border shadow-2xs transition-all cursor-pointer ${statusConfig.badgeClass}`}
+                                >
+                                  <span className="relative flex h-2 w-2 shrink-0">
+                                    {statusConfig.pulse && (
+                                      <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${statusConfig.dotClass}`} />
+                                    )}
+                                    <span className={`relative inline-flex rounded-full h-2 w-2 ${statusConfig.dotClass}`} />
                                   </span>
-                                )}
-                              </div>
-                            </button>
-                          </td>
-
-                          <td className="py-3 px-4 align-middle text-end">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <div className="relative inline-flex items-center">
+                                  <StatusIcon className={`w-3.5 h-3.5 shrink-0 ${statusConfig.iconClass}`} />
+                                  <span className="whitespace-nowrap">{statusConfig.label}</span>
+                                  <ChevronDown className="w-3 h-3 opacity-60 ml-0.5 group-hover/badge:opacity-100 transition" />
+                                </div>
                                 <select
                                   value={order.status}
                                   onChange={e => handleUpdateStatus(order, e.target.value as OrderStatus)}
-                                  className="text-[11px] font-bold py-1.5 ps-2 pe-6 bg-stone-50 hover:bg-stone-100 border border-stone-300 rounded-lg text-stone-800 cursor-pointer outline-hidden focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition appearance-none"
-                                  title={t.quickStatus}
+                                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer text-xs"
+                                  title="Change status"
                                 >
-                                  <option value="pending">⏳ {t.markPending}</option>
-                                  <option value="in_progress">✂️ {t.markInProgress}</option>
-                                  <option value="ready">✅ {t.markReady}</option>
-                                  <option value="delivered">📦 {t.markDelivered}</option>
+                                  <option value="pending">⏳ {t.statusPending}</option>
+                                  <option value="in_progress">✂️ {t.statusInProgress}</option>
+                                  <option value="ready">✅ {t.statusReady}</option>
+                                  <option value="delivered">📦 {t.statusDelivered}</option>
                                 </select>
-                                <ChevronDown className="w-3 h-3 text-stone-500 absolute end-1.5 pointer-events-none" />
                               </div>
+                            </td>
 
+                            <td className="py-2.5 px-3 align-middle whitespace-nowrap">
                               <button
                                 type="button"
-                                onClick={() => onViewReceipt(order)}
-                                title={t.print}
-                                className="p-1.5 bg-[#D4AF37] hover:bg-[#C29E2E] text-[#1A1A1A] rounded-lg transition cursor-pointer shadow-2xs"
+                                onClick={() => openPaymentModal(order)}
+                                className="text-start hover:opacity-80 transition cursor-pointer"
                               >
-                                <Printer className="w-4 h-4" />
+                                <div className="flex items-center gap-1.5 mb-0.5">
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                    order.balanceAmount === 0
+                                      ? 'bg-emerald-100 text-emerald-800'
+                                      : order.paidAmount > 0
+                                      ? 'bg-amber-100 text-amber-800'
+                                      : 'bg-rose-100 text-rose-800'
+                                  }`}>
+                                    {order.balanceAmount === 0 ? t.paid : order.paidAmount > 0 ? t.partial : t.unpaid}
+                                  </span>
+                                </div>
+                                <div className="font-mono text-xs">
+                                  <span className="font-bold text-[#1A1A1A]">{order.totalAmount} {currencySymbol}</span>
+                                  {order.balanceAmount > 0 && (
+                                    <span className="text-rose-600 font-bold block text-[11px]">
+                                      ({t.balanceRemaining}: {order.balanceAmount})
+                                    </span>
+                                  )}
+                                </div>
                               </button>
-                              <button
-                                type="button"
-                                onClick={() => onEditOrder(order)}
-                                title={t.edit}
-                                className="p-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg transition cursor-pointer"
-                              >
-                                <Edit3 className="w-4 h-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteOrder(order)}
-                                title={t.delete}
-                                className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition cursor-pointer"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                            </td>
+
+                            <td className="py-2.5 px-3 align-middle text-end whitespace-nowrap">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => onViewReceipt(order)}
+                                  title={t.print}
+                                  className="p-1.5 bg-[#D4AF37] hover:bg-[#C29E2E] text-[#1A1A1A] rounded-lg transition cursor-pointer shadow-2xs"
+                                >
+                                  <Printer className="w-4 h-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => onEditOrder(order)}
+                                  title={t.edit}
+                                  className="p-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg transition cursor-pointer"
+                                >
+                                  <Edit3 className="w-4 h-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteOrder(order)}
+                                  title={t.delete}
+                                  className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition cursor-pointer"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
               {/* Mobile / Tablet Friendly Cards */}

@@ -547,6 +547,21 @@ apiRouter.post('/sync/all', async (req: Request, res: Response) => {
         const idx = store.products.findIndex(x => x.id === p.id);
         if (idx >= 0) store.products[idx] = { ...store.products[idx], ...p };
         else store.products.push(p);
+
+        await safeQuery(`
+          INSERT INTO products (id, name, category, vendor, brand, sku, image_url, purchase_price, stock_quantity, low_stock_threshold, description, updated_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
+          ON CONFLICT (id) DO UPDATE SET
+            name = EXCLUDED.name, category = EXCLUDED.category, vendor = EXCLUDED.vendor,
+            brand = EXCLUDED.brand, sku = EXCLUDED.sku, image_url = EXCLUDED.image_url,
+            purchase_price = EXCLUDED.purchase_price, stock_quantity = EXCLUDED.stock_quantity,
+            low_stock_threshold = EXCLUDED.low_stock_threshold, description = EXCLUDED.description,
+            updated_at = NOW();
+        `, [
+          p.id, p.name, p.category, p.vendor || null, p.brand || null, p.sku || null,
+          p.imageUrl || null, p.purchasePrice || 0, p.stockQuantity || 0,
+          p.lowStockThreshold ?? 5, p.description || null,
+        ]);
       }
     }
   }
@@ -558,16 +573,36 @@ apiRouter.post('/sync/all', async (req: Request, res: Response) => {
         const idx = store.productSales.findIndex(x => x.id === s.id);
         if (idx >= 0) store.productSales[idx] = { ...store.productSales[idx], ...s };
         else store.productSales.push(s);
+
+        await safeQuery(`
+          INSERT INTO product_sales (id, product_id, product_name, category, quantity, purchase_price, selling_price, total_amount, profit, customer_id, customer_name, customer_phone, sale_date, payment_method, notes)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+          ON CONFLICT (id) DO UPDATE SET
+            quantity = EXCLUDED.quantity, selling_price = EXCLUDED.selling_price, total_amount = EXCLUDED.total_amount,
+            profit = EXCLUDED.profit, customer_id = EXCLUDED.customer_id, customer_name = EXCLUDED.customer_name,
+            customer_phone = EXCLUDED.customer_phone, payment_method = EXCLUDED.payment_method, notes = EXCLUDED.notes;
+        `, [
+          s.id, s.productId, s.productName, s.category, s.quantity, s.purchasePrice || 0,
+          s.sellingPrice, s.totalAmount, s.profit || 0, s.customerId || null, s.customerName || null,
+          s.customerPhone || null, s.saleDate, s.paymentMethod || null, s.notes || null,
+        ]);
       }
     }
   }
 
   saveStoreToDisk();
 
-  // Query fresh consolidated orders directly from PostgreSQL if available
-  const result = await safeQuery('SELECT * FROM orders ORDER BY created_at DESC');
-  if (result && result.rows && result.rows.length > 0) {
-    store.orders = result.rows.map((row: any) => ({
+  // Query fresh consolidated data directly from PostgreSQL if available
+  const [ordersRes, customersRes, productsRes, salesRes, fabricsRes] = await Promise.all([
+    safeQuery('SELECT * FROM orders ORDER BY updated_at DESC, created_at DESC'),
+    safeQuery('SELECT * FROM customers ORDER BY updated_at DESC, created_at DESC'),
+    safeQuery('SELECT * FROM products ORDER BY updated_at DESC, created_at DESC'),
+    safeQuery('SELECT * FROM product_sales ORDER BY sale_date DESC, created_at DESC'),
+    safeQuery('SELECT * FROM fabrics ORDER BY updated_at DESC, created_at DESC')
+  ]);
+
+  if (ordersRes && ordersRes.rows && ordersRes.rows.length > 0) {
+    store.orders = ordersRes.rows.map((row: any) => ({
       id: row.id,
       orderNumber: row.order_number,
       customerId: row.customer_id,
@@ -598,8 +633,69 @@ apiRouter.post('/sync/all', async (req: Request, res: Response) => {
       createdAt: row.created_at,
       updatedAt: row.updated_at
     }));
-    saveStoreToDisk();
   }
+
+  if (customersRes && customersRes.rows && customersRes.rows.length > 0) {
+    store.customers = customersRes.rows.map((row: any) => {
+      let measurements = {};
+      if (typeof row.standard_measurements === 'string') {
+        try { measurements = JSON.parse(row.standard_measurements); } catch {}
+      } else if (typeof row.standard_measurements === 'object' && row.standard_measurements !== null) {
+        measurements = row.standard_measurements;
+      }
+      return {
+        id: row.id,
+        name: row.name,
+        phone: row.phone,
+        whatsapp: row.whatsapp,
+        address: row.address,
+        notes: row.notes,
+        standardMeasurements: measurements,
+        preferredGarmentType: row.preferred_garment_type,
+        totalOrdersCount: row.total_orders_count || 0,
+        totalSpent: parseFloat(row.total_spent) || 0,
+        totalBalance: parseFloat(row.total_balance) || 0,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      };
+    });
+  }
+
+  if (productsRes && productsRes.rows && productsRes.rows.length > 0) {
+    store.products = productsRes.rows.map((row: any) => ({
+      id: row.id, name: row.name, category: row.category, vendor: row.vendor,
+      brand: row.brand, sku: row.sku, imageUrl: row.image_url,
+      purchasePrice: Number(row.purchase_price) || 0, stockQuantity: Number(row.stock_quantity) || 0,
+      lowStockThreshold: Number(row.low_stock_threshold) || 5, description: row.description,
+      createdAt: row.created_at, updatedAt: row.updated_at,
+    }));
+  }
+
+  if (salesRes && salesRes.rows && salesRes.rows.length > 0) {
+    store.productSales = salesRes.rows.map((row: any) => ({
+      id: row.id, productId: row.product_id, productName: row.product_name, category: row.category,
+      quantity: Number(row.quantity) || 0, purchasePrice: Number(row.purchase_price) || 0,
+      sellingPrice: Number(row.selling_price) || 0, totalAmount: Number(row.total_amount) || 0,
+      profit: Number(row.profit) || 0, customerId: row.customer_id, customerName: row.customer_name,
+      customerPhone: row.customer_phone, saleDate: row.sale_date, paymentMethod: row.payment_method,
+      notes: row.notes,
+    }));
+  }
+
+  if (fabricsRes && fabricsRes.rows && fabricsRes.rows.length > 0) {
+    store.fabrics = fabricsRes.rows.map((row: any) => ({
+      id: row.id, name: row.name, code: row.code, color: row.color,
+      pattern: row.pattern, type: row.type, width: row.width,
+      stockMeters: parseFloat(row.stock_meters) || 0,
+      pricePerMeter: parseFloat(row.price_per_meter) || 0,
+      costPerMeter: parseFloat(row.cost_per_meter) || 0,
+      location: row.location, supplier: row.supplier,
+      imageUrl: row.image_url, notes: row.notes,
+      createdAt: row.created_at, updatedAt: row.updated_at
+    }));
+  }
+
+  saveStoreToDisk();
 
   res.json({
     success: true,
@@ -898,6 +994,21 @@ apiRouter.post('/product-sales', async (req: Request, res: Response) => {
   const existing = store.productSales.findIndex(record => record.id === sale.id);
   if (existing >= 0) store.productSales[existing] = sale;
   else store.productSales.unshift(sale);
+
+  // Deduct product stock in memory and in Supabase
+  if (sale.productId && sale.quantity > 0) {
+    const prodIdx = store.products.findIndex(p => p.id === sale.productId);
+    if (prodIdx >= 0) {
+      store.products[prodIdx].stockQuantity = Math.max(0, (store.products[prodIdx].stockQuantity || 0) - sale.quantity);
+      store.products[prodIdx].updatedAt = new Date().toISOString();
+    }
+    await safeQuery(`
+      UPDATE products 
+      SET stock_quantity = GREATEST(0, stock_quantity - $1), updated_at = NOW() 
+      WHERE id = $2
+    `, [sale.quantity, sale.productId]);
+  }
+
   saveStoreToDisk();
 
   await safeQuery(`

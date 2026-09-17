@@ -461,11 +461,7 @@ export async function initDatabase(): Promise<boolean> {
             id, name, phone, whatsapp, standard_measurements, preferred_garment_type, total_orders_count, total_spent, total_balance, created_at, updated_at
           ) VALUES (
             $1, $2, $3, $4, $5::jsonb, $6, 1, $7, $8, NOW(), NOW()
-          ) ON CONFLICT (id) DO UPDATE SET
-            name = EXCLUDED.name,
-            phone = EXCLUDED.phone,
-            standard_measurements = EXCLUDED.standard_measurements,
-            updated_at = NOW();
+          ) ON CONFLICT (id) DO NOTHING;
         `, [
           ord.customer_id, ord.customer_name, ord.customer_phone, ord.customer_whatsapp,
           ord.measurements, ord.garment_type, ord.total_amount, ord.balance_amount

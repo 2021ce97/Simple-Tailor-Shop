@@ -1091,6 +1091,16 @@ export const storageService = {
     return fullProduct;
   },
 
+  async saveProductAsync(product: Partial<Product> & { name: string; category: string; purchasePrice: number; stockQuantity: number }): Promise<Product> {
+    const saved = this.saveProduct(product);
+    try {
+      await apiSync('products', 'POST', saved);
+    } catch (e) {
+      console.warn('saveProductAsync background sync:', e);
+    }
+    return saved;
+  },
+
   deleteProduct(id: string): void {
     let products = this.getProducts() || [];
     products = products.filter(p => p.id !== id);
@@ -1254,6 +1264,16 @@ export const storageService = {
     notes?: string;
   }): ProductSale {
     return this.recordProductSale(sale);
+  },
+
+  async saveProductSaleAsync(sale: any): Promise<ProductSale> {
+    const saved = this.recordProductSale(sale);
+    try {
+      await apiSync('product-sales', 'POST', saved);
+    } catch (e) {
+      console.warn('saveProductSaleAsync background sync:', e);
+    }
+    return saved;
   },
 
   deleteProductSale(id: string): void {
@@ -1428,6 +1448,16 @@ export const storageService = {
     setStoredItem(STORAGE_KEYS.CUSTOMERS, customers);
     apiSync('customers', 'POST', customer);
     return customer;
+  },
+
+  async saveCustomerAsync(customer: Customer): Promise<Customer> {
+    const saved = this.saveCustomer(customer);
+    try {
+      await apiSync('customers', 'POST', saved);
+    } catch (e) {
+      console.warn('saveCustomerAsync background sync:', e);
+    }
+    return saved;
   },
 
   deleteCustomer(id: string): void {

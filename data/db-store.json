@@ -196,6 +196,19 @@
   ],
   "customers": [
     {
+      "id": "cust_1789643729611",
+      "name": "Test Client",
+      "phone": "0799999999",
+      "whatsapp": "0799999999",
+      "standardMeasurements": {},
+      "preferredGarmentType": "perahanTunban",
+      "totalOrdersCount": 1,
+      "totalSpent": 1500,
+      "totalBalance": 500,
+      "createdAt": "2026-09-17T11:15:29.611Z",
+      "updatedAt": "2026-09-17T11:15:29.611Z"
+    },
+    {
       "id": "cust_1",
       "name": "فرهاد",
       "phone": "0765445309",
@@ -268,8 +281,147 @@
       "totalBalance": 2700
     }
   ],
-  "products": [],
-  "productSales": [],
+  "products": [
+    {
+      "id": "prod_1788884300211_l7yo",
+      "name": "Swift shoe",
+      "category": "Shoes",
+      "vendor": "",
+      "brand": "",
+      "sku": null,
+      "imageUrl": null,
+      "purchasePrice": 700,
+      "stockQuantity": 0,
+      "lowStockThreshold": 2,
+      "description": "Saze 30,40,41,42,43",
+      "createdAt": "2026-09-08T16:18:22.927Z",
+      "updatedAt": "2026-09-09T08:47:45.273Z"
+    },
+    {
+      "id": "prod_1788884235078_c2un",
+      "name": "Comfort Sheema",
+      "category": "Shoes",
+      "vendor": "",
+      "brand": "Sheema",
+      "sku": null,
+      "imageUrl": null,
+      "purchasePrice": 480,
+      "stockQuantity": 199,
+      "lowStockThreshold": 2,
+      "description": "Size 40, 38, 42",
+      "createdAt": "2026-09-08T16:17:17.763Z",
+      "updatedAt": "2026-09-08T16:19:45.053Z"
+    },
+    {
+      "id": "prod_1788884160913_5wp6",
+      "name": "Rolex X",
+      "category": "Watches",
+      "vendor": "",
+      "brand": "Rolex",
+      "sku": null,
+      "imageUrl": null,
+      "purchasePrice": 4500,
+      "stockQuantity": 30,
+      "lowStockThreshold": 2,
+      "description": "Golden",
+      "createdAt": "2026-09-08T16:16:03.524Z",
+      "updatedAt": "2026-09-08T16:16:03.524Z"
+    },
+    {
+      "id": "prod_1788884117739_atqo",
+      "name": "Rado fit",
+      "category": "Watches",
+      "vendor": "",
+      "brand": "Rado",
+      "sku": null,
+      "imageUrl": null,
+      "purchasePrice": 800,
+      "stockQuantity": 20,
+      "lowStockThreshold": 2,
+      "description": "Black color",
+      "createdAt": "2026-09-08T16:15:20.333Z",
+      "updatedAt": "2026-09-08T16:15:20.333Z"
+    },
+    {
+      "id": "prod_1788884033842_l968",
+      "name": "Comfort Perfume",
+      "category": "Perfume",
+      "vendor": "",
+      "brand": "Dior",
+      "sku": null,
+      "imageUrl": null,
+      "purchasePrice": 150,
+      "stockQuantity": 50,
+      "lowStockThreshold": 2,
+      "description": "50ml",
+      "createdAt": "2026-09-08T16:13:56.434Z",
+      "updatedAt": "2026-09-08T16:13:56.434Z"
+    },
+    {
+      "id": "prod_1788883972892_tqgv",
+      "name": "Sensation Perfume",
+      "category": "Perfume",
+      "vendor": "",
+      "brand": "Dior",
+      "sku": null,
+      "imageUrl": null,
+      "purchasePrice": 450,
+      "stockQuantity": 50,
+      "lowStockThreshold": 2,
+      "description": "100ml",
+      "createdAt": "2026-09-08T16:12:55.579Z",
+      "updatedAt": "2026-09-08T16:12:55.579Z"
+    },
+    {
+      "id": "prod_1788854778489_oqvr",
+      "name": "Waseem Akram",
+      "category": "Perfume",
+      "vendor": "",
+      "brand": "J,",
+      "sku": null,
+      "imageUrl": null,
+      "purchasePrice": 600,
+      "stockQuantity": 99,
+      "lowStockThreshold": 2,
+      "description": "",
+      "createdAt": "2026-09-08T08:06:20.107Z",
+      "updatedAt": "2026-09-08T08:07:00.061Z"
+    }
+  ],
+  "productSales": [
+    {
+      "id": "sale_demo_1",
+      "productId": "prod_1",
+      "productName": "کفش چرم دست‌دوز اعلا (Handmade Leather Peshawari Shoes)",
+      "category": "Shoes",
+      "quantity": 2,
+      "purchasePrice": 1200,
+      "sellingPrice": 1750,
+      "totalAmount": 3500,
+      "profit": 1100,
+      "customerName": "Ahmad Khan",
+      "customerPhone": "0771002003",
+      "saleDate": "2026-09-05T10:30:00Z",
+      "paymentMethod": "cash",
+      "notes": "Demo sale"
+    },
+    {
+      "id": "sale_demo_2",
+      "productId": "prod_2",
+      "productName": "ساعت مچی مجلسی طلایی (Classic Gold Quartz Watch)",
+      "category": "Watches",
+      "quantity": 1,
+      "purchasePrice": 850,
+      "sellingPrice": 1400,
+      "totalAmount": 1400,
+      "profit": 550,
+      "customerName": "Farid Safi",
+      "customerPhone": "0772557002",
+      "saleDate": "2026-09-06T14:15:00Z",
+      "paymentMethod": "cash",
+      "notes": "Demo sale"
+    }
+  ],
   "shopSettings": {
     "shopNameEn": "MUJEEB AFGHAN FASHION HOUSE",
     "shopNameFa": "مجیب افغان خیاطی و لباس‌فروشی",
@@ -1706,5 +1858,5 @@
       ]
     }
   ],
-  "lastUpdated": "2026-09-15T11:45:50.714Z"
+  "lastUpdated": "2026-09-17T11:24:14.759Z"
 }
