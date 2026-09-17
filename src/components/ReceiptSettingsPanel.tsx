@@ -224,12 +224,45 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 </h4>
               </div>
               <span className="text-[11px] font-mono text-[#706E6B] font-bold">
-                {currentFormat === 'a4' ? 'Sheet Paper (A4)' : 'POS Thermal Roll'}
+                {currentFormat === 'a6' ? 'A6 Standard Sheet' : currentFormat === 'a4' ? 'Sheet Paper (A4)' : 'POS Thermal Roll'}
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {/* Option A: Thermal 80mm */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {/* Option 1: A6 Paper (Primary for Tailor Slips & Customer Bills) */}
+              <div
+                onClick={() => handleSelectFormat('a6')}
+                className={`p-4 rounded-xl border-2 transition cursor-pointer flex flex-col justify-between relative ${
+                  currentFormat === 'a6'
+                    ? 'border-[#D4AF37] bg-amber-50/40 shadow-xs'
+                    : 'border-[#E5E5E5] hover:border-stone-300 bg-white'
+                }`}
+              >
+                {currentFormat === 'a6' && (
+                  <span className="absolute -top-2.5 right-3 px-2 py-0.5 bg-[#D4AF37] text-[#1A1A1A] text-[9px] font-black rounded-full uppercase tracking-wider">
+                    {language === 'fa' ? 'انتخاب شده' : 'Active'}
+                  </span>
+                )}
+                <div>
+                  <div className="w-8 h-8 rounded-lg bg-stone-100 flex items-center justify-center text-stone-800 mb-2">
+                    <FileSpreadsheet className="w-4 h-4" />
+                  </div>
+                  <h5 className="font-bold text-xs text-[#1A1A1A]">
+                    {language === 'fa' ? 'کاغذ A6 (استاندارد)' : language === 'ps' ? 'معیاري A6 پاڼه' : 'A6 Standard (105×148)'}
+                  </h5>
+                  <p className="text-[10px] text-[#706E6B] mt-1 leading-snug">
+                    {language === 'fa' 
+                      ? 'سایز ایده‌آل و استاندارد برای قبض مشتری و برگه مشخصات خیاط' 
+                      : 'Perfect standard size for Customer Receipts and Tailor Slips'}
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-stone-200 flex items-center justify-between text-[10px] font-mono font-bold text-stone-600">
+                  <span>105 × 148 mm</span>
+                  <span className="text-[#D4AF37] font-black">{language === 'fa' ? 'پیشنهادی' : 'Recommended'}</span>
+                </div>
+              </div>
+
+              {/* Option 2: Thermal 80mm */}
               <div
                 onClick={() => handleSelectFormat('thermal80')}
                 className={`p-4 rounded-xl border-2 transition cursor-pointer flex flex-col justify-between relative ${
@@ -258,11 +291,11 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 </div>
                 <div className="mt-3 pt-2 border-t border-stone-200 flex items-center justify-between text-[10px] font-mono font-bold text-stone-600">
                   <span>80mm / 3.15"</span>
-                  <span className="text-[#D4AF37] font-black">{language === 'fa' ? 'پیشنهادی' : 'Best'}</span>
+                  <span>Roll</span>
                 </div>
               </div>
 
-              {/* Option B: Thermal 58mm */}
+              {/* Option 3: Thermal 58mm */}
               <div
                 onClick={() => handleSelectFormat('thermal58')}
                 className={`p-4 rounded-xl border-2 transition cursor-pointer flex flex-col justify-between relative ${
@@ -295,7 +328,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 </div>
               </div>
 
-              {/* Option C: Standard A4 Paper */}
+              {/* Option 4: Standard A4 Paper */}
               <div
                 onClick={() => handleSelectFormat('a4')}
                 className={`p-4 rounded-xl border-2 transition cursor-pointer flex flex-col justify-between relative ${
@@ -324,7 +357,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 </div>
                 <div className="mt-3 pt-2 border-t border-stone-200 flex items-center justify-between text-[10px] font-mono font-bold text-stone-600">
                   <span>210 × 297 mm</span>
-                  <span>Office Page</span>
+                  <span>Office Sheet</span>
                 </div>
               </div>
             </div>

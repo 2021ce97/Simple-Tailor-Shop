@@ -196,9 +196,24 @@ export interface Translations {
 
   // Receipt / Slip
   tailorReceipt: string;
+  tailorWorkSlip: string;
+  customerReceipt: string;
+  bothSlips: string;
+  printTailorSlip: string;
+  printCustomerReceipt: string;
+  downloadTailorPdf: string;
+  downloadCustomerPdf: string;
   measurementSlip: string;
   billBarcode: string;
   phoneBarcode: string;
+  specs: string;
+  shape: string;
+  orderTakingDate: string;
+  totalBill: string;
+  totalRemaining: string;
+  cabinetAndQty: string;
+  customerAndGarment: string;
+  a6Paper: string;
   item: string;
   qty: string;
   price: string;
@@ -521,9 +536,24 @@ export const translations: Record<Language, Translations> = {
     backupDescription: 'Export your entire tailor shop database (all orders, customer records, design templates) as a backup file.',
 
     tailorReceipt: 'Tailoring Receipt & Measurement Slip',
+    tailorWorkSlip: 'Tailor Production Slip',
+    customerReceipt: 'Customer Receipt',
+    bothSlips: 'Both Slips (Tailor + Customer)',
+    printTailorSlip: 'Print Tailor Slip',
+    printCustomerReceipt: 'Print Customer Receipt',
+    downloadTailorPdf: 'Download Tailor PDF',
+    downloadCustomerPdf: 'Download Customer PDF',
     measurementSlip: 'Measurement Slip',
     billBarcode: 'Order Barcode',
-    phoneBarcode: 'Contact Barcode',
+    phoneBarcode: 'Customer Barcode',
+    specs: 'Specifications',
+    shape: 'Style / Shape',
+    orderTakingDate: 'Order Date',
+    totalBill: 'Total Amount',
+    totalRemaining: 'Total Balance',
+    cabinetAndQty: 'Qty & Cabinet',
+    customerAndGarment: 'Customer : Garment',
+    a6Paper: 'A6 Paper',
     item: 'Item',
     qty: 'Qty',
     price: 'Price',
@@ -843,9 +873,24 @@ export const translations: Record<Language, Translations> = {
     backupDescription: 'از تمام سفارشات، مشتریان، اندازه‌ها و مدل‌ها نسخه پشتیبان دریافت کنید.',
 
     tailorReceipt: 'بل و ورق اندازه خیاطی',
+    tailorWorkSlip: 'برگه کارگاه خیاط',
+    customerReceipt: 'قبض مشتری',
+    bothSlips: 'هر دو برگه (خیاط + مشتری)',
+    printTailorSlip: 'چاپ برگه خیاط',
+    printCustomerReceipt: 'چاپ قبض مشتری',
+    downloadTailorPdf: 'دانلود PDF خیاط',
+    downloadCustomerPdf: 'دانلود PDF مشتری',
     measurementSlip: 'ورق اندازه',
     billBarcode: 'بارکود بل',
-    phoneBarcode: 'بارکود شماره',
+    phoneBarcode: 'بارکود مشتری',
+    specs: 'مشخصات',
+    shape: 'شکل',
+    orderTakingDate: 'تاریخ ثبت',
+    totalBill: 'جمله',
+    totalRemaining: 'جمله باقیات',
+    cabinetAndQty: 'تعداد و کابین',
+    customerAndGarment: 'مشتری: لباس',
+    a6Paper: 'کاغذ A6',
     item: 'لباس',
     qty: 'تعداد',
     price: 'قیمت',
@@ -1165,9 +1210,24 @@ export const translations: Record<Language, Translations> = {
     backupDescription: 'د ټولو فرمایشونو، پېرودونکو، اندازو او ډیزاینونو بیک اپ فایل ترلاسه کړئ.',
 
     tailorReceipt: 'د خیاطۍ بِل او د اندازې پرچه',
+    tailorWorkSlip: 'د خیاط کاري پرچه',
+    customerReceipt: 'د پیرودونکي رسید',
+    bothSlips: 'دواړه پاڼې (خیاط + پېرودونکی)',
+    printTailorSlip: 'د خیاط پاڼه چاپ کړئ',
+    printCustomerReceipt: 'د پیرودونکي رسید چاپ کړئ',
+    downloadTailorPdf: 'د خیاط PDF ډاونلوډ',
+    downloadCustomerPdf: 'د پیرودونکي PDF ډاونلوډ',
     measurementSlip: 'د اندازې پرچه',
     billBarcode: 'د بِل بارکوډ',
-    phoneBarcode: 'د ټلیفون بارکوډ',
+    phoneBarcode: 'د پیرودونکي بارکوډ',
+    specs: 'ځانګړنې',
+    shape: 'شکل / بڼه',
+    orderTakingDate: 'د ثبت نېټه',
+    totalBill: 'جمله (ټول)',
+    totalRemaining: 'جمله باقیات (پاتې)',
+    cabinetAndQty: 'تعداد او کابین',
+    customerAndGarment: 'پېرودونکی: کالي',
+    a6Paper: 'A6 پاڼه',
     item: 'کالي',
     qty: 'تعداد',
     price: 'قیمت',

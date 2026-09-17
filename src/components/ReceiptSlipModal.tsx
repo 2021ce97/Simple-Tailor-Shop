@@ -1,30 +1,36 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { 
   Order, 
   ShopSettings, 
   Language, 
   MeasurementField, 
-  DesignCategory 
+  DesignCategory,
+  ReceiptPaperFormat
 } from '../types';
 import { translations } from '../translations/i18n';
 import { BarcodeView } from './BarcodeView';
 import { 
   Printer, 
   Download, 
-  Share2, 
+  MessageCircle, 
   X, 
   Check, 
   Scissors, 
   Sparkles, 
-  Phone, 
-  MessageCircle, 
-  MapPin,
+  FileText,
+  User,
   Calendar,
-  AlertCircle
+  Layers,
+  Phone,
+  MapPin,
+  Clock,
+  ArrowRightLeft,
+  CheckCircle2,
+  FileSpreadsheet
 } from 'lucide-react';
-import jsPDF from 'jspdf';
-import { toPng } from 'html-to-image';
 import { printReceiptElement, downloadReceiptPdf } from '../services/printService';
+
+export type ReceiptSlipMode = 'tailor' | 'customer' | 'both';
 
 interface ReceiptSlipModalProps {
   order: Order;
@@ -32,39 +38,101 @@ interface ReceiptSlipModalProps {
   measurementFields?: MeasurementField[];
   designCategories?: DesignCategory[];
   language: Language;
+  initialMode?: ReceiptSlipMode;
   onClose: () => void;
   onEdit?: (order: Order) => void;
 }
 
-type PrintFormat = 'a4' | 'thermal58' | 'thermal80';
-
-const receiptCopy = {
+const copy = {
   en: {
-    contact: 'Contact', address: 'Address', bill: 'Bill no.', customer: 'Customer',
-    noStyle: 'Standard style', notes: 'Tailor notes', noMeasurements: 'No measurements recorded',
-    delivery: 'Delivery date', orderDate: 'Order date', garment: 'Garment',
-    quantity: 'Quantity', total: 'Total', paid: 'Paid', balance: 'Balance', developed: 'Developed by: Rayan Tech solution',
-    measurementsHeader: 'Measurements (Inches)',
-    styleHeader: 'Design & Style Specs',
-    cabinetSlot: 'Cabinet / Shelf',
+    contact: 'Contact',
+    address: 'Address',
+    bill: 'Bill No.',
+    customer: 'Customer',
+    garment: 'Garment',
+    quantity: 'Qty',
+    cabinet: 'Cabinet',
+    orderDate: 'Order Date',
+    returnDate: 'Return Date',
+    deliveryDate: 'Delivery Date',
+    totalBill: 'Total Amount',
+    totalPaid: 'Total Paid',
+    totalRemaining: 'Total Balance',
+    specs: 'Specs / Design',
+    shape: 'Style / Selection',
+    measurements: 'Measurements',
+    value: 'Value',
+    tailorNotes: 'Tailor Notes',
+    noMeasurements: 'No measurements recorded',
+    noDesign: 'Standard Style',
+    tailorSlipTitle: 'Tailor Production Slip',
+    customerReceiptTitle: 'Customer Receipt',
+    developedBy: 'Developed by: Rayan Tech solution',
+    fabricDetails: 'Fabric Details',
+    customerFabric: 'Customer Own Fabric',
+    shopFabric: 'Shop Fabric',
+    phoneBarcode: 'Customer Barcode',
+    billBarcode: 'Bill Barcode',
   },
   fa: {
-    contact: 'شماره تماس', address: 'آدرس', bill: 'شماره بل', customer: 'مشتری',
-    noStyle: 'استایل ساده', notes: 'یادداشت خیاط', noMeasurements: 'اندازه‌ای ثبت نشده',
-    delivery: 'تاریخ تحویل', orderDate: 'تاریخ ثبت سفارش', garment: 'لباس',
-    quantity: 'تعداد', total: 'مجموع', paid: 'پرداخت', balance: 'باقی‌مانده', developed: 'ساخته شده توسط: Rayan Tech solution',
-    measurementsHeader: 'اندازه‌های ثبت شده (انچ)',
-    styleHeader: 'مشخصات و استایل دوخت',
-    cabinetSlot: 'الماری / طبقه',
+    contact: 'شماره تماس',
+    address: 'آدرس',
+    bill: 'شماره بل',
+    customer: 'مشتری',
+    garment: 'لباس',
+    quantity: 'تعداد',
+    cabinet: 'کابین',
+    orderDate: 'تاریخ ثبت',
+    returnDate: 'تاریخ واپسی',
+    deliveryDate: 'تاریخ تحویل',
+    totalBill: 'جمله',
+    totalPaid: 'جمله پرداخت',
+    totalRemaining: 'جمله باقیات',
+    specs: 'مشخصات',
+    shape: 'شکل',
+    measurements: 'اندازه‌ها',
+    value: 'مقدار',
+    tailorNotes: 'یادداشت خیاط',
+    noMeasurements: 'اندازه‌ای ثبت نشده',
+    noDesign: 'استایل ساده',
+    tailorSlipTitle: 'برگه مشخصات و اندازه خیاط',
+    customerReceiptTitle: 'قبض حساب مشتری',
+    developedBy: 'ساخته شده توسط: Rayan Tech solution',
+    fabricDetails: 'مشخصات تکه (پارچه)',
+    customerFabric: 'تکه از خود مشتری',
+    shopFabric: 'تکه از دکان',
+    phoneBarcode: 'بارکود مشتری',
+    billBarcode: 'بارکود بل',
   },
   ps: {
-    contact: 'د اړیکې شمېره', address: 'پته', bill: 'د بِل شمېره', customer: 'پېرودونکی',
-    noStyle: 'ساده سټایل', notes: 'د خیاط یادښت', noMeasurements: 'اندازې نه دي ثبت شوي',
-    delivery: 'د سپارلو نېټه', orderDate: 'د فرمایش نېټه', garment: 'کالي',
-    quantity: 'تعداد', total: 'ټول', paid: 'ورکړل شوي', balance: 'پاتې', developed: 'جوړونکی: Rayan Tech solution',
-    measurementsHeader: 'ثبت شوې اندازې (انچ)',
-    styleHeader: 'د ډیزاین او سټایل ځانګړنې',
-    cabinetSlot: 'المارۍ / خونه',
+    contact: 'د اړیکې شمېره',
+    address: 'پته',
+    bill: 'د بِل شمېره',
+    customer: 'پېرودونکی',
+    garment: 'کالي',
+    quantity: 'تعداد',
+    cabinet: 'کابین',
+    orderDate: 'د ثبت نېټه',
+    returnDate: 'د واپسی نېټه',
+    deliveryDate: 'د سپارلو نېټه',
+    totalBill: 'جمله (ټول)',
+    totalPaid: 'جمله پرداخت',
+    totalRemaining: 'جمله باقیات',
+    specs: 'ځانګړنې',
+    shape: 'شکل / بڼه',
+    measurements: 'اندازې',
+    value: 'اندازه',
+    tailorNotes: 'د خیاط یادښت',
+    noMeasurements: 'اندازې نه دي ثبت شوي',
+    noDesign: 'ساده سټایل',
+    tailorSlipTitle: 'د خیاط کاري پاڼه او اندازې',
+    customerReceiptTitle: 'د پیرودونکي رسید او بِل',
+    developedBy: 'جوړونکی: Rayan Tech solution',
+    fabricDetails: 'د رخت / ټوکر مشخصات',
+    customerFabric: 'د مشتري خپل رخت',
+    shopFabric: 'د دوکان رخت',
+    phoneBarcode: 'د پیرودونکي بارکوډ',
+    billBarcode: 'د بِل بارکوډ',
   },
 } as const;
 
@@ -74,61 +142,103 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
   measurementFields = [],
   designCategories = [],
   language,
+  initialMode = 'tailor',
   onClose,
   onEdit,
 }) => {
   const t = translations[language];
-  const receiptText = receiptCopy[language];
-  const receiptRef = useRef<HTMLDivElement>(null);
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [printFormat, setPrintFormat] = useState<PrintFormat>(
-    (shopSettings.receiptFormat as PrintFormat) || 'thermal80'
+  const dict = copy[language];
+
+  // Active slip mode: 'tailor' (workshop slip) | 'customer' (customer bill) | 'both'
+  const [activeMode, setActiveMode] = useState<ReceiptSlipMode>(initialMode);
+  const [printFormat, setPrintFormat] = useState<ReceiptPaperFormat>(
+    shopSettings.receiptFormat || 'a6'
   );
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
 
-  // Sync with shopSettings.receiptFormat if changed externally
-  React.useEffect(() => {
-    if (shopSettings.receiptFormat) {
-      setPrintFormat(shopSettings.receiptFormat as PrintFormat);
-    }
-  }, [shopSettings.receiptFormat]);
+  // References for printable DOM elements
+  const mainPrintRef = useRef<HTMLDivElement>(null);
+  const tailorPrintRef = useRef<HTMLDivElement>(null);
+  const customerPrintRef = useRef<HTMLDivElement>(null);
 
-  const thermalStyle = shopSettings.receiptThermalStyle || 'standard';
-  const showLogo = shopSettings.receiptShowLogo !== false;
-  const showBarcode = shopSettings.receiptShowBarcode !== false;
-  const showNotes = shopSettings.receiptShowNotes !== false;
-  const headerBlessing = language === 'ps'
-    ? shopSettings.receiptHeaderNotePs
-    : language === 'fa'
-    ? shopSettings.receiptHeaderNoteFa
-    : shopSettings.receiptHeaderNoteEn;
-
-  // Shop Name & Details based on language or dual
+  // Shop details by language
   const shopName = language === 'ps' 
-    ? shopSettings.shopNamePs 
+    ? (shopSettings.shopNamePs || shopSettings.shopNameEn) 
     : language === 'fa' 
-    ? shopSettings.shopNameFa 
+    ? (shopSettings.shopNameFa || shopSettings.shopNameEn) 
     : shopSettings.shopNameEn;
 
   const shopAddress = language === 'ps' 
-    ? shopSettings.addressPs 
+    ? (shopSettings.addressPs || shopSettings.addressEn) 
     : language === 'fa' 
-    ? shopSettings.addressFa 
+    ? (shopSettings.addressFa || shopSettings.addressEn) 
     : shopSettings.addressEn;
 
   const currencySymbol = language === 'ps'
-    ? shopSettings.currencyPs
+    ? (shopSettings.currencyPs || 'افغانۍ')
     : language === 'fa'
-    ? shopSettings.currencyFa
-    : shopSettings.currencyEn;
-  const logoUrl = shopSettings.logoUrl || '/mujeeb-afghan-logo.jpeg';
+    ? (shopSettings.currencyFa || 'افغانی')
+    : (shopSettings.currencySymbol || shopSettings.currencyEn || 'AFN');
 
-  // Print Handler (100% reliable across browsers, iframes, and thermal printers)
-  const handlePrint = async () => {
-    if (!receiptRef.current) return;
-    await printReceiptElement(receiptRef.current, {
-      title: `${shopName} - ${order.orderNumber}`,
+  const logoUrl = shopSettings.logoUrl || '/mujeeb-afghan-logo.jpeg';
+  const showLogo = shopSettings.receiptShowLogo !== false;
+  const showBarcode = shopSettings.receiptShowBarcode !== false;
+
+  // Active Measurements list
+  const activeMeasurements = (measurementFields || [])
+    .map(field => {
+      const val = order.measurements?.[field.key];
+      const label = language === 'ps' ? field.labelPs : language === 'fa' ? field.labelFa : field.labelEn;
+      return {
+        key: field.key,
+        label,
+        value: val !== undefined && val !== '' && val !== null ? String(val) : '',
+      };
+    })
+    .filter(m => Boolean(m.value));
+
+  // Active Design list
+  const activeDesignItems = Object.entries(order.designSelections || {})
+    .map(([catKey, value]) => {
+      const cat = (designCategories || []).find(c => c.key === catKey);
+      const option = cat?.options.find(
+        item => item.nameEn === value || item.nameFa === value || item.namePs === value
+      );
+      const title = cat 
+        ? (language === 'ps' ? cat.titlePs : language === 'fa' ? cat.titleFa : cat.titleEn) 
+        : catKey;
+      const displayVal = option 
+        ? (language === 'ps' ? option.namePs : language === 'fa' ? option.nameFa : option.nameEn) 
+        : value;
+      return {
+        key: catKey,
+        title,
+        value: displayVal,
+      };
+    })
+    .filter(d => Boolean(d.value));
+
+  // Garment type translation
+  const garmentKeys = ['perahanTunban', 'waistcoat', 'suit', 'coatKorti', 'kameezShalwar', 'kurta', 'otherGarment'] as const;
+  const displayGarmentType = (() => {
+    const garmentKey = garmentKeys.find(key =>
+      translations.en[key] === order.garmentType || translations.fa[key] === order.garmentType || translations.ps[key] === order.garmentType
+    );
+    return garmentKey ? t[garmentKey] : order.garmentType;
+  })();
+
+  // Formatting delivery date with time
+  const formattedDeliveryDate = order.deliveryDate ? order.deliveryDate : '';
+  const orderDateWithTime = order.orderDate || order.createdAt?.slice(0, 10) || new Date().toISOString().slice(0, 10);
+
+  // Print Active Slip
+  const handlePrint = async (targetElement?: HTMLElement | null) => {
+    const el = targetElement || mainPrintRef.current;
+    if (!el) return;
+
+    await printReceiptElement(el, {
+      title: `${shopName} - ${order.orderNumber} - ${activeMode.toUpperCase()}`,
       pageFormat: printFormat,
       dir: language === 'en' ? 'ltr' : 'rtl',
       onStart: () => setIsPrinting(true),
@@ -140,12 +250,28 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
     });
   };
 
-  // PDF Generator using printService
-  const handleDownloadPdf = async () => {
-    if (!receiptRef.current) return;
-    const safeCustomerName = order.customerName ? order.customerName.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_') : 'Customer';
-    const filename = `Mujeeb_Afghan_${order.orderNumber || 'Order'}_${printFormat}_${safeCustomerName}`;
-    await downloadReceiptPdf(receiptRef.current, {
+  // Download PDF
+  const handleDownloadPdf = async (modeToDownload: ReceiptSlipMode = activeMode) => {
+    let targetEl: HTMLElement | null = null;
+    let typeSuffix = 'Slip';
+
+    if (modeToDownload === 'tailor') {
+      targetEl = tailorPrintRef.current || mainPrintRef.current;
+      typeSuffix = 'Tailor_Slip';
+    } else if (modeToDownload === 'customer') {
+      targetEl = customerPrintRef.current || mainPrintRef.current;
+      typeSuffix = 'Customer_Receipt';
+    } else {
+      targetEl = mainPrintRef.current;
+      typeSuffix = 'Complete_Receipt';
+    }
+
+    if (!targetEl) return;
+
+    const safeCustomer = (order.customerName || 'Customer').replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_');
+    const filename = `${shopName.replace(/\s+/g, '_')}_${order.orderNumber}_${typeSuffix}_${printFormat.toUpperCase()}_${safeCustomer}`;
+
+    await downloadReceiptPdf(targetEl, {
       filename,
       pageFormat: printFormat,
       onStart: () => setIsGeneratingPdf(true),
@@ -153,13 +279,12 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
       onError: (err) => {
         console.error('PDF error:', err);
         setIsGeneratingPdf(false);
-        // Fallback to direct print
-        handlePrint();
+        handlePrint(targetEl);
       }
     });
   };
 
-  // WhatsApp Share text generator
+  // WhatsApp message generator
   const handleWhatsAppShare = () => {
     const balanceText = order.balanceAmount > 0 
       ? `باقیمانده / پاتې: ${order.balanceAmount} ${currencySymbol}` 
@@ -167,13 +292,13 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
 
     const text = `*${shopName}*
 ------------------------------
-*شماره بل / د بِل شمېره:* ${order.orderNumber}
-*مشتری / پېرودونکی:* ${order.customerName}
-*تاریخ ثبت:* ${order.orderDate}
-*تاریخ تسلیمی / تحویل:* ${order.deliveryDate}
-*لباس:* ${order.garmentType} (تعداد: ${order.quantity})
-*جمله مبلغ / ټولې پیسې:* ${order.totalAmount} ${currencySymbol}
-*پرداخت شده / رسید:* ${order.paidAmount} ${currencySymbol}
+*${dict.bill}:* ${order.orderNumber}
+*${dict.customer}:* ${order.customerName}
+*${dict.orderDate}:* ${order.orderDate}
+*${dict.returnDate}:* ${order.deliveryDate}
+*${dict.garment}:* ${displayGarmentType} (${dict.quantity}: ${order.quantity || 1})
+*${dict.totalBill}:* ${order.totalAmount} ${currencySymbol}
+*${dict.totalPaid}:* ${order.paidAmount} ${currencySymbol}
 *${balanceText}*
 ------------------------------
 ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
@@ -187,405 +312,530 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
     window.open(url, '_blank');
   };
 
-  // Map active measurements with values
-  const activeMeasurements = (measurementFields || [])
-    .map(field => ({
-      key: field.key,
-      label: language === 'ps' ? field.labelPs : language === 'fa' ? field.labelFa : field.labelEn,
-      labelFa: field.labelFa,
-      value: order.measurements?.[field.key],
-    }))
-    .filter(m => m.value !== undefined && m.value !== '' && m.value !== null);
+  // ==========================================
+  // RENDER: Tailor Work Slip Component
+  // ==========================================
+  const renderTailorSlip = (ref?: React.RefObject<HTMLDivElement | null>) => (
+    <div 
+      ref={ref}
+      className="tailor-slip-sheet bg-white text-[#1A1A1A] p-3 text-xs border-2 border-stone-950 font-sans shadow-xs relative select-text"
+      style={{
+        width: printFormat === 'a6' ? '99mm' : printFormat === 'thermal58' ? '54mm' : printFormat === 'thermal80' ? '76mm' : '100%',
+        maxWidth: printFormat === 'a4' ? '180mm' : '100%',
+        margin: '0 auto',
+        boxSizing: 'border-box'
+      }}
+      dir={language === 'en' ? 'ltr' : 'rtl'}
+    >
+      {/* 1. Header with Logo & Contacts */}
+      <div className="text-center pb-2 border-b-2 border-stone-950 mb-1.5">
+        {showLogo && (
+          <img
+            src={logoUrl}
+            alt={shopName}
+            className="mx-auto mb-1 h-14 w-14 rounded-md object-contain"
+          />
+        )}
+        <h1 className="text-sm sm:text-base font-black tracking-tight text-stone-950 font-serif leading-tight">
+          {shopName}
+        </h1>
+        <div className="flex justify-between items-center text-[10px] font-bold text-stone-900 px-1 mt-1 border-t border-dotted border-stone-400 pt-0.5">
+          <span>واتساپ: <b className="font-mono">{shopSettings.whatsapp || '0782207308'}</b></span>
+          <span>تماس: <b className="font-mono">{shopSettings.phone1 || '0793710008'}</b></span>
+        </div>
+        <p className="text-[9px] text-stone-700 mt-0.5 leading-tight px-1 font-medium">
+          {shopAddress}
+        </p>
+      </div>
 
-  // Map active design selections with labels
-  const activeDesignItems = Object.entries(order.designSelections || {})
-    .map(([catKey, value]) => {
-      const cat = (designCategories || []).find(c => c.key === catKey);
-      const option = cat?.options.find(item =>
-        item.nameEn === value || item.nameFa === value || item.namePs === value
-      );
-      const catTitle = cat 
-        ? (language === 'ps' ? cat.titlePs : language === 'fa' ? cat.titleFa : cat.titleEn)
-        : catKey;
-      return {
-        key: catKey,
-        title: catTitle,
-        value: option ? (language === 'ps' ? option.namePs : language === 'fa' ? option.nameFa : option.nameEn) : value,
-      };
-    })
-    .filter(d => Boolean(d.value));
+      {/* 2. Order & Customer Info Strip */}
+      <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 text-[11px] font-bold bg-stone-100 mb-1.5">
+        <div className="p-1 flex items-center justify-between">
+          <span className="text-stone-700 text-[9.5px]">{dict.bill}:</span>
+          <span className="font-mono font-black text-stone-950 text-xs">{order.orderNumber}</span>
+        </div>
+        <div className="p-1 flex items-center justify-between">
+          <span className="text-stone-700 text-[9.5px]">{dict.customer}:</span>
+          <span className="font-black text-stone-950 truncate max-w-[120px] text-xs">{order.customerName}</span>
+        </div>
+      </div>
 
-  const garmentKeys = ['perahanTunban', 'waistcoat', 'suit', 'coatKorti', 'kameezShalwar', 'kurta', 'otherGarment'] as const;
-  const displayGarmentType = (() => {
-    const garmentKey = garmentKeys.find(key =>
-      translations.en[key] === order.garmentType || translations.fa[key] === order.garmentType || translations.ps[key] === order.garmentType
-    );
-    return garmentKey ? t[garmentKey] : order.garmentType;
-  })();
+      {/* 3. Main 2-Column Matrix: Left=Specs/Design, Right=Measurements (Inspired by Photo 1) */}
+      <div className="border-2 border-stone-950 mb-1.5 bg-white overflow-hidden">
+        {/* Table Header */}
+        <div className="grid grid-cols-2 border-b-2 border-stone-950 bg-stone-200 text-[10px] font-black text-center divide-x-2 divide-stone-950">
+          <div className="py-0.5 px-1 text-stone-950 uppercase flex justify-between">
+            <span>{dict.specs}</span>
+            <span>{dict.shape}</span>
+          </div>
+          <div className="py-0.5 px-1 text-stone-950 uppercase flex justify-between">
+            <span>{dict.measurements}</span>
+            <span>{dict.value}</span>
+          </div>
+        </div>
+
+        {/* Table Body */}
+        <div className="grid grid-cols-2 divide-x-2 divide-stone-950 text-[10.5px]">
+          {/* Left Column: Specs / Design */}
+          <div className="flex flex-col justify-start divide-y divide-stone-300 bg-white">
+            {activeDesignItems.length > 0 ? (
+              activeDesignItems.map((item, idx) => (
+                <div key={idx} className="px-1.5 py-0.5 flex justify-between items-center text-[9.5px] leading-tight hover:bg-stone-50">
+                  <span className="text-stone-800 font-bold truncate max-w-[70px]">{item.title}:</span>
+                  <span className="font-extrabold text-stone-950 text-left truncate max-w-[85px]">{String(item.value)}</span>
+                </div>
+              ))
+            ) : (
+              <div className="p-2 text-stone-400 text-center italic text-[9.5px]">
+                {dict.noDesign}
+              </div>
+            )}
+          </div>
+
+          {/* Right Column: Measurements */}
+          <div className="flex flex-col justify-start divide-y divide-stone-300 bg-white">
+            {activeMeasurements.length > 0 ? (
+              activeMeasurements.map((m, idx) => (
+                <div key={idx} className="px-1.5 py-0.5 flex justify-between items-center text-[10.5px] leading-tight hover:bg-stone-50">
+                  <span className="text-stone-800 font-bold truncate max-w-[80px]">{m.label}:</span>
+                  <span className="font-mono font-black text-stone-950 text-xs pl-1 text-right">{m.value}</span>
+                </div>
+              ))
+            ) : (
+              <div className="p-2 text-stone-400 text-center italic text-[9.5px]">
+                {dict.noMeasurements}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Special Tailor Instructions Note (if present) */}
+      {order.specialInstructions && (
+        <div className="p-1 bg-amber-50 border-2 border-stone-950 text-[9.5px] font-semibold text-stone-950 mb-1.5 leading-tight">
+          <span className="font-bold text-amber-950 block text-[9px]">{dict.tailorNotes}:</span>
+          <span>{order.specialInstructions}</span>
+        </div>
+      )}
+
+      {/* 5. Cut Line Divider */}
+      <div className="my-1 border-t-2 border-dashed border-stone-800 relative text-center">
+        <span className="bg-white px-2 text-[8px] text-stone-500 uppercase tracking-widest relative -top-2">
+          ✂ {dict.tailorSlipTitle}
+        </span>
+      </div>
+
+      {/* 6. Return Date & Order Date Strip */}
+      <div className="border-2 border-stone-950 bg-stone-100 text-[10px] font-bold p-1 mb-1.5 flex justify-between items-center">
+        <div className="flex items-center gap-1">
+          <span className="text-stone-700">{dict.returnDate}:</span>
+          <span className="font-mono font-black text-stone-950 text-[11px]">{formattedDeliveryDate}</span>
+        </div>
+        <div className="flex items-center gap-1 text-[9px] text-stone-700">
+          <span>{dict.orderDate}:</span>
+          <span className="font-mono font-bold text-stone-900">{orderDateWithTime}</span>
+        </div>
+      </div>
+
+      {/* 7. Barcodes Row (Phone Barcode & Order Barcode) */}
+      {showBarcode && (
+        <div className="border-2 border-stone-950 p-1 flex justify-between items-center divide-x-2 divide-stone-950 bg-white mb-1.5">
+          <div className="flex-1 text-center px-0.5">
+            <BarcodeView 
+              value={order.customerPhone || '0780000000'} 
+              height={22} 
+              width={1.05} 
+              fontSize={8} 
+            />
+            <span className="text-[7.5px] text-stone-600 block">{dict.phoneBarcode}</span>
+          </div>
+          <div className="flex-1 text-center px-0.5">
+            <BarcodeView 
+              value={order.orderNumber} 
+              height={22} 
+              width={1.15} 
+              fontSize={8} 
+            />
+            <span className="text-[7.5px] text-stone-600 block">{dict.billBarcode}</span>
+          </div>
+        </div>
+      )}
+
+      {/* 8. Bottom strip with Cabinet & Quantity */}
+      <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 bg-stone-200 text-center font-black text-xs py-1">
+        <div className="flex justify-between items-center px-2">
+          <span className="text-[10px] text-stone-700">{dict.cabinet}:</span>
+          <span className="font-mono text-sm text-stone-950">{order.cabinetSlot || '---'}</span>
+        </div>
+        <div className="flex justify-between items-center px-2">
+          <span className="text-[10px] text-stone-700">{dict.quantity}:</span>
+          <span className="font-mono text-sm text-stone-950">{order.quantity || 1}</span>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ==========================================
+  // RENDER: Customer Receipt Component
+  // ==========================================
+  const renderCustomerReceipt = (ref?: React.RefObject<HTMLDivElement | null>) => (
+    <div 
+      ref={ref}
+      className="customer-receipt-sheet bg-white text-[#1A1A1A] p-3 text-xs border-2 border-stone-950 font-sans shadow-xs relative select-text"
+      style={{
+        width: printFormat === 'a6' ? '99mm' : printFormat === 'thermal58' ? '54mm' : printFormat === 'thermal80' ? '76mm' : '100%',
+        maxWidth: printFormat === 'a4' ? '180mm' : '100%',
+        margin: '0 auto',
+        boxSizing: 'border-box'
+      }}
+      dir={language === 'en' ? 'ltr' : 'rtl'}
+    >
+      {/* 1. Header with Logo, Shop Name & Contacts */}
+      <div className="text-center pb-2 border-b-2 border-stone-950 mb-1.5">
+        {showLogo && (
+          <img
+            src={logoUrl}
+            alt={shopName}
+            className="mx-auto mb-1 h-14 w-14 rounded-md object-contain"
+          />
+        )}
+        <h1 className="text-sm sm:text-base font-black tracking-tight text-stone-950 font-serif leading-tight">
+          {shopName}
+        </h1>
+        <div className="flex justify-between items-center text-[10px] font-bold text-stone-900 px-1 mt-1 border-t border-dotted border-stone-400 pt-0.5">
+          <span>واتساپ: <b className="font-mono">{shopSettings.whatsapp || '0782207308'}</b></span>
+          <span>تماس: <b className="font-mono">{shopSettings.phone1 || '0793710008'}</b></span>
+        </div>
+        <p className="text-[9px] text-stone-700 mt-0.5 leading-tight px-1 font-medium">
+          {shopAddress}
+        </p>
+      </div>
+
+      {/* 2. Customer Barcode & Bill Barcode Row (Matching Photo 2) */}
+      {showBarcode && (
+        <div className="border-2 border-stone-950 p-1 flex justify-between items-center divide-x-2 divide-stone-950 bg-white mb-1.5">
+          <div className="flex-1 text-center px-0.5">
+            <BarcodeView 
+              value={order.orderNumber} 
+              height={22} 
+              width={1.15} 
+              fontSize={8} 
+            />
+            <span className="text-[7.5px] text-stone-600 block">{dict.billBarcode}</span>
+          </div>
+          <div className="flex-1 text-center px-0.5">
+            <BarcodeView 
+              value={order.customerPhone || '0780000000'} 
+              height={22} 
+              width={1.05} 
+              fontSize={8} 
+            />
+            <span className="text-[7.5px] text-stone-600 block">{dict.phoneBarcode}</span>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Customer & Garment Type Details Box */}
+      <div className="border-2 border-stone-950 divide-y-2 divide-stone-950 bg-stone-50 text-[11px] font-bold mb-1.5">
+        <div className="grid grid-cols-2 divide-x-2 divide-stone-950 p-1">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-stone-700 text-[9.5px]">{dict.customer}:</span>
+            <span className="font-black text-stone-950 truncate max-w-[110px] text-xs">{order.customerName}</span>
+          </div>
+          <div className="flex items-center justify-between px-1">
+            <span className="text-stone-700 text-[9.5px]">{dict.contact}:</span>
+            <span className="font-mono text-stone-950 font-bold text-xs">{order.customerPhone}</span>
+          </div>
+        </div>
+        <div className="grid grid-cols-3 divide-x-2 divide-stone-950 p-1 bg-white">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-stone-700 text-[9px]">{dict.garment}:</span>
+            <span className="font-black text-stone-950 text-xs truncate max-w-[70px]">{displayGarmentType}</span>
+          </div>
+          <div className="flex items-center justify-between px-1">
+            <span className="text-stone-700 text-[9px]">{dict.quantity}:</span>
+            <span className="font-mono font-black text-stone-950 text-xs">{order.quantity || 1}</span>
+          </div>
+          <div className="flex items-center justify-between px-1">
+            <span className="text-stone-700 text-[9px]">{dict.cabinet}:</span>
+            <span className="font-mono font-black text-stone-950 text-xs">{order.cabinetSlot || '---'}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Dates Box */}
+      <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 bg-stone-100 text-[10px] font-bold p-1 mb-1.5">
+        <div className="flex justify-between items-center px-1">
+          <span className="text-stone-700">{dict.orderDate}:</span>
+          <span className="font-mono font-bold text-stone-900">{orderDateWithTime}</span>
+        </div>
+        <div className="flex justify-between items-center px-1">
+          <span className="text-stone-700">{dict.returnDate}:</span>
+          <span className="font-mono font-black text-stone-950 text-xs">{formattedDeliveryDate}</span>
+        </div>
+      </div>
+
+      {/* 5. Big Clear Financial Table (جمله, جمله پرداخت, جمله باقیات - Matching Photo 2) */}
+      <div className="border-2 border-stone-950 divide-y-2 divide-stone-950 my-1.5">
+        <div className="grid grid-cols-3 divide-x-2 divide-stone-950 bg-stone-200 text-center text-[10px] font-black uppercase py-0.5">
+          <div>{dict.totalBill}</div>
+          <div className="text-emerald-900">{dict.totalPaid}</div>
+          <div className="text-rose-900">{dict.totalRemaining}</div>
+        </div>
+        <div className="grid grid-cols-3 divide-x-2 divide-stone-950 text-center py-1.5 font-bold">
+          <div className="px-1">
+            <span className="font-mono text-sm font-black text-stone-950 block">{order.totalAmount}</span>
+            <span className="text-[8px] text-stone-500 font-normal">{currencySymbol}</span>
+          </div>
+          <div className="px-1 bg-emerald-50/70">
+            <span className="font-mono text-sm font-black text-emerald-700 block">{order.paidAmount}</span>
+            <span className="text-[8px] text-emerald-800 font-normal">{currencySymbol}</span>
+          </div>
+          <div className="px-1 bg-rose-50/70">
+            <span className={`font-mono text-sm font-black block ${order.balanceAmount > 0 ? 'text-rose-600' : 'text-stone-800'}`}>
+              {order.balanceAmount}
+            </span>
+            <span className="text-[8px] text-rose-800 font-normal">{currencySymbol}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 6. Fabric Details (if any) */}
+      {order.fabricName && (
+        <div className="border-2 border-stone-950 p-1 bg-stone-50 text-[9.5px] font-semibold mb-1.5 flex justify-between items-center">
+          <span className="text-stone-700">{dict.fabricDetails}:</span>
+          <span className="font-bold text-stone-950">{order.fabricName} {order.fabricColor ? `(${order.fabricColor})` : ''}</span>
+        </div>
+      )}
+
+      {/* 7. Footer Thank you Note & Attribution */}
+      <div className="text-center pt-1.5 border-t border-dotted border-stone-300 text-[9px] text-stone-600">
+        <p className="font-bold">{language === 'ps' ? shopSettings.receiptFooterPs : language === 'fa' ? shopSettings.receiptFooterFa : shopSettings.receiptFooterEn}</p>
+        <p className="text-[8px] text-stone-400 mt-0.5">{dict.developedBy}</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div data-print-format={printFormat} className={`receipt-modal-shell fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto ${isPrinting ? 'is-printing' : ''}`}>
-      {/* Dynamic CSS Media Query for Thermal Printer Widths (58mm / 80mm / A4) */}
-      <style>{`
-        @media print {
-          @page {
-            size: ${printFormat === 'thermal58' ? '58mm auto' : printFormat === 'thermal80' ? '80mm auto' : 'A4 portrait'};
-            margin: ${printFormat === 'a4' ? '8mm' : '0mm'};
-          }
-          html, body {
-            width: ${printFormat === 'thermal58' ? '48mm' : printFormat === 'thermal80' ? '72mm' : '100%'} !important;
-            margin: 0 auto !important;
-            padding: 0 !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            background: #ffffff !important;
-            color: #000000 !important;
-          }
-          #authentic-receipt-slip {
-            width: ${printFormat === 'thermal58' ? '48mm' : printFormat === 'thermal80' ? '72mm' : '100%'} !important;
-            max-width: ${printFormat === 'thermal58' ? '48mm' : printFormat === 'thermal80' ? '72mm' : '180mm'} !important;
-            margin: 0 auto !important;
-            padding: ${printFormat === 'thermal58' ? '1mm' : printFormat === 'thermal80' ? '1.5mm' : '4mm'} !important;
-            font-size: ${printFormat === 'thermal58' ? '9.5px' : printFormat === 'thermal80' ? '10.5px' : '12px'} !important;
-            box-shadow: none !important;
-            border: none !important;
-          }
-          .border-stone-900, .border-stone-950, .border-black {
-            border-color: #000000 !important;
-          }
-        }
-      `}</style>
+    <div 
+      data-print-format={printFormat} 
+      className={`receipt-modal-shell fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto ${isPrinting ? 'is-printing' : ''}`}
+    >
       <div 
         id="receipt-modal-container"
-        className="bg-white rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-200 border border-[#E5E5E5]"
+        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden flex flex-col max-h-[94vh] animate-in fade-in zoom-in-95 duration-200 border border-[#E5E5E5]"
       >
-        {/* Header Action Bar */}
-        <div className="receipt-actions flex flex-wrap items-center justify-between px-5 py-3.5 bg-[#1A1A1A] text-white border-b border-black no-print gap-2">
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-4 bg-[#D4AF37] rounded-full inline-block" />
-            <Scissors className="w-4 h-4 text-[#D4AF37]" />
-            <h2 className="text-sm font-bold tracking-wide">
-              {t.tailorReceipt} - {order.orderNumber}
-            </h2>
+        {/* ==========================================
+            TOP CONTROL BAR: Mode Tabs & Actions
+           ========================================== */}
+        <div className="receipt-actions px-4 py-3 bg-[#1A1A1A] text-white border-b border-black no-print flex flex-col gap-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            {/* Title & Order info */}
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-4 bg-[#D4AF37] rounded-full inline-block" />
+              <Scissors className="w-4 h-4 text-[#D4AF37]" />
+              <h2 className="text-sm font-black tracking-wide">
+                {order.orderNumber} - {order.customerName}
+              </h2>
+            </div>
+
+            {/* Quick Action buttons: Print, PDF, WhatsApp, Close */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {/* Print Button */}
+              <button
+                type="button"
+                onClick={() => handlePrint()}
+                id="print-slip-btn"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#D4AF37] hover:bg-[#B39025] active:bg-[#B39025] text-[#1A1A1A] font-black rounded-lg text-xs transition cursor-pointer shadow-xs"
+                title={t.print}
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>{t.print}</span>
+              </button>
+
+              {/* Download PDF Button */}
+              <button
+                type="button"
+                onClick={() => handleDownloadPdf(activeMode)}
+                disabled={isGeneratingPdf}
+                id="download-pdf-btn"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/15 hover:bg-white/25 text-white font-black rounded-lg text-xs transition cursor-pointer border border-white/10 disabled:opacity-50"
+                title={t.downloadPdf}
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>{isGeneratingPdf ? t.loading : 'PDF'}</span>
+              </button>
+
+              {/* WhatsApp Share */}
+              <button
+                type="button"
+                onClick={handleWhatsAppShare}
+                id="whatsapp-share-btn"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs transition cursor-pointer"
+                title={t.shareWhatsApp}
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">WhatsApp</span>
+              </button>
+
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={onClose}
+                id="close-receipt-btn"
+                className="p-1.5 text-stone-400 hover:text-white rounded-lg hover:bg-white/10 transition ml-1 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
-          
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Thermal Print-Size Selector */}
-            <div className="flex items-center gap-1 bg-white/10 rounded-lg p-0.5 border border-white/15">
+
+          {/* Sub-bar: Format Selector & Mode Switcher */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/10 text-xs">
+            {/* Mode Switcher Tabs: Tailor Slip | Customer Bill | Both */}
+            <div className="flex items-center gap-1 bg-white/10 rounded-xl p-1 border border-white/10">
+              <button
+                type="button"
+                onClick={() => setActiveMode('tailor')}
+                className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
+                  activeMode === 'tailor'
+                    ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
+                    : 'text-stone-300 hover:text-white'
+                }`}
+              >
+                <Scissors className="w-3 h-3" />
+                <span>{t.tailorWorkSlip}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveMode('customer')}
+                className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
+                  activeMode === 'customer'
+                    ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
+                    : 'text-stone-300 hover:text-white'
+                }`}
+              >
+                <User className="w-3 h-3" />
+                <span>{t.customerReceipt}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveMode('both')}
+                className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
+                  activeMode === 'both'
+                    ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
+                    : 'text-stone-300 hover:text-white'
+                }`}
+              >
+                <Layers className="w-3 h-3" />
+                <span>{t.bothSlips}</span>
+              </button>
+            </div>
+
+            {/* Paper Size selector (A6, 80mm, 58mm, A4) */}
+            <div className="flex items-center gap-1 bg-white/10 rounded-xl p-0.5 border border-white/10">
+              <button
+                type="button"
+                onClick={() => setPrintFormat('a6')}
+                className={`px-2 py-1 text-[11px] font-black rounded-md transition cursor-pointer ${
+                  printFormat === 'a6'
+                    ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
+                    : 'text-stone-300 hover:text-white'
+                }`}
+                title="A6 Standard Sheet (105×148 mm)"
+              >
+                A6
+              </button>
               <button
                 type="button"
                 onClick={() => setPrintFormat('thermal80')}
-                className={`px-2 py-1 text-[10px] font-black rounded-md transition cursor-pointer ${
+                className={`px-2 py-1 text-[11px] font-black rounded-md transition cursor-pointer ${
                   printFormat === 'thermal80'
                     ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
                     : 'text-stone-300 hover:text-white'
                 }`}
-                title="80mm Thermal Paper (POS/Receipt Printer like MY-P80)"
+                title="80mm Thermal POS Roll"
               >
                 80mm
               </button>
               <button
                 type="button"
                 onClick={() => setPrintFormat('thermal58')}
-                className={`px-2 py-1 text-[10px] font-black rounded-md transition cursor-pointer ${
+                className={`px-2 py-1 text-[11px] font-black rounded-md transition cursor-pointer ${
                   printFormat === 'thermal58'
                     ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
                     : 'text-stone-300 hover:text-white'
                 }`}
-                title="58mm Mini Thermal Paper"
+                title="58mm Mini Thermal Roll"
               >
                 58mm
               </button>
               <button
                 type="button"
                 onClick={() => setPrintFormat('a4')}
-                className={`px-2 py-1 text-[10px] font-black rounded-md transition cursor-pointer ${
+                className={`px-2 py-1 text-[11px] font-black rounded-md transition cursor-pointer ${
                   printFormat === 'a4'
                     ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
                     : 'text-stone-300 hover:text-white'
                 }`}
-                title="Standard A4 Paper"
+                title="A4 Full Sheet"
               >
                 A4
               </button>
             </div>
-            <button
-              onClick={handlePrint}
-              id="print-slip-btn"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#D4AF37] hover:bg-[#B39025] active:bg-[#B39025] text-[#1A1A1A] font-black rounded-lg text-xs transition cursor-pointer shadow-xs"
-              title={t.print}
-            >
-              <Printer className="w-3.5 h-3.5" />
-              <span>{t.print}</span>
-            </button>
-
-            <button
-              onClick={handleDownloadPdf}
-              disabled={isGeneratingPdf}
-              id="download-pdf-btn"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg text-xs transition cursor-pointer border border-white/10 disabled:opacity-50"
-              title={t.downloadPdf}
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>{isGeneratingPdf ? t.loading : 'PDF'}</span>
-            </button>
-
-            <button
-              onClick={handleWhatsAppShare}
-              id="whatsapp-share-btn"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-xs transition cursor-pointer"
-              title={t.shareWhatsApp}
-            >
-              <MessageCircle className="w-3.5 h-3.5" />
-              <span>WhatsApp</span>
-            </button>
-
-            <button
-              onClick={onClose}
-              id="close-receipt-btn"
-              className="p-1.5 text-stone-400 hover:text-white rounded-lg hover:bg-white/10 transition ml-1 cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
         </div>
 
-        {/* Scrollable Receipt Preview Area */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#F9F7F2] flex justify-center">
-          {/* Printable Receipt Card matching exact authentic Afghan slip layout */}
-          <div 
-            ref={receiptRef}
-            id="authentic-receipt-slip"
-            dir={language === 'en' ? 'ltr' : 'rtl'}
-            className={`bg-white border border-[#E5E5E5] shadow-xs p-4 text-[#1A1A1A] text-sm relative select-text rounded-xl transition-all ${
-              printFormat === 'a4' 
-                ? 'w-full max-w-[420px]' 
-                : printFormat === 'thermal58' 
-                ? 'w-[280px]' 
-                : 'w-[380px]'
-            } ${
-              thermalStyle === 'classic' 
-                ? 'font-mono' 
-                : thermalStyle === 'compact' 
-                ? 'p-2.5 text-xs' 
-                : 'font-sans'
-            }`}
-            style={{ minHeight: '520px' }}
-          >
-            {/* Header Blessing / Bismillah */}
-            {headerBlessing && (
-              <div className="text-center font-serif text-[11px] text-stone-700 pb-1 mb-1 border-b border-stone-200">
-                {headerBlessing}
+        {/* ==========================================
+            PREVIEW AREA (Scrollable)
+           ========================================== */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#F9F7F2] flex flex-col items-center justify-start gap-6">
+          {/* Active Main Printable Container */}
+          <div ref={mainPrintRef} className="print-main-wrapper flex flex-col gap-6 w-full items-center">
+            {activeMode === 'tailor' && renderTailorSlip(tailorPrintRef)}
+            {activeMode === 'customer' && renderCustomerReceipt(customerPrintRef)}
+            {activeMode === 'both' && (
+              <div className="flex flex-col gap-6 w-full items-center">
+                {renderTailorSlip(tailorPrintRef)}
+                <div className="w-full max-w-[400px] border-t-2 border-dashed border-stone-400 my-1 relative text-center no-print">
+                  <span className="bg-[#F9F7F2] px-3 text-xs font-bold text-stone-500 relative -top-3">
+                    {t.customerReceipt}
+                  </span>
+                </div>
+                {renderCustomerReceipt(customerPrintRef)}
               </div>
             )}
-
-            {/* Top Header with Seal and Contacts */}
-            <div className="text-center pb-3 border-b-2 border-stone-900">
-              {showLogo && (
-                <img
-                  src={logoUrl}
-                  alt="Mujeeb Afghan Fashion"
-                  className="mx-auto mb-2 h-20 w-20 rounded-lg object-contain"
-                />
-              )}
-              <div className="flex items-center justify-center gap-2 mb-1">
-                <div>
-                  <h1 className="text-lg font-black tracking-tight text-stone-950 font-serif leading-tight">
-                    {shopName}
-                  </h1>
-                </div>
-              </div>
-
-              {/* Contacts row */}
-              <div className="flex justify-between items-center text-[11px] font-semibold text-stone-800 px-1 mt-1 border-t border-dotted border-stone-300 pt-1">
-                <span className="flex items-center gap-1">
-                  <span>WhatsApp:</span>
-                  <b className="font-mono">{shopSettings.whatsapp || '0782220194'}</b>
-                </span>
-                <span className="flex items-center gap-1">
-                  <span>{receiptText.contact}:</span>
-                  <b className="font-mono">{shopSettings.phone1 || '0772559881'}</b>
-                </span>
-              </div>
-
-              {/* Address */}
-              <p className="text-[10px] text-stone-600 mt-1 leading-snug px-2">
-                <b>{receiptText.address}:</b> {shopAddress}
-              </p>
-            </div>
-
-            {/* Order Info & Customer Strip Table */}
-            <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 text-xs font-bold bg-stone-50 my-1.5">
-              <div className="p-1.5 flex items-center justify-between">
-                <span className="text-stone-600 text-[10px]">{receiptText.bill}:</span>
-                <span className="text-sm font-black font-mono text-stone-950">{order.orderNumber}</span>
-              </div>
-              <div className="p-1.5 flex items-center justify-between">
-                <span className="text-stone-600 text-[10px]">{receiptText.customer}:</span>
-                <span className="text-xs font-black text-stone-950 truncate max-w-[130px]">{order.customerName}</span>
-              </div>
-            </div>
-
-            {/* Main Measurements & Styles 2-Column Grid with complete 4-sided borders and vertical right-line */}
-            <div className="border-2 border-stone-950 my-1.5 bg-white overflow-hidden">
-              {/* Header labels for both columns */}
-              <div className="grid grid-cols-2 border-b-2 border-stone-950 bg-stone-100 text-[10px] font-black text-center divide-x-2 divide-stone-950">
-                <div className="py-1 px-1 text-stone-800 uppercase tracking-tight">
-                  {receiptText.styleHeader}
-                </div>
-                <div className="py-1 px-1 text-stone-800 uppercase tracking-tight">
-                  {receiptText.measurementsHeader}
-                </div>
-              </div>
-
-              {/* Table Columns with center divider and outer right border */}
-              <div className="grid grid-cols-2 divide-x-2 divide-stone-950">
-                {/* Left Column: Design & Style Specs */}
-                <div className="flex flex-col justify-between text-[11px] bg-white">
-                  <div className="divide-y divide-stone-200">
-                    {activeDesignItems.length > 0 ? (
-                      activeDesignItems.map((item, idx) => (
-                        <div key={idx} className="px-1.5 py-1 flex justify-between items-center text-[10px]">
-                          <span className="text-stone-600 font-medium text-[9.5px]">{item.title}:</span>
-                          <span className="font-bold text-stone-900 text-left truncate max-w-[85px]">{String(item.value)}</span>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="p-2 text-stone-400 text-center italic text-[10px]">
-                        {receiptText.noStyle}
-                      </div>
-                    )}
-                    {order.cabinetSlot && (
-                      <div className="px-1.5 py-1 flex justify-between items-center text-[10px] bg-amber-50/70 border-t border-stone-300">
-                        <span className="text-amber-900 font-bold text-[9.5px]">{receiptText.cabinetSlot}:</span>
-                        <span className="font-mono font-black text-amber-950">{order.cabinetSlot}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Special Tailor Instructions / Note */}
-                  {order.specialInstructions && (
-                    <div className="p-1.5 bg-amber-50/80 border-t-2 border-stone-950 text-[10px] font-semibold text-stone-900 mt-auto">
-                      <span className="text-[9px] text-amber-900 block font-bold">{receiptText.notes}:</span>
-                      <span className="leading-snug">{order.specialInstructions}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Right Column: Measurements Table with right-side border line */}
-                <div className="flex flex-col bg-white">
-                  <div className="divide-y divide-stone-300 text-xs">
-                    {activeMeasurements.map((m, idx) => (
-                      <div key={idx} className="flex justify-between items-center px-2 py-0.5 hover:bg-stone-50">
-                        <span className="font-semibold text-stone-700 text-[10.5px] truncate max-w-[95px]">{m.label}:</span>
-                        <span className="font-mono font-black text-stone-950 text-xs pl-1.5 border-l border-stone-200 min-w-[34px] text-right">{m.value}</span>
-                      </div>
-                    ))}
-                    {activeMeasurements.length === 0 && (
-                      <div className="p-3 text-stone-400 text-center text-xs">
-                        {receiptText.noMeasurements}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Delivery Date & Time section */}
-            <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 bg-stone-50/70 text-xs my-1.5">
-              <div className="p-1.5 flex items-center justify-between">
-                <span className="text-[10px] text-stone-600 font-semibold">{receiptText.delivery}:</span>
-                <span className="font-black text-stone-950 font-mono text-xs">{order.deliveryDate}</span>
-              </div>
-              <div className="p-1.5 flex items-center justify-between text-[11px] font-mono">
-                <span className="text-[10px] text-stone-500">{receiptText.orderDate}:</span>
-                <span className="text-stone-800 text-[10px]">{order.orderDate || new Date().toISOString().slice(0, 10)}</span>
-              </div>
-            </div>
-
-            {/* Barcodes Row (Contact Barcode & Order Barcode) as shown in uploaded photos */}
-            {showBarcode && (
-              <div className="py-1.5 px-1 border-2 border-stone-950 my-1.5 flex items-center justify-between divide-x-2 divide-stone-950 bg-white">
-                {/* Phone Barcode */}
-                <div className="flex-1 text-center px-1">
-                  <BarcodeView 
-                    value={order.customerPhone || '0780000000'} 
-                    height={24}
-                    width={1.1}
-                    fontSize={8}
-                  />
-                  <span className="text-[8px] text-stone-500 block">{t.phoneBarcode}</span>
-                </div>
-
-                {/* Order Number Barcode */}
-                <div className="flex-1 text-center px-1">
-                  <BarcodeView 
-                    value={order.orderNumber} 
-                    height={24}
-                    width={1.2}
-                    fontSize={8}
-                  />
-                  <span className="text-[8px] text-stone-500 block">{t.billBarcode}</span>
-                </div>
-              </div>
-            )}
-
-            {/* Garment and quantity */}
-            <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 text-xs py-1 px-2 font-bold bg-stone-100 my-1.5 text-center">
-              <div className="flex items-center justify-between px-1">
-                <span className="text-[10px] text-stone-600">{receiptText.garment}:</span>
-                <span className="text-stone-950 text-xs">{displayGarmentType}</span>
-              </div>
-              <div className="flex items-center justify-between px-1">
-                <span className="text-[10px] text-stone-600">{receiptText.quantity}:</span>
-                <span className="font-mono text-sm text-stone-950">{order.quantity || 1}</span>
-              </div>
-            </div>
-
-            {/* Financials Breakdown Table (جمله, جمله پرداخت, جمله باقیات) */}
-            <div className="grid grid-cols-3 border-2 border-stone-950 text-center font-bold my-1.5 divide-x-2 divide-stone-950 bg-stone-50">
-              <div className="p-1">
-                <div className="text-[9px] text-stone-600 uppercase font-bold">{receiptText.total}</div>
-                <div className="font-mono text-xs font-black text-stone-950">
-                  {order.totalAmount} <span className="text-[8px] font-normal">{currencySymbol}</span>
-                </div>
-              </div>
-              <div className="p-1 bg-emerald-50/60">
-                <div className="text-[9px] text-emerald-800 uppercase font-bold">{receiptText.paid}</div>
-                <div className="font-mono text-xs font-black text-emerald-700">
-                  {order.paidAmount} <span className="text-[8px] font-normal">{currencySymbol}</span>
-                </div>
-              </div>
-              <div className="p-1 bg-amber-50/60">
-                <div className="text-[9px] text-amber-900 uppercase font-bold">{receiptText.balance}</div>
-                <div className={`font-mono text-xs font-black ${order.balanceAmount > 0 ? 'text-rose-600' : 'text-stone-800'}`}>
-                  {order.balanceAmount} <span className="text-[8px] font-normal">{currencySymbol}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Footer Note */}
-            <div className="text-center pt-2 text-[10px] text-stone-500">
-              <p>{language === 'ps' ? shopSettings.receiptFooterPs : language === 'fa' ? shopSettings.receiptFooterFa : shopSettings.receiptFooterEn}</p>
-              <a href="https://rayan-tech-solution.tech" target="_blank" rel="noreferrer" className="mt-1 inline-block text-[8px] text-stone-400 underline">{receiptText.developed}</a>
-            </div>
           </div>
         </div>
 
-        {/* Modal Footer Controls */}
-        <div className="receipt-modal-footer px-5 py-3 bg-white border-t border-[#E5E5E5] flex items-center justify-between no-print">
-          <div className="flex items-center gap-2 text-xs text-[#706E6B]">
-            <span className={`inline-block w-2.5 h-2.5 rounded-full ${
-              order.status === 'ready' ? 'bg-emerald-500' : 
-              order.status === 'in_progress' ? 'bg-blue-500' : 
-              order.status === 'delivered' ? 'bg-purple-500' : 'bg-[#D4AF37]'
-            }`} />
-            <span className="font-bold text-[#1A1A1A]">{t[('status' + order.status.charAt(0).toUpperCase() + order.status.slice(1).replace('_', '')) as keyof typeof t] || order.status}</span>
+        {/* ==========================================
+            FOOTER CONTROLS
+           ========================================== */}
+        <div className="receipt-modal-footer px-5 py-3 bg-white border-t border-[#E5E5E5] flex flex-wrap items-center justify-between no-print gap-3">
+          {/* Quick specific PDF download triggers */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={() => handleDownloadPdf('tailor')}
+              className="px-3 py-1.5 text-xs font-bold text-[#1A1A1A] bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl transition cursor-pointer flex items-center gap-1.5"
+            >
+              <Download className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span>{t.downloadTailorPdf}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDownloadPdf('customer')}
+              className="px-3 py-1.5 text-xs font-bold text-[#1A1A1A] bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded-xl transition cursor-pointer flex items-center gap-1.5"
+            >
+              <Download className="w-3.5 h-3.5 text-stone-700" />
+              <span>{t.downloadCustomerPdf}</span>
+            </button>
           </div>
 
           <div className="flex items-center gap-2">
             {onEdit && (
               <button
+                type="button"
                 onClick={() => {
                   onClose();
                   onEdit(order);
@@ -596,6 +846,7 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
               </button>
             )}
             <button
+              type="button"
               onClick={onClose}
               className="px-4 py-1.5 text-xs font-bold text-[#706E6B] hover:text-[#1A1A1A] bg-[#F9F7F2] hover:bg-stone-200 rounded-xl transition cursor-pointer border border-[#E5E5E5]"
             >

@@ -8,7 +8,7 @@ import { toPng } from 'html-to-image';
 
 export interface PrintOptions {
   title?: string;
-  pageFormat?: 'a4' | 'thermal58' | 'thermal80' | 'auto';
+  pageFormat?: 'a6' | 'a4' | 'thermal58' | 'thermal80' | 'auto';
   dir?: 'rtl' | 'ltr';
   onStart?: () => void;
   onComplete?: () => void;
@@ -26,7 +26,7 @@ export async function printReceiptElement(
 ): Promise<void> {
   const {
     title = 'Receipt',
-    pageFormat = 'thermal80',
+    pageFormat = 'a6',
     dir = 'rtl',
     onStart,
     onComplete,
@@ -40,14 +40,16 @@ export async function printReceiptElement(
 
   onStart?.();
 
-  // Width calculations for thermal (Xprinter XP-80 series is 72mm printable width) vs A4
+  // Width calculations for A6 (105mm), thermal (58mm, 80mm), and A4
   const widthCss = pageFormat === 'thermal58' 
     ? 'width: 48mm; max-width: 48mm;' 
     : pageFormat === 'thermal80'
     ? 'width: 72mm; max-width: 72mm;'
+    : pageFormat === 'a6'
+    ? 'width: 98mm; max-width: 98mm;'
     : 'width: 100%; max-width: 180mm;';
 
-  const marginCss = pageFormat === 'a4' ? '8mm' : '0mm';
+  const marginCss = pageFormat === 'a6' ? '3mm' : pageFormat === 'a4' ? '8mm' : '0mm';
 
   // Gather existing stylesheets & fonts
   let styleTags = '';
@@ -65,7 +67,7 @@ export async function printReceiptElement(
         ${styleTags}
         <style>
           @page {
-            size: ${pageFormat === 'a4' ? 'A4 portrait' : pageFormat === 'thermal58' ? '58mm auto' : '80mm auto'};
+            size: ${pageFormat === 'a6' ? '105mm 148mm' : pageFormat === 'a4' ? 'A4 portrait' : pageFormat === 'thermal58' ? '58mm auto' : '80mm auto'};
             margin: ${marginCss};
           }
           * {
@@ -89,7 +91,7 @@ export async function printReceiptElement(
             background: #ffffff !important;
             color: #000000 !important;
             margin: 0 auto !important;
-            padding: ${pageFormat === 'a4' ? '4mm' : '1mm'} !important;
+            padding: ${pageFormat === 'a6' ? '2mm' : pageFormat === 'a4' ? '4mm' : '1mm'} !important;
             box-sizing: border-box !important;
           }
           .no-print, button, .receipt-actions, .receipt-modal-footer {
@@ -107,7 +109,7 @@ export async function printReceiptElement(
             width: 100% !important;
             border-collapse: collapse !important;
           }
-          /* Ensure high-contrast solid lines for thermal printers */
+          /* Ensure high-contrast solid lines for thermal and regular printers */
           .border-stone-900, .border-stone-950, .border-black {
             border-color: #000000 !important;
           }
@@ -199,7 +201,7 @@ export async function downloadReceiptPdf(
   element: HTMLElement,
   options: {
     filename?: string;
-    pageFormat?: 'a4' | 'thermal58' | 'thermal80' | 'auto';
+    pageFormat?: 'a6' | 'a4' | 'thermal58' | 'thermal80' | 'auto';
     onStart?: () => void;
     onComplete?: () => void;
     onError?: (err: unknown) => void;
@@ -207,7 +209,7 @@ export async function downloadReceiptPdf(
 ): Promise<void> {
   const {
     filename = 'Receipt.pdf',
-    pageFormat = 'thermal80',
+    pageFormat = 'a6',
     onStart,
     onComplete,
     onError,
@@ -252,20 +254,42 @@ export async function downloadReceiptPdf(
     });
 
     const isA4 = pageFormat === 'a4';
+    const isA6 = pageFormat === 'a6';
     const isThermal58 = pageFormat === 'thermal58';
-    const pdfWidth = isA4 ? 210 : isThermal58 ? 58 : 80;
-    const margin = isA4 ? 10 : 2; // 2mm margin for thermal ensures all borders remain intact
+    
+    // PDF width and margin definitions
+    const pdfWidth = isA4 ? 210 : isA6 ? 105 : isThermal58 ? 58 : 80;
+    const margin = isA4 ? 8 : isA6 ? 3 : 2; // 3mm margin for A6 ensures clean fit on 105x148
     const printableWidth = pdfWidth - margin * 2;
     const imgHeight = (img.naturalHeight * printableWidth) / (img.naturalWidth || 1);
-    const pdfHeight = isA4 ? 297 : Math.ceil(imgHeight + margin * 2);
+    
+    // Default page heights for standard sheet sizes
+    const standardPageHeight = isA4 ? 297 : isA6 ? 148 : Math.ceil(imgHeight + margin * 2);
 
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: isA4 ? 'a4' : [pdfWidth, Math.max(30, pdfHeight)],
-    });
+    let pdf: jsPDF;
+    if (isA6) {
+      // If content fits or is close to A6 (<= 148mm), generate exact standard A6 portrait page
+      const useFixedA6 = imgHeight + margin * 2 <= 152;
+      pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: useFixedA6 ? 'a6' : [105, Math.ceil(imgHeight + margin * 2)],
+      });
+    } else if (isA4) {
+      pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+    } else {
+      pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [pdfWidth, Math.max(30, Math.ceil(imgHeight + margin * 2))],
+      });
+    }
 
-    if (isA4) {
+    if (isA4 || (isA6 && imgHeight + margin * 2 > 152 && false)) {
       const pageHeight = pdf.internal.pageSize.getHeight();
       const pageContentHeight = pageHeight - margin * 2;
       let imageY = margin;
