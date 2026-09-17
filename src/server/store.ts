@@ -4,10 +4,12 @@ import {
   INITIAL_DEMO_FABRICS, 
   INITIAL_DEMO_CUSTOMERS, 
   INITIAL_DEMO_ORDERS, 
+  INITIAL_DEMO_PRODUCTS,
+  INITIAL_DEMO_PRODUCT_SALES,
   DEFAULT_SHOP_SETTINGS, 
   DEFAULT_MEASUREMENT_FIELDS, 
   DEFAULT_DESIGN_CATEGORIES 
-} from '../services/storage.js';
+} from '../services/storage';
 
 export interface DatabaseStore {
   fabrics: any[];
@@ -38,8 +40,8 @@ let cachedStore: DatabaseStore = {
   fabrics: [...INITIAL_DEMO_FABRICS],
   orders: [...INITIAL_DEMO_ORDERS],
   customers: [...INITIAL_DEMO_CUSTOMERS],
-  products: [],
-  productSales: [],
+  products: [...INITIAL_DEMO_PRODUCTS],
+  productSales: [...INITIAL_DEMO_PRODUCT_SALES],
   shopSettings: { ...DEFAULT_SHOP_SETTINGS },
   measurementFields: [...DEFAULT_MEASUREMENT_FIELDS],
   designCategories: [...DEFAULT_DESIGN_CATEGORIES],
@@ -57,8 +59,8 @@ export function initStore(): DatabaseStore {
           fabrics: Array.isArray(parsed.fabrics) ? parsed.fabrics : [...INITIAL_DEMO_FABRICS],
           orders: Array.isArray(parsed.orders) ? parsed.orders : [...INITIAL_DEMO_ORDERS],
           customers: Array.isArray(parsed.customers) ? parsed.customers : [...INITIAL_DEMO_CUSTOMERS],
-          products: Array.isArray(parsed.products) ? parsed.products : [],
-          productSales: Array.isArray(parsed.productSales) ? parsed.productSales : [],
+          products: Array.isArray(parsed.products) && parsed.products.length > 0 ? parsed.products : [...INITIAL_DEMO_PRODUCTS],
+          productSales: Array.isArray(parsed.productSales) && parsed.productSales.length > 0 ? parsed.productSales : [...INITIAL_DEMO_PRODUCT_SALES],
           shopSettings: parsed.shopSettings || { ...DEFAULT_SHOP_SETTINGS },
           measurementFields: Array.isArray(parsed.measurementFields) && parsed.measurementFields.length > 0 
             ? parsed.measurementFields 

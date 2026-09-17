@@ -972,7 +972,10 @@ function setStoredItem<T>(key: string, value: T): void {
 }
 
 // Background sync helper to API if online
+let activeSyncs = 0;
+
 async function apiSync(endpoint: string, method = 'GET', data?: any) {
+  activeSyncs++;
   try {
     const res = await fetch(`/api/${endpoint}`, {
       method,
@@ -986,6 +989,8 @@ async function apiSync(endpoint: string, method = 'GET', data?: any) {
     }
   } catch (err: any) {
     console.warn(`API ${method} /api/${endpoint} connection error:`, err?.message || err);
+  } finally {
+    activeSyncs = Math.max(0, activeSyncs - 1);
   }
   return null;
 }
@@ -1691,6 +1696,10 @@ export const storageService = {
 
   // Pull and push data with Server Database
   async syncFromDatabase(): Promise<boolean> {
+    if (activeSyncs > 0) {
+      console.log('Skipping background sync because mutations are in flight');
+      return false;
+    }
     try {
       // 1. Fetch latest collections from server
       const [fabricsRes, ordersRes, customersRes, productsRes, productSalesRes, measurementFieldsRes, designCategoriesRes, shopSettingsRes] = await Promise.all([
