@@ -4,12 +4,16 @@ import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import { apiRouter } from './src/server/api';
 import { initDatabase } from './src/db/db';
+import { initStore } from './src/server/store';
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
   app.use(express.json());
+
+  // Initialize Persistent Storage on startup
+  initStore();
 
   // Initialize Database tables on startup
   try {

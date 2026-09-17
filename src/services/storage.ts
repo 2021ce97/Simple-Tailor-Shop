@@ -668,7 +668,7 @@ export const DEFAULT_DESIGN_CATEGORIES: DesignCategory[] = [
   },
 ];
 
-const INITIAL_DEMO_CUSTOMERS: Customer[] = [
+export const INITIAL_DEMO_CUSTOMERS: Customer[] = [
   {
     id: 'cust_1',
     name: 'فرهاد',
@@ -743,7 +743,7 @@ const INITIAL_DEMO_CUSTOMERS: Customer[] = [
   },
 ];
 
-const INITIAL_DEMO_ORDERS: Order[] = [
+export const INITIAL_DEMO_ORDERS: Order[] = [
   {
     id: 'ord_1',
     orderNumber: 'MA-0001',
@@ -1689,24 +1689,10 @@ export const storageService = {
     return `MA-${String(max + 1).padStart(4, '0')}`;
   },
 
-  // Pull and push data with PostgreSQL database
+  // Pull and push data with Server Database
   async syncFromDatabase(): Promise<boolean> {
     try {
-      const localOrdersBeforeSync = this.getOrders();
-      const localCustomersBeforeSync = this.getCustomers();
-
-      // 1. Batch push any local orders and customers directly into PostgreSQL table
-      if (localOrdersBeforeSync.length > 0 || localCustomersBeforeSync.length > 0) {
-        const syncRes = await apiSync('sync/all', 'POST', {
-          orders: localOrdersBeforeSync,
-          customers: localCustomersBeforeSync
-        });
-        if (syncRes && Array.isArray(syncRes.orders) && syncRes.orders.length > 0) {
-          setStoredItem(STORAGE_KEYS.ORDERS, syncRes.orders);
-        }
-      }
-
-      // 2. Fetch all collections from server
+      // 1. Fetch latest collections from server
       const [fabricsRes, ordersRes, customersRes, productsRes, productSalesRes, measurementFieldsRes, designCategoriesRes, shopSettingsRes] = await Promise.all([
         fetch('/api/fabrics').catch(() => null),
         fetch('/api/orders').catch(() => null),
@@ -1718,6 +1704,20 @@ export const storageService = {
         fetch('/api/shop-settings').catch(() => null)
       ]);
 
+      if (ordersRes && ordersRes.ok) {
+        const data = await ordersRes.json();
+        if (Array.isArray(data)) {
+          setStoredItem(STORAGE_KEYS.ORDERS, data);
+        }
+      }
+
+      if (customersRes && customersRes.ok) {
+        const data = await customersRes.json();
+        if (Array.isArray(data)) {
+          setStoredItem(STORAGE_KEYS.CUSTOMERS, data);
+        }
+      }
+
       if (fabricsRes && fabricsRes.ok) {
         const data = await fabricsRes.json();
         if (Array.isArray(data) && data.length > 0) {
@@ -1725,28 +1725,14 @@ export const storageService = {
         }
       }
 
-      if (ordersRes && ordersRes.ok) {
-        const data = await ordersRes.json();
-        if (Array.isArray(data) && data.length > 0) {
-          setStoredItem(STORAGE_KEYS.ORDERS, data);
-        }
-      }
-
-      if (customersRes && customersRes.ok) {
-        const data = await customersRes.json();
-        if (Array.isArray(data) && data.length > 0) {
-          setStoredItem(STORAGE_KEYS.CUSTOMERS, data);
-        }
-      }
-
       if (productsRes && productsRes.ok) {
         const data = await productsRes.json();
-        if (Array.isArray(data) && data.length > 0) setStoredItem(STORAGE_KEYS.PRODUCTS, data);
+        if (Array.isArray(data)) setStoredItem(STORAGE_KEYS.PRODUCTS, data);
       }
 
       if (productSalesRes && productSalesRes.ok) {
         const data = await productSalesRes.json();
-        if (Array.isArray(data) && data.length > 0) setStoredItem(STORAGE_KEYS.PRODUCT_SALES, data);
+        if (Array.isArray(data)) setStoredItem(STORAGE_KEYS.PRODUCT_SALES, data);
       }
 
       if (measurementFieldsRes && measurementFieldsRes.ok) {
@@ -1766,7 +1752,7 @@ export const storageService = {
 
       return true;
     } catch (e) {
-      console.log('Database sync handled in local mode');
+      console.log('Database sync notice:', e);
       return false;
     }
   }

@@ -110,20 +110,38 @@ function ShopApp() {
     storageService.saveLanguage(language);
   }, [language]);
 
-  // Initial & Periodic Database Sync from Supabase PostgreSQL in background
+  // Initial & Periodic Automatic Background Database Sync
   useEffect(() => {
-    storageService.syncFromDatabase().then(() => {
-      reloadData();
-    });
-
-    // Auto-sync every 30 seconds to keep fresh state with Supabase
-    const syncInterval = setInterval(() => {
-      storageService.syncFromDatabase().then(() => {
-        reloadData();
+    const doSync = () => {
+      storageService.syncFromDatabase().then((updated) => {
+        if (updated) {
+          reloadData();
+        }
       });
-    }, 30000);
+    };
 
-    return () => clearInterval(syncInterval);
+    // Initial sync
+    doSync();
+
+    // Auto-sync every 4 seconds so orders from other computers appear automatically in real-time
+    const syncInterval = setInterval(doSync, 4000);
+
+    // Sync on window focus and visibility change
+    const handleFocus = () => doSync();
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        doSync();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(syncInterval);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   // Keyboard shortcuts (e.g. F2 for new order)

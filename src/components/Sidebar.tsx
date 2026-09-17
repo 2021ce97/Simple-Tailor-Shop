@@ -79,39 +79,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return stock <= (product.lowStockThreshold ?? 5);
   }).length;
 
-  const [dbStatus, setDbStatus] = React.useState<{ connected: boolean; ordersCount: number } | null>(null);
-  const [isSyncing, setIsSyncing] = React.useState(false);
-
-  const checkDb = React.useCallback(() => {
-    fetch('/api/health')
-      .then(res => res.json())
-      .then(data => {
-        setDbStatus({
-          connected: Boolean(data.database && String(data.database).includes('Connected')),
-          ordersCount: data.ordersCount || 0
-        });
-      })
-      .catch(() => {
-        setDbStatus({ connected: false, ordersCount: 0 });
-      });
-  }, []);
-
-  React.useEffect(() => {
-    checkDb();
-    const interval = setInterval(checkDb, 15000);
-    return () => clearInterval(interval);
-  }, [checkDb]);
-
-  const handleManualSync = async () => {
-    setIsSyncing(true);
-    try {
-      await storageService.syncFromDatabase();
-      checkDb();
-    } finally {
-      setTimeout(() => setIsSyncing(false), 600);
-    }
-  };
-
   const handleNavClick = (tab: MainNavTab) => {
     onSelectNav(tab);
     onCloseMobile();
@@ -361,30 +328,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               6
             </span>
           </button>
-        </div>
-
-        {/* Database & Cloud Connection Status */}
-        <div className="px-3 py-1.5 mx-3 mb-2 rounded-xl bg-emerald-950/30 border border-emerald-500/20 flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${dbStatus?.connected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-300">
-              <Database className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{dbStatus?.connected ? 'PostgreSQL DB' : 'Local Mode'}</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
-              {dbStatus?.connected ? `${dbStatus.ordersCount} DB` : 'OFFLINE'}
-            </span>
-            <button
-              onClick={handleManualSync}
-              disabled={isSyncing}
-              title="Sync with PostgreSQL"
-              className="p-1 hover:bg-emerald-500/20 text-emerald-400 rounded transition cursor-pointer"
-            >
-              <RefreshCw className={`w-3 h-3 ${isSyncing ? 'animate-spin' : ''}`} />
-            </button>
-          </div>
         </div>
 
         {/* User Account & Sign Out Section */}

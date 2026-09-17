@@ -96,26 +96,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [activeRetailReceipt, setActiveRetailReceipt] = useState<ProductSale | null>(null);
   const retailReceiptPrintRef = useRef<HTMLDivElement>(null);
 
-  // Cloud Database Sync State
-  const [isSyncingDb, setIsSyncingDb] = useState(false);
-  const [dbSyncMsg, setDbSyncMsg] = useState<string | null>(null);
-  const [dbOrdersCount, setDbOrdersCount] = useState<number | null>(null);
-
-  const checkDbStatus = React.useCallback(() => {
-    fetch('/api/health')
-      .then(res => res.json())
-      .then(data => {
-        if (typeof data.ordersCount === 'number') {
-          setDbOrdersCount(data.ordersCount);
-        }
-      })
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    checkDbStatus();
-  }, [checkDbStatus, orders.length]);
-
   // Global search sync
   useEffect(() => {
     setSearchTerm(globalSearchTerm);
@@ -352,7 +332,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
     };
     await storageService.saveOrderAsync(updated);
     onOrderUpdated();
-    checkDbStatus();
   };
 
   // Payment update
@@ -372,7 +351,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
     await storageService.saveOrderAsync(updated);
     setPaymentModalOrder(null);
     onOrderUpdated();
-    checkDbStatus();
   };
 
   const openPaymentModal = (order: Order) => {
@@ -384,7 +362,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
     if (window.confirm(`${t.confirmDelete} (${t.orderNumber}: ${order.orderNumber})`)) {
       storageService.deleteOrder(order.id);
       onOrderUpdated();
-      setTimeout(() => checkDbStatus(), 500);
     }
   };
 
@@ -494,47 +471,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Cloud Database Sync Status Pill */}
-          <button
-            onClick={async () => {
-              setIsSyncingDb(true);
-              try {
-                const ok = await storageService.syncFromDatabase();
-                onOrderUpdated();
-                checkDbStatus();
-                setDbSyncMsg(
-                  ok
-                    ? (language === 'fa' ? 'تمام سفارشات موفقانه با دیتابیس همگام و ثبت شدند' : language === 'ps' ? 'ټول فرمایشونه په بریالیتوب سره په ډیټابیس کې ثبت شول' : 'Orders successfully synced & saved to PostgreSQL')
-                    : (language === 'fa' ? 'همگام‌سازی محلی انجام شد' : 'Local sync completed')
-                );
-                setTimeout(() => setDbSyncMsg(null), 4000);
-              } catch (e) {
-                console.warn('Sync error:', e);
-              } finally {
-                setIsSyncingDb(false);
-              }
-            }}
-            id="dashboard-sync-db-btn"
-            title="Sync with PostgreSQL Database"
-            className="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300/80 text-emerald-800 font-semibold rounded-xl text-xs transition cursor-pointer shadow-2xs"
-          >
-            <Database className="w-4 h-4 text-emerald-600" />
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block" />
-              <span>
-                {isSyncingDb 
-                  ? (language === 'fa' ? 'در حال ثبت در دیتابیس...' : language === 'ps' ? 'ډیټابیس ته ثبت کیږي...' : 'Syncing...') 
-                  : (language === 'fa' ? 'دیتابیس متصل' : language === 'ps' ? 'ډیټابیس نښلول شوی' : 'DB Connected')}
-              </span>
-              {typeof dbOrdersCount === 'number' && (
-                <span className="bg-emerald-200/70 text-emerald-900 text-[10px] px-1.5 py-0.2 rounded-full font-mono">
-                  {dbOrdersCount}
-                </span>
-              )}
-            </span>
-            <RefreshCw className={`w-3.5 h-3.5 text-emerald-600 ${isSyncingDb ? 'animate-spin' : ''}`} />
-          </button>
-
           <button
             onClick={onNewOrder}
             id="dashboard-new-order-btn"
@@ -545,22 +481,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </button>
         </div>
       </div>
-
-      {/* Sync Success Feedback Notification */}
-      {dbSyncMsg && (
-        <div className="px-4 py-2.5 rounded-xl bg-emerald-900 text-emerald-100 border border-emerald-700 flex items-center justify-between text-xs font-semibold shadow-xs animate-in fade-in">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" />
-            <span>{dbSyncMsg}</span>
-          </div>
-          <button 
-            onClick={() => setDbSyncMsg(null)} 
-            className="text-emerald-300 hover:text-white cursor-pointer ml-3"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
 
       {/* 4 KPI Summary Cards: Tailor + Retail Revenue & Records */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="dashboard-summary-cards">
