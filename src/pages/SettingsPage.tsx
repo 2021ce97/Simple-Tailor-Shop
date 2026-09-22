@@ -30,7 +30,7 @@ import {
   Printer,
   RefreshCw
 } from 'lucide-react';
-import { ReceiptSettingsPanel } from './ReceiptSettingsPanel';
+import { ReceiptSettingsPanel } from '../components/ReceiptSettingsPanel';
 
 interface DesignSettingsViewProps {
   designCategories: DesignCategory[];

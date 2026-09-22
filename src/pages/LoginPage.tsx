@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Language, ShopSettings } from '../types';
 import { translations } from '../translations/i18n';
+import { supabase } from '../lib/supabase';
 import { 
   Scissors, 
   Lock, 
@@ -39,24 +40,25 @@ export const LoginView: React.FC<LoginViewProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
 
-    setTimeout(() => {
-      const normalizedEmail = email.trim().toLowerCase();
-      // Strict authentication: only tailor1@gmail.com and Admin123 can log in
-      if (normalizedEmail === 'tailor1@gmail.com' && password === 'Admin123') {
-        onLoginSuccess({
-          email: 'tailor1@gmail.com',
-          name: language === 'fa' ? 'مدیر خیاطی' : language === 'ps' ? 'د خیاطۍ مدیر' : 'Tailor Shop Admin',
-        });
-      } else {
-        setError(t.invalidCredentials || 'Invalid email or password. Please check your credentials.');
-        setIsLoading(false);
-      }
-    }, 200);
+    try {
+      const { data, error: loginError } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+      if (loginError || !data.user) throw loginError || new Error('Invalid credentials');
+      onLoginSuccess({
+        email: data.user.email || email.trim().toLowerCase(),
+        name: String(data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Admin'),
+      });
+    } catch {
+      setError(t.invalidCredentials || 'Invalid email or password. Please check your credentials.');
+      setIsLoading(false);
+    }
   };
 
   const shopTitle = language === 'ps' 

@@ -14,17 +14,20 @@ import {
 import { storageService } from './services/storage';
 import { Navbar } from './components/Navbar';
 import { Sidebar, MainNavTab, SettingsSubTab } from './components/Sidebar';
-import { Dashboard } from './components/Dashboard';
+import { Dashboard } from './pages/DashboardPage';
 import { OrderForm } from './components/OrderForm';
-import { CustomersView } from './components/CustomersView';
-import { FabricsView } from './components/FabricsView';
-import { ProductsView } from './components/ProductsView';
-import { SalesHistoryView } from './components/SalesHistoryView';
-import { DesignSettingsView } from './components/DesignSettingsView';
+import { CustomersView } from './pages/CustomersPage';
+import { FabricsView } from './pages/FabricsPage';
+import { ProductsView } from './pages/ProductsPage';
+import { SalesHistoryView } from './pages/SalesHistoryPage';
+import { DesignSettingsView } from './pages/SettingsPage';
 import { ReceiptSlipModal } from './components/ReceiptSlipModal';
-import { LoginView } from './components/LoginView';
-import { PublicTrackingView } from './components/PublicTrackingView';
-import { ReportsView } from './components/ReportsView';
+import { LoginView } from './pages/LoginPage';
+import { PublicTrackingView } from './pages/PublicTrackingPage';
+import { ReportsView } from './pages/ReportsPage';
+import { supabase } from './lib/supabase';
+import { getErrorMessage } from './lib/errors';
+import { migrateLegacyLocalData } from './services/legacyMigration';
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
@@ -65,9 +68,21 @@ function ShopApp() {
   const [language, setLanguage] = useState<Language>(() => storageService.getLanguage());
 
   // 2. Authentication State
-  const [currentUser, setCurrentUser] = useState<{ email: string; name: string } | null>(() => 
-    storageService.getAuthUser()
-  );
+  const [currentUser, setCurrentUser] = useState<{ email: string; name: string } | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        setCurrentUser({ email: data.user.email || '', name: String(data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Admin') });
+        migrateLegacyLocalData().then(() => storageService.syncFromDatabase()).then(reloadData).catch(console.error);
+      }
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      const user = session?.user;
+      setCurrentUser(user ? { email: user.email || '', name: String(user.user_metadata?.name || user.email?.split('@')[0] || 'Admin') } : null);
+    });
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
   // 3. Data State
   const [orders, setOrders] = useState<Order[]>(() => storageService.getOrders());
@@ -96,6 +111,7 @@ function ShopApp() {
   const [settingsSubTab, setSettingsSubTab] = useState<SettingsSubTab>('design');
   const [isSidebarOpenMobile, setIsSidebarOpenMobile] = useState<boolean>(false);
   const [dbConnected, setDbConnected] = useState<boolean>(true);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [prefilledCustomer, setPrefilledCustomer] = useState<Customer | null>(null);
@@ -114,14 +130,8 @@ function ShopApp() {
   // Initial & Periodic Automatic Background Database Sync
   useEffect(() => {
     const checkDbHealth = () => {
-      fetch('/api/health')
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.connected !== undefined) {
-            setDbConnected(Boolean(data.connected));
-          }
-        })
-        .catch(() => setDbConnected(false));
+      supabase.from('orders').select('id', { head: true, count: 'exact' })
+        .then(({ error }) => setDbConnected(!error));
     };
 
     const doSync = () => {
@@ -260,13 +270,14 @@ function ShopApp() {
     storageService.saveAuthUser(user);
     setCurrentUser(user);
     // Immediately synchronize database on login so latest persistent records are shown
-    storageService.syncFromDatabase().then((updated) => {
+    migrateLegacyLocalData().then(() => storageService.syncFromDatabase()).then((updated) => {
       if (updated) reloadData();
     });
   };
 
   // Logout handler
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
     storageService.saveAuthUser(null);
     setCurrentUser(null);
   };
@@ -286,7 +297,13 @@ function ShopApp() {
 
   // Save Order Handler
   const handleSaveOrder = async (savedOrder: Order, shouldPrint: boolean) => {
-    await storageService.saveOrderAsync(savedOrder);
+    try {
+      await storageService.saveOrderAsync(savedOrder);
+    } catch (error) {
+      const detail = getErrorMessage(error);
+      setNotification({ type: 'error', message: `Order was not saved to Supabase: ${detail}` });
+      throw error;
+    }
     reloadData();
     setEditingOrder(null);
     setPrefilledCustomer(null);
@@ -296,6 +313,11 @@ function ShopApp() {
       setActiveReceiptOrder(savedOrder);
     }
     setCurrentTab('dashboard');
+    setNotification({
+      type: 'success',
+      message: language === 'fa' ? `سفارش ${savedOrder.orderNumber} با موفقیت در دیتابیس ذخیره شد.` : language === 'ps' ? `فرمایش ${savedOrder.orderNumber} په بریالیتوب ډیټابیس ته خوندي شو.` : `Order ${savedOrder.orderNumber} was saved successfully to Supabase.`,
+    });
+    window.setTimeout(() => setNotification(null), 5000);
   };
 
   // Start New Blank Order
@@ -357,6 +379,7 @@ function ShopApp() {
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-[#1A1A1A] flex flex-col font-sans selection:bg-teal-400/30">
+      {notification && <div role="status" className={`fixed right-4 top-4 z-[100] max-w-md rounded-xl border px-4 py-3 text-sm font-bold shadow-xl ${notification.type === 'success' ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-rose-300 bg-rose-50 text-rose-800'}`}>{notification.message}</div>}
       {/* Sidebar Navigation */}
       <Sidebar
         currentTab={currentTab}

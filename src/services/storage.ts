@@ -10,6 +10,7 @@ import {
   ProductSale,
   GarmentTypeConfig
 } from '../types';
+import { fromDatabaseRows, supabase, toDatabaseRows } from '../lib/supabase';
 
 const DEFAULT_OWNER_PHONE = '0772559881';
 const LEGACY_OWNER_PHONE = '0749592404';
@@ -30,6 +31,7 @@ const STORAGE_KEYS = {
   SHOP_SETTINGS: 'tailor_shop_settings_v1',
   LANGUAGE: 'tailor_app_lang_v1',
   AUTH_USER: 'tailor_app_auth_user_v1',
+  UI_PREFERENCES: 'ui_preferences',
 };
 
 export const DEFAULT_PRODUCT_CATEGORIES = ['Shoes', 'Watches', 'Perfume', 'Accessories', 'Caps / Karakul'];
@@ -949,52 +951,57 @@ export const INITIAL_DEMO_FABRICS: Fabric[] = [
 ];
 
 // Helper to safely load data
+const memoryStore = new Map<string, any>();
+let authUser: { email: string; name: string } | null = null;
+let languagePreference: 'en' | 'fa' | 'ps' = 'fa';
+
 function getStoredItem<T>(key: string, defaultValue: T): T {
-  try {
-    const item = localStorage.getItem(key);
-    if (!item || item === 'undefined' || item === 'null') {
-      localStorage.setItem(key, JSON.stringify(defaultValue));
-      return defaultValue;
-    }
-    const parsed = JSON.parse(item);
-    if (parsed === null || parsed === undefined) {
-      return defaultValue;
-    }
-    if (Array.isArray(defaultValue) && !Array.isArray(parsed)) {
-      return defaultValue;
-    }
-    return parsed;
-  } catch {
-    return defaultValue;
-  }
+  return memoryStore.has(key) ? memoryStore.get(key) as T : defaultValue;
 }
 
 function setStoredItem<T>(key: string, value: T): void {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch (err) {
-    console.error('Failed to save to localStorage:', err);
-  }
+  memoryStore.set(key, value);
 }
 
-// Background sync helper to API if online
+const endpointTable: Record<string, string> = {
+  fabrics: 'fabrics', orders: 'orders', customers: 'customers', products: 'products',
+  'product-sales': 'product_sales', 'measurement-fields': 'measurement_fields',
+  'design-categories': 'design_categories', 'shop-settings': 'shop_settings',
+  'app-config': 'app_config',
+};
+
+// Direct Supabase mutation helper (there is no application backend).
 let activeSyncs = 0;
 
-async function apiSync(endpoint: string, method = 'GET', data?: any) {
+async function apiSync(endpoint: string, method = 'GET', data?: any, throwOnError = false) {
   activeSyncs++;
   try {
-    const res = await fetch(`/api/${endpoint}`, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: data ? JSON.stringify(data) : undefined,
-    });
-    if (res.ok) {
-      return await res.json();
-    } else {
-      console.warn(`API ${method} /api/${endpoint} returned status ${res.status}`);
+    const [base, id] = endpoint.split('/');
+    const table = endpointTable[base];
+    if (!table) throw new Error(`Unknown Supabase collection: ${base}`);
+    if (method === 'DELETE') {
+      const { error } = await supabase.from(table).delete().eq('id', id);
+      if (error) throw error;
+      return { success: true };
     }
+    let payload: any = data;
+    if (base === 'shop-settings') payload = { id: 'default', data, updated_at: new Date().toISOString() };
+    else if (base === 'app-config') payload = { id, data, updated_at: new Date().toISOString() };
+    else payload = toDatabaseRows(table, data);
+    if ((base === 'measurement-fields' || base === 'design-categories') && Array.isArray(payload)) {
+      const ids = payload.map(item => item.id);
+      const deleteQuery = ids.length ? supabase.from(table).delete().not('id', 'in', `(${ids.map(id => `"${id}"`).join(',')})`) : supabase.from(table).delete().neq('id', '');
+      const { error: deleteError } = await deleteQuery;
+      if (deleteError) throw deleteError;
+      if (!payload.length) return [];
+    }
+    const { data: saved, error } = await supabase.from(table).upsert(payload).select();
+    if (error) throw error;
+    return saved;
   } catch (err: any) {
-    console.warn(`API ${method} /api/${endpoint} connection error:`, err?.message || err);
+    console.warn(`Supabase ${method} ${endpoint} error:`, err?.message || err);
+    if (throwOnError) throw err;
+    return null;
   } finally {
     activeSyncs = Math.max(0, activeSyncs - 1);
   }
@@ -1003,6 +1010,15 @@ async function apiSync(endpoint: string, method = 'GET', data?: any) {
 
 // Storage Operations
 export const storageService = {
+  getUiPreferences(): { fabricLowStockThreshold: number; productLowStockThreshold: number } {
+    return getStoredItem(STORAGE_KEYS.UI_PREFERENCES, { fabricLowStockThreshold: 15, productLowStockThreshold: 3 });
+  },
+
+  saveUiPreferences(preferences: { fabricLowStockThreshold: number; productLowStockThreshold: number }): void {
+    setStoredItem(STORAGE_KEYS.UI_PREFERENCES, preferences);
+    apiSync('app-config/ui_preferences', 'POST', preferences);
+  },
+
   // Fabrics
   getFabrics(): Fabric[] {
     const list = getStoredItem<Fabric[]>(STORAGE_KEYS.FABRICS, INITIAL_DEMO_FABRICS);
@@ -1137,6 +1153,7 @@ export const storageService = {
     };
     list.push(newCat);
     setStoredItem(STORAGE_KEYS.PRODUCT_CATEGORIES, list);
+    apiSync('app-config/product_categories', 'POST', list);
     return newCat;
   },
 
@@ -1144,6 +1161,7 @@ export const storageService = {
     let list = this.getProductCategories();
     list = list.filter(c => c.id !== idOrName && c.name !== idOrName);
     setStoredItem(STORAGE_KEYS.PRODUCT_CATEGORIES, list);
+    apiSync('app-config/product_categories', 'POST', list);
     return list;
   },
 
@@ -1160,6 +1178,7 @@ export const storageService = {
     if (!list.includes(trimmed)) {
       list.push(trimmed);
       setStoredItem(STORAGE_KEYS.PRODUCT_VENDORS, list);
+      apiSync('app-config/product_vendors', 'POST', list);
     }
     return list;
   },
@@ -1168,6 +1187,7 @@ export const storageService = {
     let list = this.getProductVendors();
     list = list.filter(v => v !== name);
     setStoredItem(STORAGE_KEYS.PRODUCT_VENDORS, list);
+    apiSync('app-config/product_vendors', 'POST', list);
     return list;
   },
 
@@ -1185,6 +1205,7 @@ export const storageService = {
     if (!list.includes(trimmed)) {
       list.push(trimmed);
       setStoredItem(STORAGE_KEYS.PRODUCT_BRANDS, list);
+      apiSync('app-config/product_brands', 'POST', list);
     }
     return list;
   },
@@ -1193,6 +1214,7 @@ export const storageService = {
     let list = this.getProductBrands();
     list = list.filter(b => b !== name);
     setStoredItem(STORAGE_KEYS.PRODUCT_BRANDS, list);
+    apiSync('app-config/product_brands', 'POST', list);
     return list;
   },
 
@@ -1337,7 +1359,7 @@ export const storageService = {
     return orders.find(o => o.id === id || o.orderNumber === id);
   },
 
-  saveOrder(order: Order): Order {
+  saveOrder(order: Order, syncToSupabase = true): Order {
     const orders = this.getOrders();
     const existingIndex = orders.findIndex(o => o.id === order.id);
 
@@ -1359,15 +1381,10 @@ export const storageService = {
     setStoredItem(STORAGE_KEYS.ORDERS, orders);
     this.syncCustomerFromOrder(order);
 
-    // Sync to PostgreSQL database
-    apiSync('orders', 'POST', order).then(res => {
-      if (res && res.persistedToDb) {
-        console.log(`[PostgreSQL] Order ${order.orderNumber} successfully saved to DB.`);
-      }
-    }).catch(() => {});
+    if (syncToSupabase) apiSync('orders', 'POST', order).catch(() => {});
 
     const cust = this.getCustomerById(order.customerId);
-    if (cust) {
+    if (cust && syncToSupabase) {
       apiSync('customers', 'POST', cust).catch(() => {});
     }
 
@@ -1375,17 +1392,26 @@ export const storageService = {
   },
 
   async saveOrderAsync(order: Order): Promise<Order> {
-    const saved = this.saveOrder(order);
-    try {
-      await apiSync('orders', 'POST', order);
-      const cust = this.getCustomerById(order.customerId);
-      if (cust) {
-        await apiSync('customers', 'POST', cust);
-      }
-    } catch (e) {
-      console.warn('saveOrderAsync sync notice:', e);
-    }
-    return saved;
+    const existingCustomer = this.getCustomerById(order.customerId);
+    const customer: Customer = {
+      ...(existingCustomer || {} as Customer),
+      id: order.customerId,
+      name: order.customerName,
+      phone: order.customerPhone,
+      whatsapp: order.customerWhatsApp || order.customerPhone,
+      standardMeasurements: { ...(existingCustomer?.standardMeasurements || {}), ...(order.measurements || {}) },
+      preferredGarmentType: order.garmentType,
+      createdAt: existingCustomer?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      totalOrdersCount: existingCustomer?.totalOrdersCount || 0,
+      totalSpent: existingCustomer?.totalSpent || 0,
+      totalBalance: existingCustomer?.totalBalance || 0,
+    };
+
+    // Save the parent row first so installations with foreign keys accept the order.
+    await apiSync('customers', 'POST', customer, true);
+    await apiSync('orders', 'POST', order, true);
+    return this.saveOrder(order, false);
   },
 
   deleteOrder(id: string): void {
@@ -1526,6 +1552,7 @@ export const storageService = {
 
   saveGarmentTypes(types: GarmentTypeConfig[]): void {
     setStoredItem(STORAGE_KEYS.GARMENT_TYPES, types);
+    apiSync('app-config/garment_types', 'POST', types);
   },
 
   saveGarmentType(type: GarmentTypeConfig): GarmentTypeConfig {
@@ -1678,28 +1705,26 @@ export const storageService = {
 
   // Auth User Session
   getAuthUser(): { email: string; name: string } | null {
-    return getStoredItem<{ email: string; name: string } | null>(STORAGE_KEYS.AUTH_USER, null);
+    return authUser;
   },
 
   saveAuthUser(user: { email: string; name: string } | null): void {
-    if (user) {
-      setStoredItem(STORAGE_KEYS.AUTH_USER, user);
-    } else {
-      localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
-    }
+    authUser = user;
   },
+
+  getAuthToken(): string | null {
+    return null;
+  },
+
+  saveAuthToken(_token: string | null): void {},
 
   // Language
   getLanguage(): 'en' | 'fa' | 'ps' {
-    const stored = localStorage.getItem(STORAGE_KEYS.LANGUAGE);
-    if (stored === 'en' || stored === 'fa' || stored === 'ps') {
-      return stored;
-    }
-    return 'fa'; // Default to Dari / دری
+    return languagePreference;
   },
 
   saveLanguage(lang: 'en' | 'fa' | 'ps'): void {
-    localStorage.setItem(STORAGE_KEYS.LANGUAGE, lang);
+    languagePreference = lang;
   },
 
   // Backup & Export / Import
@@ -1738,6 +1763,18 @@ export const storageService = {
       if (data.garmentTypes) setStoredItem(STORAGE_KEYS.GARMENT_TYPES, data.garmentTypes);
       if (data.designCategories) setStoredItem(STORAGE_KEYS.DESIGN_CATEGORIES, data.designCategories);
       if (data.measurementFields) setStoredItem(STORAGE_KEYS.MEASUREMENT_FIELDS, data.measurementFields);
+      if (data.shopSettings) apiSync('shop-settings', 'POST', data.shopSettings);
+      if (data.customers) data.customers.forEach((row: Customer) => apiSync('customers', 'POST', row));
+      if (data.fabrics) data.fabrics.forEach((row: Fabric) => apiSync('fabrics', 'POST', row));
+      if (data.products) data.products.forEach((row: Product) => apiSync('products', 'POST', row));
+      if (data.productSales) data.productSales.forEach((row: ProductSale) => apiSync('product-sales', 'POST', row));
+      if (data.orders) data.orders.forEach((row: Order) => apiSync('orders', 'POST', row));
+      if (data.garmentTypes) apiSync('app-config/garment_types', 'POST', data.garmentTypes);
+      if (data.productCategories) apiSync('app-config/product_categories', 'POST', data.productCategories);
+      if (data.productVendors) apiSync('app-config/product_vendors', 'POST', data.productVendors);
+      if (data.productBrands) apiSync('app-config/product_brands', 'POST', data.productBrands);
+      if (data.designCategories) apiSync('design-categories', 'POST', data.designCategories);
+      if (data.measurementFields) apiSync('measurement-fields', 'POST', data.measurementFields);
       return true;
     } catch (err) {
       console.error('Failed to import database JSON:', err);
@@ -1776,69 +1813,32 @@ export const storageService = {
     return `MA-${String(max + 1).padStart(4, '0')}`;
   },
 
-  // Pull and push data with Server Database
+  // Pull the authoritative state directly from Supabase.
   async syncFromDatabase(): Promise<boolean> {
     if (activeSyncs > 0) {
       console.log('Skipping background sync because mutations are in flight');
       return false;
     }
     try {
-      // 1. Fetch latest collections from server
-      const [fabricsRes, ordersRes, customersRes, productsRes, productSalesRes, measurementFieldsRes, designCategoriesRes, shopSettingsRes] = await Promise.all([
-        fetch('/api/fabrics').catch(() => null),
-        fetch('/api/orders').catch(() => null),
-        fetch('/api/customers').catch(() => null),
-        fetch('/api/products').catch(() => null),
-        fetch('/api/product-sales').catch(() => null),
-        fetch('/api/measurement-fields').catch(() => null),
-        fetch('/api/design-categories').catch(() => null),
-        fetch('/api/shop-settings').catch(() => null)
-      ]);
-
-      if (ordersRes && ordersRes.ok) {
-        const data = await ordersRes.json();
-        if (Array.isArray(data) && (data.length > 0 || (this.getOrders() || []).length === 0)) {
-          setStoredItem(STORAGE_KEYS.ORDERS, data);
-        }
-      }
-
-      if (customersRes && customersRes.ok) {
-        const data = await customersRes.json();
-        if (Array.isArray(data) && (data.length > 0 || (this.getCustomers() || []).length === 0)) {
-          setStoredItem(STORAGE_KEYS.CUSTOMERS, data);
-        }
-      }
-
-      if (fabricsRes && fabricsRes.ok) {
-        const data = await fabricsRes.json();
-        if (Array.isArray(data) && (data.length > 0 || (this.getFabrics() || []).length === 0)) {
-          setStoredItem(STORAGE_KEYS.FABRICS, data);
-        }
-      }
-
-      if (productsRes && productsRes.ok) {
-        const data = await productsRes.json();
-        if (Array.isArray(data) && (data.length > 0 || (this.getProducts() || []).length === 0)) setStoredItem(STORAGE_KEYS.PRODUCTS, data);
-      }
-
-      if (productSalesRes && productSalesRes.ok) {
-        const data = await productSalesRes.json();
-        if (Array.isArray(data) && (data.length > 0 || (this.getProductSales() || []).length === 0)) setStoredItem(STORAGE_KEYS.PRODUCT_SALES, data);
-      }
-
-      if (measurementFieldsRes && measurementFieldsRes.ok) {
-        const data = await measurementFieldsRes.json();
-        if (Array.isArray(data) && data.length > 0) setStoredItem(STORAGE_KEYS.MEASUREMENT_FIELDS, data);
-      }
-
-      if (designCategoriesRes && designCategoriesRes.ok) {
-        const data = await designCategoriesRes.json();
-        if (Array.isArray(data) && data.length > 0) setStoredItem(STORAGE_KEYS.DESIGN_CATEGORIES, data);
-      }
-
-      if (shopSettingsRes && shopSettingsRes.ok) {
-        const data = await shopSettingsRes.json();
-        if (data && typeof data === 'object') setStoredItem(STORAGE_KEYS.SHOP_SETTINGS, data);
+      const names = ['fabrics','orders','customers','products','product_sales','measurement_fields','design_categories','shop_settings','app_config'];
+      const results = await Promise.all(names.map(name => supabase.from(name).select('*')));
+      const failed = results.find(result => result.error);
+      if (failed?.error) throw failed.error;
+      const [fabrics, orders, customers, products, sales, fields, designs, settings, config] = results.map(result => result.data || []);
+      setStoredItem(STORAGE_KEYS.FABRICS, fromDatabaseRows('fabrics', fabrics));
+      setStoredItem(STORAGE_KEYS.ORDERS, fromDatabaseRows('orders', orders));
+      setStoredItem(STORAGE_KEYS.CUSTOMERS, fromDatabaseRows('customers', customers));
+      setStoredItem(STORAGE_KEYS.PRODUCTS, fromDatabaseRows('products', products));
+      setStoredItem(STORAGE_KEYS.PRODUCT_SALES, fromDatabaseRows('product_sales', sales));
+      if (fields.length) setStoredItem(STORAGE_KEYS.MEASUREMENT_FIELDS, fromDatabaseRows('measurement_fields', fields));
+      if (designs.length) setStoredItem(STORAGE_KEYS.DESIGN_CATEGORIES, fromDatabaseRows('design_categories', designs));
+      if (settings[0]?.data) setStoredItem(STORAGE_KEYS.SHOP_SETTINGS, settings[0].data);
+      for (const row of config) {
+        if (row.id === 'product_categories') setStoredItem(STORAGE_KEYS.PRODUCT_CATEGORIES, row.data);
+        if (row.id === 'product_vendors') setStoredItem(STORAGE_KEYS.PRODUCT_VENDORS, row.data);
+        if (row.id === 'product_brands') setStoredItem(STORAGE_KEYS.PRODUCT_BRANDS, row.data);
+        if (row.id === 'garment_types') setStoredItem(STORAGE_KEYS.GARMENT_TYPES, row.data);
+        if (row.id === 'ui_preferences') setStoredItem(STORAGE_KEYS.UI_PREFERENCES, row.data);
       }
 
       return true;

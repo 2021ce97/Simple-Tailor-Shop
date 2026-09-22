@@ -74,7 +74,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
   const currentFormat: ReceiptPaperFormat = settings.receiptFormat || 'thermal80';
   const currentStyle: ThermalReceiptStyle = settings.receiptThermalStyle || 'standard';
 
-  // Save changes to shopSettings in localStorage and notify parent
+  // Save changes to Supabase and notify the parent view.
   const handleSave = () => {
     storageService.saveShopSettings(settings);
     if (onUpdateShopSettings) {

@@ -40,17 +40,12 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
   const [isAddingNew, setIsAddingNew] = useState(false);
 
   // Configurable Low Stock Threshold (default: 15 meters)
-  const [lowStockThreshold, setLowStockThreshold] = useState<number>(() => {
-    const saved = localStorage.getItem('fabrics_low_stock_threshold');
-    return saved ? Math.max(1, parseInt(saved, 10)) : 15;
-  });
+  const [lowStockThreshold, setLowStockThreshold] = useState<number>(() => storageService.getUiPreferences().fabricLowStockThreshold);
 
   const handleUpdateThreshold = (val: number) => {
     const cleaned = Math.max(1, val);
     setLowStockThreshold(cleaned);
-    localStorage.setItem('fabrics_low_stock_threshold', cleaned.toString());
-    // Also notify window for sidebar synchronization
-    window.dispatchEvent(new Event('storage'));
+    storageService.saveUiPreferences({ ...storageService.getUiPreferences(), fabricLowStockThreshold: cleaned });
   };
 
   // Form fields

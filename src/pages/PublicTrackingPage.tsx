@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CheckCircle2, Clock3, Scissors, Search, Shirt, XCircle } from 'lucide-react';
 import { Language } from '../types';
 import { storageService } from '../services/storage';
 import { translations } from '../translations/i18n';
+import { supabase } from '../lib/supabase';
 
 type PublicOrder = {
   orderNumber: string;
@@ -28,7 +29,11 @@ export const PublicTrackingView: React.FC = () => {
   const [orders, setOrders] = useState<PublicOrder[]>([]);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const shopSettings = storageService.getShopSettings();
+  const [shopSettings, setShopSettings] = useState(storageService.getShopSettings());
+  useEffect(() => {
+    supabase.from('shop_settings').select('data').eq('id', 'default').maybeSingle()
+      .then(({ data }) => { if (data?.data) setShopSettings({ ...shopSettings, ...data.data }); });
+  }, []);
   const garmentKeys = ['perahanTunban', 'waistcoat', 'suit', 'coatKorti', 'kameezShalwar', 'kurta', 'otherGarment'] as const;
   const localizeGarment = (garmentType: string) => {
     const key = garmentKeys.find(item =>
@@ -42,45 +47,17 @@ export const PublicTrackingView: React.FC = () => {
     const value = lookup.trim();
     if (!value) return;
 
-    const normalizedLookup = value.replace(/\D/g, '');
-    const localMatches = storageService.getOrders()
-      .filter(order =>
-        order.orderNumber.trim().toLowerCase() === value.toLowerCase() ||
-        String(order.orderNumber || '').replace(/\D/g, '') === normalizedLookup ||
-        String(order.customerPhone || '').replace(/\D/g, '') === normalizedLookup ||
-        String(order.customerWhatsApp || '').replace(/\D/g, '') === normalizedLookup
-      )
-      .map(order => ({
-        orderNumber: order.orderNumber,
-        garmentType: order.garmentType,
-        quantity: order.quantity,
-        status: order.status,
-        orderDate: order.orderDate,
-        deliveryDate: order.deliveryDate,
-        completedDate: order.completedDate,
-        deliveredDate: order.deliveredDate,
-      }));
-
     setError('');
     setOrders([]);
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/public/orders?lookup=${encodeURIComponent(value)}`);
-      const data = await response.json();
-      if (response.ok && Array.isArray(data.orders) && data.orders.length > 0) {
-        setOrders(data.orders);
+      const { data, error: lookupError } = await supabase.rpc('lookup_public_orders', { lookup_value: value });
+      if (!lookupError && Array.isArray(data) && data.length > 0) {
+        setOrders(data.map((row: any) => ({ orderNumber: row.order_number, garmentType: row.garment_type, quantity: row.quantity, status: row.status, orderDate: row.order_date, deliveryDate: row.delivery_date, completedDate: row.completed_date, deliveredDate: row.delivered_date })));
         return;
       }
-      if (localMatches.length > 0) {
-        setOrders(localMatches);
-        return;
-      }
-      throw new Error(data.error || 'Order not found');
+      throw lookupError || new Error('Order not found');
     } catch (searchError) {
-      if (localMatches.length > 0) {
-        setOrders(localMatches);
-        return;
-      }
       setError(searchError instanceof Error ? searchError.message : 'Order not found');
     } finally {
       setIsLoading(false);

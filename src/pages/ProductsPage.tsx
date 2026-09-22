@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Product, ProductCategory, ProductSale, Language } from '../types';
 import { translations } from '../translations/i18n';
+import { storageService } from '../services/storage';
 import { 
   ShoppingBag, 
   Plus, 
@@ -61,16 +62,12 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
   const [activeViewTab, setActiveViewTab] = useState<'inventory' | 'sales'>('inventory');
 
   // Configurable Low Stock Threshold (default: 3 units)
-  const [lowStockThreshold, setLowStockThreshold] = useState<number>(() => {
-    const saved = localStorage.getItem('products_low_stock_threshold');
-    return saved ? Math.max(1, parseInt(saved, 10)) : 3;
-  });
+  const [lowStockThreshold, setLowStockThreshold] = useState<number>(() => storageService.getUiPreferences().productLowStockThreshold);
 
   const handleUpdateThreshold = (val: number) => {
     const cleaned = Math.max(1, val);
     setLowStockThreshold(cleaned);
-    localStorage.setItem('products_low_stock_threshold', cleaned.toString());
-    window.dispatchEvent(new Event('storage'));
+    storageService.saveUiPreferences({ ...storageService.getUiPreferences(), productLowStockThreshold: cleaned });
   };
 
   // Modals state

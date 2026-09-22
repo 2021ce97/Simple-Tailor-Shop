@@ -13,6 +13,7 @@ import {
 } from '../types';
 import { translations } from '../translations/i18n';
 import { storageService } from '../services/storage';
+import { getErrorMessage } from '../lib/errors';
 import { 
   Scissors, 
   User, 
@@ -46,7 +47,7 @@ interface OrderFormProps {
   designCategories: DesignCategory[];
   shopSettings: ShopSettings;
   language: Language;
-  onSave: (order: Order, shouldPrint: boolean) => void;
+  onSave: (order: Order, shouldPrint: boolean) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -139,6 +140,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
     initialOrder?.cabinetSlot || ''
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   // Pricing & Payment
   const [totalAmount, setTotalAmount] = useState<number>(initialOrder?.totalAmount || 1800);
@@ -289,6 +291,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
     }
 
     setIsSaving(true);
+    setSaveError('');
     try {
       const orderData: Order = {
         id: initialOrder?.id || 'ord_' + Date.now(),
@@ -321,6 +324,9 @@ export const OrderForm: React.FC<OrderFormProps> = ({
       };
 
       await onSave(orderData, shouldPrint);
+    } catch (error) {
+      const detail = getErrorMessage(error);
+      setSaveError(language === 'fa' ? `سفارش در دیتابیس ذخیره نشد: ${detail}` : language === 'ps' ? `فرمایش په ډیټابیس کې خوندي نه شو: ${detail}` : `Order was not saved to Supabase: ${detail}`);
     } finally {
       setIsSaving(false);
     }
@@ -328,6 +334,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
 
   return (
     <div className="max-w-6xl mx-auto pb-16 animate-in fade-in duration-200">
+      {saveError && <div role="alert" className="mb-4 flex items-start gap-2 rounded-xl border border-rose-300 bg-rose-50 p-4 text-sm font-bold text-rose-800"><AlertCircle className="h-5 w-5 shrink-0" /><span>{saveError}</span></div>}
       {/* Top Banner & Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6 bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs">
         <div className="flex items-center gap-3">

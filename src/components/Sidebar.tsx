@@ -1,6 +1,7 @@
 import React from 'react';
 import { Language, ShopSettings, Order, Customer, Fabric, Product } from '../types';
 import { translations } from '../translations/i18n';
+import { storageService } from '../services/storage';
 import { 
   Scissors, 
   LayoutDashboard, 
@@ -18,8 +19,6 @@ import {
   Database,
   RefreshCw
 } from 'lucide-react';
-import { storageService } from '../services/storage';
-
 export type MainNavTab = 'dashboard' | 'new_order' | 'customers' | 'fabrics' | 'products' | 'sales_history' | 'reports' | 'settings';
 export type SettingsSubTab = 'design' | 'measurements' | 'garments' | 'shop' | 'receipt' | 'backup';
 
@@ -71,7 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const totalOrdersCount = orders.length;
   const totalCustomersCount = customers.length;
   const totalFabricsCount = fabrics.length;
-  const fabricThreshold = Number(localStorage.getItem('fabrics_low_stock_threshold') || 15);
+  const fabricThreshold = storageService.getUiPreferences().fabricLowStockThreshold;
   const lowFabricCount = fabrics.filter(fabric => {
     const stock = Number(fabric.stockMeters) || 0;
     return stock > 0 && stock <= fabricThreshold;
