@@ -4,7 +4,7 @@ A tailored shop-management system for orders, customer measurements, fabric and 
 
 ## Source structure
 
-- `src/pages` — full application screens
+- `src/pages` — full application screens,,,,,
 - `src/components` — reusable interface components
 - `src/services` — shop data operations, printing, and legacy-data migration
 - `src/lib` — Supabase client and shared helpers
