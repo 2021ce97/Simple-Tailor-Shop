@@ -8,7 +8,7 @@ A tailored shop-management system for orders, customer measurements, fabric and 
 - `src/components` — reusable interface components
 - `src/app` — top-level routing and application composition
 - `src/hooks` — session, synchronization, and shared state hooks
-- `src/services` — shop data operations, printing, and legacy-data migration
+- `src/services` — Supabase-backed shop data operations and printing
 - `src/lib` — Supabase client and shared helpers
 - `src/translations` — English, Dari, and Pashto copy
 - `supabase/migrations` — database schema and security changes
@@ -21,7 +21,7 @@ A tailored shop-management system for orders, customer measurements, fabric and 
 4. Copy `.env.example` to `.env` and set the Supabase URL and publishable key. Do not commit `.env`.
 5. Run `npm run dev`, then open the URL Vite displays.
 
-The React app connects directly to Supabase. On the first successful login, legacy browser data is uploaded to Supabase and removed from browser storage after the upload succeeds.
+The React app connects directly to Supabase. Retired application cache keys are removed from browser storage at startup; business records are loaded from Supabase.
 
 ## Production
 

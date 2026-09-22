@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { migrateLegacyLocalData } from '../services/legacyMigration';
 import { storageService } from '../services/storage';
 
 export interface AppUser { email: string; name: string }
@@ -14,7 +13,6 @@ export function useSupabaseSession(onDataReady: () => void) {
   const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
 
   const hydrate = useCallback(async () => {
-    await migrateLegacyLocalData();
     await storageService.syncFromDatabase();
     onDataReady();
   }, [onDataReady]);

@@ -1021,8 +1021,8 @@ export const storageService = {
 
   // Fabrics
   getFabrics(): Fabric[] {
-    const list = getStoredItem<Fabric[]>(STORAGE_KEYS.FABRICS, INITIAL_DEMO_FABRICS);
-    return Array.isArray(list) ? list : INITIAL_DEMO_FABRICS;
+    const list = getStoredItem<Fabric[]>(STORAGE_KEYS.FABRICS, []);
+    return Array.isArray(list) ? list : [];
   },
 
   getFabricById(id: string): Fabric | undefined {
@@ -1071,10 +1071,10 @@ export const storageService = {
 
   // Products & Retail Inventory
   getProducts(): Product[] {
-    const list = getStoredItem<Product[]>(STORAGE_KEYS.PRODUCTS, INITIAL_DEMO_PRODUCTS);
+    const list = getStoredItem<Product[]>(STORAGE_KEYS.PRODUCTS, []);
     return Array.isArray(list)
       ? list.map(product => product.brand === 'Rayan Signature' ? { ...product, brand: 'Mujeeb Collection' } : product)
-      : INITIAL_DEMO_PRODUCTS;
+      : [];
   },
 
   getProductById(id: string): Product | undefined {
@@ -1132,8 +1132,8 @@ export const storageService = {
 
   // Product Categories
   getProductCategories(): ProductCategory[] {
-    const list = getStoredItem<any[]>(STORAGE_KEYS.PRODUCT_CATEGORIES, DEFAULT_PRODUCT_CATEGORIES);
-    const safeList = Array.isArray(list) && list.length > 0 ? list : DEFAULT_PRODUCT_CATEGORIES;
+    const list = getStoredItem<any[]>(STORAGE_KEYS.PRODUCT_CATEGORIES, []);
+    const safeList = Array.isArray(list) ? list : [];
     return safeList.map((item, idx) => {
       if (typeof item === 'string') {
         return { id: `cat_${idx}_${item.toLowerCase().replace(/[^a-z0-9]/g, '_')}`, name: item };
@@ -1167,8 +1167,8 @@ export const storageService = {
 
   // Product Vendors
   getProductVendors(): string[] {
-    const list = getStoredItem<string[]>(STORAGE_KEYS.PRODUCT_VENDORS, DEFAULT_PRODUCT_VENDORS);
-    return Array.isArray(list) && list.length > 0 ? list : DEFAULT_PRODUCT_VENDORS;
+    const list = getStoredItem<string[]>(STORAGE_KEYS.PRODUCT_VENDORS, []);
+    return Array.isArray(list) ? list : [];
   },
 
   saveProductVendor(name: string): string[] {
@@ -1193,9 +1193,8 @@ export const storageService = {
 
   // Product Brands
   getProductBrands(): string[] {
-    const list = getStoredItem<string[]>(STORAGE_KEYS.PRODUCT_BRANDS, DEFAULT_PRODUCT_BRANDS);
-    const migrated = Array.isArray(list) ? list.map(brand => brand === 'Rayan Signature' ? 'Mujeeb Collection' : brand) : DEFAULT_PRODUCT_BRANDS;
-    return migrated.length > 0 ? migrated : DEFAULT_PRODUCT_BRANDS;
+    const list = getStoredItem<string[]>(STORAGE_KEYS.PRODUCT_BRANDS, []);
+    return Array.isArray(list) ? list : [];
   },
 
   saveProductBrand(name: string): string[] {
@@ -1220,7 +1219,7 @@ export const storageService = {
 
   // Product Sales
   getProductSales(): ProductSale[] {
-    const list = getStoredItem<ProductSale[]>(STORAGE_KEYS.PRODUCT_SALES, INITIAL_DEMO_PRODUCT_SALES);
+    const list = getStoredItem<ProductSale[]>(STORAGE_KEYS.PRODUCT_SALES, []);
     return Array.isArray(list) ? list : [];
   },
 
@@ -1546,8 +1545,8 @@ export const storageService = {
 
   // Garment Types
   getGarmentTypes(): GarmentTypeConfig[] {
-    const list = getStoredItem<GarmentTypeConfig[]>(STORAGE_KEYS.GARMENT_TYPES, DEFAULT_GARMENT_TYPES);
-    return Array.isArray(list) && list.length > 0 ? list : DEFAULT_GARMENT_TYPES;
+    const list = getStoredItem<GarmentTypeConfig[]>(STORAGE_KEYS.GARMENT_TYPES, []);
+    return Array.isArray(list) ? list : [];
   },
 
   saveGarmentTypes(types: GarmentTypeConfig[]): void {
@@ -1578,8 +1577,8 @@ export const storageService = {
 
   // Design Categories
   getDesignCategories(garmentType?: string): DesignCategory[] {
-    const list = getStoredItem<DesignCategory[]>(STORAGE_KEYS.DESIGN_CATEGORIES, DEFAULT_DESIGN_CATEGORIES);
-    const categories = Array.isArray(list) ? list : DEFAULT_DESIGN_CATEGORIES;
+    const list = getStoredItem<DesignCategory[]>(STORAGE_KEYS.DESIGN_CATEGORIES, []);
+    const categories = Array.isArray(list) ? list : [];
     
     // Normalize existing data so every category has a valid garmentCategory (defaulting to perahan_tunban if missing)
     const normalized = categories.map(cat => ({
@@ -1628,8 +1627,8 @@ export const storageService = {
 
   // Measurement Fields
   getMeasurementFields(garmentType?: string): MeasurementField[] {
-    const list = getStoredItem<MeasurementField[]>(STORAGE_KEYS.MEASUREMENT_FIELDS, DEFAULT_MEASUREMENT_FIELDS);
-    const fields = Array.isArray(list) ? list : DEFAULT_MEASUREMENT_FIELDS;
+    const list = getStoredItem<MeasurementField[]>(STORAGE_KEYS.MEASUREMENT_FIELDS, []);
+    const fields = Array.isArray(list) ? list : [];
 
     // Normalize existing data so older fields get assigned to 'perahan_tunban'
     const normalized = fields.map(field => ({
@@ -1783,17 +1782,17 @@ export const storageService = {
   },
 
   resetAllToDemo(): void {
-    setStoredItem(STORAGE_KEYS.ORDERS, INITIAL_DEMO_ORDERS);
-    setStoredItem(STORAGE_KEYS.CUSTOMERS, INITIAL_DEMO_CUSTOMERS);
-    setStoredItem(STORAGE_KEYS.FABRICS, INITIAL_DEMO_FABRICS);
-    setStoredItem(STORAGE_KEYS.PRODUCTS, INITIAL_DEMO_PRODUCTS);
-    setStoredItem(STORAGE_KEYS.PRODUCT_CATEGORIES, DEFAULT_PRODUCT_CATEGORIES);
-    setStoredItem(STORAGE_KEYS.PRODUCT_VENDORS, DEFAULT_PRODUCT_VENDORS);
-    setStoredItem(STORAGE_KEYS.PRODUCT_BRANDS, DEFAULT_PRODUCT_BRANDS);
-    setStoredItem(STORAGE_KEYS.PRODUCT_SALES, INITIAL_DEMO_PRODUCT_SALES);
-    setStoredItem(STORAGE_KEYS.GARMENT_TYPES, DEFAULT_GARMENT_TYPES);
-    setStoredItem(STORAGE_KEYS.DESIGN_CATEGORIES, DEFAULT_DESIGN_CATEGORIES);
-    setStoredItem(STORAGE_KEYS.MEASUREMENT_FIELDS, DEFAULT_MEASUREMENT_FIELDS);
+    setStoredItem(STORAGE_KEYS.ORDERS, []);
+    setStoredItem(STORAGE_KEYS.CUSTOMERS, []);
+    setStoredItem(STORAGE_KEYS.FABRICS, []);
+    setStoredItem(STORAGE_KEYS.PRODUCTS, []);
+    setStoredItem(STORAGE_KEYS.PRODUCT_CATEGORIES, []);
+    setStoredItem(STORAGE_KEYS.PRODUCT_VENDORS, []);
+    setStoredItem(STORAGE_KEYS.PRODUCT_BRANDS, []);
+    setStoredItem(STORAGE_KEYS.PRODUCT_SALES, []);
+    setStoredItem(STORAGE_KEYS.GARMENT_TYPES, []);
+    setStoredItem(STORAGE_KEYS.DESIGN_CATEGORIES, []);
+    setStoredItem(STORAGE_KEYS.MEASUREMENT_FIELDS, []);
     setStoredItem(STORAGE_KEYS.SHOP_SETTINGS, DEFAULT_SHOP_SETTINGS);
   },
 
@@ -1830,9 +1829,14 @@ export const storageService = {
       setStoredItem(STORAGE_KEYS.CUSTOMERS, fromDatabaseRows('customers', customers));
       setStoredItem(STORAGE_KEYS.PRODUCTS, fromDatabaseRows('products', products));
       setStoredItem(STORAGE_KEYS.PRODUCT_SALES, fromDatabaseRows('product_sales', sales));
-      if (fields.length) setStoredItem(STORAGE_KEYS.MEASUREMENT_FIELDS, fromDatabaseRows('measurement_fields', fields));
-      if (designs.length) setStoredItem(STORAGE_KEYS.DESIGN_CATEGORIES, fromDatabaseRows('design_categories', designs));
+      setStoredItem(STORAGE_KEYS.MEASUREMENT_FIELDS, fromDatabaseRows('measurement_fields', fields));
+      setStoredItem(STORAGE_KEYS.DESIGN_CATEGORIES, fromDatabaseRows('design_categories', designs));
       if (settings[0]?.data) setStoredItem(STORAGE_KEYS.SHOP_SETTINGS, settings[0].data);
+      setStoredItem(STORAGE_KEYS.PRODUCT_CATEGORIES, []);
+      setStoredItem(STORAGE_KEYS.PRODUCT_VENDORS, []);
+      setStoredItem(STORAGE_KEYS.PRODUCT_BRANDS, []);
+      setStoredItem(STORAGE_KEYS.GARMENT_TYPES, []);
+      setStoredItem(STORAGE_KEYS.UI_PREFERENCES, { fabricLowStockThreshold: 15, productLowStockThreshold: 3 });
       for (const row of config) {
         if (row.id === 'product_categories') setStoredItem(STORAGE_KEYS.PRODUCT_CATEGORIES, row.data);
         if (row.id === 'product_vendors') setStoredItem(STORAGE_KEYS.PRODUCT_VENDORS, row.data);
