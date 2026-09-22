@@ -95,6 +95,7 @@ function ShopApp() {
   const [globalOrderSearch, setGlobalOrderSearch] = useState('');
   const [settingsSubTab, setSettingsSubTab] = useState<SettingsSubTab>('design');
   const [isSidebarOpenMobile, setIsSidebarOpenMobile] = useState<boolean>(false);
+  const [dbConnected, setDbConnected] = useState<boolean>(true);
 
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [prefilledCustomer, setPrefilledCustomer] = useState<Customer | null>(null);
@@ -112,7 +113,19 @@ function ShopApp() {
 
   // Initial & Periodic Automatic Background Database Sync
   useEffect(() => {
+    const checkDbHealth = () => {
+      fetch('/api/health')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.connected !== undefined) {
+            setDbConnected(Boolean(data.connected));
+          }
+        })
+        .catch(() => setDbConnected(false));
+    };
+
     const doSync = () => {
+      checkDbHealth();
       storageService.syncFromDatabase().then((updated) => {
         if (updated) {
           reloadData();
@@ -246,6 +259,10 @@ function ShopApp() {
   const handleLoginSuccess = (user: { email: string; name: string }) => {
     storageService.saveAuthUser(user);
     setCurrentUser(user);
+    // Immediately synchronize database on login so latest persistent records are shown
+    storageService.syncFromDatabase().then((updated) => {
+      if (updated) reloadData();
+    });
   };
 
   // Logout handler
@@ -357,6 +374,7 @@ function ShopApp() {
         onSelectNav={handleSelectNav}
         onLanguageChange={handleLanguageChange}
         onSignOut={handleSignOut}
+        dbConnected={dbConnected}
       />
 
       {/* Main Content Layout with responsive margin for desktop sidebar */}
@@ -376,6 +394,7 @@ function ShopApp() {
           }}
           onLanguageChange={handleLanguageChange}
           onSignOut={handleSignOut}
+          dbConnected={dbConnected}
         />
 
         {/* Main Content View Container */}

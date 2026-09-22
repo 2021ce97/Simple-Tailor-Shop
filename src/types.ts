@@ -100,6 +100,9 @@ export interface ProductSale {
   purchasePrice: number; // cost
   sellingPrice: number; // decided at time of sale
   totalAmount: number;
+  paidAmount: number;
+  balanceAmount: number;
+  paymentStatus: PaymentStatus;
   profit: number; // (sellingPrice - purchasePrice) * quantity
   customerId?: string;
   customerName?: string;

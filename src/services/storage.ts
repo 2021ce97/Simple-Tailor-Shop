@@ -140,6 +140,9 @@ export const INITIAL_DEMO_PRODUCT_SALES: ProductSale[] = [
     purchasePrice: 1200,
     sellingPrice: 1750,
     totalAmount: 3500,
+    paidAmount: 3500,
+    balanceAmount: 0,
+    paymentStatus: 'paid',
     profit: 1100,
     customerName: 'Ahmad Khan',
     customerPhone: '0771002003',
@@ -156,6 +159,9 @@ export const INITIAL_DEMO_PRODUCT_SALES: ProductSale[] = [
     purchasePrice: 850,
     sellingPrice: 1400,
     totalAmount: 1400,
+    paidAmount: 1400,
+    balanceAmount: 0,
+    paymentStatus: 'paid',
     profit: 550,
     customerName: 'Farid Safi',
     customerPhone: '0772557002',
@@ -1202,9 +1208,11 @@ export const storageService = {
     category: string;
     quantity: number;
     sellingPrice: number;
+    paidAmount?: number;
     customerId?: string;
     customerName?: string;
     customerPhone?: string;
+    paymentMethod?: string;
     notes?: string;
   }): ProductSale {
     const products = this.getProducts() || [];
@@ -1213,6 +1221,9 @@ export const storageService = {
     const qty = Math.max(1, Number(sale.quantity) || 1);
     const sellingPrice = Number(sale.sellingPrice) || 0;
     const totalAmount = sellingPrice * qty;
+    const paidAmount = sale.paidAmount !== undefined ? Number(sale.paidAmount) : totalAmount;
+    const balanceAmount = Math.max(0, totalAmount - paidAmount);
+    const paymentStatus = balanceAmount === 0 ? 'paid' : paidAmount > 0 ? 'partial' : 'unpaid';
     const profit = (sellingPrice - purchasePrice) * qty;
 
     const newSale: ProductSale = {
@@ -1224,11 +1235,15 @@ export const storageService = {
       purchasePrice,
       sellingPrice,
       totalAmount,
+      paidAmount,
+      balanceAmount,
+      paymentStatus: paymentStatus as any,
       profit,
       customerId: sale.customerId,
       customerName: sale.customerName,
       customerPhone: sale.customerPhone,
       saleDate: new Date().toISOString(),
+      paymentMethod: sale.paymentMethod || 'cash',
       notes: sale.notes,
     };
 
@@ -1244,6 +1259,35 @@ export const storageService = {
     sales.unshift(newSale);
     setStoredItem(STORAGE_KEYS.PRODUCT_SALES, sales);
     apiSync('product-sales', 'POST', newSale);
+
+    if (sale.customerName && sale.customerPhone) {
+      const customers = this.getCustomers() || [];
+      const cleanPhone = sale.customerPhone.trim();
+      const existingCustomer = customers.find(c => 
+        (sale.customerId && c.id === sale.customerId) || c.phone === cleanPhone
+      );
+      if (existingCustomer) {
+        newSale.customerId = existingCustomer.id;
+        this.recalculateCustomerStats(existingCustomer.id);
+      } else {
+        const newCust: Customer = {
+          id: sale.customerId || `cust_sale_${Date.now()}`,
+          name: sale.customerName.trim(),
+          phone: cleanPhone,
+          whatsapp: cleanPhone,
+          notes: 'Retail customer',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          totalOrdersCount: 0,
+          totalSpent: totalAmount,
+          totalBalance: balanceAmount,
+        };
+        customers.unshift(newCust);
+        setStoredItem(STORAGE_KEYS.CUSTOMERS, customers);
+        apiSync('customers', 'POST', newCust);
+        newSale.customerId = newCust.id;
+      }
+    }
 
     return newSale;
   },
@@ -1399,14 +1443,22 @@ export const storageService = {
 
   recalculateCustomerStats(customerId: string): void {
     const orders = (this.getOrders() || []).filter(o => o.customerId === customerId);
+    const sales = (this.getProductSales() || []).filter(s => s.customerId === customerId);
     const customers = this.getCustomers() || [];
     const customer = customers.find(c => c.id === customerId);
 
     if (customer) {
       customer.totalOrdersCount = orders.length;
-      customer.totalSpent = orders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
-      customer.totalBalance = orders.reduce((sum, o) => sum + (Number(o.balanceAmount) || 0), 0);
+      const ordersSpent = orders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+      const salesSpent = sales.reduce((sum, s) => sum + (Number(s.totalAmount) || 0), 0);
+      customer.totalSpent = ordersSpent + salesSpent;
+
+      const ordersBalance = orders.reduce((sum, o) => sum + (Number(o.balanceAmount) || 0), 0);
+      const salesBalance = sales.reduce((sum, s) => sum + (Number(s.balanceAmount) || 0), 0);
+      customer.totalBalance = ordersBalance + salesBalance;
+
       setStoredItem(STORAGE_KEYS.CUSTOMERS, customers);
+      apiSync('customers', 'POST', customer);
     }
   },
 
@@ -1745,33 +1797,33 @@ export const storageService = {
 
       if (ordersRes && ordersRes.ok) {
         const data = await ordersRes.json();
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && (data.length > 0 || (this.getOrders() || []).length === 0)) {
           setStoredItem(STORAGE_KEYS.ORDERS, data);
         }
       }
 
       if (customersRes && customersRes.ok) {
         const data = await customersRes.json();
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && (data.length > 0 || (this.getCustomers() || []).length === 0)) {
           setStoredItem(STORAGE_KEYS.CUSTOMERS, data);
         }
       }
 
       if (fabricsRes && fabricsRes.ok) {
         const data = await fabricsRes.json();
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data) && (data.length > 0 || (this.getFabrics() || []).length === 0)) {
           setStoredItem(STORAGE_KEYS.FABRICS, data);
         }
       }
 
       if (productsRes && productsRes.ok) {
         const data = await productsRes.json();
-        if (Array.isArray(data)) setStoredItem(STORAGE_KEYS.PRODUCTS, data);
+        if (Array.isArray(data) && (data.length > 0 || (this.getProducts() || []).length === 0)) setStoredItem(STORAGE_KEYS.PRODUCTS, data);
       }
 
       if (productSalesRes && productSalesRes.ok) {
         const data = await productSalesRes.json();
-        if (Array.isArray(data)) setStoredItem(STORAGE_KEYS.PRODUCT_SALES, data);
+        if (Array.isArray(data) && (data.length > 0 || (this.getProductSales() || []).length === 0)) setStoredItem(STORAGE_KEYS.PRODUCT_SALES, data);
       }
 
       if (measurementFieldsRes && measurementFieldsRes.ok) {

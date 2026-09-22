@@ -39,6 +39,7 @@ interface SidebarProps {
   onSelectNav: (tab: MainNavTab, subTab?: SettingsSubTab) => void;
   onLanguageChange: (lang: Language) => void;
   onSignOut?: () => void;
+  dbConnected?: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -55,6 +56,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectNav,
   onLanguageChange,
   onSignOut,
+  dbConnected = true,
 }) => {
   const t = translations[language];
   const isRtl = language === 'fa' || language === 'ps';
@@ -328,6 +330,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
               6
             </span>
           </button>
+        </div>
+
+        {/* Database Live Status Indicator */}
+        <div className="px-3 pb-2 shrink-0">
+          <div className="flex items-center justify-between text-xs px-2.5 py-1.5 rounded-xl bg-stone-900/90 border border-stone-800">
+            <div className="flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full ${dbConnected !== false ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+              <span className="text-[11px] font-medium text-stone-300">
+                {language === 'fa' ? 'دیتابیس ابری' : language === 'ps' ? 'د ډیټابیس حالت' : 'Cloud Database'}
+              </span>
+            </div>
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+              dbConnected !== false 
+                ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/40' 
+                : 'bg-amber-950 text-amber-400 border border-amber-800/40'
+            }`}>
+              {dbConnected !== false ? (language === 'fa' ? 'متصل' : language === 'ps' ? 'وصل دی' : 'Connected') : (language === 'fa' ? 'در حال اتصال' : language === 'ps' ? 'نښلول کیږي' : 'Connecting')}
+            </span>
+          </div>
         </div>
 
         {/* User Account & Sign Out Section */}

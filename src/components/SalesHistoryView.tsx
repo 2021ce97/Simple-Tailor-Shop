@@ -72,6 +72,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
   const [productSearchQuery, setProductSearchQuery] = useState('');
   const [quantity, setQuantity] = useState<number>(1);
   const [sellingPrice, setSellingPrice] = useState<number>(0);
+  const [paidAmount, setPaidAmount] = useState<number>(0);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
   const [customCustomerName, setCustomCustomerName] = useState<string>('');
   const [customCustomerPhone, setCustomCustomerPhone] = useState<string>('');
@@ -188,17 +189,22 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
     if (preselectedProd) {
       setSelectedProductId(preselectedProd.id);
       setQuantity(1);
-      setSellingPrice(Math.round(preselectedProd.purchasePrice * 1.3));
+      const pr = Math.round(preselectedProd.purchasePrice * 1.3);
+      setSellingPrice(pr);
+      setPaidAmount(pr);
     } else {
       const firstAvailable = products.find(p => (Number(p.stockQuantity) || 0) > 0) || products[0];
       if (firstAvailable) {
         setSelectedProductId(firstAvailable.id);
         setQuantity(1);
-        setSellingPrice(Math.round(firstAvailable.purchasePrice * 1.3));
+        const pr = Math.round(firstAvailable.purchasePrice * 1.3);
+        setSellingPrice(pr);
+        setPaidAmount(pr);
       } else {
         setSelectedProductId('');
         setQuantity(1);
         setSellingPrice(0);
+        setPaidAmount(0);
       }
     }
     setSelectedCustomerId('');
@@ -219,7 +225,9 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
     const prod = products.find(p => p.id === prodId);
     if (prod) {
       setQuantity(1);
-      setSellingPrice(Math.round(prod.purchasePrice * 1.3));
+      const pr = Math.round(prod.purchasePrice * 1.3);
+      setSellingPrice(pr);
+      setPaidAmount(pr);
     }
   };
 
@@ -257,6 +265,9 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
 
     const unitBuyPrice = Number(selectedProduct.purchasePrice) || 0;
     const totalAmount = qty * unitSellPrice;
+    const finalPaid = paidAmount !== undefined ? Number(paidAmount) : totalAmount;
+    const balanceAmount = Math.max(0, totalAmount - finalPaid);
+    const paymentStatus = balanceAmount === 0 ? 'paid' : finalPaid > 0 ? 'partial' : 'unpaid';
     const profit = (unitSellPrice - unitBuyPrice) * qty;
 
     // Determine customer info
@@ -289,6 +300,9 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
         sellingPrice: unitSellPrice,
         quantity: qty,
         totalAmount,
+        paidAmount: finalPaid,
+        balanceAmount,
+        paymentStatus,
         profit,
         customerId: finalCustId,
         customerName: finalCustName || undefined,
@@ -923,6 +937,48 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Paid Amount & Remaining Balance Inputs */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 bg-stone-50 p-3 rounded-xl border border-stone-200">
+                <div>
+                  <label className="block text-xs font-bold text-stone-800 mb-1">
+                    💵 {language === 'fa' ? 'مبلغ پرداخت شده (رسید)' : 'Paid Amount (نقدی/رسیده)'} *
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="any"
+                    required
+                    value={paidAmount === 0 ? '' : paidAmount}
+                    onChange={e => setPaidAmount(e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
+                    placeholder="مبلغ پرداختی..."
+                    className="w-full px-3.5 py-2 bg-white border border-stone-300 rounded-lg text-xs font-mono font-bold text-[#1A1A1A] outline-hidden focus:border-emerald-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 mb-1">
+                    ⏳ {language === 'fa' ? 'باقی‌مانده (قرض مشتری)' : 'Remaining Balance (باقی‌مانده)'}
+                  </label>
+                  <div className="px-3.5 py-2 bg-white border border-stone-200 rounded-lg text-xs font-mono font-bold text-rose-600 flex items-center justify-between">
+                    <span>
+                      {Math.max(0, ((Number(quantity) || 1) * (Number(sellingPrice) || 0)) - (Number(paidAmount) || 0)).toLocaleString()} {currencySymbol}
+                    </span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+                      ((Number(quantity) || 1) * (Number(sellingPrice) || 0)) - (Number(paidAmount) || 0) === 0
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : Number(paidAmount) > 0
+                        ? 'bg-amber-100 text-amber-800'
+                        : 'bg-rose-100 text-rose-800'
+                    }`}>
+                      {((Number(quantity) || 1) * (Number(sellingPrice) || 0)) - (Number(paidAmount) || 0) === 0
+                        ? (language === 'fa' ? 'تصفیه (Paid)' : 'Paid')
+                        : Number(paidAmount) > 0
+                        ? (language === 'fa' ? 'قسمی (Partial)' : 'Partial')
+                        : (language === 'fa' ? 'قرض (Unpaid)' : 'Unpaid')}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
               {/* Customer Selector / Creator */}
               <div className="space-y-2 pt-1 border-t border-stone-100">

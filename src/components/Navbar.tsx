@@ -20,6 +20,7 @@ interface NavbarProps {
   onLanguageChange: (lang: Language) => void;
   onSignOut?: () => void;
   onSearchOrders: (query: string) => void;
+  dbConnected?: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -30,6 +31,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLanguageChange,
   onSignOut,
   onSearchOrders,
+  dbConnected = true,
 }) => {
   const t = translations[language];
   const [searchQuery, setSearchQuery] = useState('');
@@ -95,6 +97,22 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className="w-full bg-slate-800/80 border border-slate-700 rounded-xl ps-9 pe-3 py-2 text-xs text-white placeholder:text-slate-400 outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400"
               />
             </div>
+            {/* Database Status Indicator */}
+            <div 
+              id="navbar-db-status"
+              className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-bold border transition ${
+                dbConnected !== false
+                  ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400'
+                  : 'bg-amber-950/40 border-amber-500/30 text-amber-400'
+              }`}
+              title={dbConnected !== false ? 'PostgreSQL Database Connected (Cloud Sync Active)' : 'Connecting to database...'}
+            >
+              <span className={`w-2 h-2 rounded-full ${dbConnected !== false ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+              <span className="font-mono text-[10px] tracking-wide">
+                {dbConnected !== false ? 'PostgreSQL Live' : 'Syncing'}
+              </span>
+            </div>
+
             <button
               onClick={() => onTabChange('new_order')}
               id="nav-quick-new-order"

@@ -1,5 +1,26 @@
 import express, { Router, Request, Response } from 'express';
-import { safeQuery, isDatabaseConnected, verifyDbConnection } from '../db/db.js';
+import { 
+  safeQuery, 
+  isDatabaseConnected, 
+  verifyDbConnection,
+  dbGetOrders,
+  dbSaveOrder,
+  dbDeleteOrder,
+  dbGetCustomers,
+  dbSaveCustomer,
+  dbDeleteCustomer,
+  dbGetFabrics,
+  dbSaveFabric,
+  dbDeleteFabric,
+  dbGetProducts,
+  dbSaveProduct,
+  dbDeleteProduct,
+  dbGetProductSales,
+  dbSaveProductSale,
+  dbDeleteProductSale,
+  dbGetShopSettings,
+  dbSaveShopSettings
+} from '../db/db.js';
 import { getStore, saveStoreToDisk } from './store.js';
 
 export const apiRouter = Router();
@@ -152,24 +173,8 @@ apiRouter.post('/fabrics', async (req: Request, res: Response) => {
   }
   saveStoreToDisk();
 
-  // Persist to PostgreSQL if connected
-  await safeQuery(`
-    INSERT INTO fabrics (id, name, code, color, type, price_per_meter, stock_meters, image_url, notes, updated_at)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
-    ON CONFLICT (id) DO UPDATE SET
-      name = EXCLUDED.name,
-      code = EXCLUDED.code,
-      color = EXCLUDED.color,
-      type = EXCLUDED.type,
-      price_per_meter = EXCLUDED.price_per_meter,
-      stock_meters = EXCLUDED.stock_meters,
-      image_url = EXCLUDED.image_url,
-      notes = EXCLUDED.notes,
-      updated_at = NOW();
-  `, [
-    fabric.id, fabric.name, fabric.code, fabric.color, fabric.type, 
-    fabric.pricePerMeter || 0, fabric.stockMeters || 0, fabric.imageUrl, fabric.notes
-  ]);
+  // Persist to Cloud PostgreSQL (Supabase)
+  await dbSaveFabric(fabric);
 
   res.json({ success: true, fabric });
 });
@@ -179,6 +184,7 @@ apiRouter.delete('/fabrics/:id', async (req: Request, res: Response) => {
   const store = getStore();
   store.fabrics = store.fabrics.filter(f => f.id !== id);
   saveStoreToDisk();
+  await dbDeleteFabric(id);
   await safeQuery('DELETE FROM fabrics WHERE id = $1', [id]);
   res.json({ success: true });
 });
@@ -229,6 +235,14 @@ apiRouter.get('/orders', async (req: Request, res: Response) => {
 // Database order saver helper
 async function saveOrderToDb(order: any): Promise<boolean> {
   if (!order || !order.id) return false;
+
+  // Persist directly to Supabase Cloud PostgreSQL
+  try {
+    const saved = await dbSaveOrder(order);
+    if (saved) return true;
+  } catch (e: any) {
+    console.warn('[Database] dbSaveOrder notice:', e?.message || e);
+  }
 
   const orderId = String(order.id);
   const orderNumber = String(order.orderNumber || 'ORD-' + Math.floor(1000 + Math.random() * 9000));
@@ -716,6 +730,7 @@ apiRouter.delete('/orders/:id', async (req: Request, res: Response) => {
   const store = getStore();
   store.orders = store.orders.filter(o => o.id !== id);
   saveStoreToDisk();
+  await dbDeleteOrder(id);
   await safeQuery('DELETE FROM order_items WHERE order_id = $1', [id]);
   await safeQuery('DELETE FROM orders WHERE id = $1', [id]);
   res.json({ success: true });
@@ -763,31 +778,8 @@ apiRouter.post('/customers', async (req: Request, res: Response) => {
   }
   saveStoreToDisk();
 
-  // Persist to PostgreSQL if connected
-  await safeQuery(`
-    INSERT INTO customers (
-      id, name, phone, whatsapp, address, notes, standard_measurements,
-      preferred_garment_type, total_orders_count, total_spent, total_balance, updated_at
-    ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW()
-    )
-    ON CONFLICT (id) DO UPDATE SET
-      name = EXCLUDED.name,
-      phone = EXCLUDED.phone,
-      whatsapp = EXCLUDED.whatsapp,
-      address = EXCLUDED.address,
-      notes = EXCLUDED.notes,
-      standard_measurements = EXCLUDED.standard_measurements,
-      preferred_garment_type = EXCLUDED.preferred_garment_type,
-      total_orders_count = EXCLUDED.total_orders_count,
-      total_spent = EXCLUDED.total_spent,
-      total_balance = EXCLUDED.total_balance,
-      updated_at = NOW();
-  `, [
-    customer.id, customer.name, customer.phone, customer.whatsapp, customer.address, customer.notes,
-    JSON.stringify(customer.standardMeasurements || {}), customer.preferredGarmentType,
-    customer.totalOrdersCount || 0, customer.totalSpent || 0, customer.totalBalance || 0
-  ]);
+  // Persist to Cloud PostgreSQL (Supabase)
+  await dbSaveCustomer(customer);
 
   res.json({ success: true, customer });
 });
@@ -797,6 +789,7 @@ apiRouter.delete('/customers/:id', async (req: Request, res: Response) => {
   const store = getStore();
   store.customers = store.customers.filter(c => c.id !== id);
   saveStoreToDisk();
+  await dbDeleteCustomer(id);
   await safeQuery('DELETE FROM customers WHERE id = $1', [id]);
   res.json({ success: true });
 });
@@ -804,6 +797,12 @@ apiRouter.delete('/customers/:id', async (req: Request, res: Response) => {
 // --- SHOP SETTINGS ---
 apiRouter.get('/shop-settings', async (req: Request, res: Response) => {
   const store = getStore();
+  const dbSettings = await dbGetShopSettings();
+  if (dbSettings) {
+    store.shopSettings = dbSettings;
+    saveStoreToDisk();
+    return res.json(store.shopSettings);
+  }
   const result = await safeQuery('SELECT data FROM shop_settings WHERE id = $1', ['default']);
   if (result && result.rows && result.rows.length > 0) {
     store.shopSettings = result.rows[0].data;
@@ -819,6 +818,7 @@ apiRouter.post('/shop-settings', async (req: Request, res: Response) => {
   store.shopSettings = settings;
   saveStoreToDisk();
 
+  await dbSaveShopSettings(settings);
   await safeQuery(`
     INSERT INTO shop_settings (id, data, updated_at)
     VALUES ($1, $2, NOW())
@@ -939,6 +939,7 @@ apiRouter.post('/products', async (req: Request, res: Response) => {
   }
   saveStoreToDisk();
 
+  await dbSaveProduct(product);
   await safeQuery(`
     INSERT INTO products (id, name, category, vendor, brand, sku, image_url, purchase_price, stock_quantity, low_stock_threshold, description, updated_at)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
@@ -961,6 +962,7 @@ apiRouter.delete('/products/:id', async (req: Request, res: Response) => {
   const store = getStore();
   store.products = store.products.filter(p => p.id !== id);
   saveStoreToDisk();
+  await dbDeleteProduct(id);
   await safeQuery('DELETE FROM products WHERE id = $1', [id]);
   res.json({ success: true });
 });
@@ -968,12 +970,21 @@ apiRouter.delete('/products/:id', async (req: Request, res: Response) => {
 // --- PRODUCT SALES ---
 apiRouter.get('/product-sales', async (req: Request, res: Response) => {
   const store = getStore();
+  const dbSales = await dbGetProductSales();
+  if (dbSales && dbSales.length > 0) {
+    store.productSales = dbSales;
+    saveStoreToDisk();
+    return res.json(store.productSales);
+  }
   const result = await safeQuery('SELECT * FROM product_sales ORDER BY sale_date DESC, created_at DESC');
   if (result?.rows && result.rows.length > 0) {
     store.productSales = result.rows.map((row: any) => ({
       id: row.id, productId: row.product_id, productName: row.product_name, category: row.category,
       quantity: Number(row.quantity) || 0, purchasePrice: Number(row.purchase_price) || 0,
       sellingPrice: Number(row.selling_price) || 0, totalAmount: Number(row.total_amount) || 0,
+      paidAmount: (Number(row.paid_amount) ?? Number(row.total_amount)) || 0,
+      balanceAmount: Number(row.balance_amount) || 0,
+      paymentStatus: row.payment_status || 'paid',
       profit: Number(row.profit) || 0, customerId: row.customer_id, customerName: row.customer_name,
       customerPhone: row.customer_phone, saleDate: row.sale_date, paymentMethod: row.payment_method,
       notes: row.notes,
@@ -1001,6 +1012,7 @@ apiRouter.post('/product-sales', async (req: Request, res: Response) => {
     if (prodIdx >= 0) {
       store.products[prodIdx].stockQuantity = Math.max(0, (store.products[prodIdx].stockQuantity || 0) - sale.quantity);
       store.products[prodIdx].updatedAt = new Date().toISOString();
+      await dbSaveProduct(store.products[prodIdx]);
     }
     await safeQuery(`
       UPDATE products 
@@ -1011,17 +1023,18 @@ apiRouter.post('/product-sales', async (req: Request, res: Response) => {
 
   saveStoreToDisk();
 
-  await safeQuery(`
-    INSERT INTO product_sales (id, product_id, product_name, category, quantity, purchase_price, selling_price, total_amount, profit, customer_id, customer_name, customer_phone, sale_date, payment_method, notes)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
-    ON CONFLICT (id) DO UPDATE SET
-      quantity = EXCLUDED.quantity, selling_price = EXCLUDED.selling_price, total_amount = EXCLUDED.total_amount,
-      profit = EXCLUDED.profit, customer_id = EXCLUDED.customer_id, customer_name = EXCLUDED.customer_name,
-      customer_phone = EXCLUDED.customer_phone, payment_method = EXCLUDED.payment_method, notes = EXCLUDED.notes;
-  `, [
-    sale.id, sale.productId, sale.productName, sale.category, sale.quantity, sale.purchasePrice || 0,
-    sale.sellingPrice, sale.totalAmount, sale.profit || 0, sale.customerId, sale.customerName,
-    sale.customerPhone, sale.saleDate, sale.paymentMethod, sale.notes,
-  ]);
+  // Persist directly to Supabase Cloud PostgreSQL
+  await dbSaveProductSale(sale);
+
   res.json({ success: true, sale });
+});
+
+apiRouter.delete('/product-sales/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const store = getStore();
+  store.productSales = store.productSales.filter(s => s.id !== id);
+  saveStoreToDisk();
+  await dbDeleteProductSale(id);
+  await safeQuery('DELETE FROM product_sales WHERE id = $1', [id]);
+  res.json({ success: true });
 });
