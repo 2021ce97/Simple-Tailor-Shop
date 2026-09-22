@@ -4,7 +4,7 @@ A tailored shop-management system for orders, customer measurements, fabric and 
 
 ## Source structure
 
-- `src/pages` — full application screens
+- `src/pages` — full application screens,
 - `src/components` — reusable interface components
 - `src/app` — top-level routing and application composition
 - `src/hooks` — session, synchronization, and shared state hooks
