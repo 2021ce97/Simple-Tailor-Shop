@@ -344,20 +344,26 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
       standardMeasurements: cleanedMeasurements
     };
 
-    await storageService.saveCustomerAsync(customerToSave);
-    setIsEditingModalOpen(false);
-    setActiveCustomer(customerToSave);
-    onCustomerUpdated();
+    try {
+      await storageService.saveCustomerAsync(customerToSave);
+      setIsEditingModalOpen(false);
+      setActiveCustomer(customerToSave);
+      onCustomerUpdated();
+    } catch (error: any) {
+      alert(error?.message || 'Customer could not be saved to Supabase.');
+    }
   };
 
   // Delete Customer
-  const handleDeleteCustomer = (cust: Customer) => {
+  const handleDeleteCustomer = async (cust: Customer) => {
     if (window.confirm(`${t.confirmDelete} (${cust.name})`)) {
-      storageService.deleteCustomer(cust.id);
-      if (activeCustomer?.id === cust.id) {
-        setActiveCustomer(null);
+      try {
+        await storageService.deleteCustomer(cust.id);
+        if (activeCustomer?.id === cust.id) setActiveCustomer(null);
+        onCustomerUpdated();
+      } catch (error: any) {
+        alert(error?.message || 'Customer could not be deleted from Supabase.');
       }
-      onCustomerUpdated();
     }
   };
 

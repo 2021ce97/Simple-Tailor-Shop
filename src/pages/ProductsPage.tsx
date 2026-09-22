@@ -172,8 +172,9 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
     e.preventDefault();
     if (!formData.name.trim()) return;
 
-    if (editingProduct) {
-      await onUpdateProduct({
+    try {
+      if (editingProduct) {
+        await onUpdateProduct({
         ...editingProduct,
         name: formData.name.trim(),
         category: formData.category,
@@ -184,9 +185,9 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
         description: formData.description.trim() || undefined,
         imageUrl: formData.imageUrl.trim() || undefined,
         updatedAt: new Date().toISOString()
-      });
-    } else {
-      await onAddProduct({
+        });
+      } else {
+        await onAddProduct({
         name: formData.name.trim(),
         category: formData.category,
         brand: formData.brand.trim() || undefined,
@@ -195,11 +196,13 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
         stockQuantity: Number(formData.stockQuantity) || 0,
         description: formData.description.trim() || undefined,
         imageUrl: formData.imageUrl.trim() || undefined
-      });
+        });
+      }
+      setIsAddModalOpen(false);
+      setEditingProduct(null);
+    } catch (error: any) {
+      alert(error?.message || 'Product could not be saved to Supabase.');
     }
-
-    setIsAddModalOpen(false);
-    setEditingProduct(null);
   };
 
   // Quick category icon helper
@@ -234,6 +237,15 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
         stockQuantity: (Number(product.stockQuantity) || 0) + amount,
         updatedAt: new Date().toISOString(),
       });
+    }
+  };
+
+  const handleDeleteProduct = async (product: Product) => {
+    if (!window.confirm(`${t.confirmDelete} (${product.name})`)) return;
+    try {
+      await onDeleteProduct(product.id);
+    } catch (error: any) {
+      alert(error?.message || 'Product could not be deleted from Supabase.');
     }
   };
 
@@ -677,7 +689,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => onDeleteProduct(product.id)}
+                          onClick={() => handleDeleteProduct(product)}
                           title={t.delete}
                           className="p-1.5 text-stone-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
                         >

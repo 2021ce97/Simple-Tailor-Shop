@@ -980,8 +980,9 @@ async function apiSync(endpoint: string, method = 'GET', data?: any, throwOnErro
     const table = endpointTable[base];
     if (!table) throw new Error(`Unknown Supabase collection: ${base}`);
     if (method === 'DELETE') {
-      const { error } = await supabase.from(table).delete().eq('id', id);
+      const { data: deleted, error } = await supabase.from(table).delete().eq('id', id).select('id');
       if (error) throw error;
+      if (!deleted?.some(row => row.id === id)) throw new Error(`Supabase did not delete ${table}/${id}. Check the table's DELETE policy.`);
       return { success: true };
     }
     let payload: any = data;
@@ -1030,7 +1031,7 @@ export const storageService = {
     return fabrics.find(f => f.id === id || f.code === id);
   },
 
-  saveFabric(fabric: Fabric): Fabric {
+  async saveFabric(fabric: Fabric): Promise<Fabric> {
     const fabrics = this.getFabrics() || [];
     const existingIndex = fabrics.findIndex(f => f.id === fabric.id);
     const now = new Date().toISOString();
@@ -1046,15 +1047,14 @@ export const storageService = {
       });
     }
 
+    await apiSync('fabrics', 'POST', fabric, true);
     setStoredItem(STORAGE_KEYS.FABRICS, fabrics);
-    apiSync('fabrics', 'POST', fabric);
     return fabric;
   },
 
-  deleteFabric(id: string): void {
-    const fabrics = (this.getFabrics() || []).filter(f => f.id !== id);
-    setStoredItem(STORAGE_KEYS.FABRICS, fabrics);
-    apiSync(`fabrics/${id}`, 'DELETE');
+  async deleteFabric(id: string): Promise<void> {
+    await apiSync(`fabrics/${id}`, 'DELETE', undefined, true);
+    await this.syncFromDatabase();
   },
 
   deductFabricStock(fabricId: string, metersUsed: number): void {
@@ -1065,7 +1065,7 @@ export const storageService = {
       fabric.stockMeters = Math.max(0, Number(fabric.stockMeters || 0) - Number(metersUsed));
       fabric.updatedAt = new Date().toISOString();
       setStoredItem(STORAGE_KEYS.FABRICS, fabrics);
-      apiSync('fabrics', 'POST', fabric);
+      apiSync('fabrics', 'POST', fabric, true).catch(console.error);
     }
   },
 
@@ -1115,19 +1115,14 @@ export const storageService = {
 
   async saveProductAsync(product: Partial<Product> & { name: string; category: string; purchasePrice: number; stockQuantity: number }): Promise<Product> {
     const saved = this.saveProduct(product);
-    try {
-      await apiSync('products', 'POST', saved);
-    } catch (e) {
-      console.warn('saveProductAsync background sync:', e);
-    }
+    await apiSync('products', 'POST', saved, true);
+    await this.syncFromDatabase();
     return saved;
   },
 
-  deleteProduct(id: string): void {
-    let products = this.getProducts() || [];
-    products = products.filter(p => p.id !== id);
-    setStoredItem(STORAGE_KEYS.PRODUCTS, products);
-    apiSync(`products/${id}`, 'DELETE');
+  async deleteProduct(id: string): Promise<void> {
+    await apiSync(`products/${id}`, 'DELETE', undefined, true);
+    await this.syncFromDatabase();
   },
 
   // Product Categories
@@ -1333,18 +1328,14 @@ export const storageService = {
 
   async saveProductSaleAsync(sale: any): Promise<ProductSale> {
     const saved = this.recordProductSale(sale);
-    try {
-      await apiSync('product-sales', 'POST', saved);
-    } catch (e) {
-      console.warn('saveProductSaleAsync background sync:', e);
-    }
+    await apiSync('product-sales', 'POST', saved, true);
+    await this.syncFromDatabase();
     return saved;
   },
 
-  deleteProductSale(id: string): void {
-    const sales = this.getProductSales().filter(s => s.id !== id);
-    setStoredItem(STORAGE_KEYS.PRODUCT_SALES, sales);
-    apiSync(`product-sales/${id}`, 'DELETE');
+  async deleteProductSale(id: string): Promise<void> {
+    await apiSync(`product-sales/${id}`, 'DELETE', undefined, true);
+    await this.syncFromDatabase();
   },
 
   // Orders
@@ -1410,13 +1401,13 @@ export const storageService = {
     // Save the parent row first so installations with foreign keys accept the order.
     await apiSync('customers', 'POST', customer, true);
     await apiSync('orders', 'POST', order, true);
-    return this.saveOrder(order, false);
+    await this.syncFromDatabase();
+    return order;
   },
 
-  deleteOrder(id: string): void {
-    const orders = this.getOrders().filter(o => o.id !== id);
-    setStoredItem(STORAGE_KEYS.ORDERS, orders);
-    apiSync(`orders/${id}`, 'DELETE');
+  async deleteOrder(id: string): Promise<void> {
+    await apiSync(`orders/${id}`, 'DELETE', undefined, true);
+    await this.syncFromDatabase();
   },
 
   // Automatically update/create customer when an order is saved
@@ -1529,18 +1520,14 @@ export const storageService = {
 
   async saveCustomerAsync(customer: Customer): Promise<Customer> {
     const saved = this.saveCustomer(customer);
-    try {
-      await apiSync('customers', 'POST', saved);
-    } catch (e) {
-      console.warn('saveCustomerAsync background sync:', e);
-    }
+    await apiSync('customers', 'POST', saved, true);
+    await this.syncFromDatabase();
     return saved;
   },
 
-  deleteCustomer(id: string): void {
-    const customers = (this.getCustomers() || []).filter(c => c.id !== id);
-    setStoredItem(STORAGE_KEYS.CUSTOMERS, customers);
-    apiSync(`customers/${id}`, 'DELETE');
+  async deleteCustomer(id: string): Promise<void> {
+    await apiSync(`customers/${id}`, 'DELETE', undefined, true);
+    await this.syncFromDatabase();
   },
 
   // Garment Types
