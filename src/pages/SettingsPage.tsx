@@ -683,7 +683,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
           <Printer className="w-4 h-4" />
           <span>{language === 'fa' ? 'تنظیمات رسید و پرینتر' : language === 'ps' ? 'د رسید او پرینټر ترتیبات' : 'Receipt Settings'}</span>
           <span className="px-1.5 py-0.2 bg-[#D4AF37]/20 text-[#D4AF37] rounded-full text-[10px] font-mono font-bold uppercase">
-            {shop.receiptFormat === 'a4' ? 'A4' : shop.receiptFormat === 'thermal58' ? '58mm' : '80mm'}
+            {shop.receiptFormat === 'a5' ? 'A5' : 'A6'}
           </span>
         </button>
 
@@ -1759,25 +1759,25 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <button
                 type="button"
-                onClick={() => setShop({ ...shop, receiptFormat: 'thermal80' })}
+                onClick={() => setShop({ ...shop, receiptFormat: 'a6' })}
                 className={`p-3 rounded-lg border text-right sm:text-center transition cursor-pointer ${
-                  (shop.receiptFormat || 'thermal80') === 'thermal80'
+                  (shop.receiptFormat || 'a6') === 'a6'
                     ? 'border-[#D4AF37] bg-white text-[#1A1A1A] font-bold shadow-xs'
                     : 'border-[#E5E5E5] bg-white/60 text-[#706E6B]'
                 }`}
               >
-                <div className="font-bold">{language === 'fa' ? 'حرارتی ۸۰ میلی‌متر (POS)' : 'Thermal 80mm POS'}</div>
-                <div className="text-[10px] text-stone-500 font-normal">رول استاندارد دکان</div>
+                <div className="font-bold">{language === 'fa' ? 'کاغذ A6' : 'A6 Standard'}</div>
+                <div className="text-[10px] text-stone-500 font-normal">105 × 148 mm</div>
               </button>
 
               <button
                 type="button"
-                onClick={() => setShop({ ...shop, receiptFormat: 'thermal58' })}
-                className={`p-3 rounded-lg border text-right sm:text-center transition cursor-pointer ${
-                  shop.receiptFormat === 'thermal58'
+                onClick={() => setShop({ ...shop, receiptFormat: 'a6' })}
+                className={`hidden p-3 rounded-lg border text-right sm:text-center transition cursor-pointer ${
+                  shop.receiptFormat === 'a6'
                     ? 'border-[#D4AF37] bg-white text-[#1A1A1A] font-bold shadow-xs'
                     : 'border-[#E5E5E5] bg-white/60 text-[#706E6B]'
                 }`}
@@ -1788,15 +1788,15 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
               <button
                 type="button"
-                onClick={() => setShop({ ...shop, receiptFormat: 'a4' })}
+                onClick={() => setShop({ ...shop, receiptFormat: 'a5' })}
                 className={`p-3 rounded-lg border text-right sm:text-center transition cursor-pointer ${
-                  shop.receiptFormat === 'a4'
+                  shop.receiptFormat === 'a5'
                     ? 'border-[#D4AF37] bg-white text-[#1A1A1A] font-bold shadow-xs'
                     : 'border-[#E5E5E5] bg-white/60 text-[#706E6B]'
                 }`}
               >
-                <div className="font-bold">{language === 'fa' ? 'کاغذ رسمی A4' : 'Standard A4 Sheet'}</div>
-                <div className="text-[10px] text-stone-500 font-normal">پرینتر دفتری / لیزری</div>
+                <div className="font-bold">{language === 'fa' ? 'کاغذ A5' : 'A5 Standard'}</div>
+                <div className="text-[10px] text-stone-500 font-normal">148 × 210 mm</div>
               </button>
             </div>
           </div>

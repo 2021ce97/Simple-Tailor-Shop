@@ -286,8 +286,6 @@ export interface Translations {
   adminAccount: string;
   printFormat: string;
   standardA4: string;
-  thermal58: string;
-  thermal80: string;
 
   // Garment Categories & Dynamic Measurement Settings
   garmentTypesNav: string;
@@ -625,8 +623,6 @@ export const translations: Record<Language, Translations> = {
     adminAccount: 'Master Tailor Admin',
     printFormat: 'Print format',
     standardA4: 'Standard A4',
-    thermal58: 'Thermal 58 mm',
-    thermal80: 'Thermal 80 mm',
 
     garmentTypesNav: 'Garment Categories',
     garmentCategory: 'Garment Category',
@@ -962,8 +958,6 @@ export const translations: Record<Language, Translations> = {
     adminAccount: 'حساب مدیر خیاطی',
     printFormat: 'نوع چاپ',
     standardA4: 'سند استاندارد A4',
-    thermal58: 'پرینتر حرارتی ۵۸ میلی‌متر',
-    thermal80: 'پرینتر حرارتی ۸۰ میلی‌متر',
 
     garmentTypesNav: 'دسته‌بندی لباس‌ها',
     garmentCategory: 'کتگوری لباس',
@@ -1299,8 +1293,6 @@ export const translations: Record<Language, Translations> = {
     adminAccount: 'د خیاطۍ د مدیر حساب',
     printFormat: 'د چاپ ډول',
     standardA4: 'معیاري A4 سند',
-    thermal58: 'حرارتي ۵۸ ملي متره',
-    thermal80: 'حرارتي ۸۰ ملي متره',
 
     garmentTypesNav: 'د جامو وېشنیزې',
     garmentCategory: 'د جامو کټګوري',

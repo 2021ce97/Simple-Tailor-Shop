@@ -209,7 +209,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
 
     await printReceiptElement(reportContainerRef.current, {
       title: `${shopTitle} - Financial Report (${period})`,
-      pageFormat: 'a4',
+      pageFormat: 'a5',
       dir: language === 'en' ? 'ltr' : 'rtl',
       onStart: () => setIsPrinting(true),
       onComplete: () => setIsPrinting(false),

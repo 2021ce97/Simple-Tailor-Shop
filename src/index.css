@@ -86,19 +86,13 @@
     overflow: visible !important;
     background: white !important;
   }
-  [data-print-format="a4"] #authentic-receipt-slip {
-    width: 186mm !important;
-    max-width: 186mm !important;
+  [data-print-format="a5"] #authentic-receipt-slip {
+    width: 140mm !important;
+    max-width: 140mm !important;
   }
-  [data-print-format="thermal58"] #authentic-receipt-slip,
-  .thermal58-slip {
-    width: 54mm !important;
-    max-width: 54mm !important;
-  }
-  [data-print-format="thermal80"] #authentic-receipt-slip,
-  .thermal80-slip {
-    width: 76mm !important;
-    max-width: 76mm !important;
+  [data-print-format="a6"] #authentic-receipt-slip {
+    width: 99mm !important;
+    max-width: 99mm !important;
   }
   .overflow-y-auto {
     overflow: visible !important;

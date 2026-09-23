@@ -195,7 +195,7 @@ export const DEFAULT_SHOP_SETTINGS: ShopSettings = {
   receiptFooterPs: 'مهرباني وکړئ د فرمایش د اخیستلو پر مهال دا بِل له ځان سره ولرئ.',
   logoUrl: '/mujeeb-afghan-logo.jpeg',
   logoType: 'emblem',
-  receiptFormat: 'thermal80',
+  receiptFormat: 'a6',
   receiptThermalStyle: 'standard',
   receiptShowLogo: true,
   receiptShowBarcode: true,
@@ -1668,6 +1668,7 @@ export const storageService = {
     if (!stored) return DEFAULT_SHOP_SETTINGS;
 
     const settings = { ...DEFAULT_SHOP_SETTINGS, ...stored };
+    if (settings.receiptFormat !== 'a5' && settings.receiptFormat !== 'a6') settings.receiptFormat = 'a6';
     if (settings.phone1 === LEGACY_OWNER_PHONE) settings.phone1 = DEFAULT_OWNER_PHONE;
     if (settings.phone2 === '0780000000' || settings.phone2 === '0782207308') settings.phone2 = '0782220194';
     if (settings.whatsapp === '0782207308') settings.whatsapp = '0782220194';

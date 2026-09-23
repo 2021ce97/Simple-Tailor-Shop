@@ -394,7 +394,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     
     await printReceiptElement(retailReceiptPrintRef.current, {
       title: `${shopName} - SL-${activeRetailReceipt.id.slice(-6).toUpperCase()}`,
-      pageFormat: 'thermal80',
+      pageFormat: 'a6',
       dir: language === 'en' ? 'ltr' : 'rtl',
       onStart: () => setIsPrintingRetail(true),
       onComplete: () => setIsPrintingRetail(false),
@@ -408,7 +408,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     const filename = `Retail_Receipt_SL_${activeRetailReceipt.id.slice(-6).toUpperCase()}_${safeCustomerName}`;
     await downloadReceiptPdf(retailReceiptPrintRef.current, {
       filename,
-      pageFormat: 'thermal80',
+      pageFormat: 'a6',
       onStart: () => setIsGeneratingRetailPdf(true),
       onComplete: () => setIsGeneratingRetailPdf(false),
       onError: (err) => {

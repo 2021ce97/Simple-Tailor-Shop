@@ -44,7 +44,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
 
   // Local copy of shop settings for editing receipt configuration
   const [settings, setSettings] = useState<ShopSettings>(() => ({
-    receiptFormat: 'thermal80',
+    receiptFormat: 'a6',
     receiptThermalStyle: 'standard',
     receiptShowLogo: true,
     receiptShowBarcode: true,
@@ -71,7 +71,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
   const previewRef = useRef<HTMLDivElement>(null);
 
   // Active preferences
-  const currentFormat: ReceiptPaperFormat = settings.receiptFormat || 'thermal80';
+  const currentFormat: ReceiptPaperFormat = settings.receiptFormat === 'a5' ? 'a5' : 'a6';
   const currentStyle: ThermalReceiptStyle = settings.receiptThermalStyle || 'standard';
 
   // Save changes to Supabase and notify the parent view.
@@ -224,11 +224,11 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 </h4>
               </div>
               <span className="text-[11px] font-mono text-[#706E6B] font-bold">
-                {currentFormat === 'a6' ? 'A6 Standard Sheet' : currentFormat === 'a4' ? 'Sheet Paper (A4)' : 'POS Thermal Roll'}
+                {currentFormat === 'a5' ? 'A5 Standard Sheet' : 'A6 Standard Sheet'}
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Option 1: A6 Paper (Primary for Tailor Slips & Customer Bills) */}
               <div
                 onClick={() => handleSelectFormat('a6')}
@@ -264,14 +264,14 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
 
               {/* Option 2: Thermal 80mm */}
               <div
-                onClick={() => handleSelectFormat('thermal80')}
-                className={`p-4 rounded-xl border-2 transition cursor-pointer flex flex-col justify-between relative ${
-                  currentFormat === 'thermal80'
+                onClick={() => handleSelectFormat('a6')}
+                className={`hidden p-4 rounded-xl border-2 transition cursor-pointer flex-col justify-between relative ${
+                  currentFormat === 'a6'
                     ? 'border-[#D4AF37] bg-amber-50/40 shadow-xs'
                     : 'border-[#E5E5E5] hover:border-stone-300 bg-white'
                 }`}
               >
-                {currentFormat === 'thermal80' && (
+                {currentFormat === 'a6' && (
                   <span className="absolute -top-2.5 right-3 px-2 py-0.5 bg-[#D4AF37] text-[#1A1A1A] text-[9px] font-black rounded-full uppercase tracking-wider">
                     {language === 'fa' ? 'انتخاب شده' : 'Active'}
                   </span>
@@ -297,14 +297,14 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
 
               {/* Option 3: Thermal 58mm */}
               <div
-                onClick={() => handleSelectFormat('thermal58')}
-                className={`p-4 rounded-xl border-2 transition cursor-pointer flex flex-col justify-between relative ${
-                  currentFormat === 'thermal58'
+                onClick={() => handleSelectFormat('a6')}
+                className={`hidden p-4 rounded-xl border-2 transition cursor-pointer flex-col justify-between relative ${
+                  currentFormat === 'a6'
                     ? 'border-[#D4AF37] bg-amber-50/40 shadow-xs'
                     : 'border-[#E5E5E5] hover:border-stone-300 bg-white'
                 }`}
               >
-                {currentFormat === 'thermal58' && (
+                {currentFormat === 'a6' && (
                   <span className="absolute -top-2.5 right-3 px-2 py-0.5 bg-[#D4AF37] text-[#1A1A1A] text-[9px] font-black rounded-full uppercase tracking-wider">
                     {language === 'fa' ? 'انتخاب شده' : 'Active'}
                   </span>
@@ -330,14 +330,14 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
 
               {/* Option 4: Standard A4 Paper */}
               <div
-                onClick={() => handleSelectFormat('a4')}
+                onClick={() => handleSelectFormat('a5')}
                 className={`p-4 rounded-xl border-2 transition cursor-pointer flex flex-col justify-between relative ${
-                  currentFormat === 'a4'
+                  currentFormat === 'a5'
                     ? 'border-[#D4AF37] bg-amber-50/40 shadow-xs'
                     : 'border-[#E5E5E5] hover:border-stone-300 bg-white'
                 }`}
               >
-                {currentFormat === 'a4' && (
+                {currentFormat === 'a5' && (
                   <span className="absolute -top-2.5 right-3 px-2 py-0.5 bg-[#D4AF37] text-[#1A1A1A] text-[9px] font-black rounded-full uppercase tracking-wider">
                     {language === 'fa' ? 'انتخاب شده' : 'Active'}
                   </span>
@@ -347,7 +347,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                     <FileText className="w-4 h-4" />
                   </div>
                   <h5 className="font-bold text-xs text-[#1A1A1A]">
-                    {language === 'fa' ? 'کاغذ رسمی A4' : language === 'ps' ? 'معیاري A4 پاڼه' : 'Standard A4 Sheet'}
+                    {language === 'fa' ? 'کاغذ A5' : language === 'ps' ? 'معیاري A5 پاڼه' : 'A5 Standard (148×210)'}
                   </h5>
                   <p className="text-[10px] text-[#706E6B] mt-1 leading-snug">
                     {language === 'fa'
@@ -356,7 +356,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                   </p>
                 </div>
                 <div className="mt-3 pt-2 border-t border-stone-200 flex items-center justify-between text-[10px] font-mono font-bold text-stone-600">
-                  <span>210 × 297 mm</span>
+                  <span>148 × 210 mm</span>
                   <span>Office Sheet</span>
                 </div>
               </div>
@@ -662,10 +662,8 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 ref={previewRef}
                 dir={language === 'en' ? 'ltr' : 'rtl'}
                 className={`bg-white shadow-md text-[#1A1A1A] p-4 text-xs transition-all duration-300 relative select-text border border-stone-300 ${
-                  currentFormat === 'a4'
-                    ? 'w-full max-w-[360px] rounded-lg'
-                    : currentFormat === 'thermal58'
-                    ? 'w-[260px] rounded-sm font-sans'
+                  currentFormat === 'a5'
+                    ? 'w-full max-w-[420px] rounded-lg'
                     : 'w-[320px] rounded-sm font-sans'
                 } ${
                   currentStyle === 'classic'

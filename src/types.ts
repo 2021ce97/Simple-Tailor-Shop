@@ -182,7 +182,7 @@ export interface Order {
   updatedAt: string;
 }
 
-export type ReceiptPaperFormat = 'a6' | 'thermal80' | 'thermal58' | 'a4';
+export type ReceiptPaperFormat = 'a6' | 'a5';
 export type ThermalReceiptStyle = 'standard' | 'classic' | 'compact';
 
 export interface ShopSettings {

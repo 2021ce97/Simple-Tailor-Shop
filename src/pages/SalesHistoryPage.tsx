@@ -344,7 +344,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
       
       await printReceiptElement(quickPrintRef.current, {
         title: `${shopName} - SL-${sale.id.slice(-6).toUpperCase()}`,
-        pageFormat: shopSettings?.receiptFormat || 'thermal80',
+        pageFormat: shopSettings?.receiptFormat === 'a5' ? 'a5' : 'a6',
         dir: language === 'en' ? 'ltr' : 'rtl',
         onStart: () => setIsPrintingReceipt(true),
         onComplete: () => {
@@ -369,7 +369,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
     
     await printReceiptElement(receiptPrintRef.current, {
       title: `${shopName} - SL-${activeReceiptSale.id.slice(-6).toUpperCase()}`,
-      pageFormat: shopSettings?.receiptFormat || 'thermal80',
+      pageFormat: shopSettings?.receiptFormat === 'a5' ? 'a5' : 'a6',
       dir: language === 'en' ? 'ltr' : 'rtl',
       onStart: () => setIsPrintingReceipt(true),
       onComplete: () => setIsPrintingReceipt(false),
@@ -383,7 +383,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
     const filename = `Retail_Receipt_SL_${activeReceiptSale.id.slice(-6).toUpperCase()}_${safeCustomerName}`;
     await downloadReceiptPdf(receiptPrintRef.current, {
       filename,
-      pageFormat: 'thermal80',
+      pageFormat: 'a6',
       onStart: () => setIsGeneratingPdf(true),
       onComplete: () => setIsGeneratingPdf(false),
       onError: (err) => {

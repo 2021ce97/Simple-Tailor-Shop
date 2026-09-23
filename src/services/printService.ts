@@ -1,14 +1,14 @@
 /**
  * Universal Print & PDF Service
  * 100% reliable across Desktop, Mobile, iFrames (AI Studio preview), 
- * POS Thermal Receipt Printers (58mm, 80mm), and Standard A4/Letter printers.
+ * Standard A6 and A5 sheet printers.
  */
 import jsPDF from 'jspdf';
 import { toPng } from 'html-to-image';
 
 export interface PrintOptions {
   title?: string;
-  pageFormat?: 'a6' | 'a4' | 'thermal58' | 'thermal80' | 'auto';
+  pageFormat?: 'a6' | 'a5';
   dir?: 'rtl' | 'ltr';
   onStart?: () => void;
   onComplete?: () => void;
@@ -40,16 +40,10 @@ export async function printReceiptElement(
 
   onStart?.();
 
-  // Width calculations for A6 (105mm), thermal (58mm, 80mm), and A4
-  const widthCss = pageFormat === 'thermal58' 
-    ? 'width: 48mm; max-width: 48mm;' 
-    : pageFormat === 'thermal80'
-    ? 'width: 72mm; max-width: 72mm;'
-    : pageFormat === 'a6'
-    ? 'width: 98mm; max-width: 98mm;'
-    : 'width: 100%; max-width: 180mm;';
+  const widthCss = pageFormat === 'a5' ? 'width: 140mm; max-width: 140mm;' : 'width: 99mm; max-width: 99mm;';
+  const marginCss = pageFormat === 'a5' ? '5mm' : '3mm';
 
-  const marginCss = pageFormat === 'a6' ? '3mm' : pageFormat === 'a4' ? '8mm' : '0mm';
+  await waitForRenderedContent(element);
 
   // Gather existing stylesheets & fonts
   let styleTags = '';
@@ -67,7 +61,7 @@ export async function printReceiptElement(
         ${styleTags}
         <style>
           @page {
-            size: ${pageFormat === 'a6' ? '105mm 148mm' : pageFormat === 'a4' ? 'A4 portrait' : pageFormat === 'thermal58' ? '58mm auto' : '80mm auto'};
+            size: ${pageFormat === 'a5' ? '148mm 210mm' : '105mm 148mm'};
             margin: ${marginCss};
           }
           * {
@@ -91,7 +85,7 @@ export async function printReceiptElement(
             background: #ffffff !important;
             color: #000000 !important;
             margin: 0 auto !important;
-            padding: ${pageFormat === 'a6' ? '2mm' : pageFormat === 'a4' ? '4mm' : '1mm'} !important;
+            padding: ${pageFormat === 'a5' ? '4mm' : '2mm'} !important;
             box-sizing: border-box !important;
           }
           .no-print, button, .receipt-actions, .receipt-modal-footer {
@@ -130,10 +124,11 @@ export async function printReceiptElement(
     iframe.style.position = 'fixed';
     iframe.style.right = '0';
     iframe.style.bottom = '0';
-    iframe.style.width = '0px';
-    iframe.style.height = '0px';
+    iframe.style.width = pageFormat === 'a5' ? '794px' : '559px';
+    iframe.style.height = '1px';
+    iframe.style.left = '-10000px';
     iframe.style.border = '0';
-    iframe.style.opacity = '0';
+    iframe.style.visibility = 'hidden';
     iframe.style.pointerEvents = 'none';
 
     document.body.appendChild(iframe);
@@ -147,21 +142,7 @@ export async function printReceiptElement(
     frameDoc.write(printDocumentHtml);
     frameDoc.close();
 
-    // Wait for all images inside iframe to load before triggering print
-    const images = Array.from(frameDoc.images);
-    await Promise.all(
-      images.map(img => {
-        if (img.complete) return Promise.resolve();
-        return new Promise(resolve => {
-          img.onload = resolve;
-          img.onerror = resolve;
-          setTimeout(resolve, 500); // 500ms safety timeout
-        });
-      })
-    );
-
-    // Short buffer for SVG/Barcode rendering
-    await new Promise(r => setTimeout(r, 150));
+    await waitForDocumentReady(frameDoc);
 
     if (iframe.contentWindow) {
       iframe.contentWindow.focus();
@@ -201,7 +182,7 @@ export async function downloadReceiptPdf(
   element: HTMLElement,
   options: {
     filename?: string;
-    pageFormat?: 'a6' | 'a4' | 'thermal58' | 'thermal80' | 'auto';
+    pageFormat?: 'a6' | 'a5';
     onStart?: () => void;
     onComplete?: () => void;
     onError?: (err: unknown) => void;
@@ -223,18 +204,7 @@ export async function downloadReceiptPdf(
   try {
     onStart?.();
 
-    // Ensure all internal images are ready
-    const images = Array.from(element.querySelectorAll('img'));
-    await Promise.all(
-      images.map(img => {
-        if (img.complete) return Promise.resolve();
-        return new Promise(resolve => {
-          img.onload = resolve;
-          img.onerror = resolve;
-          setTimeout(resolve, 500);
-        });
-      })
-    );
+    await waitForRenderedContent(element);
 
     const dataUrl = await toPng(element, {
       pixelRatio: 3,
@@ -253,43 +223,16 @@ export async function downloadReceiptPdf(
       img.onerror = resolve;
     });
 
-    const isA4 = pageFormat === 'a4';
-    const isA6 = pageFormat === 'a6';
-    const isThermal58 = pageFormat === 'thermal58';
-    
-    // PDF width and margin definitions
-    const pdfWidth = isA4 ? 210 : isA6 ? 105 : isThermal58 ? 58 : 80;
-    const margin = isA4 ? 8 : isA6 ? 3 : 2; // 3mm margin for A6 ensures clean fit on 105x148
+    const isA5 = pageFormat === 'a5';
+    const pdfWidth = isA5 ? 148 : 105;
+    const margin = isA5 ? 5 : 3;
     const printableWidth = pdfWidth - margin * 2;
     const imgHeight = (img.naturalHeight * printableWidth) / (img.naturalWidth || 1);
     
     // Default page heights for standard sheet sizes
-    const standardPageHeight = isA4 ? 297 : isA6 ? 148 : Math.ceil(imgHeight + margin * 2);
-
-    let pdf: jsPDF;
-    if (isA6) {
-      // If content fits or is close to A6 (<= 148mm), generate exact standard A6 portrait page
-      const useFixedA6 = imgHeight + margin * 2 <= 152;
-      pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: useFixedA6 ? 'a6' : [105, Math.ceil(imgHeight + margin * 2)],
-      });
-    } else if (isA4) {
-      pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-    } else {
-      pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: [pdfWidth, Math.max(30, Math.ceil(imgHeight + margin * 2))],
-      });
-    }
-
-    if (isA4 || (isA6 && imgHeight + margin * 2 > 152 && false)) {
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: isA5 ? 'a5' : 'a6' });
+    const pageHeight = isA5 ? 210 : 148;
+    if (imgHeight + margin * 2 > pageHeight) {
       const pageHeight = pdf.internal.pageSize.getHeight();
       const pageContentHeight = pageHeight - margin * 2;
       let imageY = margin;
@@ -312,4 +255,32 @@ export async function downloadReceiptPdf(
     console.error('PDF generation error:', err);
     onError?.(err);
   }
+}
+
+async function waitForImages(images: HTMLImageElement[]) {
+  await Promise.all(images.map(async image => {
+    if (!image.complete) await new Promise<void>(resolve => {
+      const done = () => resolve();
+      image.addEventListener('load', done, { once: true });
+      image.addEventListener('error', done, { once: true });
+      window.setTimeout(done, 3000);
+    });
+    try { await image.decode(); } catch { /* rendering can continue with the fallback image */ }
+  }));
+}
+
+async function waitForRenderedContent(element: HTMLElement) {
+  if (document.fonts?.ready) await document.fonts.ready;
+  await waitForImages(Array.from(element.querySelectorAll('img')));
+  await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+}
+
+async function waitForDocumentReady(doc: Document) {
+  if (doc.readyState !== 'complete') await new Promise<void>(resolve => {
+    doc.defaultView?.addEventListener('load', () => resolve(), { once: true });
+    window.setTimeout(resolve, 3000);
+  });
+  if (doc.fonts?.ready) await doc.fonts.ready;
+  await waitForImages(Array.from(doc.images));
+  await new Promise<void>(resolve => doc.defaultView?.requestAnimationFrame(() => doc.defaultView?.requestAnimationFrame(() => resolve())));
 }
