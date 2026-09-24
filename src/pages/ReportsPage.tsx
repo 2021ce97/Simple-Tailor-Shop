@@ -20,7 +20,7 @@ import {
   FileText,
   Sparkles
 } from 'lucide-react';
-import { Fabric, Language, Order, Product, ProductSale, ShopSettings } from '../types';
+import { Fabric, Language, Order, Product, ProductSale, ShopSettings, Expense } from '../types';
 import { translations } from '../translations/i18n';
 import { printReceiptElement } from '../services/printService';
 
@@ -29,6 +29,7 @@ interface ReportsViewProps {
   products: Product[];
   fabrics: Fabric[];
   productSales: ProductSale[];
+  expenses?: Expense[];
   shopSettings: ShopSettings;
   language: Language;
 }
@@ -45,6 +46,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
   products,
   fabrics,
   productSales,
+  expenses = [],
   shopSettings,
   language
 }) => {
@@ -119,6 +121,12 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
     const totalShopBalance = tailorBalance; // Outstanding is only from tailoring orders
     const collectionEfficiency = totalShopBilled > 0 ? Math.round((totalShopCollected / totalShopBilled) * 100) : 100;
 
+    // 4. Shop Operating Expenses & Net Adjustment
+    const periodExpenses = (expenses || []).filter(exp => inRange(exp.date || exp.createdAt));
+    const totalShopExpenses = periodExpenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
+    const totalShopNetProfit = totalShopProfit - totalShopExpenses;
+    const totalShopNetCash = totalShopCollected - totalShopExpenses;
+
     // Payment method breakdown for retail
     const retailByPayment: Record<string, { count: number; total: number }> = {};
     for (const s of periodSales) {
@@ -162,6 +170,10 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       totalShopCollected,
       totalShopCost,
       totalShopProfit,
+      totalShopExpenses,
+      totalShopNetProfit,
+      totalShopNetCash,
+      periodExpenses,
       totalShopBalance,
       collectionEfficiency,
       retailByPayment,
@@ -180,7 +192,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       garments,
       productsSold,
     };
-  }, [orders, productSales, range, period]);
+  }, [orders, productSales, expenses, range, period]);
 
   const lowStockProducts = products.filter(product => (Number(product.stockQuantity) || 0) <= (product.lowStockThreshold ?? 3));
   const lowStockFabrics = fabrics.filter(fabric => (Number(fabric.stockMeters) || 0) <= 15);
@@ -460,19 +472,19 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           </div>
         </div>
 
-        {/* Card 3: Total Net Profit (Tailor + Retail) */}
+        {/* Card 3: Total Net Profit (Tailor + Retail - Expenses) */}
         <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 shadow-xs">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-[11px] font-extrabold uppercase tracking-wider text-amber-900">
-                ✨ {t.totalShopProfit}
+                ✨ {t.netProfit}
               </p>
               <p className="mt-1.5 text-2xl font-black text-amber-950 font-mono">
-                {money(report.totalShopProfit)}
+                {money(report.totalShopNetProfit)}
               </p>
               <p className="mt-1 text-[11px] font-bold text-amber-800">
-                ✂️ {t.tailorProfit}: {money(report.tailorProfit)}<br />
-                🛍️ {t.retailProfit}: {money(report.retailProfit)}
+                🏷️ {t.totalShopProfit}: {money(report.totalShopProfit)}<br />
+                💸 {t.totalExpenses}: -{money(report.totalShopExpenses)}
               </p>
             </div>
             <div className="rounded-xl border border-amber-300 bg-white p-2.5 text-amber-700 shadow-2xs">

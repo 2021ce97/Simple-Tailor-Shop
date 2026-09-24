@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Expense, ExpenseCategory, ShopSettings, Language } from '../types';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Expense, ExpenseCategory, ShopSettings, Language, Order, ProductSale } from '../types';
 import { translations } from '../translations/i18n';
 import { storageService } from '../services/storage';
 import { 
@@ -19,14 +19,19 @@ import {
   Database, 
   Copy, 
   TrendingDown, 
+  TrendingUp,
   Receipt,
   Layers,
   Sparkles,
-  ArrowUpDown
+  ArrowUpDown,
+  ArrowUpRight,
+  CheckCircle2
 } from 'lucide-react';
 
 interface ExpensesViewProps {
   expenses: Expense[];
+  orders?: Order[];
+  productSales?: ProductSale[];
   shopSettings: ShopSettings;
   language: Language;
   onExpenseUpdated: () => void;
@@ -47,6 +52,8 @@ const CATEGORY_ICONS: Record<ExpenseCategory, string> = {
 
 export const ExpensesView: React.FC<ExpensesViewProps> = ({
   expenses,
+  orders = [],
+  productSales = [],
   shopSettings,
   language,
   onExpenseUpdated,
@@ -69,7 +76,17 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [isSqlModalOpen, setIsSqlModalOpen] = useState(false);
   const [sqlCopied, setSqlCopied] = useState(false);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null);
+  const [adjustmentToast, setAdjustmentToast] = useState<{ title: string; amount: number } | null>(null);
+
+  // Auto-dismiss adjustment toast
+  useEffect(() => {
+    if (!adjustmentToast) return;
+    const timer = setTimeout(() => {
+      setAdjustmentToast(null);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [adjustmentToast]);
 
   // Form states
   const [formTitle, setFormTitle] = useState('');
@@ -156,9 +173,13 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
     setEditingExpense(null);
   };
 
-  const handleDeleteExpense = (id: string) => {
-    storageService.deleteExpense(id);
-    setDeleteConfirmId(null);
+  const handleConfirmDelete = () => {
+    if (!deleteTarget) return;
+    const targetTitle = deleteTarget.title;
+    const targetAmount = Number(deleteTarget.amount) || 0;
+    storageService.deleteExpense(deleteTarget.id);
+    setDeleteTarget(null);
+    setAdjustmentToast({ title: targetTitle, amount: targetAmount });
     onExpenseUpdated();
   };
 
@@ -263,6 +284,22 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
 
     return { total, thisMonth, today, average, count: expenses.length };
   }, [expenses]);
+
+  // Shop Cash Inflows vs Total Expenses -> Net Cash Balance
+  const financialTotals = useMemo(() => {
+    const ordersCollected = (orders || []).reduce((sum, o) => sum + (Number(o.paidAmount) || 0), 0);
+    const retailCollected = (productSales || []).reduce((sum, s) => sum + (Number(s.totalAmount) || 0), 0);
+    const totalInflows = ordersCollected + retailCollected;
+    const totalExpenses = expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+    const netCashBalance = totalInflows - totalExpenses;
+    return {
+      ordersCollected,
+      retailCollected,
+      totalInflows,
+      totalExpenses,
+      netCashBalance,
+    };
+  }, [orders, productSales, expenses]);
 
   // Export to CSV
   const handleExportCsv = () => {
@@ -385,6 +422,73 @@ create policy anon_manage_expenses on public.expenses
             <Plus className="w-4 h-4 stroke-[3]" />
             <span>{t.addExpense}</span>
           </button>
+        </div>
+      </div>
+
+      {/* Real-time money adjustment confirmation toast */}
+      {adjustmentToast && (
+        <div className="bg-emerald-50 border-2 border-emerald-400 text-emerald-950 px-4 py-3 rounded-2xl shadow-sm flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shrink-0 shadow-xs">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-xs font-black text-emerald-900">
+                {t.moneyRefundedToast}
+              </div>
+              <div className="text-[11px] text-emerald-800 font-medium">
+                «{adjustmentToast.title}» — <span className="font-mono font-bold text-emerald-950">+{adjustmentToast.amount.toLocaleString()} {currencySymbol}</span> {language === 'fa' ? 'به صندوق و موجودی دکان تعدیل (اضافه) شد.' : language === 'ps' ? 'بېرته د دوکان نغدو پیسو ته ورزیاتې شوې.' : 'adjusted back into shop funds.'}
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => setAdjustmentToast(null)}
+            className="text-emerald-700 hover:text-emerald-900 p-1.5 rounded-lg hover:bg-emerald-100 cursor-pointer"
+            title={t.close}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Net Cash Balance & Money Adjustment Hub */}
+      <div className="bg-stone-900 text-white p-4 sm:p-5 rounded-2xl border border-stone-800 shadow-md">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-xs font-bold text-amber-400">
+              <Sparkles className="w-4 h-4 text-amber-400" />
+              <span>{t.netShopBalance}</span>
+              <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                {language === 'fa' ? 'تعدیل خودکار با ثبت و حذف' : language === 'ps' ? 'د ثبت او ړنګولو سره اتومات حساب' : 'Auto-adjusted on delete & add'}
+              </span>
+            </div>
+            <div className="text-2xl sm:text-3xl font-black font-mono text-emerald-400 tracking-tight">
+              {financialTotals.netCashBalance.toLocaleString()} <span className="text-xs font-bold text-stone-300">{currencySymbol}</span>
+            </div>
+            <p className="text-[11px] text-stone-400 font-medium max-w-xl">
+              {language === 'fa' 
+                ? 'مجموع پول نقد دریافتی دکان منفی مصارف عملیاتی. هرگاه مصرفی را حذف کنید، پول آن فوراً به دخل دکان برگشت داده می‌شود.' 
+                : language === 'ps' 
+                ? 'د دوکان ټولې ترلاسه شوې نغدې پیسې منفي لګښتونه. کله چې لګښت ړنګ کړئ، پیسې یې سمدستي بېرته دلته جمع کېږي.' 
+                : 'Net shop funds: Customer cash received minus operating costs. Deleting an expense immediately adjusts the amount back here.'}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 bg-stone-950/60 border border-stone-800/80 p-3 rounded-xl shrink-0">
+            <div className="text-start">
+              <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">{t.totalInflows}</div>
+              <div className="text-sm font-bold font-mono text-stone-200">
+                +{financialTotals.totalInflows.toLocaleString()} <span className="text-[10px] text-stone-400">{currencySymbol}</span>
+              </div>
+            </div>
+            <div className="text-stone-600 font-bold">−</div>
+            <div className="text-start">
+              <div className="text-[10px] font-bold text-rose-400 uppercase tracking-wider">{t.totalExpenses}</div>
+              <div className="text-sm font-bold font-mono text-rose-400">
+                -{financialTotals.totalExpenses.toLocaleString()} <span className="text-[10px] text-rose-500">{currencySymbol}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -726,9 +830,9 @@ create policy anon_manage_expenses on public.expenses
                             <Edit3 className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={() => setDeleteConfirmId(exp.id)}
+                            onClick={() => setDeleteTarget(exp)}
                             className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                            title={t.delete}
+                            title={t.deleteExpense}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -785,12 +889,14 @@ create policy anon_manage_expenses on public.expenses
                       <button
                         onClick={() => handleOpenEdit(exp)}
                         className="p-1.5 text-stone-600 hover:text-amber-700 hover:bg-stone-100 rounded-lg transition-colors cursor-pointer"
+                        title={t.edit}
                       >
                         <Edit3 className="w-3.5 h-3.5" />
                       </button>
                       <button
-                        onClick={() => setDeleteConfirmId(exp.id)}
+                        onClick={() => setDeleteTarget(exp)}
                         className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                        title={t.deleteExpense}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -1024,54 +1130,128 @@ create policy anon_manage_expenses on public.expenses
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-stone-100">
-                <button
-                  type="button"
-                  onClick={() => { setIsAddingNew(false); setEditingExpense(null); }}
-                  className="px-4 py-2.5 text-xs font-bold text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors cursor-pointer"
-                >
-                  {t.cancel}
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 text-xs font-black text-stone-900 bg-amber-400 hover:bg-amber-500 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
-                >
-                  <Check className="w-4 h-4 stroke-[3]" />
-                  <span>{t.save}</span>
-                </button>
+              <div className="flex items-center justify-between gap-2.5 pt-3 border-t border-stone-100">
+                {editingExpense ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const target = editingExpense;
+                      setIsAddingNew(false);
+                      setEditingExpense(null);
+                      setDeleteTarget(target);
+                    }}
+                    className="px-3 py-2 text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>{t.deleteExpense}</span>
+                  </button>
+                ) : (
+                  <div />
+                )}
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { setIsAddingNew(false); setEditingExpense(null); }}
+                    className="px-4 py-2.5 text-xs font-bold text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors cursor-pointer"
+                  >
+                    {t.cancel}
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2.5 text-xs font-black text-stone-900 bg-amber-400 hover:bg-amber-500 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Check className="w-4 h-4 stroke-[3]" />
+                    <span>{t.save}</span>
+                  </button>
+                </div>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
-      {deleteConfirmId && (
+      {/* Delete Confirmation Modal with Clear Money Adjustment Back to Shop */}
+      {deleteTarget && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-sm rounded-2xl p-5 shadow-xl border border-stone-200 space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 mx-auto flex items-center justify-center">
-              <Trash2 className="w-6 h-6 stroke-[2]" />
+          <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-stone-200 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 mx-auto flex items-center justify-center border border-rose-100 shadow-xs">
+              <Trash2 className="w-7 h-7 stroke-[2]" />
             </div>
-            <div className="text-center">
-              <h3 className="text-sm font-bold text-stone-900 mb-1">
-                {t.confirmDelete}
+
+            <div className="text-center space-y-1">
+              <h3 className="text-base font-black text-stone-900">
+                {t.deleteExpenseConfirmTitle}
               </h3>
-              <p className="text-xs text-stone-500">
-                {t.areYouSure}
+              <p className="text-xs text-stone-500 max-w-xs mx-auto">
+                {t.deleteExpenseConfirmMessage}
               </p>
             </div>
-            <div className="flex items-center justify-center gap-2 pt-2">
+
+            {/* Expense Record Summary */}
+            <div className="bg-stone-50 border border-stone-200/80 rounded-2xl p-3.5 space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500 font-medium">{t.expenseTitle}:</span>
+                <span className="font-black text-stone-900">{deleteTarget.title}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500 font-medium">{t.spentBy}:</span>
+                <span className="font-bold text-amber-900 bg-amber-100/70 px-2 py-0.5 rounded-md">{deleteTarget.spentBy}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500 font-medium">{t.expenseDate}:</span>
+                <span className="font-mono text-stone-700">{deleteTarget.date}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-stone-500 font-medium">{t.expenseCategory}:</span>
+                <span className="font-medium text-stone-700">{CATEGORY_ICONS[deleteTarget.category]} {getCategoryLabel(deleteTarget.category)}</span>
+              </div>
+              {deleteTarget.receiptNumber && (
+                <div className="flex items-center justify-between">
+                  <span className="text-stone-500 font-medium">{t.expenseReceiptNo}:</span>
+                  <span className="font-mono text-stone-700">#{deleteTarget.receiptNumber}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Prominent Money Adjustment Notice */}
+            <div className="bg-emerald-50 border-2 border-emerald-300/80 rounded-2xl p-4 flex items-start gap-3.5 shadow-xs">
+              <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <TrendingUp className="w-5 h-5 stroke-[2.5]" />
+              </div>
+              <div className="flex-1">
+                <div className="text-xs font-black text-emerald-950 uppercase tracking-wide">
+                  {t.moneyAdjustedNotice}
+                </div>
+                <div className="text-lg font-black font-mono text-emerald-800 mt-0.5">
+                  +{Number(deleteTarget.amount).toLocaleString()} <span className="text-xs">{currencySymbol}</span>
+                </div>
+                <div className="text-[11px] text-emerald-700 mt-1 leading-relaxed font-medium">
+                  {language === 'fa' 
+                    ? 'این مبلغ بلافاصله به صندوق نقد و موجودی خالص دکان بازگردانده می‌شود.' 
+                    : language === 'ps' 
+                    ? 'دا پیسې به سمدستي بېرته د دوکان نغدو پیسو (دخل) ته جمع او ورزیاتې شي.' 
+                    : 'This amount will be immediately adjusted back into your shop cash balance.'}
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2.5 pt-2">
               <button
-                onClick={() => setDeleteConfirmId(null)}
-                className="w-1/2 py-2.5 text-xs font-bold text-stone-600 bg-stone-100 hover:bg-stone-200 rounded-xl cursor-pointer"
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="w-1/2 py-2.5 text-xs font-bold text-stone-600 bg-stone-100 hover:bg-stone-200 rounded-xl cursor-pointer transition-colors"
               >
                 {t.cancel}
               </button>
               <button
-                onClick={() => handleDeleteExpense(deleteConfirmId)}
-                className="w-1/2 py-2.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl cursor-pointer"
+                type="button"
+                onClick={handleConfirmDelete}
+                className="w-1/2 py-2.5 text-xs font-black text-white bg-rose-600 hover:bg-rose-700 rounded-xl cursor-pointer transition-all shadow-sm flex items-center justify-center gap-1.5"
               >
-                {t.delete}
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{t.deleteExpense}</span>
               </button>
             </div>
           </div>

@@ -377,6 +377,14 @@ export interface Translations {
   categoryTransport: string;
   categoryMarketing: string;
   categoryOther: string;
+  deleteExpense: string;
+  deleteExpenseConfirmTitle: string;
+  deleteExpenseConfirmMessage: string;
+  moneyAdjustedNotice: string;
+  moneyRefundedToast: string;
+  netShopBalance: string;
+  netProfit: string;
+  totalInflows: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -742,6 +750,14 @@ export const translations: Record<Language, Translations> = {
     categoryTransport: 'Transport & Delivery',
     categoryMarketing: 'Advertising & Printing',
     categoryOther: 'Miscellaneous / Other',
+    deleteExpense: 'Delete Expense',
+    deleteExpenseConfirmTitle: 'Delete Expense & Adjust Money Back',
+    deleteExpenseConfirmMessage: 'Deleting this expense will permanently remove the record and automatically adjust the money back into your shop cash balance.',
+    moneyAdjustedNotice: 'Amount Adjusted Back to Balance',
+    moneyRefundedToast: 'Expense deleted successfully! Amount adjusted back to shop funds.',
+    netShopBalance: 'Net Cash in Shop',
+    netProfit: 'Net Shop Profit',
+    totalInflows: 'Total Collected Inflows',
   },
 
   fa: {
@@ -1106,6 +1122,14 @@ export const translations: Record<Language, Translations> = {
     categoryTransport: 'کرایه رفت‌وآمد و باربری',
     categoryMarketing: 'تبلیغات و چاپ کارت',
     categoryOther: 'متفرقه و سایر مصارف',
+    deleteExpense: 'حذف مصرف',
+    deleteExpenseConfirmTitle: 'حذف مصرف و برگشت پول به دخل',
+    deleteExpenseConfirmMessage: 'با حذف این قلم مصرف، سند باطل گردیده و مبلغ آن دوباره به موجودی نقدی و دخل دکان بازگردانده می‌شود.',
+    moneyAdjustedNotice: 'برگشت پول به دخل دکان',
+    moneyRefundedToast: 'مصرف حذف گردید و مبلغ با موفقیت به دخل دکان برگشت داده شد.',
+    netShopBalance: 'موجودی خالص دخل',
+    netProfit: 'فایده خالص دکان',
+    totalInflows: 'مجموع عواید دریافتی',
   },
 
   ps: {
@@ -1470,5 +1494,13 @@ export const translations: Record<Language, Translations> = {
     categoryTransport: 'کرایه او باربري',
     categoryMarketing: 'تبلیغات او چاپ',
     categoryOther: 'نور / متفرقه لګښتونه',
+    deleteExpense: 'د لګښت ړنګول',
+    deleteExpenseConfirmTitle: 'د لګښت ړنګول او نغدو پیسو بېرته اضافه کول',
+    deleteExpenseConfirmMessage: 'د دې لګښت په ړنګولو سره به سند لغوه شي او پیسې به بېرته د دوکان نغدو پیسو (دخل) ته ورزیاتې شي.',
+    moneyAdjustedNotice: 'پیسې بېرته دخل ته ورزیاتې شوې',
+    moneyRefundedToast: 'لګښت ړنګ شو او پیسې بېرته د دوکان حساب ته اضافه شوې.',
+    netShopBalance: 'د دخل خالص موجودي',
+    netProfit: 'د دوکان خالصه ګټه',
+    totalInflows: 'ټولې ترلاسه شوې پیسې',
   },
 };

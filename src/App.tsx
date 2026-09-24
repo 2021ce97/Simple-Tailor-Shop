@@ -524,6 +524,8 @@ function ShopApp() {
           {currentTab === 'expenses' && (
             <ExpensesView
               expenses={expenses}
+              orders={orders}
+              productSales={productSales}
               shopSettings={shopSettings}
               language={language}
               onExpenseUpdated={reloadData}
@@ -536,6 +538,7 @@ function ShopApp() {
               products={products}
               fabrics={fabrics}
               productSales={productSales}
+              expenses={expenses}
               shopSettings={shopSettings}
               language={language}
             />
