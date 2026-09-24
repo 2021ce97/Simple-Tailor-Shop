@@ -286,6 +286,8 @@ export interface Translations {
   adminAccount: string;
   printFormat: string;
   standardA4: string;
+  thermal58: string;
+  thermal80: string;
 
   // Garment Categories & Dynamic Measurement Settings
   garmentTypesNav: string;
@@ -348,6 +350,33 @@ export interface Translations {
   totalRetailSales: string;
   todaysRetailRevenue: string;
   customSellingPrice: string;
+
+  // Expenses
+  expenses: string;
+  expensesNav: string;
+  addExpense: string;
+  editExpense: string;
+  expenseTitle: string;
+  expenseAmount: string;
+  expenseDate: string;
+  spentBy: string;
+  expenseCategory: string;
+  paymentMethod: string;
+  totalExpenses: string;
+  thisMonthExpenses: string;
+  todayExpenses: string;
+  averageExpense: string;
+  expenseReceiptNo: string;
+  expenseNotes: string;
+  categoryRent: string;
+  categoryUtilities: string;
+  categoryMaterials: string;
+  categoryMaintenance: string;
+  categoryFood: string;
+  categorySalaries: string;
+  categoryTransport: string;
+  categoryMarketing: string;
+  categoryOther: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -623,6 +652,8 @@ export const translations: Record<Language, Translations> = {
     adminAccount: 'Master Tailor Admin',
     printFormat: 'Print format',
     standardA4: 'Standard A4',
+    thermal58: 'Thermal 58 mm',
+    thermal80: 'Thermal 80 mm',
 
     garmentTypesNav: 'Garment Categories',
     garmentCategory: 'Garment Category',
@@ -684,6 +715,33 @@ export const translations: Record<Language, Translations> = {
     totalRetailSales: 'Total Retail Sales',
     todaysRetailRevenue: "Today's Retail Revenue",
     customSellingPrice: 'Flexible Selling Price',
+
+    // Expenses
+    expenses: 'Shop Expenses',
+    expensesNav: 'Expenses & Costs',
+    addExpense: 'Add New Expense',
+    editExpense: 'Edit Expense',
+    expenseTitle: 'Expense Name / Title',
+    expenseAmount: 'Amount',
+    expenseDate: 'Date',
+    spentBy: 'Spent By (Person Name)',
+    expenseCategory: 'Category',
+    paymentMethod: 'Payment Method',
+    totalExpenses: 'Total Expenses',
+    thisMonthExpenses: 'This Month Expenses',
+    todayExpenses: "Today's Expenses",
+    averageExpense: 'Average Expense',
+    expenseReceiptNo: 'Receipt / Voucher #',
+    expenseNotes: 'Additional Notes',
+    categoryRent: 'Shop Rent',
+    categoryUtilities: 'Utilities (Electricity/Water)',
+    categoryMaterials: 'Sewing Materials & Supplies',
+    categoryMaintenance: 'Machine Repair & Servicing',
+    categoryFood: 'Tea, Food & Hospitality',
+    categorySalaries: 'Staff Wages & Advance',
+    categoryTransport: 'Transport & Delivery',
+    categoryMarketing: 'Advertising & Printing',
+    categoryOther: 'Miscellaneous / Other',
   },
 
   fa: {
@@ -958,6 +1016,8 @@ export const translations: Record<Language, Translations> = {
     adminAccount: 'حساب مدیر خیاطی',
     printFormat: 'نوع چاپ',
     standardA4: 'سند استاندارد A4',
+    thermal58: 'پرینتر حرارتی ۵۸ میلی‌متر',
+    thermal80: 'پرینتر حرارتی ۸۰ میلی‌متر',
 
     garmentTypesNav: 'دسته‌بندی لباس‌ها',
     garmentCategory: 'کتگوری لباس',
@@ -1019,6 +1079,33 @@ export const translations: Record<Language, Translations> = {
     totalRetailSales: 'مجموع فروشات پرچون',
     todaysRetailRevenue: 'عواید امروز پرچون',
     customSellingPrice: 'قیمت فروش دلخواه',
+
+    // Expenses
+    expenses: 'مصارف دکان',
+    expensesNav: 'مدیریت مصارف و هزینه‌ها',
+    addExpense: 'ثبت مصارف جدید',
+    editExpense: 'ویرایش مصرف',
+    expenseTitle: 'نام / عنوان مصرف',
+    expenseAmount: 'مبلغ هزینه',
+    expenseDate: 'تاریخ مصرف',
+    spentBy: 'نام شخص پرداخت‌کننده / مصرف‌کننده',
+    expenseCategory: 'کتگوری مصرف',
+    paymentMethod: 'نحوه پرداخت',
+    totalExpenses: 'مجموع مصارف ثبت شده',
+    thisMonthExpenses: 'مصارف این ماه',
+    todayExpenses: 'مصارف امروز',
+    averageExpense: 'میانگین هر مصرف',
+    expenseReceiptNo: 'شماره سند / رسید',
+    expenseNotes: 'توضیحات و جزئیات اضافه',
+    categoryRent: 'کرایه دکان',
+    categoryUtilities: 'برق و آب و خدمات',
+    categoryMaterials: 'لوازم خیاطی، تار و سوزن',
+    categoryMaintenance: 'سرویس و ترمیم ماشین‌آلات',
+    categoryFood: 'چای، نان و مهمانداری',
+    categorySalaries: 'معاشات و مساعده شاگردان',
+    categoryTransport: 'کرایه رفت‌وآمد و باربری',
+    categoryMarketing: 'تبلیغات و چاپ کارت',
+    categoryOther: 'متفرقه و سایر مصارف',
   },
 
   ps: {
@@ -1293,6 +1380,8 @@ export const translations: Record<Language, Translations> = {
     adminAccount: 'د خیاطۍ د مدیر حساب',
     printFormat: 'د چاپ ډول',
     standardA4: 'معیاري A4 سند',
+    thermal58: 'حرارتي ۵۸ ملي متره',
+    thermal80: 'حرارتي ۸۰ ملي متره',
 
     garmentTypesNav: 'د جامو وېشنیزې',
     garmentCategory: 'د جامو کټګوري',
@@ -1354,5 +1443,32 @@ export const translations: Record<Language, Translations> = {
     totalRetailSales: 'د پرچون ټول پلور',
     todaysRetailRevenue: 'د نن ورځې پرچون عواید',
     customSellingPrice: 'خپله خوښه د پلور بیه',
+
+    // Expenses
+    expenses: 'د دوکان لګښتونه',
+    expensesNav: 'لګښتونه او مصارف',
+    addExpense: 'نوی لګښت ثبتول',
+    editExpense: 'د لګښت سمول',
+    expenseTitle: 'د لګښت نوم / تفصیل',
+    expenseAmount: 'د لګښت پیسې / رقم',
+    expenseDate: 'نېټه',
+    spentBy: 'د لګوونکي / مصرف کوونکي کس نوم',
+    expenseCategory: 'د لګښت برخه / کټګوري',
+    paymentMethod: 'د تادیې طریقه',
+    totalExpenses: 'ټول لګښتونه',
+    thisMonthExpenses: 'د دې میاشتې لګښتونه',
+    todayExpenses: 'د نن ورځې لګښتونه',
+    averageExpense: 'د هر لګښت اوسط',
+    expenseReceiptNo: 'د بِل / سَنَد نمبر',
+    expenseNotes: 'اضافي یادښتونه',
+    categoryRent: 'د دوکان کرایه',
+    categoryUtilities: 'برېښنا او اوبه',
+    categoryMaterials: 'د خیاطۍ سامان، تار او ستنې',
+    categoryMaintenance: 'د ګنډلو ماشین ترمیم او سرویس',
+    categoryFood: 'چای، ډوډۍ او مېلمستیا',
+    categorySalaries: 'معاشات او پیشکي پیسې',
+    categoryTransport: 'کرایه او باربري',
+    categoryMarketing: 'تبلیغات او چاپ',
+    categoryOther: 'نور / متفرقه لګښتونه',
   },
 };

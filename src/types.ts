@@ -182,7 +182,7 @@ export interface Order {
   updatedAt: string;
 }
 
-export type ReceiptPaperFormat = 'a6' | 'a5';
+export type ReceiptPaperFormat = 'a6' | 'thermal80' | 'thermal58' | 'a4';
 export type ThermalReceiptStyle = 'standard' | 'classic' | 'compact';
 
 export interface ShopSettings {
@@ -219,3 +219,30 @@ export interface ShopSettings {
   receiptHeaderNotePs?: string;
   receiptHeaderNoteEn?: string;
 }
+
+export type ExpenseCategory = 
+  | 'rent'
+  | 'utilities'
+  | 'materials'
+  | 'maintenance'
+  | 'food_hospitality'
+  | 'salaries'
+  | 'salaries_wages'
+  | 'transport'
+  | 'marketing'
+  | 'other';
+
+export interface Expense {
+  id: string;
+  title: string;
+  category: ExpenseCategory | string;
+  amount: number;
+  date: string; // YYYY-MM-DD
+  spentBy: string; // Name of person who incurred or paid the expense
+  paymentMethod?: 'cash' | 'bank' | 'mobile_money' | 'other';
+  notes?: string;
+  receiptNumber?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+

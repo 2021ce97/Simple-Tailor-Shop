@@ -152,7 +152,7 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
   // Active slip mode: 'tailor' (workshop slip) | 'customer' (customer bill) | 'both'
   const [activeMode, setActiveMode] = useState<ReceiptSlipMode>(initialMode);
   const [printFormat, setPrintFormat] = useState<ReceiptPaperFormat>(
-    shopSettings.receiptFormat === 'a5' ? 'a5' : 'a6'
+    shopSettings.receiptFormat || 'a6'
   );
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
@@ -320,8 +320,8 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
       ref={ref}
       className="tailor-slip-sheet bg-white text-[#1A1A1A] p-3 text-xs border-2 border-stone-950 font-sans shadow-xs relative select-text"
       style={{
-        width: printFormat === 'a5' ? '140mm' : '99mm',
-        maxWidth: '100%',
+        width: printFormat === 'a6' ? '99mm' : printFormat === 'thermal58' ? '54mm' : printFormat === 'thermal80' ? '76mm' : '100%',
+        maxWidth: printFormat === 'a4' ? '180mm' : '100%',
         margin: '0 auto',
         boxSizing: 'border-box'
       }}
@@ -483,8 +483,8 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
       ref={ref}
       className="customer-receipt-sheet bg-white text-[#1A1A1A] p-3 text-xs border-2 border-stone-950 font-sans shadow-xs relative select-text"
       style={{
-        width: printFormat === 'a5' ? '140mm' : '99mm',
-        maxWidth: '100%',
+        width: printFormat === 'a6' ? '99mm' : printFormat === 'thermal58' ? '54mm' : printFormat === 'thermal80' ? '76mm' : '100%',
+        maxWidth: printFormat === 'a4' ? '180mm' : '100%',
         margin: '0 auto',
         boxSizing: 'border-box'
       }}
@@ -732,7 +732,7 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
               </button>
             </div>
 
-            {/* Paper Size selector */}
+            {/* Paper Size selector (A6, 80mm, 58mm, A4) */}
             <div className="flex items-center gap-1 bg-white/10 rounded-xl p-0.5 border border-white/10">
               <button
                 type="button"
@@ -748,9 +748,9 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
               </button>
               <button
                 type="button"
-                onClick={() => setPrintFormat('a6')}
-                className={`hidden px-2 py-1 text-[11px] font-black rounded-md transition cursor-pointer ${
-                  printFormat === 'a6'
+                onClick={() => setPrintFormat('thermal80')}
+                className={`px-2 py-1 text-[11px] font-black rounded-md transition cursor-pointer ${
+                  printFormat === 'thermal80'
                     ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
                     : 'text-stone-300 hover:text-white'
                 }`}
@@ -760,9 +760,9 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
               </button>
               <button
                 type="button"
-                onClick={() => setPrintFormat('a6')}
-                className={`hidden px-2 py-1 text-[11px] font-black rounded-md transition cursor-pointer ${
-                  printFormat === 'a6'
+                onClick={() => setPrintFormat('thermal58')}
+                className={`px-2 py-1 text-[11px] font-black rounded-md transition cursor-pointer ${
+                  printFormat === 'thermal58'
                     ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
                     : 'text-stone-300 hover:text-white'
                 }`}
@@ -772,15 +772,15 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
               </button>
               <button
                 type="button"
-                onClick={() => setPrintFormat('a5')}
+                onClick={() => setPrintFormat('a4')}
                 className={`px-2 py-1 text-[11px] font-black rounded-md transition cursor-pointer ${
-                  printFormat === 'a5'
+                  printFormat === 'a4'
                     ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
                     : 'text-stone-300 hover:text-white'
                 }`}
-                title="A5 Standard Sheet (148×210 mm)"
+                title="A4 Full Sheet"
               >
-                A5
+                A4
               </button>
             </div>
           </div>

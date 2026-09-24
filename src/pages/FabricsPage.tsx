@@ -123,7 +123,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
     setIsAddingNew(true);
   };
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formName.trim()) return;
 
@@ -140,29 +140,21 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
       createdAt: editingFabric?.createdAt || new Date().toISOString(),
     };
 
-    try {
-      await storageService.saveFabric(fabricToSave);
-      setIsAddingNew(false);
-      setEditingFabric(null);
-      onFabricUpdated();
-    } catch (error: any) {
-      alert(error?.message || 'Fabric could not be saved to Supabase.');
-    }
+    storageService.saveFabric(fabricToSave);
+    setIsAddingNew(false);
+    setEditingFabric(null);
+    onFabricUpdated();
   };
 
-  const handleDelete = async (fabric: Fabric) => {
+  const handleDelete = (fabric: Fabric) => {
     if (window.confirm(`${t.confirmDelete} (${fabric.name})`)) {
-      try {
-        await storageService.deleteFabric(fabric.id);
-        onFabricUpdated();
-      } catch (error: any) {
-        alert(error?.message || 'Fabric could not be deleted from Supabase.');
-      }
+      storageService.deleteFabric(fabric.id);
+      onFabricUpdated();
     }
   };
 
-  const handleUpdateStock = async (fabric: Fabric, newStock: number) => {
-    await storageService.saveFabric({
+  const handleUpdateStock = (fabric: Fabric, newStock: number) => {
+    storageService.saveFabric({
       ...fabric,
       stockMeters: Math.max(0, newStock),
       updatedAt: new Date().toISOString()

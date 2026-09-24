@@ -1,6 +1,6 @@
 {
   "name": "MUJEEB AFGHAN FASHION HOUSE",
-  "description": "Bespoke Afghan tailoring management system for orders, garment-specific measurement fields, design options, customer records, fabric inventory, and multilingual receipt slips in English, Dari, and Pashto.",
+  "description": "Bespoke Afghan tailoring management system for orders, garment measurements, customer records, fabric inventory, retail products, shop expense tracking, and multilingual receipt slips in English, Dari, and Pashto.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

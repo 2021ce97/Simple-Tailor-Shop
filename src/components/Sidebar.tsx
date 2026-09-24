@@ -2,6 +2,7 @@ import React from 'react';
 import { Language, ShopSettings, Order, Customer, Fabric, Product } from '../types';
 import { translations } from '../translations/i18n';
 import { storageService } from '../services/storage';
+import { isSupabaseConfigured } from '../lib/supabase';
 import { 
   Scissors, 
   LayoutDashboard, 
@@ -17,9 +18,10 @@ import {
   UserCheck, 
   BarChart3,
   Database,
-  RefreshCw
+  RefreshCw,
+  Wallet
 } from 'lucide-react';
-export type MainNavTab = 'dashboard' | 'new_order' | 'customers' | 'fabrics' | 'products' | 'sales_history' | 'reports' | 'settings';
+export type MainNavTab = 'dashboard' | 'new_order' | 'customers' | 'fabrics' | 'products' | 'sales_history' | 'expenses' | 'reports' | 'settings';
 export type SettingsSubTab = 'design' | 'measurements' | 'garments' | 'shop' | 'receipt' | 'backup';
 
 interface SidebarProps {
@@ -32,6 +34,7 @@ interface SidebarProps {
   fabrics: Fabric[];
   products: Product[];
   salesCount?: number;
+  expensesCount?: number;
   designCategoriesCount: number;
   isOpenOnMobile: boolean;
   onCloseMobile: () => void;
@@ -39,6 +42,7 @@ interface SidebarProps {
   onLanguageChange: (lang: Language) => void;
   onSignOut?: () => void;
   dbConnected?: boolean;
+  currentUser?: { email: string; name: string } | null;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -50,12 +54,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   fabrics,
   products,
   salesCount = 0,
+  expensesCount = 0,
   isOpenOnMobile,
   onCloseMobile,
   onSelectNav,
   onLanguageChange,
   onSignOut,
   dbConnected = true,
+  currentUser,
 }) => {
   const t = translations[language];
   const isRtl = language === 'fa' || language === 'ps';
@@ -290,6 +296,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
           </button>
 
+          {/* Financials & Accounts workspace */}
+          <div className="my-3 border-t border-stone-800 pt-3">
+            <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-amber-400">
+              {language === 'fa' ? 'حسابداری و مصارف' : language === 'ps' ? 'حسابونه او لګښتونه' : 'Finance & Expenses'}
+            </div>
+          </div>
+
+          {/* Expenses */}
+          <button
+            onClick={() => handleNavClick('expenses')}
+            id="sidebar-expenses-link"
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              isTabActive('expenses')
+                ? 'bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 font-black'
+                : 'text-stone-300 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Wallet className={`w-4 h-4 ${isTabActive('expenses') ? 'text-[#D4AF37]' : 'text-stone-400'}`} />
+              <span>{t.expenses}</span>
+            </div>
+            {expensesCount > 0 && (
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                isTabActive('expenses') ? 'bg-[#D4AF37] text-[#181818]' : 'bg-stone-800 text-stone-300'
+              }`}>
+                {expensesCount}
+              </span>
+            )}
+          </button>
+
           <button
             onClick={() => handleNavClick('reports')}
             id="sidebar-reports-link"
@@ -335,17 +371,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="px-3 pb-2 shrink-0">
           <div className="flex items-center justify-between text-xs px-2.5 py-1.5 rounded-xl bg-stone-900/90 border border-stone-800">
             <div className="flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${dbConnected !== false ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+              <span className={`w-2 h-2 rounded-full ${
+                isSupabaseConfigured && dbConnected !== false 
+                  ? 'bg-emerald-400 animate-pulse' 
+                  : !isSupabaseConfigured 
+                  ? 'bg-teal-400' 
+                  : 'bg-amber-400'
+              }`} />
               <span className="text-[11px] font-medium text-stone-300">
-                {language === 'fa' ? 'دیتابیس ابری' : language === 'ps' ? 'د ډیټابیس حالت' : 'Cloud Database'}
+                {isSupabaseConfigured 
+                  ? (language === 'fa' ? 'دیتابیس ابری' : language === 'ps' ? 'د ډیټابیس حالت' : 'Cloud Database')
+                  : (language === 'fa' ? 'حافظه محلی' : language === 'ps' ? 'محلي ډیټابیس' : 'Local Storage')}
               </span>
             </div>
             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-              dbConnected !== false 
+              isSupabaseConfigured && dbConnected !== false 
                 ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/40' 
+                : !isSupabaseConfigured
+                ? 'bg-teal-950 text-teal-300 border border-teal-800/40'
                 : 'bg-amber-950 text-amber-400 border border-amber-800/40'
             }`}>
-              {dbConnected !== false ? (language === 'fa' ? 'متصل' : language === 'ps' ? 'وصل دی' : 'Connected') : (language === 'fa' ? 'در حال اتصال' : language === 'ps' ? 'نښلول کیږي' : 'Connecting')}
+              {isSupabaseConfigured 
+                ? (dbConnected !== false ? (language === 'fa' ? 'متصل' : language === 'ps' ? 'وصل دی' : 'Connected') : (language === 'fa' ? 'در حال اتصال' : language === 'ps' ? 'نښلول کیږي' : 'Connecting'))
+                : (language === 'fa' ? 'فعال آفلاین' : language === 'ps' ? 'فعال' : 'Active')}
             </span>
           </div>
         </div>
@@ -358,10 +406,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
             <div className="overflow-hidden leading-tight">
               <span className="font-bold text-white block text-[11px] truncate">
-                tailor1@gmail.com
+                {currentUser?.email || 'tailor1@gmail.com'}
               </span>
               <span className="text-[9px] text-[#D4AF37] font-medium block truncate">
-                {t.adminAccount || 'Master Tailor Admin'}
+                {currentUser?.name || t.adminAccount || 'Master Tailor Admin'}
               </span>
             </div>
           </div>

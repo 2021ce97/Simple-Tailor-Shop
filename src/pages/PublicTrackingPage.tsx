@@ -51,14 +51,61 @@ export const PublicTrackingView: React.FC = () => {
     setOrders([]);
     setIsLoading(true);
     try {
-      const { data, error: lookupError } = await supabase.rpc('lookup_public_orders', { lookup_value: value });
-      if (!lookupError && Array.isArray(data) && data.length > 0) {
-        setOrders(data.map((row: any) => ({ orderNumber: row.order_number, garmentType: row.garment_type, quantity: row.quantity, status: row.status, orderDate: row.order_date, deliveryDate: row.delivery_date, completedDate: row.completed_date, deliveredDate: row.delivered_date })));
+      let matchedOrders: PublicOrder[] = [];
+      try {
+        const { data, error: lookupError } = await supabase.rpc('lookup_public_orders', { lookup_value: value });
+        if (!lookupError && Array.isArray(data) && data.length > 0) {
+          matchedOrders = data.map((row: any) => ({
+            orderNumber: row.order_number,
+            garmentType: row.garment_type,
+            quantity: row.quantity,
+            status: row.status,
+            orderDate: row.order_date,
+            deliveryDate: row.delivery_date,
+            completedDate: row.completed_date,
+            deliveredDate: row.delivered_date,
+          }));
+        }
+      } catch {
+        // Fall back to local storage query
+      }
+
+      if (matchedOrders.length === 0) {
+        const localOrders = storageService.getOrders();
+        const norm = value.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const matched = localOrders.filter(o => {
+          const ordNum = (o.orderNumber || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          const phone = (o.customerPhone || '').replace(/[^0-9]/g, '');
+          const whatsapp = (o.customerWhatsApp || '').replace(/[^0-9]/g, '');
+          const id = (o.id || '').toLowerCase();
+          return (
+            ordNum.includes(norm) ||
+            (norm.length >= 3 && (phone.includes(norm) || whatsapp.includes(norm))) ||
+            id.includes(norm)
+          );
+        });
+
+        if (matched.length > 0) {
+          matchedOrders = matched.map(o => ({
+            orderNumber: o.orderNumber,
+            garmentType: o.garmentType,
+            quantity: o.quantity,
+            status: o.status,
+            orderDate: o.orderDate,
+            deliveryDate: o.deliveryDate,
+            completedDate: o.completedDate || null,
+            deliveredDate: o.deliveredDate || null,
+          }));
+        }
+      }
+
+      if (matchedOrders.length > 0) {
+        setOrders(matchedOrders);
         return;
       }
-      throw lookupError || new Error('Order not found');
+      throw new Error('No order was found for this Order ID or contact');
     } catch (searchError) {
-      setError(searchError instanceof Error ? searchError.message : 'Order not found');
+      setError(searchError instanceof Error ? searchError.message : 'No order was found for this Order ID or contact');
     } finally {
       setIsLoading(false);
     }
