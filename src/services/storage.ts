@@ -176,59 +176,7 @@ export const INITIAL_DEMO_PRODUCT_SALES: ProductSale[] = [
   },
 ];
 
-export const INITIAL_DEMO_EXPENSES: Expense[] = [
-  {
-    id: 'exp_1',
-    title: 'خرید تار خیاطی و سوزن جوره (Sewing Threads & Needles)',
-    category: 'materials',
-    amount: 1450,
-    date: '2026-09-20',
-    spentBy: 'Mujeeb (مجیب)',
-    paymentMethod: 'cash',
-    notes: 'تار سفید، مشکی و طلایی برای دوخت سفارشات مجلسی',
-    receiptNumber: 'RCP-8821',
-    createdAt: '2026-09-20T09:00:00Z',
-    updatedAt: '2026-09-20T09:00:00Z',
-  },
-  {
-    id: 'exp_2',
-    title: 'بل برق دکان ماه سنبله (Shop Electricity Bill)',
-    category: 'utilities',
-    amount: 2800,
-    date: '2026-09-18',
-    spentBy: 'Ahmad (احمد)',
-    paymentMethod: 'cash',
-    notes: 'تحویل شده به شرکت برشنا',
-    receiptNumber: 'DABS-4401',
-    createdAt: '2026-09-18T11:30:00Z',
-    updatedAt: '2026-09-18T11:30:00Z',
-  },
-  {
-    id: 'exp_3',
-    title: 'روغن‌کاری و سرویس ماشین‌های دوخت (Sewing Machine Servicing & Oil)',
-    category: 'maintenance',
-    amount: 900,
-    date: '2026-09-15',
-    spentBy: 'Ustad Karim (استاد کریم)',
-    paymentMethod: 'cash',
-    notes: 'تنظیم تسمه و سرویس ۳ پایه ماشین جاکی',
-    receiptNumber: 'SRV-102',
-    createdAt: '2026-09-15T14:00:00Z',
-    updatedAt: '2026-09-15T14:00:00Z',
-  },
-  {
-    id: 'exp_4',
-    title: 'چای، شکر و نان ظهر شاگردان (Tea & Staff Lunch)',
-    category: 'food_hospitality',
-    amount: 650,
-    date: '2026-09-22',
-    spentBy: 'Farhad (فرهاد)',
-    paymentMethod: 'cash',
-    notes: 'مصارف مهمانداری و نان چاشت پرسونل',
-    createdAt: '2026-09-22T13:00:00Z',
-    updatedAt: '2026-09-22T13:00:00Z',
-  },
-];
+export const INITIAL_DEMO_EXPENSES: Expense[] = [];
 
 export const DEFAULT_SHOP_SETTINGS: ShopSettings = {
   shopNameEn: 'MUJEEB AFGHAN FASHION HOUSE',
@@ -1028,18 +976,13 @@ let languagePreference: 'en' | 'fa' | 'ps' = (() => {
 function getStoredItem<T>(key: string, defaultValue: T): T {
   if (memoryStore.has(key)) {
     const cached = memoryStore.get(key);
-    if (Array.isArray(cached) && cached.length > 0) return cached as T;
-    if (!Array.isArray(cached) && cached !== null && cached !== undefined) return cached as T;
+    if (cached !== null && cached !== undefined) return cached as T;
   }
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
       const raw = localStorage.getItem(key);
       if (raw !== null) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length === 0 && Array.isArray(defaultValue) && defaultValue.length > 0) {
-          memoryStore.set(key, defaultValue);
-          return defaultValue;
-        }
         memoryStore.set(key, parsed);
         return parsed as T;
       }
@@ -1452,8 +1395,15 @@ export const storageService = {
 
   // Expenses
   getExpenses(): Expense[] {
-    const list = getStoredItem<Expense[]>(STORAGE_KEYS.EXPENSES, INITIAL_DEMO_EXPENSES);
-    return Array.isArray(list) && list.length > 0 ? list : INITIAL_DEMO_EXPENSES;
+    const list = getStoredItem<Expense[]>(STORAGE_KEYS.EXPENSES, []);
+    // Ensure any previously cached demo expenses are permanently purged
+    const validList = Array.isArray(list) 
+      ? list.filter(e => !['exp_1', 'exp_2', 'exp_3', 'exp_4'].includes(e.id))
+      : [];
+    if (Array.isArray(list) && list.length !== validList.length) {
+      setStoredItem(STORAGE_KEYS.EXPENSES, validList);
+    }
+    return validList;
   },
 
   getExpenseById(id: string): Expense | undefined {

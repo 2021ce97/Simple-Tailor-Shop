@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Language, ShopSettings } from '../types';
 import { translations } from '../translations/i18n';
 import { 
   Menu, 
-  PlusCircle, 
   Globe, 
-  LogOut,
-  UserCheck
+  ChevronDown,
+  Check,
+  Search
 } from 'lucide-react';
-import { Search } from 'lucide-react';
 import { MainNavTab, SettingsSubTab } from './Sidebar';
 
 interface NavbarProps {
@@ -29,12 +28,23 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleSidebar,
   onTabChange,
   onLanguageChange,
-  onSignOut,
   onSearchOrders,
-  dbConnected = true,
 }) => {
   const t = translations[language];
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const langDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (langDropdownRef.current && !langDropdownRef.current.contains(event.target as Node)) {
+        setIsLangDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const shopTitle = language === 'ps' 
     ? shopSettings.shopNamePs 
@@ -42,17 +52,20 @@ export const Navbar: React.FC<NavbarProps> = ({
     ? shopSettings.shopNameFa 
     : shopSettings.shopNameEn;
 
+  const currentLanguageLabel = 
+    language === 'fa' ? 'دری' : language === 'ps' ? 'پښتو' : 'English';
+
   return (
-    <header className="sticky top-0 z-30 bg-[#1A1A1A] text-white border-b border-[#2A2A2A] shadow-md no-print">
+    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md text-stone-900 border-b border-stone-200 shadow-xs no-print">
       <div className="w-full px-4 sm:px-6">
         <div className="flex items-center justify-between h-16 gap-3">
           {/* Left / Start: Sidebar Toggle & Brand */}
           <div className="flex items-center gap-3">
-            {/* Sidebar toggle button (visible on all screens for quick collapse/expand) */}
+            {/* Sidebar toggle button */}
             <button
               onClick={onToggleSidebar}
               id="sidebar-toggle-btn"
-              className="p-2 rounded-xl text-stone-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
+              className="p-2 rounded-xl text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition cursor-pointer"
               title={t.menu}
               aria-label="Toggle Navigation Menu"
             >
@@ -64,14 +77,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => onTabChange('dashboard')}
               className="flex items-center gap-2.5 cursor-pointer group shrink-0"
             >
-              <div className="w-9 h-9 overflow-hidden rounded-xl bg-black shadow-sm transition group-hover:scale-105">
+              <div className="w-9 h-9 overflow-hidden rounded-xl bg-stone-900 shadow-xs transition group-hover:scale-105">
                 <img src={shopSettings.logoUrl || '/mujeeb-afghan-logo.jpeg'} alt="Mujeeb Afghan Fashion" className="h-full w-full object-contain" />
               </div>
               <div>
-                <h1 className="font-bold text-sm sm:text-base text-white tracking-tight leading-tight flex items-center gap-2">
-                  <span>{shopTitle || 'MUJEEB AFGHAN FASION HOUSE'}</span>
+                <h1 className="font-extrabold text-sm sm:text-base text-stone-900 tracking-tight leading-tight flex items-center gap-2">
+                  <span>{shopTitle || 'MUJEEB AFGHAN FASHION HOUSE'}</span>
                 </h1>
-                <p className="text-[10px] text-[#D4AF37] font-medium hidden sm:block">
+                <p className="text-[10px] text-amber-700 font-semibold hidden sm:block">
                   {t.appSubtitle}
                 </p>
               </div>
@@ -80,8 +93,9 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Quick Action Navigation Bar */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Global Search */}
             <div className="relative hidden md:block w-52 lg:w-72">
-              <Search className="w-4 h-4 text-slate-400 absolute start-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-stone-400 absolute start-3 top-1/2 -translate-y-1/2" />
               <input
                 value={searchQuery}
                 onChange={(e) => {
@@ -94,91 +108,70 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }}
                 placeholder={language === 'fa' ? 'جستجوی سفارش یا مشتری...' : language === 'ps' ? 'فرمایش یا پېرودونکی ولټوئ...' : 'Search order or customer...'}
                 aria-label="Search orders by customer name or order ID"
-                className="w-full bg-slate-800/80 border border-slate-700 rounded-xl ps-9 pe-3 py-2 text-xs text-white placeholder:text-slate-400 outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400"
+                className="w-full bg-stone-50 border border-stone-200 rounded-xl ps-9 pe-3 py-2 text-xs text-stone-800 placeholder:text-stone-400 outline-none focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-500 transition"
               />
             </div>
-            {/* Database Status Indicator */}
-            <div 
-              id="navbar-db-status"
-              className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-bold border transition ${
-                dbConnected !== false
-                  ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400'
-                  : 'bg-amber-950/40 border-amber-500/30 text-amber-400'
-              }`}
-              title={dbConnected !== false ? 'PostgreSQL Database Connected (Cloud Sync Active)' : 'Connecting to database...'}
-            >
-              <span className={`w-2 h-2 rounded-full ${dbConnected !== false ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-              <span className="font-mono text-[10px] tracking-wide">
-                {dbConnected !== false ? 'PostgreSQL Live' : 'Syncing'}
-              </span>
+
+            {/* Compact Language Selector Dropdown - Showing only the selected language */}
+            <div className="relative" ref={langDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+                id="topbar-lang-selector-btn"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-100 hover:bg-stone-200/80 text-stone-800 rounded-xl text-xs font-bold transition border border-stone-200 cursor-pointer shadow-2xs"
+                aria-label="Select Language"
+              >
+                <Globe className="w-3.5 h-3.5 text-amber-600" />
+                <span>{currentLanguageLabel}</span>
+                <ChevronDown className={`w-3 h-3 text-stone-500 transition-transform ${isLangDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isLangDropdownOpen && (
+                <div className="absolute end-0 mt-1.5 w-36 bg-white rounded-xl shadow-lg border border-stone-200 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onLanguageChange('fa');
+                      setIsLangDropdownOpen(false);
+                    }}
+                    className={`w-full text-start px-3 py-2 text-xs flex items-center justify-between font-bold transition cursor-pointer ${
+                      language === 'fa' ? 'bg-amber-50 text-amber-900' : 'text-stone-700 hover:bg-stone-50'
+                    }`}
+                  >
+                    <span>دری (Dari)</span>
+                    {language === 'fa' && <Check className="w-3.5 h-3.5 text-amber-600" />}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onLanguageChange('ps');
+                      setIsLangDropdownOpen(false);
+                    }}
+                    className={`w-full text-start px-3 py-2 text-xs flex items-center justify-between font-bold transition cursor-pointer ${
+                      language === 'ps' ? 'bg-amber-50 text-amber-900' : 'text-stone-700 hover:bg-stone-50'
+                    }`}
+                  >
+                    <span>پښتو (Pashto)</span>
+                    {language === 'ps' && <Check className="w-3.5 h-3.5 text-amber-600" />}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onLanguageChange('en');
+                      setIsLangDropdownOpen(false);
+                    }}
+                    className={`w-full text-start px-3 py-2 text-xs flex items-center justify-between font-bold transition cursor-pointer ${
+                      language === 'en' ? 'bg-amber-50 text-amber-900' : 'text-stone-700 hover:bg-stone-50'
+                    }`}
+                  >
+                    <span>English</span>
+                    {language === 'en' && <Check className="w-3.5 h-3.5 text-amber-600" />}
+                  </button>
+                </div>
+              )}
             </div>
-
-            <button
-              onClick={() => onTabChange('new_order')}
-              id="nav-quick-new-order"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#D4AF37] hover:bg-[#B39025] text-[#1A1A1A] font-black rounded-xl text-xs transition cursor-pointer shadow-xs"
-            >
-              <PlusCircle className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>{t.newOrder}</span>
-            </button>
-
-            {/* Language Switcher Bar */}
-            <div className="flex items-center gap-1 bg-stone-900/90 p-1 rounded-xl border border-stone-700/80">
-              <Globe className="w-3.5 h-3.5 text-[#D4AF37] ml-1 mr-0.5 hidden sm:inline-block" />
-              
-              <button
-                type="button"
-                onClick={() => onLanguageChange('fa')}
-                id="topbar-lang-fa"
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-                  language === 'fa'
-                    ? 'bg-[#D4AF37] text-[#1A1A1A] font-black'
-                    : 'text-stone-300 hover:text-white'
-                }`}
-              >
-                دری
-              </button>
-
-              <button
-                type="button"
-                onClick={() => onLanguageChange('ps')}
-                id="topbar-lang-ps"
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-                  language === 'ps'
-                    ? 'bg-[#D4AF37] text-[#1A1A1A] font-black'
-                    : 'text-stone-300 hover:text-white'
-                }`}
-              >
-                پښتو
-              </button>
-
-              <button
-                type="button"
-                onClick={() => onLanguageChange('en')}
-                id="topbar-lang-en"
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition cursor-pointer ${
-                  language === 'en'
-                    ? 'bg-[#D4AF37] text-[#1A1A1A] font-black'
-                    : 'text-stone-300 hover:text-white'
-                }`}
-              >
-                EN
-              </button>
-            </div>
-
-            {/* User & Sign Out */}
-            {onSignOut && (
-              <button
-                onClick={onSignOut}
-                id="navbar-signout-btn"
-                title={t.signOut}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 text-stone-300 hover:text-rose-400 hover:bg-rose-950/40 border border-stone-800 rounded-xl text-xs transition cursor-pointer"
-              >
-                <UserCheck className="w-3.5 h-3.5 text-[#D4AF37] hidden sm:inline-block" />
-                <span className="hidden md:inline-block font-mono text-[11px]">tailor1</span>
-                <LogOut className="w-3.5 h-3.5" />
-              </button>
-            )}
           </div>
         </div>
       </div>

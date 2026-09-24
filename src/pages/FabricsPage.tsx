@@ -492,16 +492,6 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
 
                 {/* 5. Row Actions */}
                 <div className="w-full lg:col-span-3 flex items-center justify-between lg:justify-end gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-stone-100">
-                  {onSelectFabricForOrder && (
-                    <button
-                      onClick={() => onSelectFabricForOrder(fabric)}
-                      className="py-1.5 px-3 bg-amber-50 hover:bg-[#D4AF37] hover:text-[#1A1A1A] text-[#B39025] rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
-                    >
-                      <Scissors className="w-3.5 h-3.5" />
-                      <span>{language === 'fa' ? 'ثبت فرمایش' : language === 'ps' ? 'نوی فرمایش' : 'New Order'}</span>
-                    </button>
-                  )}
-
                   {(isLow || isOut) && (
                     <button
                       type="button"

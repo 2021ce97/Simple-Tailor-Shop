@@ -401,7 +401,7 @@ function ShopApp() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-[#1A1A1A] flex flex-col font-sans selection:bg-teal-400/30">
+    <div className="min-h-screen bg-[#F8F7F4] text-[#1A1A1A] flex flex-col font-sans selection:bg-amber-400/30">
       {notification && <div role="status" className={`fixed right-4 top-4 z-[100] max-w-md rounded-xl border px-4 py-3 text-sm font-bold shadow-xl ${notification.type === 'success' ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-rose-300 bg-rose-50 text-rose-800'}`}>{notification.message}</div>}
       {/* Sidebar Navigation */}
       <Sidebar

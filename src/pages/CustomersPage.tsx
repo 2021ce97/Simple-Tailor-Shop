@@ -376,15 +376,6 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
             {allCustomers.length} {t.customersList} • {t.newCustomerAutoSaved}
           </p>
         </div>
-
-        <button
-          onClick={() => handleOpenEditModal()}
-          id="add-new-customer-btn"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#D4AF37] hover:bg-[#B39025] active:scale-98 text-[#1A1A1A] font-black rounded-xl text-sm transition cursor-pointer shadow-xs"
-        >
-          <Plus className="w-4 h-4 stroke-[2.5]" />
-          <span>{t.addNewCustomer}</span>
-        </button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
