@@ -51,6 +51,9 @@ interface OrderFormProps {
   onCancel: () => void;
 }
 
+const normalizedSearchText = (value: unknown): string =>
+  typeof value === 'string' ? value.toLowerCase() : '';
+
 export const OrderForm: React.FC<OrderFormProps> = ({
   initialOrder,
   prefilledCustomer,
@@ -170,14 +173,14 @@ export const OrderForm: React.FC<OrderFormProps> = ({
     const qName = customerName.toLowerCase();
     const qPhone = customerPhone.toLowerCase();
     return allCustomers.filter(c => 
-      c.name.toLowerCase().includes(qName) || c.phone.toLowerCase().includes(qPhone)
+      normalizedSearchText(c.name).includes(qName) || normalizedSearchText(c.phone).includes(qPhone)
     ).slice(0, 5);
   }, [customerName, customerPhone, allCustomers]);
 
   const matchedExistingCustomer = useMemo(() => {
     return allCustomers.find(c => 
       (customerPhone && c.phone === customerPhone) || 
-      (customerName && c.name.toLowerCase() === customerName.toLowerCase())
+      (customerName && normalizedSearchText(c.name) === customerName.toLowerCase())
     );
   }, [customerName, customerPhone, allCustomers]);
 
@@ -186,18 +189,18 @@ export const OrderForm: React.FC<OrderFormProps> = ({
     if (!fabricSearchQuery.trim()) return fabricsList;
     const q = fabricSearchQuery.toLowerCase();
     return fabricsList.filter(f => 
-      f.name.toLowerCase().includes(q) ||
-      f.code.toLowerCase().includes(q) ||
-      f.color.toLowerCase().includes(q) ||
-      (f.type && f.type.toLowerCase().includes(q))
+      normalizedSearchText(f.name).includes(q) ||
+      normalizedSearchText(f.code).includes(q) ||
+      normalizedSearchText(f.color).includes(q) ||
+      normalizedSearchText(f.type).includes(q)
     );
   }, [fabricsList, fabricSearchQuery]);
 
   const selectCustomer = (cust: Customer) => {
     setCustomerId(cust.id);
-    setCustomerName(cust.name);
-    setCustomerPhone(cust.phone);
-    setCustomerWhatsApp(cust.whatsapp || cust.phone);
+    setCustomerName(cust.name || '');
+    setCustomerPhone(cust.phone || '');
+    setCustomerWhatsApp(cust.whatsapp || cust.phone || '');
     if (cust.standardMeasurements && Object.keys(cust.standardMeasurements).length > 0) {
       setMeasurements(cust.standardMeasurements);
     }
