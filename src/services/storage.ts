@@ -1955,9 +1955,19 @@ export const storageService = {
     }
     try {
       const names = ['fabrics','orders','customers','products','product_sales','measurement_fields','design_categories','shop_settings','app_config','expenses'];
-      const results = await Promise.all(names.map(name => supabase.from(name).select('*')));
-      const failed = results.find(result => result.error);
-      if (failed?.error) throw failed.error;
+      const results = await Promise.all(names.map(async name => {
+        try {
+          const res = await supabase.from(name).select('*');
+          if (res.error) {
+            console.warn(`Supabase table ${name} sync notice:`, res.error.message || res.error);
+            return { data: [], error: null };
+          }
+          return res;
+        } catch (err) {
+          console.warn(`Supabase table ${name} query exception:`, err);
+          return { data: [], error: null };
+        }
+      }));
       const [fabrics, orders, customers, products, sales, fields, designs, settings, config, expenses] = results.map(result => result.data || []);
       setStoredItem(STORAGE_KEYS.FABRICS, fromDatabaseRows('fabrics', fabrics));
       setStoredItem(STORAGE_KEYS.ORDERS, fromDatabaseRows('orders', orders));

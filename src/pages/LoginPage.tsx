@@ -61,31 +61,6 @@ export const LoginView: React.FC<LoginViewProps> = ({
     }
   };
 
-  const handleQuickDemoLogin = async () => {
-    setEmail('tailor1@gmail.com');
-    setPassword('admin123');
-    setIsLoading(true);
-    setError(null);
-    try {
-      const { data, error: loginError } = await supabase.auth.signInWithPassword({
-        email: 'tailor1@gmail.com',
-        password: 'admin123',
-      });
-      if (!loginError && data?.user) {
-        onLoginSuccess({
-          email: data.user.email || 'tailor1@gmail.com',
-          name: String(data.user.user_metadata?.name || 'Master Tailor Admin'),
-        });
-        return;
-      }
-    } catch {}
-    onLoginSuccess({
-      email: 'tailor1@gmail.com',
-      name: 'Master Tailor Admin',
-    });
-    setIsLoading(false);
-  };
-
   const shopTitle = language === 'ps' 
     ? shopSettings.shopNamePs || 'مجیب افغان خیاطي او رخت پلورنځی'
     : language === 'fa' 
@@ -258,16 +233,6 @@ export const LoginView: React.FC<LoginViewProps> = ({
             >
               <LogIn className="w-4 h-4 stroke-[2.5]" />
               <span>{isLoading ? t.loading : t.signInBtn}</span>
-            </button>
-
-            {/* Quick Demo Sign In Button */}
-            <button
-              type="button"
-              onClick={handleQuickDemoLogin}
-              disabled={isLoading}
-              className="w-full py-2.5 px-4 bg-stone-800/80 hover:bg-stone-700/80 border border-stone-700 text-[#D4AF37] font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition cursor-pointer mt-2"
-            >
-              <span>{language === 'fa' ? 'ورود مستقیم آزمایشی (tailor1@gmail.com)' : language === 'ps' ? 'په ازمایښتي حساب مستقیم ننوتل' : 'Quick Demo Admin Sign-In (tailor1@gmail.com)'}</span>
             </button>
           </form>
 
