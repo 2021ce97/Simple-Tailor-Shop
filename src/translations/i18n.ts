@@ -350,6 +350,41 @@ export interface Translations {
   totalRetailSales: string;
   todaysRetailRevenue: string;
   customSellingPrice: string;
+
+  // Expenses
+  expenses: string;
+  expensesNav: string;
+  addExpense: string;
+  editExpense: string;
+  expenseTitle: string;
+  expenseAmount: string;
+  expenseDate: string;
+  spentBy: string;
+  expenseCategory: string;
+  paymentMethod: string;
+  totalExpenses: string;
+  thisMonthExpenses: string;
+  todayExpenses: string;
+  averageExpense: string;
+  expenseReceiptNo: string;
+  expenseNotes: string;
+  categoryRent: string;
+  categoryUtilities: string;
+  categoryMaterials: string;
+  categoryMaintenance: string;
+  categoryFood: string;
+  categorySalaries: string;
+  categoryTransport: string;
+  categoryMarketing: string;
+  categoryOther: string;
+  deleteExpense: string;
+  deleteExpenseConfirmTitle: string;
+  deleteExpenseConfirmMessage: string;
+  moneyAdjustedNotice: string;
+  moneyRefundedToast: string;
+  netShopBalance: string;
+  netProfit: string;
+  totalInflows: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -688,6 +723,41 @@ export const translations: Record<Language, Translations> = {
     totalRetailSales: 'Total Retail Sales',
     todaysRetailRevenue: "Today's Retail Revenue",
     customSellingPrice: 'Flexible Selling Price',
+
+    // Expenses
+    expenses: 'Shop Expenses',
+    expensesNav: 'Expenses & Costs',
+    addExpense: 'Add New Expense',
+    editExpense: 'Edit Expense',
+    expenseTitle: 'Expense Name / Title',
+    expenseAmount: 'Amount',
+    expenseDate: 'Date',
+    spentBy: 'Spent By (Person Name)',
+    expenseCategory: 'Category',
+    paymentMethod: 'Payment Method',
+    totalExpenses: 'Total Expenses',
+    thisMonthExpenses: 'This Month Expenses',
+    todayExpenses: "Today's Expenses",
+    averageExpense: 'Average Expense',
+    expenseReceiptNo: 'Receipt / Voucher #',
+    expenseNotes: 'Additional Notes',
+    categoryRent: 'Shop Rent',
+    categoryUtilities: 'Utilities (Electricity/Water)',
+    categoryMaterials: 'Sewing Materials & Supplies',
+    categoryMaintenance: 'Machine Repair & Servicing',
+    categoryFood: 'Tea, Food & Hospitality',
+    categorySalaries: 'Staff Wages & Advance',
+    categoryTransport: 'Transport & Delivery',
+    categoryMarketing: 'Advertising & Printing',
+    categoryOther: 'Miscellaneous / Other',
+    deleteExpense: 'Delete Expense',
+    deleteExpenseConfirmTitle: 'Delete Expense & Adjust Money Back',
+    deleteExpenseConfirmMessage: 'Deleting this expense will permanently remove the record and automatically adjust the money back into your shop cash balance.',
+    moneyAdjustedNotice: 'Amount Adjusted Back to Balance',
+    moneyRefundedToast: 'Expense deleted successfully! Amount adjusted back to shop funds.',
+    netShopBalance: 'Net Cash in Shop',
+    netProfit: 'Net Shop Profit',
+    totalInflows: 'Total Collected Inflows',
   },
 
   fa: {
@@ -1025,6 +1095,41 @@ export const translations: Record<Language, Translations> = {
     totalRetailSales: 'مجموع فروشات پرچون',
     todaysRetailRevenue: 'عواید امروز پرچون',
     customSellingPrice: 'قیمت فروش دلخواه',
+
+    // Expenses
+    expenses: 'مصارف دکان',
+    expensesNav: 'مدیریت مصارف و هزینه‌ها',
+    addExpense: 'ثبت مصارف جدید',
+    editExpense: 'ویرایش مصرف',
+    expenseTitle: 'نام / عنوان مصرف',
+    expenseAmount: 'مبلغ هزینه',
+    expenseDate: 'تاریخ مصرف',
+    spentBy: 'نام شخص پرداخت‌کننده / مصرف‌کننده',
+    expenseCategory: 'کتگوری مصرف',
+    paymentMethod: 'نحوه پرداخت',
+    totalExpenses: 'مجموع مصارف ثبت شده',
+    thisMonthExpenses: 'مصارف این ماه',
+    todayExpenses: 'مصارف امروز',
+    averageExpense: 'میانگین هر مصرف',
+    expenseReceiptNo: 'شماره سند / رسید',
+    expenseNotes: 'توضیحات و جزئیات اضافه',
+    categoryRent: 'کرایه دکان',
+    categoryUtilities: 'برق و آب و خدمات',
+    categoryMaterials: 'لوازم خیاطی، تار و سوزن',
+    categoryMaintenance: 'سرویس و ترمیم ماشین‌آلات',
+    categoryFood: 'چای، نان و مهمانداری',
+    categorySalaries: 'معاشات و مساعده شاگردان',
+    categoryTransport: 'کرایه رفت‌وآمد و باربری',
+    categoryMarketing: 'تبلیغات و چاپ کارت',
+    categoryOther: 'متفرقه و سایر مصارف',
+    deleteExpense: 'حذف مصرف',
+    deleteExpenseConfirmTitle: 'حذف مصرف و برگشت پول به دخل',
+    deleteExpenseConfirmMessage: 'با حذف این قلم مصرف، سند باطل گردیده و مبلغ آن دوباره به موجودی نقدی و دخل دکان بازگردانده می‌شود.',
+    moneyAdjustedNotice: 'برگشت پول به دخل دکان',
+    moneyRefundedToast: 'مصرف حذف گردید و مبلغ با موفقیت به دخل دکان برگشت داده شد.',
+    netShopBalance: 'موجودی خالص دخل',
+    netProfit: 'فایده خالص دکان',
+    totalInflows: 'مجموع عواید دریافتی',
   },
 
   ps: {
@@ -1362,5 +1467,40 @@ export const translations: Record<Language, Translations> = {
     totalRetailSales: 'د پرچون ټول پلور',
     todaysRetailRevenue: 'د نن ورځې پرچون عواید',
     customSellingPrice: 'خپله خوښه د پلور بیه',
+
+    // Expenses
+    expenses: 'د دوکان لګښتونه',
+    expensesNav: 'لګښتونه او مصارف',
+    addExpense: 'نوی لګښت ثبتول',
+    editExpense: 'د لګښت سمول',
+    expenseTitle: 'د لګښت نوم / تفصیل',
+    expenseAmount: 'د لګښت پیسې / رقم',
+    expenseDate: 'نېټه',
+    spentBy: 'د لګوونکي / مصرف کوونکي کس نوم',
+    expenseCategory: 'د لګښت برخه / کټګوري',
+    paymentMethod: 'د تادیې طریقه',
+    totalExpenses: 'ټول لګښتونه',
+    thisMonthExpenses: 'د دې میاشتې لګښتونه',
+    todayExpenses: 'د نن ورځې لګښتونه',
+    averageExpense: 'د هر لګښت اوسط',
+    expenseReceiptNo: 'د بِل / سَنَد نمبر',
+    expenseNotes: 'اضافي یادښتونه',
+    categoryRent: 'د دوکان کرایه',
+    categoryUtilities: 'برېښنا او اوبه',
+    categoryMaterials: 'د خیاطۍ سامان، تار او ستنې',
+    categoryMaintenance: 'د ګنډلو ماشین ترمیم او سرویس',
+    categoryFood: 'چای، ډوډۍ او مېلمستیا',
+    categorySalaries: 'معاشات او پیشکي پیسې',
+    categoryTransport: 'کرایه او باربري',
+    categoryMarketing: 'تبلیغات او چاپ',
+    categoryOther: 'نور / متفرقه لګښتونه',
+    deleteExpense: 'د لګښت ړنګول',
+    deleteExpenseConfirmTitle: 'د لګښت ړنګول او نغدو پیسو بېرته اضافه کول',
+    deleteExpenseConfirmMessage: 'د دې لګښت په ړنګولو سره به سند لغوه شي او پیسې به بېرته د دوکان نغدو پیسو (دخل) ته ورزیاتې شي.',
+    moneyAdjustedNotice: 'پیسې بېرته دخل ته ورزیاتې شوې',
+    moneyRefundedToast: 'لګښت ړنګ شو او پیسې بېرته د دوکان حساب ته اضافه شوې.',
+    netShopBalance: 'د دخل خالص موجودي',
+    netProfit: 'د دوکان خالصه ګټه',
+    totalInflows: 'ټولې ترلاسه شوې پیسې',
   },
 };

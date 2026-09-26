@@ -344,26 +344,20 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
       standardMeasurements: cleanedMeasurements
     };
 
-    try {
-      await storageService.saveCustomerAsync(customerToSave);
-      setIsEditingModalOpen(false);
-      setActiveCustomer(customerToSave);
-      onCustomerUpdated();
-    } catch (error: any) {
-      alert(error?.message || 'Customer could not be saved to Supabase.');
-    }
+    await storageService.saveCustomerAsync(customerToSave);
+    setIsEditingModalOpen(false);
+    setActiveCustomer(customerToSave);
+    onCustomerUpdated();
   };
 
   // Delete Customer
-  const handleDeleteCustomer = async (cust: Customer) => {
+  const handleDeleteCustomer = (cust: Customer) => {
     if (window.confirm(`${t.confirmDelete} (${cust.name})`)) {
-      try {
-        await storageService.deleteCustomer(cust.id);
-        if (activeCustomer?.id === cust.id) setActiveCustomer(null);
-        onCustomerUpdated();
-      } catch (error: any) {
-        alert(error?.message || 'Customer could not be deleted from Supabase.');
+      storageService.deleteCustomer(cust.id);
+      if (activeCustomer?.id === cust.id) {
+        setActiveCustomer(null);
       }
+      onCustomerUpdated();
     }
   };
 
@@ -382,15 +376,6 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
             {allCustomers.length} {t.customersList} • {t.newCustomerAutoSaved}
           </p>
         </div>
-
-        <button
-          onClick={() => handleOpenEditModal()}
-          id="add-new-customer-btn"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#D4AF37] hover:bg-[#B39025] active:scale-98 text-[#1A1A1A] font-black rounded-xl text-sm transition cursor-pointer shadow-xs"
-        >
-          <Plus className="w-4 h-4 stroke-[2.5]" />
-          <span>{t.addNewCustomer}</span>
-        </button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

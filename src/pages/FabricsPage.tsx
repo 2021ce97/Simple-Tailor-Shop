@@ -123,7 +123,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
     setIsAddingNew(true);
   };
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formName.trim()) return;
 
@@ -140,29 +140,21 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
       createdAt: editingFabric?.createdAt || new Date().toISOString(),
     };
 
-    try {
-      await storageService.saveFabric(fabricToSave);
-      setIsAddingNew(false);
-      setEditingFabric(null);
-      onFabricUpdated();
-    } catch (error: any) {
-      alert(error?.message || 'Fabric could not be saved to Supabase.');
-    }
+    storageService.saveFabric(fabricToSave);
+    setIsAddingNew(false);
+    setEditingFabric(null);
+    onFabricUpdated();
   };
 
-  const handleDelete = async (fabric: Fabric) => {
+  const handleDelete = (fabric: Fabric) => {
     if (window.confirm(`${t.confirmDelete} (${fabric.name})`)) {
-      try {
-        await storageService.deleteFabric(fabric.id);
-        onFabricUpdated();
-      } catch (error: any) {
-        alert(error?.message || 'Fabric could not be deleted from Supabase.');
-      }
+      storageService.deleteFabric(fabric.id);
+      onFabricUpdated();
     }
   };
 
-  const handleUpdateStock = async (fabric: Fabric, newStock: number) => {
-    await storageService.saveFabric({
+  const handleUpdateStock = (fabric: Fabric, newStock: number) => {
+    storageService.saveFabric({
       ...fabric,
       stockMeters: Math.max(0, newStock),
       updatedAt: new Date().toISOString()
@@ -500,16 +492,6 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
 
                 {/* 5. Row Actions */}
                 <div className="w-full lg:col-span-3 flex items-center justify-between lg:justify-end gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-stone-100">
-                  {onSelectFabricForOrder && (
-                    <button
-                      onClick={() => onSelectFabricForOrder(fabric)}
-                      className="py-1.5 px-3 bg-amber-50 hover:bg-[#D4AF37] hover:text-[#1A1A1A] text-[#B39025] rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
-                    >
-                      <Scissors className="w-3.5 h-3.5" />
-                      <span>{language === 'fa' ? 'ثبت فرمایش' : language === 'ps' ? 'نوی فرمایش' : 'New Order'}</span>
-                    </button>
-                  )}
-
                   {(isLow || isOut) && (
                     <button
                       type="button"

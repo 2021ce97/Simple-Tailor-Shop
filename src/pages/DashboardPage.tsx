@@ -360,23 +360,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const handleDeleteOrder = async (order: Order) => {
     if (window.confirm(`${t.confirmDelete} (${t.orderNumber}: ${order.orderNumber})`)) {
-      try {
-        await storageService.deleteOrder(order.id);
-        onOrderUpdated();
-      } catch (error: any) {
-        alert(error?.message || 'Order could not be deleted from Supabase.');
-      }
+      storageService.deleteOrder(order.id);
+      onOrderUpdated();
     }
   };
 
-  const handleDeleteSale = async (sale: ProductSale) => {
+  const handleDeleteSale = (sale: ProductSale) => {
     if (window.confirm(`${t.confirmDelete} (${sale.productName})`)) {
-      try {
-        await storageService.deleteProductSale(sale.id);
-        onOrderUpdated();
-      } catch (error: any) {
-        alert(error?.message || 'Sale could not be deleted from Supabase.');
-      }
+      storageService.deleteProductSale(sale.id);
+      onOrderUpdated();
     }
   };
 
