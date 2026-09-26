@@ -223,13 +223,13 @@ export const OrderForm: React.FC<OrderFormProps> = ({
       const nameQ = customerName.trim().toLowerCase();
 
       const matches = allCust.filter(c => 
-        (phoneQ && c.phone.includes(phoneQ)) || 
-        (nameQ && c.name.toLowerCase().includes(nameQ))
+        (phoneQ && typeof c.phone === 'string' && c.phone.includes(phoneQ)) || 
+        (nameQ && typeof c.name === 'string' && c.name.toLowerCase().includes(nameQ))
       );
       setMatchingCustomers(matches.slice(0, 4));
 
       // Direct exact match
-      const exact = (matches || []).find(c => c.phone.trim() === phoneQ);
+      const exact = matches.find(c => typeof c.phone === 'string' && c.phone.trim() === phoneQ);
       if (exact) {
         setMatchedExistingCustomer(exact);
       }

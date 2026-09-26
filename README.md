@@ -25,4 +25,4 @@ The React app connects directly to Supabase. Retired application cache keys are 
 
 ## Production
 
-Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in the deployment provider, then run `npm run build`.
+Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in the deployment provider, then run `npm run build`....
