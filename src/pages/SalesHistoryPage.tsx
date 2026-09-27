@@ -9,6 +9,7 @@ import {
 } from '../types';
 import { translations } from '../translations/i18n';
 import { printReceiptElement, downloadReceiptPdf } from '../services/printService';
+import { searchText, textIncludes } from '../lib/search';
 import { 
   TrendingUp, 
   Plus, 
@@ -118,15 +119,15 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
     return sales.filter(s => {
       const q = searchTerm.trim().toLowerCase();
       const matchesSearch = !q || (
-        s.productName.toLowerCase().includes(q) ||
-        s.category.toLowerCase().includes(q) ||
-        (s.customerName && s.customerName.toLowerCase().includes(q)) ||
-        (s.customerPhone && s.customerPhone.includes(q)) ||
-        (s.notes && s.notes.toLowerCase().includes(q)) ||
-        s.id.toLowerCase().includes(q)
+        textIncludes(s.productName, q) ||
+        textIncludes(s.category, q) ||
+        textIncludes(s.customerName, q) ||
+        textIncludes(s.customerPhone, q) ||
+        textIncludes(s.notes, q) ||
+        textIncludes(s.id, q)
       );
 
-      const matchesCat = categoryFilter === 'all' || s.category.toLowerCase() === categoryFilter.toLowerCase();
+      const matchesCat = categoryFilter === 'all' || searchText(s.category) === searchText(categoryFilter);
       const matchesDate = isDateInFilter(s.saleDate, dateFilter);
 
       return matchesSearch && matchesCat && matchesDate;
@@ -177,9 +178,9 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
     const q = productSearchQuery.trim().toLowerCase();
     if (!q) return products;
     return products.filter(p => 
-      p.name.toLowerCase().includes(q) ||
-      (p.sku && p.sku.toLowerCase().includes(q)) ||
-      p.category.toLowerCase().includes(q)
+      textIncludes(p.name, q) ||
+      textIncludes(p.sku, q) ||
+      textIncludes(p.category, q)
     );
   }, [products, productSearchQuery]);
 
@@ -580,13 +581,13 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
           </button>
 
           {categories.map(cat => {
-            const count = sales.filter(s => s.category.toLowerCase() === cat.name.toLowerCase()).length;
+            const count = sales.filter(s => searchText(s.category) === searchText(cat.name)).length;
             return (
               <button
                 key={cat.id}
                 onClick={() => setCategoryFilter(cat.name)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
-                  categoryFilter.toLowerCase() === cat.name.toLowerCase()
+                  searchText(categoryFilter) === searchText(cat.name)
                     ? 'bg-emerald-600 text-white shadow-xs'
                     : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                 }`}

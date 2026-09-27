@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Expense, ExpenseCategory, ShopSettings, Language, Order, ProductSale } from '../types';
 import { translations } from '../translations/i18n';
 import { storageService } from '../services/storage';
+import { textIncludes } from '../lib/search';
 import { 
   Wallet, 
   Search, 
@@ -212,10 +213,10 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
       // Search term
       if (searchTerm.trim()) {
         const query = searchTerm.toLowerCase();
-        const matchesTitle = exp.title.toLowerCase().includes(query);
-        const matchesPerson = exp.spentBy.toLowerCase().includes(query);
-        const matchesReceipt = exp.receiptNumber?.toLowerCase().includes(query) ?? false;
-        const matchesNotes = exp.notes?.toLowerCase().includes(query) ?? false;
+        const matchesTitle = textIncludes(exp.title, query);
+        const matchesPerson = textIncludes(exp.spentBy, query);
+        const matchesReceipt = textIncludes(exp.receiptNumber, query);
+        const matchesNotes = textIncludes(exp.notes, query);
         if (!matchesTitle && !matchesPerson && !matchesReceipt && !matchesNotes) {
           return false;
         }

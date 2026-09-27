@@ -8,6 +8,7 @@ import {
 } from '../types';
 import { translations } from '../translations/i18n';
 import { storageService } from '../services/storage';
+import { textIncludes } from '../lib/search';
 import {
   ResponsiveContainer,
   BarChart,
@@ -114,14 +115,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
       const q = searchTerm.trim().toLowerCase();
       
       const matchesSearch = !q || (
-        order.orderNumber.toLowerCase().includes(q) ||
-        order.customerName.toLowerCase().includes(q) ||
-        order.customerPhone.includes(q) ||
-        (order.customerWhatsApp && order.customerWhatsApp.includes(q)) ||
-        (order.orderDate && order.orderDate.toLowerCase().includes(q)) ||
-        (order.deliveryDate && order.deliveryDate.toLowerCase().includes(q)) ||
-        (order.fabricName && order.fabricName.toLowerCase().includes(q)) ||
-        (order.garmentType && order.garmentType.toLowerCase().includes(q))
+        textIncludes(order.orderNumber, q) ||
+        textIncludes(order.customerName, q) ||
+        textIncludes(order.customerPhone, q) ||
+        textIncludes(order.customerWhatsApp, q) ||
+        textIncludes(order.orderDate, q) ||
+        textIncludes(order.deliveryDate, q) ||
+        textIncludes(order.fabricName, q) ||
+        textIncludes(order.garmentType, q)
       );
 
       const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
@@ -164,13 +165,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
       const q = searchTerm.trim().toLowerCase();
       if (!q) return true;
       return (
-        sale.productName.toLowerCase().includes(q) ||
-        (sale.customerName && sale.customerName.toLowerCase().includes(q)) ||
-        (sale.customerPhone && sale.customerPhone.includes(q)) ||
-        (sale.category && sale.category.toLowerCase().includes(q)) ||
-        (sale.brand && sale.brand.toLowerCase().includes(q)) ||
-        (sale.saleDate && sale.saleDate.toLowerCase().includes(q)) ||
-        `sl-${sale.id.slice(-6)}`.toLowerCase().includes(q)
+        textIncludes(sale.productName, q) ||
+        textIncludes(sale.customerName, q) ||
+        textIncludes(sale.customerPhone, q) ||
+        textIncludes(sale.category, q) ||
+        textIncludes(sale.brand, q) ||
+        textIncludes(sale.saleDate, q) ||
+        textIncludes(`sl-${sale.id ?? ''}`.slice(-6), q)
       );
     });
 

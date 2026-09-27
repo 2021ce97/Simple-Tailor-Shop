@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Product, ProductCategory, ProductSale, Language } from '../types';
 import { translations } from '../translations/i18n';
 import { storageService } from '../services/storage';
+import { searchText, textIncludes } from '../lib/search';
 import { 
   ShoppingBag, 
   Plus, 
@@ -117,12 +118,12 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
       const matchesSearch = 
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (p.brand && p.brand.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (p.category && p.category.toLowerCase().includes(searchTerm.toLowerCase()));
+        textIncludes(p.name, searchTerm) ||
+        textIncludes(p.sku, searchTerm) ||
+        textIncludes(p.brand, searchTerm) ||
+        textIncludes(p.category, searchTerm);
 
-      const matchesCat = selectedCategory === 'all' || p.category.toLowerCase() === selectedCategory.toLowerCase();
+      const matchesCat = selectedCategory === 'all' || searchText(p.category) === searchText(selectedCategory);
 
       let matchesStock = true;
       const s = Number(p.stockQuantity) || 0;
@@ -204,7 +205,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
 
   // Quick category icon helper
   const getCategoryIcon = (categoryName: string) => {
-    const lower = categoryName.toLowerCase();
+    const lower = searchText(categoryName);
     if (lower.includes('shoe') || lower.includes('بوت') || lower.includes('کفش') || lower.includes('پڼې')) {
       return <Footprints className="w-4 h-4" />;
     }
@@ -392,13 +393,13 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                 </button>
 
                 {categories.map(cat => {
-                  const count = products.filter(p => p.category.toLowerCase() === cat.name.toLowerCase()).length;
+                  const count = products.filter(p => searchText(p.category) === searchText(cat.name)).length;
                   return (
                     <button
                       key={cat.id}
                       onClick={() => setSelectedCategory(cat.name)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
-                        selectedCategory.toLowerCase() === cat.name.toLowerCase()
+                        searchText(selectedCategory) === searchText(cat.name)
                           ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs font-black'
                           : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                       }`}

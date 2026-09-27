@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Fabric, ShopSettings, Language } from '../types';
 import { translations } from '../translations/i18n';
 import { storageService } from '../services/storage';
+import { textIncludes } from '../lib/search';
 import { 
   Layers, 
   Search, 
@@ -68,11 +69,11 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
     return fabrics.filter(fabric => {
       const q = searchTerm.trim().toLowerCase();
       const matchesSearch = !q || (
-        fabric.name.toLowerCase().includes(q) ||
-        fabric.code.toLowerCase().includes(q) ||
-        fabric.color.toLowerCase().includes(q) ||
-        fabric.type.toLowerCase().includes(q) ||
-        (fabric.notes && fabric.notes.toLowerCase().includes(q))
+        textIncludes(fabric.name, q) ||
+        textIncludes(fabric.code, q) ||
+        textIncludes(fabric.color, q) ||
+        textIncludes(fabric.type, q) ||
+        textIncludes(fabric.notes, q)
       );
 
       let matchesStock = true;

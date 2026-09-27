@@ -13,6 +13,7 @@ import {
   ExpenseCategory
 } from '../types';
 import { fromDatabaseRows, supabase, toDatabaseRows, isSupabaseConfigured } from '../lib/supabase';
+import { textIncludes } from '../lib/search';
 
 const DEFAULT_OWNER_PHONE = '0772559881';
 const LEGACY_OWNER_PHONE = '0749592404';
@@ -1625,7 +1626,7 @@ export const storageService = {
     const q = query.trim().toLowerCase();
     const customers = this.getCustomers() || [];
     return customers.filter(
-      c => c.name.toLowerCase().includes(q) || c.phone.includes(q)
+      c => textIncludes(c.name, q) || textIncludes(c.phone, q)
     );
   },
 

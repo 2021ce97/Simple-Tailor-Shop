@@ -9,6 +9,7 @@ import {
 } from '../types';
 import { translations } from '../translations/i18n';
 import { storageService } from '../services/storage';
+import { searchText, textIncludes } from '../lib/search';
 import { 
   Users, 
   Search, 
@@ -49,7 +50,7 @@ interface CustomersViewProps {
   onCustomerUpdated: () => void;
 }
 
-const normalizeMeasurementText = (value: string) => value.toLowerCase().replace(/[\s_-]+/g, '');
+const normalizeMeasurementText = (value: unknown) => searchText(value).replace(/[\s_-]+/g, '');
 
 const isWaistcoatSpecificMeasurement = (field: MeasurementField) => {
   const fieldText = normalizeMeasurementText(`${field.key} ${field.labelEn} ${field.labelFa} ${field.labelPs}`);
@@ -161,7 +162,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
       const hasProductSales = productSales.some(sale =>
         sale.customerId === cust.id ||
         (sale.customerPhone && cust.phone && sale.customerPhone === cust.phone) ||
-        (sale.customerName && cust.name && sale.customerName.trim().toLowerCase() === cust.name.trim().toLowerCase())
+        (sale.customerName && cust.name && searchText(sale.customerName.trim()) === searchText(cust.name.trim()))
       );
       return customerTypeFilter === 'tailoring' ? hasTailoringOrders : hasProductSales;
     };
@@ -170,15 +171,15 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
     // Find order numbers matching search term to also find associated customer IDs
     const matchedCustomerIdsFromOrders = new Set(
       orders
-        .filter(o => o.orderNumber.toLowerCase().includes(q))
+        .filter(o => textIncludes(o.orderNumber, q))
         .map(o => o.customerId)
     );
 
     return allCustomers.filter(cust => {
-      const matchName = cust.name.toLowerCase().includes(q);
-      const matchPhone = cust.phone.includes(q);
+      const matchName = textIncludes(cust.name, q);
+      const matchPhone = textIncludes(cust.phone, q);
       const matchOrder = matchedCustomerIdsFromOrders.has(cust.id);
-      const matchNotes = cust.notes && cust.notes.toLowerCase().includes(q);
+      const matchNotes = textIncludes(cust.notes, q);
       const matchesType = matchesCustomerType(cust);
 
       return (matchName || matchPhone || matchOrder || matchNotes) && matchesType;
@@ -190,7 +191,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
     products: allCustomers.filter(customer => productSales.some(sale =>
       sale.customerId === customer.id ||
       (sale.customerPhone && customer.phone && sale.customerPhone === customer.phone) ||
-      (sale.customerName && customer.name && sale.customerName.trim().toLowerCase() === customer.name.trim().toLowerCase())
+      (sale.customerName && customer.name && searchText(sale.customerName.trim()) === searchText(customer.name.trim()))
     )).length,
   }), [allCustomers, orders, productSales]);
 
@@ -277,7 +278,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
     return (productSales || []).filter(s => 
       s.customerId === activeCustomer.id || 
       (s.customerPhone && activeCustomer.phone && s.customerPhone === activeCustomer.phone) ||
-      (s.customerName && activeCustomer.name && s.customerName.trim().toLowerCase() === activeCustomer.name.trim().toLowerCase())
+      (s.customerName && activeCustomer.name && searchText(s.customerName.trim()) === searchText(activeCustomer.name.trim()))
     );
   }, [productSales, activeCustomer]);
 
