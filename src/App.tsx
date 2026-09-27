@@ -402,7 +402,7 @@ function ShopApp() {
 
   return (
     <div className="min-h-screen bg-[#F8F7F4] text-[#1A1A1A] flex flex-col font-sans selection:bg-amber-400/30">
-      {notification && <div role="status" className={`fixed right-4 top-4 z-[100] max-w-md rounded-xl border px-4 py-3 text-sm font-bold shadow-xl ${notification.type === 'success' ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-rose-300 bg-rose-50 text-rose-800'}`}>{notification.message}</div>}
+      {notification && <div role="status" className={`fixed inset-x-3 top-3 sm:left-auto sm:right-4 sm:top-4 z-[100] sm:max-w-md rounded-xl border px-4 py-3 text-sm font-bold shadow-xl ${notification.type === 'success' ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-rose-300 bg-rose-50 text-rose-800'}`}>{notification.message}</div>}
       {/* Sidebar Navigation */}
       <Sidebar
         currentTab={currentTab}
@@ -419,9 +419,7 @@ function ShopApp() {
         isOpenOnMobile={isSidebarOpenMobile}
         onCloseMobile={() => setIsSidebarOpenMobile(false)}
         onSelectNav={handleSelectNav}
-        onLanguageChange={handleLanguageChange}
         onSignOut={handleSignOut}
-        dbConnected={dbConnected}
         currentUser={currentUser}
       />
 
@@ -446,7 +444,7 @@ function ShopApp() {
         />
 
         {/* Main Content View Container */}
-        <main className="flex-1 w-full max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-5">
+        <main className="flex-1 min-w-0 w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-3 sm:py-5">
           {currentTab === 'dashboard' && (
             <Dashboard
               orders={orders}

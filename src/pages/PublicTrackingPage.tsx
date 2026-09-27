@@ -119,7 +119,7 @@ export const PublicTrackingView: React.FC = () => {
   const isRtl = language !== 'en';
 
   return (
-    <div dir={isRtl ? 'rtl' : 'ltr'} className="min-h-screen bg-[#f4f1ea] text-[#1c2421] px-4 py-6 sm:py-10">
+    <div dir={isRtl ? 'rtl' : 'ltr'} className="min-h-screen bg-[#f4f1ea] text-[#1c2421] px-2.5 sm:px-4 py-3 sm:py-10">
       <main className="mx-auto max-w-2xl">
         <div className="flex items-center justify-end gap-4">
           <div className="flex items-center gap-1 rounded-xl border border-stone-200 bg-white p-1 text-xs font-bold">
@@ -128,16 +128,16 @@ export const PublicTrackingView: React.FC = () => {
         </div>
 
         <section className="mt-8 overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-xl shadow-stone-900/5">
-          <div className="bg-[#173b3b] px-6 py-10 text-white sm:px-10">
+          <div className="bg-[#173b3b] px-4 py-7 text-white sm:px-10 sm:py-10">
               <div className="flex items-center gap-3 text-[#e4bd63]">
               <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-black"><img src={shopSettings.logoUrl || '/mujeeb-afghan-logo.jpeg'} alt="Mujeeb Afghan Fashion" className="h-full w-full object-contain" /></div>
               <span className="text-xs font-bold uppercase tracking-[0.2em]">{language === 'ps' ? shopSettings.shopNamePs : language === 'fa' ? shopSettings.shopNameFa : shopSettings.shopNameEn}</span>
             </div>
-            <h1 className="mt-8 max-w-lg text-3xl font-black tracking-tight sm:text-5xl">{copy.title}</h1>
+            <h1 className="mt-6 sm:mt-8 max-w-lg text-2xl min-[400px]:text-3xl font-black tracking-tight sm:text-5xl">{copy.title}</h1>
             <p className="mt-4 max-w-lg text-sm leading-6 text-teal-50/80">{copy.description}</p>
           </div>
 
-          <div className="p-6 sm:p-10">
+          <div className="p-4 sm:p-10">
             <form onSubmit={handleSearch} className="space-y-3">
               <label htmlFor="order-lookup" className="text-xs font-bold uppercase tracking-wider text-stone-500">{copy.label}</label>
               <div className="flex flex-col gap-3 sm:flex-row">

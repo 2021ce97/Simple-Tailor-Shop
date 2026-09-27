@@ -210,7 +210,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
       </div>
 
       {/* Summary KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-white p-4 rounded-xl border border-[#E5E5E5] shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-700 block">
@@ -529,10 +529,10 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
 
       {/* Add / Edit Fabric Modal */}
       {isAddingNew && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto">
+          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[calc(100dvh-1rem)] sm:max-h-[90vh]">
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100 bg-stone-50">
+            <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-stone-100 bg-stone-50">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/20 flex items-center justify-center text-[#B39025]">
                   <Layers className="w-4 h-4" />
@@ -589,7 +589,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
             )}
 
             {/* Modal Body / Form */}
-            <form onSubmit={handleSave} className="p-6 space-y-4 overflow-y-auto flex-1">
+            <form onSubmit={handleSave} className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
               <div>
                 <label className="block text-xs font-bold text-stone-700 mb-1">
                   {t.fabricName} <span className="text-rose-500">*</span>
@@ -604,7 +604,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
                     {t.fabricCode}
@@ -645,7 +645,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
                     {t.stockMeters} ({t.meters})

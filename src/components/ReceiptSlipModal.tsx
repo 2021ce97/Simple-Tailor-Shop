@@ -596,7 +596,7 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
             TOP CONTROL BAR: Mode Tabs & Actions
            ========================================== */}
         <div className="receipt-actions px-4 py-3 bg-[#1A1A1A] text-white border-b border-black no-print flex flex-col gap-2.5">
-          <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-col min-[430px]:flex-row min-[430px]:items-center justify-between gap-2">
             {/* Title & Order info */}
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-4 bg-[#D4AF37] rounded-full inline-block" />
@@ -607,7 +607,7 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
             </div>
 
             {/* Quick actions: Print and Close */}
-            <div className="flex items-center gap-1.5 flex-wrap">
+            <div className="flex items-center justify-between min-[430px]:justify-start gap-1.5 flex-wrap w-full min-[430px]:w-auto">
               {/* Print Button */}
               <button
                 type="button"
@@ -633,9 +633,9 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
           </div>
 
           {/* Sub-bar: Format Selector & Mode Switcher */}
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/10 text-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-white/10 text-xs">
             {/* Mode Switcher Tabs: Tailor Slip | Customer Bill */}
-            <div className="flex items-center gap-1 bg-white/10 rounded-xl p-1 border border-white/10">
+            <div className="flex items-center gap-1 bg-white/10 rounded-xl p-1 border border-white/10 w-full sm:w-auto overflow-x-auto">
               <button
                 type="button"
                 onClick={() => setActiveMode('tailor')}
@@ -663,7 +663,7 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
             </div>
 
             {/* Paper Size selector */}
-            <div className="flex items-center gap-1 bg-white/10 rounded-xl p-0.5 border border-white/10">
+            <div className="flex items-center justify-center gap-1 bg-white/10 rounded-xl p-0.5 border border-white/10 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => setPrintFormat('a6')}
@@ -718,9 +718,9 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
         {/* ==========================================
             FOOTER CONTROLS
            ========================================== */}
-        <div className="receipt-modal-footer px-5 py-3 bg-white border-t border-[#E5E5E5] flex flex-wrap items-center justify-between no-print gap-3">
+        <div className="receipt-modal-footer px-3 sm:px-5 py-3 bg-white border-t border-[#E5E5E5] flex flex-col sm:flex-row sm:items-center justify-between no-print gap-3">
           {/* Quick specific PDF download triggers */}
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="grid grid-cols-1 min-[430px]:grid-cols-2 gap-2 w-full sm:w-auto">
             <button
               type="button"
               onClick={() => handleDownloadPdf('tailor')}

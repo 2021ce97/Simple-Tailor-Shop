@@ -58,14 +58,14 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md text-stone-900 border-b border-stone-200 shadow-xs no-print">
       <div className="w-full px-4 sm:px-6">
-        <div className="flex items-center justify-between h-16 gap-3">
+        <div className="flex items-center justify-between h-14 sm:h-16 gap-2 sm:gap-3 min-w-0">
           {/* Left / Start: Sidebar Toggle & Brand */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             {/* Sidebar toggle button */}
             <button
               onClick={onToggleSidebar}
               id="sidebar-toggle-btn"
-              className="p-2 rounded-xl text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition cursor-pointer"
+              className="p-2.5 rounded-xl text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition cursor-pointer shrink-0"
               title={t.menu}
               aria-label="Toggle Navigation Menu"
             >
@@ -75,14 +75,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Shop Brand */}
             <div 
               onClick={() => onTabChange('dashboard')}
-              className="flex items-center gap-2.5 cursor-pointer group shrink-0"
+              className="flex items-center gap-2 sm:gap-2.5 cursor-pointer group min-w-0"
             >
-              <div className="w-9 h-9 overflow-hidden rounded-xl bg-stone-900 shadow-xs transition group-hover:scale-105">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 overflow-hidden rounded-xl bg-stone-900 shadow-xs transition group-hover:scale-105">
                 <img src={shopSettings.logoUrl || '/mujeeb-afghan-logo.jpeg'} alt="Mujeeb Afghan Fashion" className="h-full w-full object-contain" />
               </div>
-              <div>
-                <h1 className="font-extrabold text-sm sm:text-base text-stone-900 tracking-tight leading-tight flex items-center gap-2">
-                  <span>{shopTitle || 'MUJEEB AFGHAN FASHION HOUSE'}</span>
+              <div className="min-w-0">
+                <h1 className="font-extrabold text-xs sm:text-base text-stone-900 tracking-tight leading-tight flex items-center gap-2 min-w-0">
+                  <span className="truncate block max-w-[42vw] sm:max-w-none">{shopTitle || 'MUJEEB AFGHAN FASHION HOUSE'}</span>
                 </h1>
                 <p className="text-[10px] text-amber-700 font-semibold hidden sm:block">
                   {t.appSubtitle}
@@ -118,11 +118,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                 type="button"
                 onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
                 id="topbar-lang-selector-btn"
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-100 hover:bg-stone-200/80 text-stone-800 rounded-xl text-xs font-bold transition border border-stone-200 cursor-pointer shadow-2xs"
+                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 bg-stone-100 hover:bg-stone-200/80 text-stone-800 rounded-xl text-xs font-bold transition border border-stone-200 cursor-pointer shadow-2xs"
                 aria-label="Select Language"
               >
                 <Globe className="w-3.5 h-3.5 text-amber-600" />
-                <span>{currentLanguageLabel}</span>
+                <span className="hidden min-[380px]:inline">{currentLanguageLabel}</span>
                 <ChevronDown className={`w-3 h-3 text-stone-500 transition-transform ${isLangDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 

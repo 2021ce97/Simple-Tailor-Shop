@@ -429,7 +429,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       </div>
 
       {/* 3. Top KPI Cards: Combined Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-1 min-[430px]:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Card 1: Total Money Collected */}
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-xs">
           <div className="flex items-start justify-between">
@@ -548,7 +548,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           {/* Tailoring Status Distribution */}
           <div className="space-y-2 pt-2 border-t border-stone-100">
             <span className="text-xs font-bold text-stone-700 block">{t.orderStatus}:</span>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
               <div className="p-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 text-center font-bold">
                 <span>⏳ {t.statusPending}: {report.statusCounts.pending}</span>
               </div>
@@ -614,7 +614,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           {/* Retail Payment Methods Breakdown */}
           <div className="space-y-2 pt-2 border-t border-stone-100">
             <span className="text-xs font-bold text-stone-700 block">{language === 'fa' ? 'تفکیک روش پرداخت پرچون:' : 'Retail Payment Methods:'}</span>
-            <div className="grid grid-cols-3 gap-2 text-xs">
+            <div className="grid grid-cols-1 min-[400px]:grid-cols-3 gap-2 text-xs">
               {(Object.entries(report.retailByPayment) as [string, { count: number; total: number }][]).map(([method, data]) => (
                 <div key={method} className="p-2 bg-emerald-50/50 border border-emerald-200 rounded-lg text-center">
                   <span className="block font-bold text-emerald-900 capitalize">{method}</span>

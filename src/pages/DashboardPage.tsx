@@ -88,6 +88,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [paymentFilter, setPaymentFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
+  const [visibleOrderCount, setVisibleOrderCount] = useState(20);
+  const [visibleSaleCount, setVisibleSaleCount] = useState(20);
 
   // Quick Payment Modal State
   const [paymentModalOrder, setPaymentModalOrder] = useState<Order | null>(null);
@@ -181,6 +183,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
       return sortBy === 'oldest' ? dateA - dateB : dateB - dateA;
     });
   }, [productSales, searchTerm, sortBy]);
+
+  const visibleOrders = filteredOrders.slice(0, visibleOrderCount);
+  const visibleSales = filteredSales.slice(0, visibleSaleCount);
+
+  useEffect(() => {
+    setVisibleOrderCount(20);
+    setVisibleSaleCount(20);
+  }, [searchTerm, statusFilter, paymentFilter, sortBy, activeStream]);
 
   // Comprehensive Metrics (Tailor + Retail)
   const metrics = useMemo(() => {
@@ -456,9 +466,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   };
 
   return (
-    <div className="space-y-6 pb-16 animate-in fade-in duration-200">
+    <div className="flex flex-col gap-4 sm:gap-6 pb-16 animate-in fade-in duration-200 min-w-0">
       {/* Top Banner / Actions */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-[#E5E5E5] shadow-xs">
         <div className="flex items-center gap-3">
           <span className="w-1.5 h-7 bg-[#D4AF37] rounded-full inline-block shrink-0" />
           <div>
@@ -471,11 +481,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <button
             onClick={onNewOrder}
             id="dashboard-new-order-btn"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#D4AF37] hover:bg-[#C29E2E] active:scale-98 text-[#1A1A1A] font-black rounded-xl text-sm transition cursor-pointer shadow-xs"
+            className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-5 py-2.5 bg-[#D4AF37] hover:bg-[#C29E2E] active:scale-98 text-[#1A1A1A] font-black rounded-xl text-sm transition cursor-pointer shadow-xs"
           >
             <Plus className="w-5 h-5 stroke-[2.5]" />
             <span>{t.newOrder}</span>
@@ -484,7 +494,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* 4 KPI Summary Cards: Tailor + Retail Revenue & Records */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="dashboard-summary-cards">
+      <div className="grid grid-cols-1 min-[430px]:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4" id="dashboard-summary-cards">
         {/* Card 1: Today's Total Activity (Orders + Retail) */}
         <div className="bg-white p-4.5 rounded-2xl border border-stone-200 shadow-xs hover:border-[#D4AF37] transition-all duration-200 flex flex-col justify-between relative overflow-hidden group">
           <div className="flex items-start justify-between gap-3">
@@ -601,7 +611,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* 7-Day Daily Revenue Visualization */}
-      <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
+      <div className="order-last min-w-0 bg-white p-3 sm:p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4 overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-3">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-amber-50 text-[#B39025] flex items-center justify-center">
@@ -643,7 +653,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         {/* Chart */}
-        <div className="w-full h-64 pt-2">
+        <div className="w-full h-56 sm:h-64 pt-2 min-w-0">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={last7DaysRevenueData.days}
@@ -718,7 +728,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* Stream Selector Navigation Tabs */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-stone-100 p-1.5 rounded-2xl border border-stone-200">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
           <button
             onClick={() => setActiveStream('orders')}
             className={`px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 cursor-pointer ${
@@ -916,7 +926,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-100">
-                    {filteredSales.map(sale => (
+                    {visibleSales.map(sale => (
                       <tr key={sale.id} className="hover:bg-emerald-50/30 transition">
                         <td className="py-3 px-4 align-middle">
                           <span className="font-mono font-bold text-xs text-stone-900 block">
@@ -982,6 +992,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </tbody>
                 </table>
               </div>
+              {visibleSaleCount < filteredSales.length && (
+                <div className="border-t border-stone-100 p-3 text-center">
+                  <button
+                    type="button"
+                    onClick={() => setVisibleSaleCount(count => count + 20)}
+                    className="px-5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-black transition cursor-pointer"
+                  >
+                    {language === 'fa' ? 'نمایش ۲۰ مورد بیشتر' : language === 'ps' ? '۲۰ نور ریکارډونه وښایاست' : 'See 20 more records'}
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -1044,7 +1065,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#E5E5E5]">
-                      {filteredOrders.map(order => {
+                      {visibleOrders.map(order => {
                         const statusConfig = getStatusBadgeConfig(order.status);
                         const StatusIcon = statusConfig.icon;
 
@@ -1204,7 +1225,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
               {/* Mobile / Tablet Friendly Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:hidden gap-3.5">
-                {filteredOrders.map(order => {
+                {visibleOrders.map(order => {
                   const statusConfig = getStatusBadgeConfig(order.status);
                   const StatusIcon = statusConfig.icon;
 
@@ -1317,6 +1338,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   );
                 })}
               </div>
+              {visibleOrderCount < filteredOrders.length && (
+                <div className="text-center pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setVisibleOrderCount(count => count + 20)}
+                    className="px-5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-black transition cursor-pointer"
+                  >
+                    {language === 'fa' ? 'نمایش ۲۰ مورد بیشتر' : language === 'ps' ? '۲۰ نور ریکارډونه وښایاست' : 'See 20 more records'}
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

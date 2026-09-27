@@ -173,7 +173,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
   return (
     <div className="space-y-6">
       {/* 1. Header Banner */}
-      <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E5E5E5] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D4AF37]">

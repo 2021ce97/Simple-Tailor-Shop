@@ -1,8 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import { Language, ShopSettings, Order, Customer, Fabric, Product } from '../types';
 import { translations } from '../translations/i18n';
 import { storageService } from '../services/storage';
-import { isSupabaseConfigured } from '../lib/supabase';
 import { 
   LayoutDashboard, 
   PlusCircle, 
@@ -11,14 +10,11 @@ import {
   Layers, 
   ShoppingBag, 
   TrendingUp, 
-  Globe, 
   X, 
   LogOut, 
   UserCheck, 
   BarChart3, 
-  Wallet,
-  ChevronDown,
-  Check
+  Wallet
 } from 'lucide-react';
 
 export type MainNavTab = 'dashboard' | 'new_order' | 'customers' | 'fabrics' | 'products' | 'sales_history' | 'expenses' | 'reports' | 'settings';
@@ -39,9 +35,7 @@ interface SidebarProps {
   isOpenOnMobile: boolean;
   onCloseMobile: () => void;
   onSelectNav: (tab: MainNavTab, subTab?: SettingsSubTab) => void;
-  onLanguageChange: (lang: Language) => void;
   onSignOut?: () => void;
-  dbConnected?: boolean;
   currentUser?: { email: string; name: string } | null;
 }
 
@@ -58,26 +52,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isOpenOnMobile,
   onCloseMobile,
   onSelectNav,
-  onLanguageChange,
   onSignOut,
-  dbConnected = true,
   currentUser,
 }) => {
   const t = translations[language];
   const isRtl = language === 'fa' || language === 'ps';
-  const [isLangOpen, setIsLangOpen] = useState(false);
-  const langBoxRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (langBoxRef.current && !langBoxRef.current.contains(event.target as Node)) {
-        setIsLangOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   const shopTitle = language === 'ps' 
     ? shopSettings.shopNamePs 
     : language === 'fa' 
@@ -105,9 +84,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const isTabActive = (tab: MainNavTab) => currentTab === tab;
 
-  const currentLanguageLabel = 
-    language === 'fa' ? 'دری' : language === 'ps' ? 'پښتو' : 'English';
-
   return (
     <>
       {/* Mobile Backdrop Overlay */}
@@ -122,7 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Light, Elegant Sidebar Container */}
       <aside
         id="app-sidebar"
-        className={`fixed top-0 bottom-0 z-50 flex flex-col w-72 bg-white text-stone-800 transition-transform duration-300 ease-in-out lg:translate-x-0 no-print shadow-xl lg:shadow-xs ${
+        className={`fixed top-0 bottom-0 z-50 flex flex-col w-[min(18rem,88vw)] bg-white text-stone-800 transition-transform duration-300 ease-in-out lg:translate-x-0 no-print shadow-xl lg:shadow-xs ${
           isRtl 
             ? 'right-0 border-l border-stone-200' 
             : 'left-0 border-r border-stone-200'
@@ -384,37 +360,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
 
-        {/* Database Status */}
-        <div className="px-3 pb-2 shrink-0">
-          <div className="flex items-center justify-between text-xs px-2.5 py-1.5 rounded-xl bg-stone-100 border border-stone-200">
-            <div className="flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${
-                isSupabaseConfigured && dbConnected !== false 
-                  ? 'bg-emerald-500 animate-pulse' 
-                  : !isSupabaseConfigured 
-                  ? 'bg-teal-500' 
-                  : 'bg-amber-500'
-              }`} />
-              <span className="text-[11px] font-bold text-stone-700">
-                {isSupabaseConfigured 
-                  ? (language === 'fa' ? 'دیتابیس ابری' : language === 'ps' ? 'د ډیټابیس حالت' : 'Cloud Database')
-                  : (language === 'fa' ? 'حافظه محلی' : language === 'ps' ? 'محلي ډیټابیس' : 'Local Storage')}
-              </span>
-            </div>
-            <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${
-              isSupabaseConfigured && dbConnected !== false 
-                ? 'bg-emerald-100 text-emerald-800' 
-                : !isSupabaseConfigured
-                ? 'bg-teal-100 text-teal-800'
-                : 'bg-amber-100 text-amber-800'
-            }`}>
-              {isSupabaseConfigured 
-                ? (dbConnected !== false ? (language === 'fa' ? 'متصل' : language === 'ps' ? 'وصل دی' : 'Connected') : (language === 'fa' ? 'در حال اتصال' : language === 'ps' ? 'نښلول کیږي' : 'Connecting'))
-                : (language === 'fa' ? 'فعال' : language === 'ps' ? 'فعال' : 'Active')}
-            </span>
-          </div>
-        </div>
-
         {/* User Account & Sign Out Section */}
         <div className="px-3 py-2 mx-3 mb-2 rounded-xl bg-stone-100/90 border border-stone-200 flex items-center justify-between text-xs">
           <div className="flex items-center gap-2 overflow-hidden">
@@ -439,69 +384,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
               <LogOut className="w-3.5 h-3.5" />
             </button>
-          )}
-        </div>
-
-        {/* Compact Language Switcher in Sidebar - Showing only selected language */}
-        <div className="p-3 border-t border-stone-200 bg-stone-50/70 shrink-0 relative" ref={langBoxRef}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-[11px] font-bold text-stone-600">
-              <Globe className="w-3.5 h-3.5 text-amber-700" />
-              <span>{language === 'fa' ? 'زبان سیستم:' : language === 'ps' ? 'د سیستم ژبه:' : 'Language:'}</span>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setIsLangOpen(!isLangOpen)}
-              className="flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-stone-100 border border-stone-200 rounded-lg text-xs font-bold text-stone-800 transition cursor-pointer shadow-2xs"
-            >
-              <span>{currentLanguageLabel}</span>
-              <ChevronDown className={`w-3 h-3 text-stone-400 transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
-            </button>
-          </div>
-
-          {isLangOpen && (
-            <div className="mt-2 bg-white rounded-xl shadow-lg border border-stone-200 py-1 space-y-0.5">
-              <button
-                type="button"
-                onClick={() => {
-                  onLanguageChange('fa');
-                  setIsLangOpen(false);
-                }}
-                className={`w-full text-start px-3 py-1.5 text-xs flex items-center justify-between font-bold cursor-pointer ${
-                  language === 'fa' ? 'bg-amber-50 text-amber-900' : 'text-stone-700 hover:bg-stone-50'
-                }`}
-              >
-                <span>دری (Dari)</span>
-                {language === 'fa' && <Check className="w-3.5 h-3.5 text-amber-600" />}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  onLanguageChange('ps');
-                  setIsLangOpen(false);
-                }}
-                className={`w-full text-start px-3 py-1.5 text-xs flex items-center justify-between font-bold cursor-pointer ${
-                  language === 'ps' ? 'bg-amber-50 text-amber-900' : 'text-stone-700 hover:bg-stone-50'
-                }`}
-              >
-                <span>پښتو (Pashto)</span>
-                {language === 'ps' && <Check className="w-3.5 h-3.5 text-amber-600" />}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  onLanguageChange('en');
-                  setIsLangOpen(false);
-                }}
-                className={`w-full text-start px-3 py-1.5 text-xs flex items-center justify-between font-bold cursor-pointer ${
-                  language === 'en' ? 'bg-amber-50 text-amber-900' : 'text-stone-700 hover:bg-stone-50'
-                }`}
-              >
-                <span>English</span>
-                {language === 'en' && <Check className="w-3.5 h-3.5 text-amber-600" />}
-              </button>
-            </div>
           )}
         </div>
       </aside>

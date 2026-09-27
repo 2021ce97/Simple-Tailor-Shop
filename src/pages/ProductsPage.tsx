@@ -295,7 +295,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
       </div>
 
       {/* Top 4 Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-3.5">
         <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-700 block">
@@ -763,9 +763,9 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
 
       {/* MODAL 1: Add / Edit Product (CRITICAL: Strictly NO Selling Price field requested) */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100 bg-stone-50">
+        <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto">
+          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[calc(100dvh-1rem)] sm:max-h-[90vh]">
+            <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-stone-100 bg-stone-50">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/20 flex items-center justify-center text-[#B39025]">
                   <ShoppingBag className="w-4 h-4" />
@@ -789,7 +789,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
               </button>
             </div>
 
-            <form onSubmit={handleSaveProduct} className="p-6 space-y-4 overflow-y-auto">
+            <form onSubmit={handleSaveProduct} className="p-4 sm:p-6 space-y-4 overflow-y-auto">
               {/* Product Name */}
               <div>
                 <label className="block text-xs font-bold text-stone-700 mb-1">

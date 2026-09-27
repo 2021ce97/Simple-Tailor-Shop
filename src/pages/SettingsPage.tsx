@@ -1568,7 +1568,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
       {/* ================= TAB 4: SHOP PROFILE ================= */}
       {activeTab === 'shop' && (
-        <form onSubmit={handleSaveShopSettings} className="bg-white p-6 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-6">
+        <form onSubmit={handleSaveShopSettings} className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-6">
           <div className="border-b border-[#E5E5E5] pb-3">
             <h3 className="font-bold text-sm text-[#1A1A1A]">
               {t.shopProfile}
@@ -1852,7 +1852,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
       {/* ================= TAB 6: BACKUP & RESTORE ================= */}
       {activeTab === 'backup' && (
-        <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-6">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-6">
           <div>
             <h3 className="font-bold text-sm text-[#1A1A1A]">
               {t.backupAndRestore}

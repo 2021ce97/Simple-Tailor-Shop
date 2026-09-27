@@ -314,7 +314,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto pb-20 animate-in fade-in duration-200">
+    <div className="max-w-4xl min-w-0 mx-auto pb-20 animate-in fade-in duration-200">
       {saveError && <div role="alert" className="mb-4 flex items-start gap-2 rounded-xl border border-rose-300 bg-rose-50 p-4 text-sm font-bold text-rose-800"><AlertCircle className="h-5 w-5 shrink-0" /><span>{saveError}</span></div>}
       
       {/* Top Banner & Header */}
@@ -370,7 +370,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
       <div className="space-y-6">
 
         {/* 1. Customer Information Card */}
-        <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-stone-100 pb-3">
             <div className="flex items-center gap-2 text-stone-900 font-extrabold text-sm">
               <span className="w-1.5 h-5 bg-amber-600 rounded-full inline-block" />
@@ -528,7 +528,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
         </div>
 
         {/* 2. Fabric Inventory Selection Card (Prominent Switcher + Search + Dropdown) */}
-        <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-stone-100 pb-3">
             <div className="flex items-center gap-2 text-stone-900 font-extrabold text-sm">
               <span className="w-1.5 h-5 bg-amber-600 rounded-full inline-block" />
@@ -740,7 +740,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
         </div>
 
         {/* 3. Measurement Fields Grid */}
-        <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
           <div className="flex flex-wrap items-center justify-between border-b border-stone-100 pb-3 gap-2">
             <div className="flex items-center gap-2 text-stone-900 font-extrabold text-sm">
               <span className="w-1.5 h-5 bg-amber-600 rounded-full inline-block" />
@@ -841,7 +841,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
         </div>
 
         {/* 4. Garment Design Options Card */}
-        <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-stone-100 pb-3">
             <div className="flex items-center gap-2 text-stone-900 font-extrabold text-sm">
               <span className="w-1.5 h-5 bg-amber-600 rounded-full inline-block" />
@@ -921,7 +921,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
         </div>
 
         {/* 5. Order Status, Expected Date & Special Notes Card (Following downward in one flow) */}
-        <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-xs space-y-5">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-5">
           <div className="flex items-center gap-2 text-stone-900 font-extrabold text-sm border-b border-stone-100 pb-3">
             <span className="w-1.5 h-5 bg-amber-600 rounded-full inline-block" />
             <PackageCheck className="w-4 h-4 text-amber-600" />
@@ -1045,7 +1045,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
         </div>
 
         {/* 6. Pricing, Advance & Payment Card */}
-        <div className="bg-white p-6 rounded-2xl border-2 border-stone-900 shadow-md space-y-4">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border-2 border-stone-900 shadow-md space-y-4">
           <div className="flex items-center justify-between border-b border-stone-100 pb-3">
             <div className="flex items-center gap-2 text-stone-900 font-black text-sm">
               <DollarSign className="w-4 h-4 text-amber-600" />

@@ -438,7 +438,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
       </div>
 
       {/* 2. Top Analytics Metrics Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Total Sales Revenue */}
         <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs flex items-center justify-between">
           <div>
@@ -780,10 +780,10 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
 
       {/* 5. MODAL: Make a New Sale */}
       {isNewSaleModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto">
+          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[calc(100dvh-1rem)] sm:max-h-[90vh]">
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100 bg-emerald-50 shrink-0">
+            <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-stone-100 bg-emerald-50 shrink-0">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
                   <TrendingUp className="w-4 h-4 stroke-[3]" />
@@ -808,7 +808,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
             </div>
 
             {/* Modal Body Form */}
-            <form onSubmit={handleSubmitNewSale} className="p-6 space-y-4 overflow-y-auto">
+            <form onSubmit={handleSubmitNewSale} className="p-4 sm:p-6 space-y-4 overflow-y-auto">
               {saleError && (
                 <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 font-bold flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />

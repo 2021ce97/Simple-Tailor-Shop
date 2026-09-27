@@ -363,7 +363,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
   };
 
   return (
-    <div className="space-y-6 pb-12 animate-in fade-in duration-200">
+    <div className="space-y-4 sm:space-y-6 pb-12 animate-in fade-in duration-200 min-w-0">
       {/* Header Banner - Bento Style */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs">
         <div>
@@ -379,7 +379,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 min-[430px]:grid-cols-3 gap-3">
         <div className="rounded-2xl border border-stone-200 bg-white p-4"><div className="flex items-center gap-2 text-stone-500 text-xs font-bold"><Users className="w-4 h-4" /> {language === 'fa' ? 'همه مشتریان' : language === 'ps' ? 'ټول پېرودونکي' : 'All customers'}</div><p className="mt-2 text-2xl font-black text-stone-900">{allCustomers.length}</p></div>
         <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4"><div className="flex items-center gap-2 text-amber-800 text-xs font-bold"><Scissors className="w-4 h-4" /> {language === 'fa' ? 'مشتریان خیاطی' : language === 'ps' ? 'د خیاطۍ پېرودونکي' : 'Tailoring customers'}</div><p className="mt-2 text-2xl font-black text-amber-900">{customerCounts.tailoring}</p></div>
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4"><div className="flex items-center gap-2 text-emerald-800 text-xs font-bold"><ShoppingBag className="w-4 h-4" /> {language === 'fa' ? 'مشتریان محصولات' : language === 'ps' ? 'د محصولاتو پېرودونکي' : 'Product customers'}</div><p className="mt-2 text-2xl font-black text-emerald-900">{customerCounts.products}</p></div>
@@ -507,15 +507,15 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
         {/* RIGHT COLUMN: Active Customer Details & Saved Measurements (7 Cols) */}
         <div className="lg:col-span-7">
           {activeCustomer ? (
-            <div className="bg-white rounded-2xl border border-[#E5E5E5] shadow-xs p-6 space-y-6">
+            <div className="bg-white rounded-2xl border border-[#E5E5E5] shadow-xs p-4 sm:p-6 space-y-5 sm:space-y-6">
               {/* Profile Top Bar */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E5E5E5] pb-4">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   <div className="w-12 h-12 rounded-2xl bg-[#1A1A1A] border border-[#1A1A1A] flex items-center justify-center text-[#D4AF37] font-black text-lg">
                     {activeCustomer.name.charAt(0)}
                   </div>
-                  <div>
-                    <h2 className="text-lg font-black text-[#1A1A1A]">
+                  <div className="min-w-0">
+                    <h2 className="text-lg font-black text-[#1A1A1A] truncate">
                       {activeCustomer.name}
                     </h2>
                     <div className="flex items-center gap-2 text-xs text-[#706E6B] font-mono mt-0.5">
@@ -529,11 +529,11 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                 </div>
 
                 {/* Profile Quick Actions */}
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                   <button
                     onClick={() => onNewOrderForCustomer(activeCustomer)}
                     id="new-order-from-profile-btn"
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#D4AF37] hover:bg-[#B39025] active:scale-98 text-[#1A1A1A] font-black rounded-xl text-xs transition cursor-pointer shadow-xs"
+                    className="inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 px-3.5 py-2 bg-[#D4AF37] hover:bg-[#B39025] active:scale-98 text-[#1A1A1A] font-black rounded-xl text-xs transition cursor-pointer shadow-xs"
                   >
                     <Scissors className="w-4 h-4" />
                     <span>{t.createNewOrderForCustomer}</span>
@@ -874,7 +874,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
       {/* Add / Edit Customer Modal */}
       {isEditingModalOpen && editingCustomer && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1A1A1A]/70 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-[#E5E5E5] space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl border border-[#E5E5E5] space-y-4 max-h-[calc(100dvh-1rem)] sm:max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-3">
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-4 bg-[#D4AF37] rounded-full inline-block" />

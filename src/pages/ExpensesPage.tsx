@@ -494,7 +494,7 @@ create policy anon_manage_expenses on public.expenses
       </div>
 
       {/* KPI Statistic Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Total Expenses */}
         <div className="bg-white p-4 sm:p-5 rounded-2xl border border-stone-200 shadow-sm relative overflow-hidden">
           <div className="flex items-center justify-between text-stone-500 text-xs font-bold mb-2">
@@ -918,8 +918,8 @@ create policy anon_manage_expenses on public.expenses
 
       {/* Add / Edit Expense Modal */}
       {(isAddingNew || editingExpense) && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl border border-stone-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150 my-8">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-start sm:items-center justify-center p-2 sm:p-4 overflow-y-auto">
+          <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl border border-stone-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150 my-1 sm:my-8 max-h-[calc(100dvh-1rem)] overflow-y-auto">
             <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100 bg-stone-50">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-amber-400/20 text-amber-700 flex items-center justify-center font-bold">
@@ -1175,7 +1175,7 @@ create policy anon_manage_expenses on public.expenses
       {/* Delete Confirmation Modal with Clear Money Adjustment Back to Shop */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-stone-200 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-white w-full max-w-md rounded-3xl p-4 sm:p-6 shadow-2xl border border-stone-200 space-y-4 animate-in fade-in zoom-in-95 duration-150">
             <div className="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 mx-auto flex items-center justify-center border border-rose-100 shadow-xs">
               <Trash2 className="w-7 h-7 stroke-[2]" />
             </div>
