@@ -90,6 +90,10 @@
     width: 186mm !important;
     max-width: 186mm !important;
   }
+  [data-print-format="a5"] #authentic-receipt-slip {
+    width: 138mm !important;
+    max-width: 138mm !important;
+  }
   [data-print-format="thermal58"] #authentic-receipt-slip,
   .thermal58-slip {
     width: 54mm !important;

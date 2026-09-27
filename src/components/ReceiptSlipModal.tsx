@@ -12,7 +12,6 @@ import { BarcodeView } from './BarcodeView';
 import { 
   Printer, 
   Download, 
-  MessageCircle, 
   X, 
   Check, 
   Scissors, 
@@ -20,7 +19,6 @@ import {
   FileText,
   User,
   Calendar,
-  Layers,
   Phone,
   MapPin,
   Clock,
@@ -30,7 +28,7 @@ import {
 } from 'lucide-react';
 import { printReceiptElement, downloadReceiptPdf } from '../services/printService';
 
-export type ReceiptSlipMode = 'tailor' | 'customer' | 'both';
+export type ReceiptSlipMode = 'tailor' | 'customer';
 
 interface ReceiptSlipModalProps {
   order: Order;
@@ -40,7 +38,6 @@ interface ReceiptSlipModalProps {
   language: Language;
   initialMode?: ReceiptSlipMode;
   onClose: () => void;
-  onEdit?: (order: Order) => void;
 }
 
 const copy = {
@@ -144,15 +141,16 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
   language,
   initialMode = 'tailor',
   onClose,
-  onEdit,
 }) => {
   const t = translations[language];
   const dict = copy[language];
 
-  // Active slip mode: 'tailor' (workshop slip) | 'customer' (customer bill) | 'both'
+  // Active slip mode: workshop slip or customer receipt.
   const [activeMode, setActiveMode] = useState<ReceiptSlipMode>(initialMode);
   const [printFormat, setPrintFormat] = useState<ReceiptPaperFormat>(
-    shopSettings.receiptFormat || 'a6'
+    shopSettings.receiptFormat === 'thermal58' || shopSettings.receiptFormat === 'thermal80'
+      ? 'a5'
+      : shopSettings.receiptFormat || 'a5'
   );
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
@@ -261,9 +259,6 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
     } else if (modeToDownload === 'customer') {
       targetEl = customerPrintRef.current || mainPrintRef.current;
       typeSuffix = 'Customer_Receipt';
-    } else {
-      targetEl = mainPrintRef.current;
-      typeSuffix = 'Complete_Receipt';
     }
 
     if (!targetEl) return;
@@ -284,34 +279,6 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
     });
   };
 
-  // WhatsApp message generator
-  const handleWhatsAppShare = () => {
-    const balanceText = order.balanceAmount > 0 
-      ? `باقیمانده / پاتې: ${order.balanceAmount} ${currencySymbol}` 
-      : `حساب تصفیه شده / بشپړ ورکړل شوی`;
-
-    const text = `*${shopName}*
-------------------------------
-*${dict.bill}:* ${order.orderNumber}
-*${dict.customer}:* ${order.customerName}
-*${dict.orderDate}:* ${order.orderDate}
-*${dict.returnDate}:* ${order.deliveryDate}
-*${dict.garment}:* ${displayGarmentType} (${dict.quantity}: ${order.quantity || 1})
-*${dict.totalBill}:* ${order.totalAmount} ${currencySymbol}
-*${dict.totalPaid}:* ${order.paidAmount} ${currencySymbol}
-*${balanceText}*
-------------------------------
-${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
-تلیفون: ${shopSettings.phone1} | واتساپ: ${shopSettings.whatsapp}`;
-
-    const cleanPhone = (order.customerWhatsApp || order.customerPhone || '').replace(/[^0-9]/g, '');
-    const url = cleanPhone 
-      ? `https://wa.me/${cleanPhone.startsWith('0') ? '93' + cleanPhone.substring(1) : cleanPhone}?text=${encodeURIComponent(text)}`
-      : `https://wa.me/?text=${encodeURIComponent(text)}`;
-    
-    window.open(url, '_blank');
-  };
-
   // ==========================================
   // RENDER: Tailor Work Slip Component
   // ==========================================
@@ -320,7 +287,7 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
       ref={ref}
       className="tailor-slip-sheet bg-white text-[#1A1A1A] p-3 text-xs border-2 border-stone-950 font-sans shadow-xs relative select-text"
       style={{
-        width: printFormat === 'a6' ? '99mm' : printFormat === 'thermal58' ? '54mm' : printFormat === 'thermal80' ? '76mm' : '100%',
+        width: printFormat === 'a6' ? '99mm' : printFormat === 'a5' ? '138mm' : '100%',
         maxWidth: printFormat === 'a4' ? '180mm' : '100%',
         margin: '0 auto',
         boxSizing: 'border-box'
@@ -483,7 +450,7 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
       ref={ref}
       className="customer-receipt-sheet bg-white text-[#1A1A1A] p-3 text-xs border-2 border-stone-950 font-sans shadow-xs relative select-text"
       style={{
-        width: printFormat === 'a6' ? '99mm' : printFormat === 'thermal58' ? '54mm' : printFormat === 'thermal80' ? '76mm' : '100%',
+        width: printFormat === 'a6' ? '99mm' : printFormat === 'a5' ? '138mm' : '100%',
         maxWidth: printFormat === 'a4' ? '180mm' : '100%',
         margin: '0 auto',
         boxSizing: 'border-box'
@@ -639,7 +606,7 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
               </h2>
             </div>
 
-            {/* Quick Action buttons: Print, PDF, WhatsApp, Close */}
+            {/* Quick actions: Print and Close */}
             <div className="flex items-center gap-1.5 flex-wrap">
               {/* Print Button */}
               <button
@@ -651,31 +618,6 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
               >
                 <Printer className="w-3.5 h-3.5" />
                 <span>{t.print}</span>
-              </button>
-
-              {/* Download PDF Button */}
-              <button
-                type="button"
-                onClick={() => handleDownloadPdf(activeMode)}
-                disabled={isGeneratingPdf}
-                id="download-pdf-btn"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/15 hover:bg-white/25 text-white font-black rounded-lg text-xs transition cursor-pointer border border-white/10 disabled:opacity-50"
-                title={t.downloadPdf}
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>{isGeneratingPdf ? t.loading : 'PDF'}</span>
-              </button>
-
-              {/* WhatsApp Share */}
-              <button
-                type="button"
-                onClick={handleWhatsAppShare}
-                id="whatsapp-share-btn"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs transition cursor-pointer"
-                title={t.shareWhatsApp}
-              >
-                <MessageCircle className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">WhatsApp</span>
               </button>
 
               {/* Close Button */}
@@ -692,7 +634,7 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
 
           {/* Sub-bar: Format Selector & Mode Switcher */}
           <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/10 text-xs">
-            {/* Mode Switcher Tabs: Tailor Slip | Customer Bill | Both */}
+            {/* Mode Switcher Tabs: Tailor Slip | Customer Bill */}
             <div className="flex items-center gap-1 bg-white/10 rounded-xl p-1 border border-white/10">
               <button
                 type="button"
@@ -718,21 +660,9 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
                 <User className="w-3 h-3" />
                 <span>{t.customerReceipt}</span>
               </button>
-              <button
-                type="button"
-                onClick={() => setActiveMode('both')}
-                className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
-                  activeMode === 'both'
-                    ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
-                    : 'text-stone-300 hover:text-white'
-                }`}
-              >
-                <Layers className="w-3 h-3" />
-                <span>{t.bothSlips}</span>
-              </button>
             </div>
 
-            {/* Paper Size selector (A6, 80mm, 58mm, A4) */}
+            {/* Paper Size selector */}
             <div className="flex items-center gap-1 bg-white/10 rounded-xl p-0.5 border border-white/10">
               <button
                 type="button"
@@ -748,27 +678,15 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
               </button>
               <button
                 type="button"
-                onClick={() => setPrintFormat('thermal80')}
+                onClick={() => setPrintFormat('a5')}
                 className={`px-2 py-1 text-[11px] font-black rounded-md transition cursor-pointer ${
-                  printFormat === 'thermal80'
+                  printFormat === 'a5'
                     ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
                     : 'text-stone-300 hover:text-white'
                 }`}
-                title="80mm Thermal POS Roll"
+                title="A5 Standard Sheet (148×210 mm)"
               >
-                80mm
-              </button>
-              <button
-                type="button"
-                onClick={() => setPrintFormat('thermal58')}
-                className={`px-2 py-1 text-[11px] font-black rounded-md transition cursor-pointer ${
-                  printFormat === 'thermal58'
-                    ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
-                    : 'text-stone-300 hover:text-white'
-                }`}
-                title="58mm Mini Thermal Roll"
-              >
-                58mm
+                A5
               </button>
               <button
                 type="button"
@@ -794,17 +712,6 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
           <div ref={mainPrintRef} className="print-main-wrapper flex flex-col gap-6 w-full items-center">
             {activeMode === 'tailor' && renderTailorSlip(tailorPrintRef)}
             {activeMode === 'customer' && renderCustomerReceipt(customerPrintRef)}
-            {activeMode === 'both' && (
-              <div className="flex flex-col gap-6 w-full items-center">
-                {renderTailorSlip(tailorPrintRef)}
-                <div className="w-full max-w-[400px] border-t-2 border-dashed border-stone-400 my-1 relative text-center no-print">
-                  <span className="bg-[#F9F7F2] px-3 text-xs font-bold text-stone-500 relative -top-3">
-                    {t.customerReceipt}
-                  </span>
-                </div>
-                {renderCustomerReceipt(customerPrintRef)}
-              </div>
-            )}
           </div>
         </div>
 
@@ -833,18 +740,6 @@ ${shopSettings.receiptFooterFa || shopSettings.receiptFooterPs || ''}
           </div>
 
           <div className="flex items-center gap-2">
-            {onEdit && (
-              <button
-                type="button"
-                onClick={() => {
-                  onClose();
-                  onEdit(order);
-                }}
-                className="px-3.5 py-1.5 text-xs font-bold text-[#1A1A1A] bg-[#F9F7F2] hover:bg-stone-200 rounded-xl transition cursor-pointer border border-[#E5E5E5]"
-              >
-                {t.edit}
-              </button>
-            )}
             <button
               type="button"
               onClick={onClose}

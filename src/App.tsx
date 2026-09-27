@@ -586,7 +586,6 @@ function ShopApp() {
           designCategories={designCategories}
           language={language}
           onClose={() => setActiveReceiptOrder(null)}
-          onEdit={handleEditOrder}
         />
       )}
     </div>

@@ -8,7 +8,7 @@ import { toPng } from 'html-to-image';
 
 export interface PrintOptions {
   title?: string;
-  pageFormat?: 'a6' | 'a4' | 'thermal58' | 'thermal80' | 'auto';
+  pageFormat?: 'a6' | 'a5' | 'a4' | 'thermal58' | 'thermal80' | 'auto';
   dir?: 'rtl' | 'ltr';
   onStart?: () => void;
   onComplete?: () => void;
@@ -40,16 +40,18 @@ export async function printReceiptElement(
 
   onStart?.();
 
-  // Width calculations for A6 (105mm), thermal (58mm, 80mm), and A4
+  // Width calculations for standard sheets and legacy thermal formats.
   const widthCss = pageFormat === 'thermal58' 
     ? 'width: 48mm; max-width: 48mm;' 
     : pageFormat === 'thermal80'
     ? 'width: 72mm; max-width: 72mm;'
     : pageFormat === 'a6'
     ? 'width: 98mm; max-width: 98mm;'
+    : pageFormat === 'a5'
+    ? 'width: 138mm; max-width: 138mm;'
     : 'width: 100%; max-width: 180mm;';
 
-  const marginCss = pageFormat === 'a6' ? '3mm' : pageFormat === 'a4' ? '8mm' : '0mm';
+  const marginCss = pageFormat === 'a6' ? '3mm' : pageFormat === 'a5' ? '5mm' : pageFormat === 'a4' ? '8mm' : '0mm';
 
   // Gather existing stylesheets & fonts
   let styleTags = '';
@@ -67,7 +69,7 @@ export async function printReceiptElement(
         ${styleTags}
         <style>
           @page {
-            size: ${pageFormat === 'a6' ? '105mm 148mm' : pageFormat === 'a4' ? 'A4 portrait' : pageFormat === 'thermal58' ? '58mm auto' : '80mm auto'};
+            size: ${pageFormat === 'a6' ? '105mm 148mm' : pageFormat === 'a5' ? 'A5 portrait' : pageFormat === 'a4' ? 'A4 portrait' : pageFormat === 'thermal58' ? '58mm auto' : '80mm auto'};
             margin: ${marginCss};
           }
           * {
@@ -91,7 +93,7 @@ export async function printReceiptElement(
             background: #ffffff !important;
             color: #000000 !important;
             margin: 0 auto !important;
-            padding: ${pageFormat === 'a6' ? '2mm' : pageFormat === 'a4' ? '4mm' : '1mm'} !important;
+            padding: ${pageFormat === 'a6' ? '2mm' : pageFormat === 'a5' ? '3mm' : pageFormat === 'a4' ? '4mm' : '1mm'} !important;
             box-sizing: border-box !important;
           }
           .no-print, button, .receipt-actions, .receipt-modal-footer {
@@ -201,7 +203,7 @@ export async function downloadReceiptPdf(
   element: HTMLElement,
   options: {
     filename?: string;
-    pageFormat?: 'a6' | 'a4' | 'thermal58' | 'thermal80' | 'auto';
+    pageFormat?: 'a6' | 'a5' | 'a4' | 'thermal58' | 'thermal80' | 'auto';
     onStart?: () => void;
     onComplete?: () => void;
     onError?: (err: unknown) => void;
@@ -254,18 +256,17 @@ export async function downloadReceiptPdf(
     });
 
     const isA4 = pageFormat === 'a4';
+    const isA5 = pageFormat === 'a5';
     const isA6 = pageFormat === 'a6';
     const isThermal58 = pageFormat === 'thermal58';
     
     // PDF width and margin definitions
-    const pdfWidth = isA4 ? 210 : isA6 ? 105 : isThermal58 ? 58 : 80;
-    const margin = isA4 ? 8 : isA6 ? 3 : 2; // 3mm margin for A6 ensures clean fit on 105x148
+    const pdfWidth = isA4 ? 210 : isA5 ? 148 : isA6 ? 105 : isThermal58 ? 58 : 80;
+    const margin = isA4 ? 8 : isA5 ? 5 : isA6 ? 3 : 2;
     const printableWidth = pdfWidth - margin * 2;
     const imgHeight = (img.naturalHeight * printableWidth) / (img.naturalWidth || 1);
     
     // Default page heights for standard sheet sizes
-    const standardPageHeight = isA4 ? 297 : isA6 ? 148 : Math.ceil(imgHeight + margin * 2);
-
     let pdf: jsPDF;
     if (isA6) {
       // If content fits or is close to A6 (<= 148mm), generate exact standard A6 portrait page
@@ -275,11 +276,11 @@ export async function downloadReceiptPdf(
         unit: 'mm',
         format: useFixedA6 ? 'a6' : [105, Math.ceil(imgHeight + margin * 2)],
       });
-    } else if (isA4) {
+    } else if (isA4 || isA5) {
       pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: 'a4',
+        format: isA4 ? 'a4' : 'a5',
       });
     } else {
       pdf = new jsPDF({
@@ -289,7 +290,7 @@ export async function downloadReceiptPdf(
       });
     }
 
-    if (isA4 || (isA6 && imgHeight + margin * 2 > 152 && false)) {
+    if (isA4 || isA5 || (isA6 && imgHeight + margin * 2 > 152 && false)) {
       const pageHeight = pdf.internal.pageSize.getHeight();
       const pageContentHeight = pageHeight - margin * 2;
       let imageY = margin;
