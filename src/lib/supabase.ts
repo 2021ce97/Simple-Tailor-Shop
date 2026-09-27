@@ -88,6 +88,19 @@ export function toDatabaseRow(table: string, row: any): any {
       options: row.options || [], garment_category: row.garmentCategory || 'perahan_tunban',
       allow_custom_input: row.allowCustomInput ?? false, sort_order: row.sortOrder ?? 0,
     },
+    product_categories: {
+      id: row.id, name: row.name, sort_order: row.sortOrder ?? 0,
+    },
+    garment_types: {
+      id: row.id, key: row.key, name_en: row.nameEn, name_fa: row.nameFa, name_ps: row.namePs,
+      description_en: row.descriptionEn || null, description_fa: row.descriptionFa || null,
+      description_ps: row.descriptionPs || null, icon: row.icon || null,
+      sort_order: row.sortOrder ?? 0, is_standard: row.isStandard ?? false,
+    },
+    ui_preferences: {
+      id: 'default', fabric_low_stock_threshold: row.fabricLowStockThreshold ?? 15,
+      product_low_stock_threshold: row.productLowStockThreshold ?? 3,
+    },
     expenses: {
       id: row.id,
       title: row.title,
@@ -152,8 +165,11 @@ function createLocalFallbackClient() {
       measurement_fields: 'tailor_measurement_fields_v1',
       design_categories: 'tailor_design_categories_v1',
       garment_types: 'tailor_garment_types_v1',
+      product_categories: 'tailor_product_categories_v1',
+      product_vendors: 'tailor_product_vendors_v1',
+      product_brands: 'tailor_product_brands_v1',
+      ui_preferences: 'ui_preferences',
       shop_settings: 'tailor_shop_settings_v1',
-      app_config: 'tailor_app_config_v1',
       expenses: 'tailor_expenses_v1',
     };
     const key = tableKeys[table] || `tailor_${table}_v1`;
@@ -163,7 +179,7 @@ function createLocalFallbackClient() {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) return parsed.map(r => toDatabaseRow(table, r));
         if (table === 'shop_settings') return [{ id: 'default', data: parsed }];
-        if (table === 'app_config') return Object.entries(parsed).map(([id, data]) => ({ id, data }));
+        if (table === 'ui_preferences' && !Array.isArray(parsed)) return [{ id: 'default', ...toDatabaseRow(table, parsed) }];
       }
     } catch {}
     return [];
@@ -179,8 +195,11 @@ function createLocalFallbackClient() {
       measurement_fields: 'tailor_measurement_fields_v1',
       design_categories: 'tailor_design_categories_v1',
       garment_types: 'tailor_garment_types_v1',
+      product_categories: 'tailor_product_categories_v1',
+      product_vendors: 'tailor_product_vendors_v1',
+      product_brands: 'tailor_product_brands_v1',
+      ui_preferences: 'ui_preferences',
       shop_settings: 'tailor_shop_settings_v1',
-      app_config: 'tailor_app_config_v1',
       expenses: 'tailor_expenses_v1',
     };
     const key = tableKeys[table] || `tailor_${table}_v1`;
