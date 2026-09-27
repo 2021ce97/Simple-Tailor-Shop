@@ -23,4 +23,4 @@ The React app connects directly to Supabase. On the first successful login, lega
 
 ## Production
 
-Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in the deployment provider, then run `npm run build`....,,,,..m
+Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in the deployment provider, then run `npm run build`....,,,,..m.
