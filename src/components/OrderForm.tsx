@@ -93,8 +93,19 @@ export const OrderForm: React.FC<OrderFormProps> = ({
 
   // Selected Garment Type State
   const defaultGarmentName = () => {
-    if (initialOrder?.garmentType) return initialOrder.garmentType;
-    if (prefilledCustomer?.preferredGarmentType) return prefilledCustomer.preferredGarmentType;
+    const savedGarmentName = initialOrder?.garmentType || prefilledCustomer?.preferredGarmentType;
+    if (savedGarmentName) {
+      const savedConfig = garmentTypes.find(g =>
+        g.key === savedGarmentName ||
+        g.nameEn === savedGarmentName ||
+        g.nameFa === savedGarmentName ||
+        g.namePs === savedGarmentName
+      );
+      if (savedConfig) {
+        return language === 'ps' ? savedConfig.namePs : language === 'fa' ? savedConfig.nameFa : savedConfig.nameEn;
+      }
+      return savedGarmentName;
+    }
     const first = garmentTypes[0];
     if (first) {
       return language === 'ps' ? first.namePs : language === 'fa' ? first.nameFa : first.nameEn;
@@ -154,11 +165,11 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   );
 
   // Pricing
-  const [totalAmount, setTotalAmount] = useState<number>(initialOrder?.totalAmount || 1500);
-  const [paidAmount, setPaidAmount] = useState<number>(initialOrder?.paidAmount || 500);
+  const [totalAmount, setTotalAmount] = useState<number>(initialOrder?.totalAmount ?? 0);
+  const [paidAmount, setPaidAmount] = useState<number>(initialOrder?.paidAmount ?? 0);
 
   const balanceAmount = Math.max(0, totalAmount - paidAmount);
-  const paymentStatus: PaymentStatus = balanceAmount <= 0 ? 'paid' : paidAmount > 0 ? 'partial' : 'unpaid';
+  const paymentStatus: PaymentStatus = totalAmount <= 0 ? 'unpaid' : balanceAmount <= 0 ? 'paid' : paidAmount > 0 ? 'partial' : 'unpaid';
 
   const currencySymbol = shopSettings.currencySymbol || '؋';
 
@@ -227,6 +238,15 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   }, [garmentType, garmentTypes]);
 
   const activeGarmentKey = activeGarmentConfig?.key || 'perahan_tunban';
+  const localizedActiveGarmentName = activeGarmentConfig
+    ? (language === 'ps' ? activeGarmentConfig.namePs : language === 'fa' ? activeGarmentConfig.nameFa : activeGarmentConfig.nameEn)
+    : garmentType;
+
+  useEffect(() => {
+    if (activeGarmentConfig && garmentType !== localizedActiveGarmentName) {
+      setGarmentType(localizedActiveGarmentName);
+    }
+  }, [language, activeGarmentConfig, garmentType, localizedActiveGarmentName]);
 
   // Filtered measurement fields
   const filteredMeasurementFields = useMemo(() => {
@@ -446,6 +466,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               <div className="relative">
                 <input
                   type="tel"
+                  dir="ltr"
                   required
                   value={customerPhone}
                   onChange={e => {
@@ -453,9 +474,9 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                     setShowCustomerSuggestions(true);
                   }}
                   placeholder="0772559881"
-                  className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-hidden"
+                  className="w-full pl-3.5 pr-10 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-hidden"
                 />
-                <Phone className="w-4 h-4 text-stone-400 absolute end-3 top-2.5" />
+                <Phone className="w-4 h-4 text-stone-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             </div>
           </div>
@@ -482,13 +503,12 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                     key={g.key}
                     type="button"
                     onClick={() => setGarmentType(localizedName)}
-                    className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-2 shadow-2xs ${
+                    className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center shadow-2xs ${
                       isSelected
                         ? 'bg-amber-600 text-white font-black ring-2 ring-amber-400'
                         : 'bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-200'
                     }`}
                   >
-                    <span className="text-base">{g.icon || '✂️'}</span>
                     <span>{localizedName}</span>
                   </button>
                 );
@@ -747,7 +767,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               <Scissors className="w-4 h-4 text-amber-600" />
               <span>{t.bodyMeasurements}</span>
               <span className="px-2 py-0.5 bg-amber-50 text-amber-900 rounded-md text-xs font-bold border border-amber-200">
-                {garmentType}
+                {localizedActiveGarmentName}
               </span>
             </div>
 
@@ -848,7 +868,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               <Sparkles className="w-4 h-4 text-amber-600" />
               <span>{t.garmentDesign}</span>
               <span className="px-2 py-0.5 bg-amber-50 text-amber-900 rounded-md text-xs font-bold border border-amber-200">
-                {garmentType}
+                {localizedActiveGarmentName}
               </span>
             </div>
             <span className="text-xs text-stone-500 font-bold">
