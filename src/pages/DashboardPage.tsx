@@ -371,15 +371,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const handleDeleteOrder = async (order: Order) => {
     if (window.confirm(`${t.confirmDelete} (${t.orderNumber}: ${order.orderNumber})`)) {
-      storageService.deleteOrder(order.id);
-      onOrderUpdated();
+      try { await storageService.deleteOrder(order.id); onOrderUpdated(); }
+      catch (error) { alert(error instanceof Error ? error.message : String(error)); }
     }
   };
 
-  const handleDeleteSale = (sale: ProductSale) => {
+  const handleDeleteSale = async (sale: ProductSale) => {
     if (window.confirm(`${t.confirmDelete} (${sale.productName})`)) {
-      storageService.deleteProductSale(sale.id);
-      onOrderUpdated();
+      try { await storageService.deleteProductSale(sale.id); onOrderUpdated(); }
+      catch (error) { alert(error instanceof Error ? error.message : String(error)); }
     }
   };
 

@@ -26,7 +26,7 @@ alter table public.expenses enable row level security;
 
 -- Grant permissions to authenticated shop staff/admins
 grant select, insert, update, delete on public.expenses to authenticated;
-grant select, insert, update, delete on public.expenses to anon;
+revoke all on public.expenses from anon;
 
 -- Permissive policies for management
 drop policy if exists authenticated_manage_expenses on public.expenses;
@@ -36,10 +36,6 @@ create policy authenticated_manage_expenses on public.expenses
   with check (true);
 
 drop policy if exists anon_manage_expenses on public.expenses;
-create policy anon_manage_expenses on public.expenses
-  for all to anon
-  using (true)
-  with check (true);
 
 -- Comment for table documentation
 comment on table public.expenses is 'Shop operational expenses (rent, electricity, sewing materials, tea/food, staff salaries, etc.) with person tracking and dates.';

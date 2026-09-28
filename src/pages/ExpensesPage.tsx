@@ -148,7 +148,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
     setIsAddingNew(false);
   };
 
-  const handleSaveForm = (e: React.FormEvent) => {
+  const handleSaveForm = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formTitle.trim() || !formAmount || Number(formAmount) <= 0 || !formSpentBy.trim()) {
       return;
@@ -168,20 +168,20 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
       updatedAt: new Date().toISOString(),
     };
 
-    storageService.saveExpense(newExpense);
-    onExpenseUpdated();
-    setIsAddingNew(false);
-    setEditingExpense(null);
+    try {
+      await storageService.saveExpense(newExpense); onExpenseUpdated();
+      setIsAddingNew(false); setEditingExpense(null);
+    } catch (error) { alert(error instanceof Error ? error.message : String(error)); }
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
     const targetTitle = deleteTarget.title;
     const targetAmount = Number(deleteTarget.amount) || 0;
-    storageService.deleteExpense(deleteTarget.id);
-    setDeleteTarget(null);
-    setAdjustmentToast({ title: targetTitle, amount: targetAmount });
-    onExpenseUpdated();
+    try {
+      await storageService.deleteExpense(deleteTarget.id); setDeleteTarget(null);
+      setAdjustmentToast({ title: targetTitle, amount: targetAmount }); onExpenseUpdated();
+    } catch (error) { alert(error instanceof Error ? error.message : String(error)); }
   };
 
   const getCategoryLabel = (cat: ExpenseCategory): string => {
@@ -357,15 +357,13 @@ create index if not exists idx_expenses_created_at on public.expenses(created_at
 -- Enable RLS and setup permissions
 alter table public.expenses enable row level security;
 grant select, insert, update, delete on public.expenses to authenticated;
-grant select, insert, update, delete on public.expenses to anon;
+revoke all on public.expenses from anon;
 
 drop policy if exists authenticated_manage_expenses on public.expenses;
 create policy authenticated_manage_expenses on public.expenses
   for all to authenticated using (true) with check (true);
 
 drop policy if exists anon_manage_expenses on public.expenses;
-create policy anon_manage_expenses on public.expenses
-  for all to anon using (true) with check (true);
 `;
 
   const handleCopySql = () => {

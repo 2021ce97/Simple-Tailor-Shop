@@ -43,10 +43,12 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
   // Configurable Low Stock Threshold (default: 15 meters)
   const [lowStockThreshold, setLowStockThreshold] = useState<number>(() => storageService.getUiPreferences().fabricLowStockThreshold);
 
-  const handleUpdateThreshold = (val: number) => {
+  const handleUpdateThreshold = async (val: number) => {
     const cleaned = Math.max(1, val);
-    setLowStockThreshold(cleaned);
-    storageService.saveUiPreferences({ ...storageService.getUiPreferences(), fabricLowStockThreshold: cleaned });
+    try {
+      await storageService.saveUiPreferences({ ...storageService.getUiPreferences(), fabricLowStockThreshold: cleaned });
+      setLowStockThreshold(cleaned);
+    } catch (error) { alert(error instanceof Error ? error.message : String(error)); }
   };
 
   // Form fields
@@ -124,7 +126,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
     setIsAddingNew(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formName.trim()) return;
 
@@ -141,26 +143,26 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
       createdAt: editingFabric?.createdAt || new Date().toISOString(),
     };
 
-    storageService.saveFabric(fabricToSave);
-    setIsAddingNew(false);
-    setEditingFabric(null);
-    onFabricUpdated();
+    try {
+      await storageService.saveFabric(fabricToSave);
+      setIsAddingNew(false); setEditingFabric(null); onFabricUpdated();
+    } catch (error) { alert(error instanceof Error ? error.message : String(error)); }
   };
 
-  const handleDelete = (fabric: Fabric) => {
+  const handleDelete = async (fabric: Fabric) => {
     if (window.confirm(`${t.confirmDelete} (${fabric.name})`)) {
-      storageService.deleteFabric(fabric.id);
-      onFabricUpdated();
+      try { await storageService.deleteFabric(fabric.id); onFabricUpdated(); }
+      catch (error) { alert(error instanceof Error ? error.message : String(error)); }
     }
   };
 
-  const handleUpdateStock = (fabric: Fabric, newStock: number) => {
-    storageService.saveFabric({
+  const handleUpdateStock = async (fabric: Fabric, newStock: number) => {
+    try { await storageService.saveFabric({
       ...fabric,
       stockMeters: Math.max(0, newStock),
       updatedAt: new Date().toISOString()
-    });
-    onFabricUpdated();
+    }); onFabricUpdated(); }
+    catch (error) { alert(error instanceof Error ? error.message : String(error)); }
   };
 
   const handleRestock = (fabric: Fabric) => {

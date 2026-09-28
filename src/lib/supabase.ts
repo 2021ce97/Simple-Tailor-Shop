@@ -383,4 +383,13 @@ export const supabase: SupabaseClient | any = isSupabaseConfigured
   ? createClient(rawUrl, rawKey, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
     })
-  : createLocalFallbackClient();
+  : {
+      auth: {
+        async getUser() { return { data: { user: null }, error: new Error('Supabase is not configured') }; },
+        async signInWithPassword() { return { data: { user: null, session: null }, error: new Error('Supabase is not configured') }; },
+        async signOut() { return { error: null }; },
+        onAuthStateChange() { return { data: { subscription: { unsubscribe() {} } } }; },
+      },
+      async rpc() { return { data: null, error: new Error('Supabase is not configured') }; },
+      from() { throw new Error('Supabase is not configured'); },
+    };

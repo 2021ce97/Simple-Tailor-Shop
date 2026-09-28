@@ -75,8 +75,8 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
   const currentStyle: ThermalReceiptStyle = settings.receiptThermalStyle || 'standard';
 
   // Save changes to Supabase and notify the parent view.
-  const handleSave = () => {
-    storageService.saveShopSettings(settings);
+  const handleSave = async () => {
+    await storageService.saveShopSettings(settings);
     if (onUpdateShopSettings) {
       onUpdateShopSettings(settings);
     }
@@ -88,19 +88,19 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
   };
 
   // Instant Format change with automatic preference update
-  const handleSelectFormat = (format: ReceiptPaperFormat) => {
+  const handleSelectFormat = async (format: ReceiptPaperFormat) => {
     const updated = { ...settings, receiptFormat: format };
     setSettings(updated);
-    storageService.saveShopSettings(updated);
+    await storageService.saveShopSettings(updated);
     if (onUpdateShopSettings) onUpdateShopSettings(updated);
     if (onSettingsUpdated) onSettingsUpdated();
   };
 
   // Thermal style change
-  const handleSelectStyle = (style: ThermalReceiptStyle) => {
+  const handleSelectStyle = async (style: ThermalReceiptStyle) => {
     const updated = { ...settings, receiptThermalStyle: style };
     setSettings(updated);
-    storageService.saveShopSettings(updated);
+    await storageService.saveShopSettings(updated);
     if (onUpdateShopSettings) onUpdateShopSettings(updated);
     if (onSettingsUpdated) onSettingsUpdated();
   };

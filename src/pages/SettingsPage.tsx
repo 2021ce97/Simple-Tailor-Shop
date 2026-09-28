@@ -204,7 +204,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
   }, [categories, activeGarmentKey]);
 
   // ================= GARMENT TYPES ACTIONS =================
-  const handleAddGarmentType = () => {
+  const handleAddGarmentType = async () => {
     if (!newGarmentFa.trim() && !newGarmentPs.trim() && !newGarmentEn.trim()) {
       alert(language === 'fa' ? 'لطفاً نام لباس را وارد نمایید' : 'Please enter garment name');
       return;
@@ -227,7 +227,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
     const updated = [...garmentTypes, newGarment];
     setGarmentTypes(updated);
-    storageService.saveGarmentTypes(updated);
+    await storageService.saveGarmentTypes(updated);
 
     setNewGarmentKey('');
     setNewGarmentFa('');
@@ -245,7 +245,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     setEditGarmentIcon(g.icon || '✂️');
   };
 
-  const handleSaveGarmentEdit = () => {
+  const handleSaveGarmentEdit = async () => {
     if (!editingGarmentKey) return;
     const updated = garmentTypes.map(g => {
       if (g.key === editingGarmentKey) {
@@ -261,16 +261,16 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     });
 
     setGarmentTypes(updated);
-    storageService.saveGarmentTypes(updated);
+    await storageService.saveGarmentTypes(updated);
     setEditingGarmentKey(null);
     showNotification(t.savedSuccessfully);
   };
 
-  const handleDeleteGarment = (key: string) => {
+  const handleDeleteGarment = async (key: string) => {
     if (window.confirm(t.confirmDelete || 'Are you sure you want to delete this garment type?')) {
       const updated = garmentTypes.filter(g => g.key !== key);
       setGarmentTypes(updated);
-      storageService.saveGarmentTypes(updated);
+      await storageService.saveGarmentTypes(updated);
       if (activeGarmentKey === key) {
         setActiveGarmentKey(updated[0]?.key || '');
       }
@@ -279,7 +279,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
   };
 
   // ================= DESIGN CATEGORIES ACTIONS =================
-  const handleAddCategory = () => {
+  const handleAddCategory = async () => {
     if (!newCatTitleFa.trim() && !newCatTitlePs.trim() && !newCatTitleEn.trim()) {
       alert(language === 'fa' ? 'لطفاً نام دسته دیزاین را وارد نمایید' : 'Please enter category title');
       return;
@@ -305,7 +305,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
     const updated = [...categories, newCat];
     setCategories(updated);
-    storageService.saveDesignCategories(updated);
+    await storageService.saveDesignCategories(updated);
     if (onUpdateDesignCategories) onUpdateDesignCategories(updated);
     if (onCategoryUpdated) onCategoryUpdated();
 
@@ -323,7 +323,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     setEditCatTitleEn(cat.titleEn);
   };
 
-  const handleSaveCategoryEdit = () => {
+  const handleSaveCategoryEdit = async () => {
     if (!editingCategoryId) return;
     const titleFa = editCatTitleFa.trim() || editCatTitlePs.trim() || editCatTitleEn.trim();
     const titlePs = editCatTitlePs.trim() || titleFa;
@@ -343,25 +343,25 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     });
 
     setCategories(updated);
-    storageService.saveDesignCategories(updated);
+    await storageService.saveDesignCategories(updated);
     if (onUpdateDesignCategories) onUpdateDesignCategories(updated);
     if (onCategoryUpdated) onCategoryUpdated();
     setEditingCategoryId(null);
     showNotification(t.savedSuccessfully);
   };
 
-  const handleDeleteCategory = (catId: string) => {
+  const handleDeleteCategory = async (catId: string) => {
     if (window.confirm(t.confirmDelete)) {
       const updated = categories.filter(c => c.id !== catId);
       setCategories(updated);
-      storageService.saveDesignCategories(updated);
+      await storageService.saveDesignCategories(updated);
       if (onUpdateDesignCategories) onUpdateDesignCategories(updated);
       if (onCategoryUpdated) onCategoryUpdated();
       showNotification(t.deletedSuccessfully);
     }
   };
 
-  const handleAddOptionToCategory = (catId: string) => {
+  const handleAddOptionToCategory = async (catId: string) => {
     if (!newOptionNameFa.trim() && !newOptionNamePs.trim() && !newOptionNameEn.trim()) {
       return;
     }
@@ -388,7 +388,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     });
 
     setCategories(updated);
-    storageService.saveDesignCategories(updated);
+    await storageService.saveDesignCategories(updated);
     if (onUpdateDesignCategories) onUpdateDesignCategories(updated);
     if (onCategoryUpdated) onCategoryUpdated();
 
@@ -409,7 +409,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     });
   };
 
-  const handleSaveOptionEdit = () => {
+  const handleSaveOptionEdit = async () => {
     if (!editingOption) return;
     const nameFa = editingOption.nameFa.trim() || editingOption.namePs.trim() || editingOption.nameEn.trim();
     const namePs = editingOption.namePs.trim() || nameFa;
@@ -431,14 +431,14 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     });
 
     setCategories(updated);
-    storageService.saveDesignCategories(updated);
+    await storageService.saveDesignCategories(updated);
     if (onUpdateDesignCategories) onUpdateDesignCategories(updated);
     if (onCategoryUpdated) onCategoryUpdated();
     setEditingOption(null);
     showNotification(t.savedSuccessfully);
   };
 
-  const handleDeleteOption = (catId: string, optId: string) => {
+  const handleDeleteOption = async (catId: string, optId: string) => {
     const updated = categories.map(c => {
       if (c.id === catId) {
         return {
@@ -450,14 +450,14 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     });
 
     setCategories(updated);
-    storageService.saveDesignCategories(updated);
+    await storageService.saveDesignCategories(updated);
     if (onUpdateDesignCategories) onUpdateDesignCategories(updated);
     if (onCategoryUpdated) onCategoryUpdated();
     showNotification(t.deletedSuccessfully);
   };
 
   // ================= MEASUREMENT FIELDS ACTIONS =================
-  const handleAddField = () => {
+  const handleAddField = async () => {
     if (!newFieldFa.trim() && !newFieldPs.trim() && !newFieldEn.trim()) {
       alert(language === 'fa' ? 'لطفاً نام اندازه را وارد کنید' : 'Please enter measurement label');
       return;
@@ -481,7 +481,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
     const updated = [...fields, newF];
     setFields(updated);
-    storageService.saveMeasurementFields(updated);
+    await storageService.saveMeasurementFields(updated);
     if (onUpdateMeasurementFields) onUpdateMeasurementFields(updated);
     if (onMeasurementFieldsUpdated) onMeasurementFieldsUpdated();
 
@@ -501,7 +501,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     setEditFieldUnit((field.unit as any) || 'in');
   };
 
-  const handleSaveFieldEdit = () => {
+  const handleSaveFieldEdit = async () => {
     if (!editingFieldId) return;
     const labelFa = editFieldFa.trim() || editFieldPs.trim() || editFieldEn.trim();
     const labelPs = editFieldPs.trim() || labelFa;
@@ -522,18 +522,18 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     });
 
     setFields(updated);
-    storageService.saveMeasurementFields(updated);
+    await storageService.saveMeasurementFields(updated);
     if (onUpdateMeasurementFields) onUpdateMeasurementFields(updated);
     if (onMeasurementFieldsUpdated) onMeasurementFieldsUpdated();
     setEditingFieldId(null);
     showNotification(t.savedSuccessfully);
   };
 
-  const handleDeleteField = (fieldId: string) => {
+  const handleDeleteField = async (fieldId: string) => {
     if (window.confirm(t.confirmDelete || 'Are you sure?')) {
       const updated = fields.filter(f => f.id !== fieldId);
       setFields(updated);
-      storageService.saveMeasurementFields(updated);
+      await storageService.saveMeasurementFields(updated);
       if (onUpdateMeasurementFields) onUpdateMeasurementFields(updated);
       if (onMeasurementFieldsUpdated) onMeasurementFieldsUpdated();
       showNotification(t.deletedSuccessfully);
@@ -541,9 +541,9 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
   };
 
   // ================= SHOP PROFILE ACTIONS =================
-  const handleSaveShopSettings = (e: React.FormEvent) => {
+  const handleSaveShopSettings = async (e: React.FormEvent) => {
     e.preventDefault();
-    storageService.saveShopSettings(shop);
+    await storageService.saveShopSettings(shop);
     if (onUpdateShopSettings) onUpdateShopSettings(shop);
     if (onSettingsUpdated) onSettingsUpdated();
     showNotification(t.savedSuccessfully);

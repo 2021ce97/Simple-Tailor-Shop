@@ -129,6 +129,16 @@ function ShopApp() {
   const [activeReceiptOrder, setActiveReceiptOrder] = useState<Order | null>(null);
   const [pendingSaleProduct, setPendingSaleProduct] = useState<Product | null>(null);
 
+  useEffect(() => {
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      event.preventDefault();
+      setDbConnected(false);
+      setDatabaseError(getErrorMessage(event.reason) || 'A Supabase operation failed.');
+    };
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    return () => window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+  }, []);
+
   // Sync RTL and Document Language
   useEffect(() => {
     document.documentElement.dir = language === 'en' ? 'ltr' : 'rtl';
@@ -319,7 +329,9 @@ function ShopApp() {
       await storageService.saveOrderAsync(savedOrder);
     } catch (error) {
       const detail = getErrorMessage(error);
-      console.warn('Supabase sync note on handleSaveOrder:', detail);
+      setNotification({ type: 'error', message: detail });
+      window.setTimeout(() => setNotification(null), 8000);
+      return;
     }
     reloadData();
     setEditingOrder(null);

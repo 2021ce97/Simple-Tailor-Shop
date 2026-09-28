@@ -65,10 +65,12 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
   // Configurable Low Stock Threshold (default: 3 units)
   const [lowStockThreshold, setLowStockThreshold] = useState<number>(() => storageService.getUiPreferences().productLowStockThreshold);
 
-  const handleUpdateThreshold = (val: number) => {
+  const handleUpdateThreshold = async (val: number) => {
     const cleaned = Math.max(1, val);
-    setLowStockThreshold(cleaned);
-    storageService.saveUiPreferences({ ...storageService.getUiPreferences(), productLowStockThreshold: cleaned });
+    try {
+      await storageService.saveUiPreferences({ ...storageService.getUiPreferences(), productLowStockThreshold: cleaned });
+      setLowStockThreshold(cleaned);
+    } catch (error) { alert(error instanceof Error ? error.message : String(error)); }
   };
 
   // Modals state

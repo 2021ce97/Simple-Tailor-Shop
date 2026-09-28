@@ -352,13 +352,13 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
   };
 
   // Delete Customer
-  const handleDeleteCustomer = (cust: Customer) => {
+  const handleDeleteCustomer = async (cust: Customer) => {
     if (window.confirm(`${t.confirmDelete} (${cust.name})`)) {
-      storageService.deleteCustomer(cust.id);
+      try { await storageService.deleteCustomer(cust.id);
       if (activeCustomer?.id === cust.id) {
         setActiveCustomer(null);
       }
-      onCustomerUpdated();
+      onCustomerUpdated(); } catch (error) { alert(error instanceof Error ? error.message : String(error)); }
     }
   };
 

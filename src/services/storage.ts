@@ -58,8 +58,6 @@ const EMPTY_SETTINGS: ShopSettings = {
 let authUser: { email: string; name: string } | null = null;
 let languagePreference: "en" | "fa" | "ps" = "fa";
 try {
-  const user = localStorage.getItem("tailor_app_auth_user_v1");
-  authUser = user ? JSON.parse(user) : null;
   const language = localStorage.getItem("tailor_app_lang_v1");
   if (language === "en" || language === "fa" || language === "ps")
     languagePreference = language;
@@ -77,22 +75,30 @@ async function upsert(table: string, value: any) {
     table === "shop_settings"
       ? { id: "default", data: value, updated_at: new Date().toISOString() }
       : toDatabaseRows(table, value);
-  const { error } = await supabase.from(table).upsert(payload);
+  const { data, error } = await supabase.from(table).upsert(payload).select();
   if (error) throw error;
+  const expected = Array.isArray(payload) ? payload.length : 1;
+  if (!Array.isArray(data) || data.length < expected) {
+    throw new Error(`Supabase did not confirm the ${table} save. Check authentication and row-level security policies.`);
+  }
 }
 async function remove(table: string, id: string) {
   requireSupabase();
-  const { error } = await supabase.from(table).delete().eq("id", id);
+  const { data, error } = await supabase.from(table).delete().eq("id", id).select("id");
   if (error) throw error;
+  if (!Array.isArray(data) || data.length !== 1) {
+    throw new Error(`The ${table} record was not deleted. It may no longer exist or your account may not have permission.`);
+  }
 }
-function report(promise: Promise<unknown>) {
-  promise.catch((error) =>
-    window.dispatchEvent(
-      new CustomEvent("supabase-error", {
-        detail: error instanceof Error ? error.message : String(error),
-      }),
-    ),
-  );
+async function replaceCollection(table: string, values: Array<{ id: string }>) {
+  requireSupabase();
+  if (values.length) await upsert(table, values);
+  let query = supabase.from(table).delete();
+  query = values.length
+    ? query.not("id", "in", `(${values.map(row => `"${row.id.replace(/"/g, '')}"`).join(",")})`)
+    : query.not("id", "is", null);
+  const { error } = await query;
+  if (error) throw error;
 }
 function replace<T extends { id: string }>(items: T[], item: T) {
   const index = items.findIndex((row) => row.id === item.id);
@@ -102,38 +108,38 @@ function replace<T extends { id: string }>(items: T[], item: T) {
 
 export const storageService = {
   getUiPreferences: () => state.uiPreferences,
-  saveUiPreferences(value: UiPreferences) {
+  async saveUiPreferences(value: UiPreferences) {
+    await upsert("ui_preferences", { id: "default", ...value });
     state.uiPreferences = value;
-    report(upsert("ui_preferences", { id: "default", ...value }));
   },
   getFabrics: () => state.fabrics,
   getFabricById: (id: string) =>
     state.fabrics.find((row) => row.id === id || row.code === id),
-  saveFabric(value: Fabric) {
+  async saveFabric(value: Fabric) {
     const saved = {
       ...value,
       id: value.id || `fab_${Date.now()}`,
       updatedAt: new Date().toISOString(),
     };
+    await upsert("fabrics", saved);
     replace(state.fabrics, saved);
-    report(upsert("fabrics", saved));
     return saved;
   },
-  deleteFabric(id: string) {
+  async deleteFabric(id: string) {
+    await remove("fabrics", id);
     state.fabrics = state.fabrics.filter((row) => row.id !== id);
-    report(remove("fabrics", id));
   },
-  deductFabricStock(id: string, used: number) {
+  async deductFabricStock(id: string, used: number) {
     const row = this.getFabricById(id);
     if (row)
-      this.saveFabric({
+      await this.saveFabric({
         ...row,
         stockMeters: Math.max(0, row.stockMeters - used),
       });
   },
   getProducts: () => state.products,
   getProductById: (id: string) => state.products.find((row) => row.id === id),
-  saveProduct(
+  async saveProduct(
     value: Partial<Product> & {
       name: string;
       category: string;
@@ -148,8 +154,8 @@ export const storageService = {
       createdAt: value.createdAt || now,
       updatedAt: now,
     } as Product;
+    await upsert("products", saved);
     replace(state.products, saved);
-    report(upsert("products", saved));
     return saved;
   },
   async saveProductAsync(
@@ -160,9 +166,7 @@ export const storageService = {
       stockQuantity: number;
     },
   ) {
-    const saved = this.saveProduct(value);
-    await upsert("products", saved);
-    return saved;
+    return this.saveProduct(value);
   },
   async deleteProduct(id: string) {
     await remove("products", id);
@@ -179,36 +183,44 @@ export const storageService = {
     state.productCategories.push(saved);
     return saved;
   },
-  deleteProductCategory(id: string) {
+  async deleteProductCategory(id: string) {
     const row = state.productCategories.find(
       (item) => item.id === id || item.name === id,
     );
-    if (row) report(remove("product_categories", row.id));
+    if (row) await remove("product_categories", row.id);
     state.productCategories = state.productCategories.filter(
       (item) => item !== row,
     );
     return state.productCategories;
   },
   getProductVendors: () => state.productVendors,
-  saveProductVendor(name: string) {
+  async saveProductVendor(name: string) {
     if (!state.productVendors.includes(name)) state.productVendors.push(name);
+    await upsert("product_vendors", state.productVendors.map((value, sort_order) => ({ name: value, sort_order })));
     return state.productVendors;
   },
-  deleteProductVendor(name: string) {
+  async deleteProductVendor(name: string) {
+    const { data, error } = await supabase.from("product_vendors").delete().eq("name", name).select("name");
+    if (error) throw error;
+    if (!data?.length) throw new Error("The product vendor was not deleted.");
     state.productVendors = state.productVendors.filter((row) => row !== name);
     return state.productVendors;
   },
   getProductBrands: () => state.productBrands,
-  saveProductBrand(name: string) {
+  async saveProductBrand(name: string) {
     if (!state.productBrands.includes(name)) state.productBrands.push(name);
+    await upsert("product_brands", state.productBrands.map((value, sort_order) => ({ name: value, sort_order })));
     return state.productBrands;
   },
-  deleteProductBrand(name: string) {
+  async deleteProductBrand(name: string) {
+    const { data, error } = await supabase.from("product_brands").delete().eq("name", name).select("name");
+    if (error) throw error;
+    if (!data?.length) throw new Error("The product brand was not deleted.");
     state.productBrands = state.productBrands.filter((row) => row !== name);
     return state.productBrands;
   },
   getProductSales: () => state.productSales,
-  recordProductSale(value: any) {
+  async recordProductSale(value: any) {
     const product = state.products.find((row) => row.id === value.productId);
     const quantity = Math.max(1, Number(value.quantity) || 1);
     const sellingPrice = Number(value.sellingPrice) || 0;
@@ -232,30 +244,28 @@ export const storageService = {
       profit: (sellingPrice - purchasePrice) * quantity,
       saleDate: value.saleDate || new Date().toISOString(),
     } as ProductSale;
-    state.productSales.unshift(saved);
-    report(upsert("product_sales", saved));
+    await upsert("product_sales", saved);
     if (product)
-      this.saveProduct({
+      await this.saveProduct({
         ...product,
         stockQuantity: Math.max(0, product.stockQuantity - quantity),
       });
+    state.productSales.unshift(saved);
     return saved;
   },
-  saveProductSale(value: any) {
+  async saveProductSale(value: any) {
     return this.recordProductSale(value);
   },
   async saveProductSaleAsync(value: any) {
-    const saved = this.recordProductSale(value);
-    await upsert("product_sales", saved);
-    return saved;
+    return this.recordProductSale(value);
   },
-  deleteProductSale(id: string) {
+  async deleteProductSale(id: string) {
+    await remove("product_sales", id);
     state.productSales = state.productSales.filter((row) => row.id !== id);
-    report(remove("product_sales", id));
   },
   getExpenses: () => state.expenses,
   getExpenseById: (id: string) => state.expenses.find((row) => row.id === id),
-  saveExpense(value: Expense) {
+  async saveExpense(value: Expense) {
     const now = new Date().toISOString();
     const saved = {
       ...value,
@@ -263,18 +273,16 @@ export const storageService = {
       createdAt: value.createdAt || now,
       updatedAt: now,
     };
+    await upsert("expenses", saved);
     replace(state.expenses, saved);
-    report(upsert("expenses", saved));
     return saved;
   },
   async saveExpenseAsync(value: Expense) {
-    const saved = this.saveExpense(value);
-    await upsert("expenses", saved);
-    return saved;
+    return this.saveExpense(value);
   },
-  deleteExpense(id: string) {
+  async deleteExpense(id: string) {
+    await remove("expenses", id);
     state.expenses = state.expenses.filter((row) => row.id !== id);
-    report(remove("expenses", id));
   },
   async deleteExpenseAsync(id: string) {
     await remove("expenses", id);
@@ -284,22 +292,22 @@ export const storageService = {
   getOrders: () => state.orders,
   getOrderById: (id: string) =>
     state.orders.find((row) => row.id === id || row.orderNumber === id),
-  saveOrder(value: Order, sync = true) {
+  async saveOrder(value: Order, sync = true) {
+    if (sync) await upsert("orders", value);
     replace(state.orders, value);
-    if (sync) report(upsert("orders", value));
     return value;
   },
   async saveOrderAsync(value: Order) {
     await upsert("orders", value);
     replace(state.orders, value);
-    this.syncCustomerFromOrder(value);
+    await this.syncCustomerFromOrder(value);
     return value;
   },
-  deleteOrder(id: string) {
+  async deleteOrder(id: string) {
+    await remove("orders", id);
     state.orders = state.orders.filter((row) => row.id !== id);
-    report(remove("orders", id));
   },
-  syncCustomerFromOrder(order: Order) {
+  async syncCustomerFromOrder(order: Order) {
     const existing = state.customers.find(
       (row) =>
         row.id === order.customerId ||
@@ -319,10 +327,10 @@ export const storageService = {
       totalSpent: existing?.totalSpent || 0,
       totalBalance: existing?.totalBalance || 0,
     } as Customer;
+    await upsert("customers", saved);
     replace(state.customers, saved);
-    report(upsert("customers", saved));
   },
-  recalculateCustomerStats(id: string) {
+  async recalculateCustomerStats(id: string) {
     const customer = state.customers.find((row) => row.id === id);
     if (!customer) return;
     const records = [
@@ -340,7 +348,7 @@ export const storageService = {
       (sum, row) => sum + Number(row.balanceAmount || 0),
       0,
     );
-    report(upsert("customers", customer));
+    await upsert("customers", customer);
   },
   getCustomers: () => state.customers,
   getCustomerById: (id: string) => state.customers.find((row) => row.id === id),
@@ -349,14 +357,14 @@ export const storageService = {
       (row) => textIncludes(row.name, query) || textIncludes(row.phone, query),
     );
   },
-  saveCustomer(value: Customer) {
+  async saveCustomer(value: Customer) {
     const saved = {
       ...value,
       id: value.id || `cust_${Date.now()}`,
       updatedAt: new Date().toISOString(),
     };
+    await upsert("customers", saved);
     replace(state.customers, saved);
-    report(upsert("customers", saved));
     return saved;
   },
   async saveCustomerAsync(value: Customer) {
@@ -369,25 +377,26 @@ export const storageService = {
     replace(state.customers, saved);
     return saved;
   },
-  deleteCustomer(id: string) {
+  async deleteCustomer(id: string) {
+    await remove("customers", id);
     state.customers = state.customers.filter((row) => row.id !== id);
-    report(remove("customers", id));
   },
   getGarmentTypes: () => state.garmentTypes,
-  saveGarmentTypes(value: GarmentTypeConfig[]) {
+  async saveGarmentTypes(value: GarmentTypeConfig[]) {
+    await replaceCollection("garment_types", value);
     state.garmentTypes = value;
-    report(upsert("garment_types", value));
   },
-  saveGarmentType(value: GarmentTypeConfig) {
+  async saveGarmentType(value: GarmentTypeConfig) {
+    await upsert("garment_types", value);
     replace(state.garmentTypes, value);
-    report(upsert("garment_types", value));
     return value;
   },
-  deleteGarmentType(id: string) {
+  async deleteGarmentType(id: string) {
+    const row = state.garmentTypes.find(item => item.id === id || item.key === id);
+    if (row) await remove("garment_types", row.id);
     state.garmentTypes = state.garmentTypes.filter(
       (row) => row.id !== id && row.key !== id,
     );
-    report(remove("garment_types", id));
   },
   getDesignCategories(type?: string) {
     return !type || type === "all"
@@ -397,20 +406,20 @@ export const storageService = {
             row.garmentCategory === type || row.garmentCategory === "all",
         );
   },
-  saveDesignCategories(value: DesignCategory[]) {
+  async saveDesignCategories(value: DesignCategory[]) {
+    await replaceCollection("design_categories", value);
     state.designCategories = value;
-    report(upsert("design_categories", value));
   },
-  saveDesignCategory(value: DesignCategory) {
+  async saveDesignCategory(value: DesignCategory) {
+    await upsert("design_categories", value);
     replace(state.designCategories, value);
-    report(upsert("design_categories", value));
     return value;
   },
-  deleteDesignCategory(id: string) {
+  async deleteDesignCategory(id: string) {
+    await remove("design_categories", id);
     state.designCategories = state.designCategories.filter(
       (row) => row.id !== id,
     );
-    report(remove("design_categories", id));
   },
   getMeasurementFields(type?: string) {
     return !type || type === "all"
@@ -420,34 +429,30 @@ export const storageService = {
             row.garmentCategory === type || row.garmentCategory === "all",
         );
   },
-  saveMeasurementFields(value: MeasurementField[]) {
+  async saveMeasurementFields(value: MeasurementField[]) {
+    await replaceCollection("measurement_fields", value);
     state.measurementFields = value;
-    report(upsert("measurement_fields", value));
   },
-  saveMeasurementField(value: MeasurementField) {
+  async saveMeasurementField(value: MeasurementField) {
+    await upsert("measurement_fields", value);
     replace(state.measurementFields, value);
-    report(upsert("measurement_fields", value));
     return value;
   },
-  deleteMeasurementField(id: string) {
+  async deleteMeasurementField(id: string) {
+    await remove("measurement_fields", id);
     state.measurementFields = state.measurementFields.filter(
       (row) => row.id !== id,
     );
-    report(remove("measurement_fields", id));
   },
   getShopSettings: () => state.shopSettings || EMPTY_SETTINGS,
-  saveShopSettings(value: ShopSettings) {
+  async saveShopSettings(value: ShopSettings) {
+    await upsert("shop_settings", value);
     state.shopSettings = value;
-    report(upsert("shop_settings", value));
   },
   getAuthUser: () => authUser,
   saveAuthUser(value: { email: string; name: string } | null) {
     authUser = value;
-    try {
-      value
-        ? localStorage.setItem("tailor_app_auth_user_v1", JSON.stringify(value))
-        : localStorage.removeItem("tailor_app_auth_user_v1");
-    } catch {}
+    try { localStorage.removeItem("tailor_app_auth_user_v1"); } catch {}
   },
   getAuthToken: () => null,
   saveAuthToken(_value: string | null) {},
