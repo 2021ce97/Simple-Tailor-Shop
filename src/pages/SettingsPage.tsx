@@ -18,7 +18,6 @@ import {
   Pencil, 
   Download, 
   Upload, 
-  RotateCcw, 
   Check, 
   Building2, 
   X,
@@ -579,15 +578,6 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
       }
     };
     reader.readAsText(file);
-  };
-
-  const handleResetToDemo = () => {
-    if (window.confirm(t.areYouSure)) {
-      storageService.resetAllToDemo();
-      if (onDataReset) onDataReset();
-      if (onDatabaseRestored) onDatabaseRestored();
-      showNotification(t.savedSuccessfully);
-    }
   };
 
   const handleSaveSupabaseConfig = () => {
@@ -1909,27 +1899,6 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
               </label>
             </div>
 
-            {/* Reset to Default Demo */}
-            <div className="p-5 bg-rose-50/50 rounded-2xl border border-rose-200 space-y-3 flex flex-col justify-between">
-              <div>
-                <h4 className="font-bold text-xs text-rose-800 flex items-center gap-2">
-                  <RotateCcw className="w-4 h-4 text-rose-600" />
-                  <span>{t.resetDatabase}</span>
-                </h4>
-                <p className="text-[11px] text-rose-600 mt-1">
-                  {language === 'fa' ? 'بازگردانی تمام اطلاعات، اندازه‌ها و تنظیمات به حالت اولیه نمایشی.' : 'Reset all data and demo configs to default.'}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleResetToDemo}
-                className="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition cursor-pointer flex items-center justify-center gap-2 shadow-xs"
-              >
-                <RotateCcw className="w-4 h-4" />
-                <span>{t.resetDatabase}</span>
-              </button>
-            </div>
           </div>
 
           {/* Cloud Database (Supabase) Configuration & Status */}

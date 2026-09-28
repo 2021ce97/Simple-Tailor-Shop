@@ -27,7 +27,7 @@ export const isSupabaseConfigured = Boolean(
 
 if (!isSupabaseConfigured) {
   // Use console.info instead of console.error so monitoring tools do not falsely report an unhandled exception
-  console.info('Supabase cloud credentials not set. Running in resilient Local Storage mode.');
+  console.info('Supabase cloud credentials are not configured.');
 }
 
 const clean = (row: Record<string, any>) => Object.fromEntries(Object.entries(row).filter(([, value]) => value !== undefined));

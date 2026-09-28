@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircle2, Clock3, Scissors, Search, Shirt, XCircle } from 'lucide-react';
 import { Language } from '../types';
-import { storageService } from '../services/storage';
 import { translations } from '../translations/i18n';
-import { supabase } from '../lib/supabase';
+import { isSupabaseConfigured, supabase } from '../lib/supabase';
 
 type PublicOrder = {
   orderNumber: string;
@@ -29,10 +28,18 @@ export const PublicTrackingView: React.FC = () => {
   const [orders, setOrders] = useState<PublicOrder[]>([]);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [shopSettings, setShopSettings] = useState(storageService.getShopSettings());
+  const [shopSettings, setShopSettings] = useState<any>({});
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setError('Supabase is not configured.');
+      return;
+    }
     supabase.from('shop_settings').select('data').eq('id', 'default').maybeSingle()
-      .then(({ data }) => { if (data?.data) setShopSettings({ ...shopSettings, ...data.data }); });
+      .then(({ data, error: settingsError }) => {
+        if (settingsError) setError(settingsError.message);
+        else if (data?.data) setShopSettings(data.data);
+      })
+      .catch(settingsError => setError(settingsError instanceof Error ? settingsError.message : String(settingsError)));
   }, []);
   const garmentKeys = ['perahanTunban', 'waistcoat', 'suit', 'coatKorti', 'kameezShalwar', 'kurta', 'otherGarment'] as const;
   const localizeGarment = (garmentType: string) => {
@@ -46,16 +53,18 @@ export const PublicTrackingView: React.FC = () => {
     event.preventDefault();
     const value = lookup.trim();
     if (!value) return;
+    if (!isSupabaseConfigured) {
+      setError('Supabase is not configured.');
+      return;
+    }
 
     setError('');
     setOrders([]);
     setIsLoading(true);
     try {
-      let matchedOrders: PublicOrder[] = [];
-      try {
-        const { data, error: lookupError } = await supabase.rpc('lookup_public_orders', { lookup_value: value });
-        if (!lookupError && Array.isArray(data) && data.length > 0) {
-          matchedOrders = data.map((row: any) => ({
+      const { data, error: lookupError } = await supabase.rpc('lookup_public_orders', { lookup_value: value });
+      if (lookupError) throw lookupError;
+      const matchedOrders: PublicOrder[] = Array.isArray(data) ? data.map((row: any) => ({
             orderNumber: row.order_number,
             garmentType: row.garment_type,
             quantity: row.quantity,
@@ -64,40 +73,7 @@ export const PublicTrackingView: React.FC = () => {
             deliveryDate: row.delivery_date,
             completedDate: row.completed_date,
             deliveredDate: row.delivered_date,
-          }));
-        }
-      } catch {
-        // Fall back to local storage query
-      }
-
-      if (matchedOrders.length === 0) {
-        const localOrders = storageService.getOrders();
-        const norm = value.toLowerCase().replace(/[^a-z0-9]/g, '');
-        const matched = localOrders.filter(o => {
-          const ordNum = (o.orderNumber || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-          const phone = (o.customerPhone || '').replace(/[^0-9]/g, '');
-          const whatsapp = (o.customerWhatsApp || '').replace(/[^0-9]/g, '');
-          const id = (o.id || '').toLowerCase();
-          return (
-            ordNum.includes(norm) ||
-            (norm.length >= 3 && (phone.includes(norm) || whatsapp.includes(norm))) ||
-            id.includes(norm)
-          );
-        });
-
-        if (matched.length > 0) {
-          matchedOrders = matched.map(o => ({
-            orderNumber: o.orderNumber,
-            garmentType: o.garmentType,
-            quantity: o.quantity,
-            status: o.status,
-            orderDate: o.orderDate,
-            deliveryDate: o.deliveryDate,
-            completedDate: o.completedDate || null,
-            deliveredDate: o.deliveredDate || null,
-          }));
-        }
-      }
+          })) : [];
 
       if (matchedOrders.length > 0) {
         setOrders(matchedOrders);

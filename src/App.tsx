@@ -29,7 +29,6 @@ import { PublicTrackingView } from './pages/PublicTrackingPage';
 import { ReportsView } from './pages/ReportsPage';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
 import { getErrorMessage } from './lib/errors';
-import { migrateLegacyLocalData } from './services/legacyMigration';
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
@@ -78,9 +77,6 @@ function ShopApp() {
         const u = { email: data.user.email || '', name: String(data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Admin') };
         setCurrentUser(u);
         storageService.saveAuthUser(u);
-        if (isSupabaseConfigured) {
-          migrateLegacyLocalData().then(() => storageService.syncFromDatabase()).then(reloadData).catch(console.warn);
-        }
       }
     }).catch(() => {});
     const { data: listener } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
@@ -123,6 +119,8 @@ function ShopApp() {
   const [isSidebarOpenMobile, setIsSidebarOpenMobile] = useState<boolean>(false);
   const [dbConnected, setDbConnected] = useState<boolean>(true);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [databaseError, setDatabaseError] = useState<string | null>(null);
 
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [prefilledCustomer, setPrefilledCustomer] = useState<Customer | null>(null);
@@ -140,30 +138,28 @@ function ShopApp() {
 
   // Initial & Periodic Automatic Background Database Sync
   useEffect(() => {
-    const checkDbHealth = () => {
-      if (!isSupabaseConfigured) {
-        setDbConnected(true);
-        return;
-      }
-      supabase.from('orders').select('id', { head: true, count: 'exact' })
-        .then(({ error }: any) => setDbConnected(!error))
-        .catch(() => setDbConnected(false));
+    const showDatabaseError = (error: unknown) => {
+      const message = getErrorMessage(error) || 'Unable to load data from Supabase.';
+      setDbConnected(false);
+      setDatabaseError(message);
+      setDataLoading(false);
     };
-
-    const doSync = () => {
-      checkDbHealth();
-      if (!isSupabaseConfigured) return;
-      storageService.syncFromDatabase().then((updated) => {
-        if (updated) {
-          reloadData();
-        }
-      }).catch(() => {});
+    const doSync = async () => {
+      try {
+        setDataLoading(current => databaseError ? true : current);
+        await storageService.syncFromDatabase();
+        reloadData();
+        setDbConnected(true);
+        setDatabaseError(null);
+      } catch (error) {
+        showDatabaseError(error);
+      } finally {
+        setDataLoading(false);
+      }
     };
 
     // Initial sync
     doSync();
-
-    if (!isSupabaseConfigured) return;
 
     // Auto-sync every 8 seconds so orders from other computers appear automatically in real-time
     const syncInterval = setInterval(doSync, 8000);
@@ -177,14 +173,17 @@ function ShopApp() {
     };
 
     window.addEventListener('focus', handleFocus);
+    const handleWriteError = (event: Event) => showDatabaseError((event as CustomEvent<string>).detail);
+    window.addEventListener('supabase-error', handleWriteError);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       clearInterval(syncInterval);
       window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('supabase-error', handleWriteError);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [databaseError]);
 
   // Keyboard shortcuts (e.g. F2 for new order)
   useEffect(() => {
@@ -290,9 +289,8 @@ function ShopApp() {
     storageService.saveAuthUser(user);
     setCurrentUser(user);
     // Immediately synchronize database on login so latest persistent records are shown
-    migrateLegacyLocalData().then(() => storageService.syncFromDatabase()).then((updated) => {
-      if (updated) reloadData();
-    });
+    setDataLoading(true);
+    storageService.syncFromDatabase().then(() => { reloadData(); setDatabaseError(null); }).catch(error => setDatabaseError(getErrorMessage(error))).finally(() => setDataLoading(false));
   };
 
   // Logout handler
@@ -398,6 +396,14 @@ function ShopApp() {
         onLoginSuccess={handleLoginSuccess}
       />
     );
+  }
+
+  if (dataLoading) {
+    return <div className="min-h-screen grid place-items-center bg-[#F8F7F4] p-6"><div className="text-center"><div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-stone-200 border-t-amber-600" /><p className="font-bold text-stone-700">Loading data from Supabase…</p></div></div>;
+  }
+
+  if (databaseError) {
+    return <div className="min-h-screen grid place-items-center bg-[#F8F7F4] p-6"><div role="alert" className="w-full max-w-lg rounded-2xl border border-rose-200 bg-white p-6 shadow-xl"><h1 className="text-xl font-black text-rose-800">Supabase connection error</h1><p className="mt-3 break-words text-sm text-stone-700">{databaseError}</p><button type="button" onClick={() => window.location.reload()} className="mt-5 rounded-xl bg-[#173b3b] px-4 py-2.5 font-bold text-white">Retry</button></div></div>;
   }
 
   return (
