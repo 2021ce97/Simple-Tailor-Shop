@@ -293,15 +293,20 @@ export const storageService = {
   getOrderById: (id: string) =>
     state.orders.find((row) => row.id === id || row.orderNumber === id),
   async saveOrder(value: Order, sync = true) {
-    if (sync) await upsert("orders", value);
-    replace(state.orders, value);
-    return value;
+    let saved = value;
+    if (sync) {
+      // The orders.customer_id foreign key requires the customer row to exist
+      // before the order is written. Use the canonical customer ID as a phone
+      // match may resolve a newly generated ID to an existing customer.
+      const customer = await this.syncCustomerFromOrder(value);
+      saved = { ...value, customerId: customer.id };
+      await upsert("orders", saved);
+    }
+    replace(state.orders, saved);
+    return saved;
   },
   async saveOrderAsync(value: Order) {
-    await upsert("orders", value);
-    replace(state.orders, value);
-    await this.syncCustomerFromOrder(value);
-    return value;
+    return this.saveOrder(value, true);
   },
   async deleteOrder(id: string) {
     await remove("orders", id);
@@ -329,6 +334,7 @@ export const storageService = {
     } as Customer;
     await upsert("customers", saved);
     replace(state.customers, saved);
+    return saved;
   },
   async recalculateCustomerStats(id: string) {
     const customer = state.customers.find((row) => row.id === id);
