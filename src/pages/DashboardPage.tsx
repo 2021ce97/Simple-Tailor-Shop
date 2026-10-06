@@ -49,6 +49,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { printReceiptElement, downloadReceiptPdf } from '../services/printService';
+import { GroupPaymentModal } from '../components/GroupPaymentModal';
 
 export type SortOption = 'newest' | 'oldest' | 'delivery_asc' | 'delivery_desc';
 export type DashboardViewStream = 'orders' | 'retail' | 'all';
@@ -94,6 +95,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   // Quick Payment Modal State
   const [paymentModalOrder, setPaymentModalOrder] = useState<Order | null>(null);
   const [newPaidInput, setNewPaidInput] = useState<number>(0);
+  const [isGroupPaymentOpen, setIsGroupPaymentOpen] = useState(false);
 
   // Retail Receipt Print State in Dashboard
   const [activeRetailReceipt, setActiveRetailReceipt] = useState<ProductSale | null>(null);
@@ -850,15 +852,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           {/* Payment Filter */}
           {activeStream === 'orders' && (
-            <select
-              value={paymentFilter}
-              onChange={e => setPaymentFilter(e.target.value)}
-              className="px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold text-stone-700 outline-hidden focus:border-[#D4AF37] cursor-pointer"
-            >
-              <option value="all">{t.paymentStatus}: {t.all}</option>
-              <option value="paid">{t.paid}</option>
-              <option value="balance">{t.balanceRemaining} ({t.partial})</option>
-            </select>
+            <div className="flex gap-2">
+              <select
+                value={paymentFilter}
+                onChange={e => setPaymentFilter(e.target.value)}
+                className="px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold text-stone-700 outline-hidden focus:border-[#D4AF37] cursor-pointer"
+              >
+                <option value="all">{t.paymentStatus}: {t.all}</option>
+                <option value="paid">{t.paid}</option>
+                <option value="balance">{t.balanceRemaining} ({t.partial})</option>
+              </select>
+              <button type="button" onClick={() => setIsGroupPaymentOpen(true)} className="flex items-center gap-1.5 whitespace-nowrap rounded-xl bg-emerald-700 px-3 py-2 text-xs font-black text-white shadow-xs hover:bg-emerald-800">
+                <CreditCard className="h-3.5 w-3.5" />
+                {language === 'fa' ? 'پرداخت گروهی' : language === 'ps' ? 'ډله‌ییزه تادیه' : 'Group Payment'}
+              </button>
+            </div>
           )}
 
           {/* Sorting Dropdown */}
@@ -1355,6 +1363,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
       )}
 
       {/* Quick Payment Modal for Orders */}
+      {isGroupPaymentOpen && (
+        <GroupPaymentModal
+          orders={orders}
+          shopSettings={shopSettings}
+          language={language}
+          onClose={() => setIsGroupPaymentOpen(false)}
+          onSaved={onOrderUpdated}
+        />
+      )}
+
       {paymentModalOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div className="bg-white w-full max-w-sm rounded-2xl p-5 shadow-2xl border border-stone-200 space-y-4">

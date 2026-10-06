@@ -321,6 +321,12 @@ export const storageService = {
   async saveOrderAsync(value: Order) {
     return this.saveOrder(value, true);
   },
+  async saveOrderPaymentsAsync(values: Order[]) {
+    if (!values.length) return [];
+    await upsert("orders", values);
+    values.forEach((value) => replace(state.orders, value));
+    return values;
+  },
   async deleteOrder(id: string) {
     await remove("orders", id);
     state.orders = state.orders.filter((row) => row.id !== id);
