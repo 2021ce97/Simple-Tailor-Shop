@@ -106,6 +106,19 @@ function replace<T extends { id: string }>(items: T[], item: T) {
   else items.unshift(item);
 }
 
+const normalizePhone = (value: unknown) => String(value || "").replace(/\D/g, "");
+
+function assertUniqueCustomerPhone(customer: Pick<Customer, "id" | "phone">) {
+  const phone = normalizePhone(customer.phone);
+  if (!phone) return;
+  const duplicate = state.customers.find(
+    (row) => row.id !== customer.id && normalizePhone(row.phone) === phone,
+  );
+  if (duplicate) {
+    throw new Error(`A customer with phone number ${customer.phone} already exists.`);
+  }
+}
+
 export const storageService = {
   getUiPreferences: () => state.uiPreferences,
   async saveUiPreferences(value: UiPreferences) {
@@ -313,11 +326,12 @@ export const storageService = {
     state.orders = state.orders.filter((row) => row.id !== id);
   },
   async syncCustomerFromOrder(order: Order) {
-    const existing = state.customers.find(
-      (row) =>
-        row.id === order.customerId ||
-        (!!order.customerPhone && row.phone === order.customerPhone),
-    );
+    const orderPhone = normalizePhone(order.customerPhone);
+    const existing =
+      (orderPhone
+        ? state.customers.find((row) => normalizePhone(row.phone) === orderPhone)
+        : undefined) ||
+      state.customers.find((row) => row.id === order.customerId);
     const now = new Date().toISOString();
     const saved = {
       ...(existing || {}),
@@ -369,6 +383,7 @@ export const storageService = {
       id: value.id || `cust_${Date.now()}`,
       updatedAt: new Date().toISOString(),
     };
+    assertUniqueCustomerPhone(saved);
     await upsert("customers", saved);
     replace(state.customers, saved);
     return saved;
@@ -379,6 +394,7 @@ export const storageService = {
       id: value.id || `cust_${Date.now()}`,
       updatedAt: new Date().toISOString(),
     };
+    assertUniqueCustomerPhone(saved);
     await upsert("customers", saved);
     replace(state.customers, saved);
     return saved;

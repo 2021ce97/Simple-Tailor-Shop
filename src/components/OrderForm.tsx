@@ -54,6 +54,9 @@ interface OrderFormProps {
 const normalizedSearchText = (value: unknown): string =>
   typeof value === 'string' ? value.toLowerCase() : '';
 
+const normalizedPhoneDigits = (value: unknown): string =>
+  String(value || '').replace(/\D/g, '');
+
 export const OrderForm: React.FC<OrderFormProps> = ({
   initialOrder,
   prefilledCustomer,
@@ -180,20 +183,18 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   const [showCustomerSuggestions, setShowCustomerSuggestions] = useState<boolean>(false);
   const allCustomers = useMemo(() => storageService.getCustomers(), []);
   const matchingCustomers = useMemo(() => {
-    if (!customerName.trim() && !customerPhone.trim()) return [];
-    const qName = customerName.toLowerCase();
-    const qPhone = customerPhone.toLowerCase();
-    return allCustomers.filter(c => 
-      normalizedSearchText(c.name).includes(qName) || normalizedSearchText(c.phone).includes(qPhone)
+    const phoneDigits = normalizedPhoneDigits(customerPhone);
+    if (!phoneDigits) return [];
+    return allCustomers.filter(c =>
+      normalizedPhoneDigits(c.phone).includes(phoneDigits)
     ).slice(0, 5);
-  }, [customerName, customerPhone, allCustomers]);
+  }, [customerPhone, allCustomers]);
 
   const matchedExistingCustomer = useMemo(() => {
-    return allCustomers.find(c => 
-      (customerPhone && c.phone === customerPhone) || 
-      (customerName && normalizedSearchText(c.name) === customerName.toLowerCase())
-    );
-  }, [customerName, customerPhone, allCustomers]);
+    const normalizedPhone = normalizedPhoneDigits(customerPhone);
+    if (!normalizedPhone) return undefined;
+    return allCustomers.find(c => normalizedPhoneDigits(c.phone) === normalizedPhone);
+  }, [customerPhone, allCustomers]);
 
   // Filtered fabrics based on search query
   const filteredFabricsList = useMemo(() => {
@@ -426,22 +427,43 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                   type="text"
                   required
                   value={customerName}
-                  onChange={e => {
-                    setCustomerName(e.target.value);
-                    setShowCustomerSuggestions(true);
-                  }}
-                  onFocus={() => setShowCustomerSuggestions(true)}
+                  onChange={e => setCustomerName(e.target.value)}
+                  onFocus={() => setShowCustomerSuggestions(false)}
                   placeholder="e.g. احمد، فرهاد، شکیل خان..."
                   className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-bold text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-hidden"
                 />
                 <User className="w-4 h-4 text-stone-400 absolute end-3 top-2.5" />
               </div>
 
-              {/* Suggestions Dropdown */}
+            </div>
+
+            {/* Customer Phone */}
+            <div className="relative">
+              <label className="block text-xs font-bold text-stone-700 mb-1">
+                {t.customerPhone} <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="tel"
+                  dir="ltr"
+                  required
+                  value={customerPhone}
+                  onChange={e => {
+                    setCustomerPhone(e.target.value);
+                    setShowCustomerSuggestions(true);
+                  }}
+                  onFocus={() => setShowCustomerSuggestions(true)}
+                  placeholder="0772559881"
+                  className="w-full pl-3.5 pr-10 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-hidden"
+                />
+                <Phone className="w-4 h-4 text-stone-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+
+              {/* Existing customers are suggested only by phone number. */}
               {showCustomerSuggestions && matchingCustomers.length > 0 && (
                 <div className="absolute top-full start-0 end-0 mt-1 bg-white border border-stone-200 rounded-xl shadow-lg z-30 p-1.5 space-y-1">
                   <div className="text-[10px] font-bold text-stone-400 px-2 py-0.5">
-                    {language === 'fa' ? 'مشتریان موجود (کلیک برای انتخاب):' : 'Matching Customers:'}
+                    {language === 'fa' ? 'مشتریان با شماره مشابه (کلیک برای انتخاب):' : 'Matching phone numbers:'}
                   </div>
                   {matchingCustomers.map(cust => (
                     <button
@@ -456,28 +478,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                   ))}
                 </div>
               )}
-            </div>
-
-            {/* Customer Phone */}
-            <div>
-              <label className="block text-xs font-bold text-stone-700 mb-1">
-                {t.customerPhone} <span className="text-rose-500">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="tel"
-                  dir="ltr"
-                  required
-                  value={customerPhone}
-                  onChange={e => {
-                    setCustomerPhone(e.target.value);
-                    setShowCustomerSuggestions(true);
-                  }}
-                  placeholder="0772559881"
-                  className="w-full pl-3.5 pr-10 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-hidden"
-                />
-                <Phone className="w-4 h-4 text-stone-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
             </div>
           </div>
 
