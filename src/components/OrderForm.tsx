@@ -453,7 +453,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                     setShowCustomerSuggestions(true);
                   }}
                   onFocus={() => setShowCustomerSuggestions(true)}
-                  placeholder="0772559881"
+                  placeholder="0771221559"
                   className="w-full pl-3.5 pr-10 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-hidden"
                 />
                 <Phone className="w-4 h-4 text-stone-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />

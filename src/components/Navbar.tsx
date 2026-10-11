@@ -78,11 +78,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="flex items-center gap-2 sm:gap-2.5 cursor-pointer group min-w-0"
             >
               <div className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 overflow-hidden rounded-xl bg-stone-900 shadow-xs transition group-hover:scale-105">
-                <img src={shopSettings.logoUrl || '/mujeeb-afghan-logo.jpeg'} alt="Mujeeb Afghan Fashion" className="h-full w-full object-contain" />
+                <img src={shopSettings.logoUrl || '/royal-kawsar-logo.png'} alt="Royal Kawsar Brand Fashion" className="h-full w-full object-contain" />
               </div>
               <div className="min-w-0">
                 <h1 className="font-extrabold text-xs sm:text-base text-stone-900 tracking-tight leading-tight flex items-center gap-2 min-w-0">
-                  <span className="truncate block max-w-[42vw] sm:max-w-none">{shopTitle || 'MUJEEB AFGHAN FASHION HOUSE'}</span>
+                  <span className="truncate block max-w-[42vw] sm:max-w-none">{shopTitle || 'ROYAL_KAWSAR_BRAND_FASHION'}</span>
                 </h1>
                 <p className="text-[10px] text-amber-700 font-semibold hidden sm:block">
                   {t.appSubtitle}

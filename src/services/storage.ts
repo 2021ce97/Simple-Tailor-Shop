@@ -42,12 +42,17 @@ const state = {
     productLowStockThreshold: 3,
   } as UiPreferences,
 };
+const BRAND_SETTINGS: Pick<ShopSettings, "shopNameEn" | "shopNameFa" | "shopNamePs" | "phone1" | "phone2" | "whatsapp" | "logoUrl"> = {
+  shopNameEn: "ROYAL_KAWSAR_BRAND_FASHION",
+  shopNameFa: "رایل کوثر برانډ فیشن",
+  shopNamePs: "رایل کوثر برانډ فیشن",
+  phone1: "0771221559",
+  phone2: "",
+  whatsapp: "0771221559",
+  logoUrl: "/royal-kawsar-logo.png",
+};
 const EMPTY_SETTINGS: ShopSettings = {
-  shopNameEn: "",
-  shopNameFa: "",
-  shopNamePs: "",
-  phone1: "",
-  whatsapp: "",
+  ...BRAND_SETTINGS,
   addressEn: "",
   addressFa: "",
   addressPs: "",
@@ -55,6 +60,12 @@ const EMPTY_SETTINGS: ShopSettings = {
   currencyFa: "",
   currencyPs: "",
 };
+
+const withCurrentBrand = (value?: Partial<ShopSettings> | null): ShopSettings => ({
+  ...EMPTY_SETTINGS,
+  ...(value || {}),
+  ...BRAND_SETTINGS,
+});
 let authUser: { email: string; name: string } | null = null;
 let languagePreference: "en" | "fa" | "ps" = "fa";
 try {
@@ -472,10 +483,11 @@ export const storageService = {
       (row) => row.id !== id,
     );
   },
-  getShopSettings: () => state.shopSettings || EMPTY_SETTINGS,
+  getShopSettings: () => withCurrentBrand(state.shopSettings),
   async saveShopSettings(value: ShopSettings) {
-    await upsert("shop_settings", value);
-    state.shopSettings = value;
+    const brandedValue = withCurrentBrand(value);
+    await upsert("shop_settings", brandedValue);
+    state.shopSettings = brandedValue;
   },
   getAuthUser: () => authUser,
   saveAuthUser(value: { email: string; name: string } | null) {
@@ -559,7 +571,7 @@ export const storageService = {
     state.expenses = fromDatabaseRows("expenses", expenses);
     state.measurementFields = fromDatabaseRows("measurement_fields", fields);
     state.designCategories = fromDatabaseRows("design_categories", designs);
-    state.shopSettings = settings[0]?.data || null;
+    state.shopSettings = withCurrentBrand(settings[0]?.data);
     state.productCategories = fromDatabaseRows(
       "product_categories",
       categories,

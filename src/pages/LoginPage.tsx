@@ -62,10 +62,10 @@ export const LoginView: React.FC<LoginViewProps> = ({
   };
 
   const shopTitle = language === 'ps' 
-    ? shopSettings.shopNamePs || 'مجیب افغان خیاطي او رخت پلورنځی'
+    ? shopSettings.shopNamePs || 'رایل کوثر برانډ فیشن'
     : language === 'fa' 
-    ? shopSettings.shopNameFa || 'مجیب افغان خیاطی و لباس‌فروشی'
-    : shopSettings.shopNameEn || 'MUJEEB AFGHAN FASION HOUSE';
+    ? shopSettings.shopNameFa || 'رایل کوثر برانډ فیشن'
+    : shopSettings.shopNameEn || 'ROYAL_KAWSAR_BRAND_FASHION';
 
   return (
     <div className="min-h-screen bg-[#141414] text-[#F9F7F2] flex flex-col justify-between selection:bg-[#D4AF37]/40 relative overflow-hidden">
@@ -81,10 +81,10 @@ export const LoginView: React.FC<LoginViewProps> = ({
             <span>{language === 'fa' ? 'بازگشت' : language === 'ps' ? 'بېرته' : 'Back'}</span>
           </a>
           <div className="w-10 h-10 rounded-xl bg-[#D4AF37] flex items-center justify-center text-[#1A1A1A] font-black shadow-lg shadow-[#D4AF37]/20">
-            <img src={shopSettings.logoUrl || '/mujeeb-afghan-logo.jpeg'} alt="Mujeeb Afghan Fashion" className="h-full w-full rounded-xl object-contain" />
+            <img src={shopSettings.logoUrl || '/royal-kawsar-logo.png'} alt="Royal Kawsar Brand Fashion" className="h-full w-full rounded-xl object-contain" />
           </div>
-          <div>
-            <span className="font-extrabold text-sm sm:text-base text-white tracking-wide block">
+          <div className="hidden sm:block min-w-0">
+            <span className="font-extrabold text-sm sm:text-base text-white tracking-wide block break-all leading-tight">
               {shopTitle}
             </span>
             <span className="text-[11px] text-[#D4AF37] font-medium block">
@@ -142,9 +142,9 @@ export const LoginView: React.FC<LoginViewProps> = ({
           {/* Card Top Brand Badge */}
           <div className="text-center mb-6">
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-[#D4AF37] mb-4 shadow-xl shadow-[#D4AF37]/25 ring-4 ring-[#D4AF37]/10 overflow-hidden">
-              <img src={shopSettings.logoUrl || '/mujeeb-afghan-logo.jpeg'} alt="Mujeeb Afghan Fashion" className="h-full w-full object-contain" />
+              <img src={shopSettings.logoUrl || '/royal-kawsar-logo.png'} alt="Royal Kawsar Brand Fashion" className="h-full w-full object-contain" />
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight break-all leading-tight">
               {t.loginTitle}
             </h2>
             <p className="text-xs sm:text-sm text-stone-400 mt-1">

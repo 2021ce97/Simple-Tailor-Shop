@@ -179,7 +179,7 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
     ? (shopSettings.currencyFa || 'افغانی')
     : (shopSettings.currencySymbol || shopSettings.currencyEn || 'AFN');
 
-  const logoUrl = shopSettings.logoUrl || '/mujeeb-afghan-logo.jpeg';
+  const logoUrl = shopSettings.logoUrl || '/royal-kawsar-logo.png';
   const showLogo = shopSettings.receiptShowLogo !== false;
   const showBarcode = shopSettings.receiptShowBarcode !== false;
 
@@ -303,12 +303,12 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
             className="mx-auto mb-1 h-14 w-14 rounded-md object-contain"
           />
         )}
-        <h1 className="text-sm sm:text-base font-black tracking-tight text-stone-950 font-serif leading-tight">
+        <h1 className="text-sm sm:text-base font-black tracking-tight text-stone-950 font-serif leading-tight break-all">
           {shopName}
         </h1>
         <div className="flex justify-between items-center text-[10px] font-bold text-stone-900 px-1 mt-1 border-t border-dotted border-stone-400 pt-0.5">
-          <span>واتساپ: <b className="font-mono">{shopSettings.whatsapp || '0782207308'}</b></span>
-          <span>تماس: <b className="font-mono">{shopSettings.phone1 || '0793710008'}</b></span>
+          <span>واتساپ: <b className="font-mono">{shopSettings.whatsapp || '0771221559'}</b></span>
+          <span>تماس: <b className="font-mono">{shopSettings.phone1 || '0771221559'}</b></span>
         </div>
         <p className="text-[9px] text-stone-700 mt-0.5 leading-tight px-1 font-medium">
           {shopAddress}
@@ -466,12 +466,12 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
             className="mx-auto mb-1 h-14 w-14 rounded-md object-contain"
           />
         )}
-        <h1 className="text-sm sm:text-base font-black tracking-tight text-stone-950 font-serif leading-tight">
+        <h1 className="text-sm sm:text-base font-black tracking-tight text-stone-950 font-serif leading-tight break-all">
           {shopName}
         </h1>
         <div className="flex justify-between items-center text-[10px] font-bold text-stone-900 px-1 mt-1 border-t border-dotted border-stone-400 pt-0.5">
-          <span>واتساپ: <b className="font-mono">{shopSettings.whatsapp || '0782207308'}</b></span>
-          <span>تماس: <b className="font-mono">{shopSettings.phone1 || '0793710008'}</b></span>
+          <span>واتساپ: <b className="font-mono">{shopSettings.whatsapp || '0771221559'}</b></span>
+          <span>تماس: <b className="font-mono">{shopSettings.phone1 || '0771221559'}</b></span>
         </div>
         <p className="text-[9px] text-stone-700 mt-0.5 leading-tight px-1 font-medium">
           {shopAddress}

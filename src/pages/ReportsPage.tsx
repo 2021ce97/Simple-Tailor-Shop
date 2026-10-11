@@ -214,10 +214,10 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       return;
     }
     const shopTitle = language === 'fa' 
-      ? (shopSettings?.shopNameFa || 'Mujeeb Afghan') 
+      ? (shopSettings?.shopNameFa || 'رایل کوثر برانډ فیشن')
       : language === 'ps' 
-      ? (shopSettings?.shopNamePs || 'Mujeeb Afghan') 
-      : (shopSettings?.shopNameEn || 'MUJEEB AFGHAN FASHION HOUSE');
+      ? (shopSettings?.shopNamePs || 'رایل کوثر برانډ فیشن')
+      : (shopSettings?.shopNameEn || 'ROYAL_KAWSAR_BRAND_FASHION');
 
     await printReceiptElement(reportContainerRef.current, {
       title: `${shopTitle} - Financial Report (${period})`,

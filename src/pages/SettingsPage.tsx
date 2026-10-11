@@ -556,7 +556,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Mujeeb_Afghan_Fashion_${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `Royal_Kawsar_Brand_Fashion_${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
     showNotification(language === 'fa' ? 'فایل پشتیبان با موفقیت دانلود شد' : 'Backup downloaded successfully');
@@ -1615,7 +1615,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 type="text"
                 value={shop.phone1}
                 onChange={e => setShop({ ...shop, phone1: e.target.value })}
-                placeholder="0772559881"
+                placeholder="0771221559"
                 className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-mono font-bold"
               />
             </div>
@@ -1627,7 +1627,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 type="text"
                 value={shop.phone2 || ''}
                 onChange={e => setShop({ ...shop, phone2: e.target.value })}
-                placeholder="0782220194"
+                placeholder=""
                 className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-mono"
               />
             </div>
@@ -1639,7 +1639,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 type="text"
                 value={shop.whatsapp}
                 onChange={e => setShop({ ...shop, whatsapp: e.target.value })}
-                placeholder="0782220194"
+                placeholder="0771221559"
                 className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-mono font-bold"
               />
             </div>

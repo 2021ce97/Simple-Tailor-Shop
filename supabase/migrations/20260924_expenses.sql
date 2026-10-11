@@ -1,4 +1,4 @@
--- Supabase SQL Migration: Expenses Table for Mujeeb Afghan Fashion House
+-- Supabase SQL Migration: Expenses Table for Royal Kawsar Brand Fashion
 -- Run this in your Supabase SQL Editor to enable persistent cloud storage for expenses.
 
 create table if not exists public.expenses (

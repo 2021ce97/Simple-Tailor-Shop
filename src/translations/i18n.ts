@@ -389,7 +389,7 @@ export interface Translations {
 
 export const translations: Record<Language, Translations> = {
   en: {
-    appName: 'MUJEEB AFGHAN FASHION HOUSE',
+    appName: 'ROYAL_KAWSAR_BRAND_FASHION',
     appSubtitle: 'Orders, Measurements & Customer Management',
     save: 'Save',
     cancel: 'Cancel',
@@ -648,7 +648,7 @@ export const translations: Record<Language, Translations> = {
     retailPurchasesHistory: 'Retail Products Purchased',
     totalSpent: 'Total Customer Spend',
 
-    loginTitle: 'Sign In to MUJEEB AFGHAN FASHION HOUSE',
+    loginTitle: 'Sign In to ROYAL_KAWSAR_BRAND_FASHION',
     loginSubtitle: 'Enter your credentials to access the management portal',
     email: 'Email Address',
     password: 'Password',
@@ -761,7 +761,7 @@ export const translations: Record<Language, Translations> = {
   },
 
   fa: {
-    appName: 'مجیب افغان خیاطي او رخت پلورنځی',
+    appName: 'رایل کوثر برانډ فیشن',
     appSubtitle: 'سیستم جامع مدیریت سفارشات، اندازه‌ها و مشتریان',
     save: 'ذخیره',
     cancel: 'انصراف',
@@ -1020,7 +1020,7 @@ export const translations: Record<Language, Translations> = {
     retailPurchasesHistory: 'اجناس و اقلام خریداری شده',
     totalSpent: 'مجموعه مصارف مشتری',
 
-    loginTitle: 'ورود به مجیب افغان خیاطي و رخت‌فروشی',
+    loginTitle: 'ورود به رایل کوثر برانډ فیشن',
     loginSubtitle: 'برای دسترسی به سیستم، مشخصات خود را وارد نمایید',
     email: 'آدرس ایمیل',
     password: 'رمز عبور (پسورد)',
@@ -1133,7 +1133,7 @@ export const translations: Record<Language, Translations> = {
   },
 
   ps: {
-    appName: 'مجیب افغان خیاطي او رخت پلورنځی',
+    appName: 'رایل کوثر برانډ فیشن',
     appSubtitle: 'د فرمایشونو، اندازو او پیرودونکو د مدیریت جامع سیستم',
     save: 'ساتل / ثبت',
     cancel: 'ردول',
@@ -1392,7 +1392,7 @@ export const translations: Record<Language, Translations> = {
     retailPurchasesHistory: 'پېرل شوي توکي او اجناس',
     totalSpent: 'د مشتري ټول مصرف',
 
-    loginTitle: 'مجیب افغان خیاطي او رخت پلورنځي ته ننوتل',
+    loginTitle: 'رایل کوثر برانډ فیشن ته ننوتل',
     loginSubtitle: 'سیستم ته د لاسرسي لپاره خپل معلومات دننه کړئ',
     email: 'د بریښنالیک پته',
     password: 'پټنوم (پاسورډ)',

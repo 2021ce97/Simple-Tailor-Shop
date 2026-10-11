@@ -117,11 +117,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             className="flex items-center gap-3 cursor-pointer group select-none overflow-hidden"
           >
             <div className="w-10 h-10 rounded-xl bg-stone-900 flex items-center justify-center text-amber-500 font-black shadow-xs group-hover:scale-105 transition-transform shrink-0 overflow-hidden">
-              <img src={shopSettings.logoUrl || '/mujeeb-afghan-logo.jpeg'} alt="Mujeeb Afghan Fashion" className="h-full w-full object-contain" />
+              <img src={shopSettings.logoUrl || '/royal-kawsar-logo.png'} alt="Royal Kawsar Brand Fashion" className="h-full w-full object-contain" />
             </div>
             <div className="overflow-hidden">
               <h1 className="font-extrabold text-sm text-stone-900 tracking-tight leading-tight truncate">
-                {shopTitle || 'MUJEEB AFGHAN FASHION HOUSE'}
+                {shopTitle || 'ROYAL_KAWSAR_BRAND_FASHION'}
               </h1>
               <p className="text-[11px] text-amber-700 font-semibold tracking-wide truncate">
                 {t.appSubtitle}

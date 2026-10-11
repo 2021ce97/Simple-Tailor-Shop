@@ -115,10 +115,10 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
   const handleTestPrint = async () => {
     if (!previewRef.current) return;
     const shopName = language === 'ps' 
-      ? (settings.shopNamePs || 'Mujeeb Afghan') 
+      ? (settings.shopNamePs || 'رایل کوثر برانډ فیشن')
       : language === 'fa' 
-      ? (settings.shopNameFa || 'مجیب افغان') 
-      : (settings.shopNameEn || 'MUJEEB AFGHAN FASHION');
+      ? (settings.shopNameFa || 'رایل کوثر برانډ فیشن')
+      : (settings.shopNameEn || 'ROYAL_KAWSAR_BRAND_FASHION');
 
     await printReceiptElement(previewRef.current, {
       title: `${shopName} - Test Receipt Slip`,
@@ -686,17 +686,17 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 <div className="text-center pb-2 border-b-2 border-stone-900">
                   {settings.receiptShowLogo !== false && (
                     <img
-                      src={settings.logoUrl || '/mujeeb-afghan-logo.jpeg'}
+                      src={settings.logoUrl || '/royal-kawsar-logo.png'}
                       alt="Logo"
                       className="mx-auto mb-1.5 h-14 w-14 rounded-md object-contain"
                     />
                   )}
-                  <h4 className="font-black text-sm font-serif tracking-tight text-stone-950">
-                    {shopTitle || 'MUJEEB AFGHAN FASHION'}
+                  <h4 className="font-black text-sm font-serif tracking-tight text-stone-950 break-all leading-tight">
+                    {shopTitle || 'ROYAL_KAWSAR_BRAND_FASHION'}
                   </h4>
                   <div className="flex justify-between items-center text-[10px] font-semibold text-stone-700 mt-1 pt-1 border-t border-dotted border-stone-300">
-                    <span>تلیفون: <b className="font-mono">{settings.phone1 || '0772559881'}</b></span>
-                    <span>واتساپ: <b className="font-mono">{settings.whatsapp || '0782220194'}</b></span>
+                    <span>تلیفون: <b className="font-mono">{settings.phone1 || '0771221559'}</b></span>
+                    <span>واتساپ: <b className="font-mono">{settings.whatsapp || '0771221559'}</b></span>
                   </div>
                   <p className="text-[9px] text-stone-500 mt-0.5 truncate">
                     {language === 'ps' ? settings.addressPs : language === 'fa' ? settings.addressFa : settings.addressEn}

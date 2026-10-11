@@ -338,10 +338,10 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
     setTimeout(async () => {
       if (!quickPrintRef.current) return;
       const shopName = language === 'fa' 
-        ? (shopSettings?.shopNameFa || 'Mujeeb Afghan') 
+        ? (shopSettings?.shopNameFa || 'رایل کوثر برانډ فیشن')
         : language === 'ps' 
-        ? (shopSettings?.shopNamePs || 'Mujeeb Afghan') 
-        : (shopSettings?.shopNameEn || 'MUJEEB AFGHAN FASHION HOUSE');
+        ? (shopSettings?.shopNamePs || 'رایل کوثر برانډ فیشن')
+        : (shopSettings?.shopNameEn || 'ROYAL_KAWSAR_BRAND_FASHION');
       
       await printReceiptElement(quickPrintRef.current, {
         title: `${shopName} - SL-${sale.id.slice(-6).toUpperCase()}`,
@@ -363,10 +363,10 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
   const handlePrintReceipt = async () => {
     if (!receiptPrintRef.current || !activeReceiptSale) return;
     const shopName = language === 'fa' 
-      ? (shopSettings?.shopNameFa || 'Mujeeb Afghan') 
+      ? (shopSettings?.shopNameFa || 'رایل کوثر برانډ فیشن')
       : language === 'ps' 
-      ? (shopSettings?.shopNamePs || 'Mujeeb Afghan') 
-      : (shopSettings?.shopNameEn || 'MUJEEB AFGHAN FASHION HOUSE');
+      ? (shopSettings?.shopNamePs || 'رایل کوثر برانډ فیشن')
+      : (shopSettings?.shopNameEn || 'ROYAL_KAWSAR_BRAND_FASHION');
     
     await printReceiptElement(receiptPrintRef.current, {
       title: `${shopName} - SL-${activeReceiptSale.id.slice(-6).toUpperCase()}`,
@@ -1111,17 +1111,17 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
               <div className="text-center pb-2 border-b-2 border-stone-950">
                 {shopSettings?.receiptShowLogo !== false && (
                   <img
-                    src="/receipt-logo.svg"
+                    src={shopSettings?.logoUrl || '/royal-kawsar-logo.png'}
                     alt="Shop Logo"
                     className="mx-auto h-12 w-12 object-contain mb-1"
                   />
                 )}
-                <h2 className="font-black text-sm text-stone-950 font-serif leading-tight">
+                <h2 className="font-black text-sm text-stone-950 font-serif leading-tight break-all">
                   {language === 'fa' 
-                    ? (shopSettings?.shopNameFa || 'مجیب افغان خیاطي او رخت پلورنځی')
+                    ? (shopSettings?.shopNameFa || 'رایل کوثر برانډ فیشن')
                     : language === 'ps' 
-                    ? (shopSettings?.shopNamePs || 'مجیب افغان خیاطي او رخت پلورنځی')
-                    : (shopSettings?.shopNameEn || 'MUJEEB AFGHAN FASHION HOUSE')}
+                    ? (shopSettings?.shopNamePs || 'رایل کوثر برانډ فیشن')
+                    : (shopSettings?.shopNameEn || 'ROYAL_KAWSAR_BRAND_FASHION')}
                 </h2>
                 <p className="text-[10px] text-stone-600 mt-0.5">
                   {language === 'fa' 
@@ -1131,7 +1131,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                     : (shopSettings?.addressEn || '')}
                 </p>
                 <div className="flex justify-center gap-2 text-[10px] text-stone-700 font-mono mt-0.5 font-bold">
-                  <span>📞 {shopSettings?.phone1 || '0782220194'}</span>
+                  <span>📞 {shopSettings?.phone1 || '0771221559'}</span>
                   {shopSettings?.whatsapp && <span>💬 {shopSettings?.whatsapp}</span>}
                 </div>
                 <div className="text-[10px] uppercase bg-stone-100 border border-stone-950 py-0.5 mt-1.5 font-black tracking-widest text-stone-900">
@@ -1264,17 +1264,17 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
             <div className="text-center pb-2 border-b-2 border-stone-950">
               {shopSettings?.receiptShowLogo !== false && (
                 <img
-                  src="/receipt-logo.svg"
+                  src={shopSettings?.logoUrl || '/royal-kawsar-logo.png'}
                   alt="Shop Logo"
                   className="mx-auto h-12 w-12 object-contain mb-1"
                 />
               )}
-              <h2 className="font-black text-sm text-stone-950 font-serif leading-tight">
+              <h2 className="font-black text-sm text-stone-950 font-serif leading-tight break-all">
                 {language === 'fa' 
-                  ? (shopSettings?.shopNameFa || 'مجیب افغان خیاطي او رخت پلورنځی')
+                  ? (shopSettings?.shopNameFa || 'رایل کوثر برانډ فیشن')
                   : language === 'ps' 
-                  ? (shopSettings?.shopNamePs || 'مجیب افغان خیاطي او رخت پلورنځی')
-                  : (shopSettings?.shopNameEn || 'MUJEEB AFGHAN FASHION HOUSE')}
+                  ? (shopSettings?.shopNamePs || 'رایل کوثر برانډ فیشن')
+                  : (shopSettings?.shopNameEn || 'ROYAL_KAWSAR_BRAND_FASHION')}
               </h2>
               <p className="text-[10px] text-stone-600 mt-0.5">
                 {language === 'fa' 
@@ -1284,7 +1284,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                   : (shopSettings?.addressEn || '')}
               </p>
               <div className="flex justify-center gap-2 text-[10px] text-stone-700 font-mono mt-0.5 font-bold">
-                <span>📞 {shopSettings?.phone1 || '0782220194'}</span>
+                <span>📞 {shopSettings?.phone1 || '0771221559'}</span>
                 {shopSettings?.whatsapp && <span>💬 {shopSettings?.whatsapp}</span>}
               </div>
               <div className="text-[10px] uppercase bg-stone-100 border border-stone-950 py-0.5 mt-1.5 font-black tracking-widest text-stone-900">

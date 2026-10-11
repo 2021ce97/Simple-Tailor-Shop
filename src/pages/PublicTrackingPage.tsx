@@ -22,13 +22,23 @@ const statusMeta = {
   delivered: { icon: CheckCircle2, color: 'text-stone-700 bg-stone-100 border-stone-300' },
 };
 
+const currentBrandSettings = {
+  shopNameEn: 'ROYAL_KAWSAR_BRAND_FASHION',
+  shopNameFa: 'رایل کوثر برانډ فیشن',
+  shopNamePs: 'رایل کوثر برانډ فیشن',
+  phone1: '0771221559',
+  phone2: '',
+  whatsapp: '0771221559',
+  logoUrl: '/royal-kawsar-logo.png',
+};
+
 export const PublicTrackingView: React.FC = () => {
   const [language, setLanguage] = useState<Language>('en');
   const [lookup, setLookup] = useState('');
   const [orders, setOrders] = useState<PublicOrder[]>([]);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [shopSettings, setShopSettings] = useState<any>({});
+  const [shopSettings, setShopSettings] = useState<any>(currentBrandSettings);
   useEffect(() => {
     if (!isSupabaseConfigured) {
       setError('Supabase is not configured.');
@@ -37,7 +47,7 @@ export const PublicTrackingView: React.FC = () => {
     supabase.from('shop_settings').select('data').eq('id', 'default').maybeSingle()
       .then(({ data, error: settingsError }) => {
         if (settingsError) setError(settingsError.message);
-        else if (data?.data) setShopSettings(data.data);
+        else if (data?.data) setShopSettings({ ...data.data, ...currentBrandSettings });
       })
       .catch(settingsError => setError(settingsError instanceof Error ? settingsError.message : String(settingsError)));
   }, []);
@@ -88,7 +98,7 @@ export const PublicTrackingView: React.FC = () => {
   };
 
   const copy = {
-    en: { staff: 'Staff login', title: 'Find your order.', description: 'Search your orders by Order ID or contact number to see the latest production status.', label: 'Order ID or contact number', placeholder: 'e.g. 0001 or 0772559881', button: 'Find order', checking: 'Searching...', clothId: 'Order ID', garment: 'Garment', quantity: 'Quantity', collection: 'Expected collection', notFound: 'No order was found for this Order ID or contact.', toBeConfirmed: 'To be confirmed', developed: 'Developed by: Rayan Tech solution', statuses: { pending: ['Received', 'Your order is registered and waiting to enter production.'], in_progress: ['In production', 'Your cloth is being cut or stitched by our team.'], ready: ['Ready for collection', 'Your cloth is ready. Please bring your order slip when collecting it.'], delivered: ['Collected', 'This order has been collected from the shop.'] } },
+    en: { staff: 'Staff login', title: 'Find your order.', description: 'Search your orders by Order ID or contact number to see the latest production status.', label: 'Order ID or contact number', placeholder: 'e.g. 0001 or 0771221559', button: 'Find order', checking: 'Searching...', clothId: 'Order ID', garment: 'Garment', quantity: 'Quantity', collection: 'Expected collection', notFound: 'No order was found for this Order ID or contact.', toBeConfirmed: 'To be confirmed', developed: 'Developed by: Rayan Tech solution', statuses: { pending: ['Received', 'Your order is registered and waiting to enter production.'], in_progress: ['In production', 'Your cloth is being cut or stitched by our team.'], ready: ['Ready for collection', 'Your cloth is ready. Please bring your order slip when collecting it.'], delivered: ['Collected', 'This order has been collected from the shop.'] } },
     fa: { staff: 'ورود کارمندان', title: 'سفارش خود را پیدا کنید.', description: 'برای دیدن آخرین وضعیت، سفارش‌های خود را با شماره سفارش یا شماره تماس جستجو کنید.', label: 'شماره سفارش یا تماس', placeholder: 'مثلاً ۰۰۰۱ یا ۰۷۷۲۵۵۹۸۸۱', button: 'پیدا کردن سفارش', checking: 'در حال جستجو...', clothId: 'شماره سفارش', garment: 'نوع لباس', quantity: 'تعداد', collection: 'تاریخ تسلیمی', notFound: 'برای این شماره سفارش یا تماس سفارشی یافت نشد.', toBeConfirmed: 'تعیین نشده', developed: 'ساخته شده توسط: Rayan Tech solution', statuses: { pending: ['دریافت شد', 'سفارش شما ثبت شده و در انتظار شروع کار است.'], in_progress: ['در حال آماده‌سازی', 'لباس شما توسط تیم ما برش یا دوخته می‌شود.'], ready: ['آماده تحویل', 'لباس شما آماده است. هنگام دریافت، بل سفارش را همراه داشته باشید.'], delivered: ['تحویل شد', 'این سفارش از فروشگاه تحویل گرفته شده است.'] } },
     ps: { staff: 'د کارکوونکو ننوتل', title: 'خپل فرمایش پیدا کړئ.', description: 'د وروستي حالت لپاره خپل فرمایشونه د فرمایش شمېرې یا اړیکې شمېرې له لارې ولټوئ.', label: 'د فرمایش شمېره یا اړیکه', placeholder: 'لکه ۰۰۰۱ یا ۰۷۷۲۵۵۹۸۸۱', button: 'فرمایش پیدا کړئ', checking: 'لټون کېږي...', clothId: 'د فرمایش شمېره', garment: 'د جامو ډول', quantity: 'تعداد', collection: 'د اخیستلو نېټه', notFound: 'د دې فرمایش یا اړیکې شمېرې لپاره فرمایش ونه موندل شو.', toBeConfirmed: 'لا نه ده ټاکل شوې', developed: 'جوړونکی: Rayan Tech solution', statuses: { pending: ['ترلاسه شو', 'ستاسو فرمایش ثبت شوی او د تولید پیل ته منتظر دی.'], in_progress: ['د تولید په حال کې', 'ستاسو کالي زموږ د ډلې له خوا پرې کېږي یا ګنډل کېږي.'], ready: ['د اخیستلو لپاره چمتو', 'ستاسو کالي چمتو دي. د اخیستلو پر مهال د فرمایش بِل راوړئ.'], delivered: ['تحویل شو', 'دا فرمایش له هټۍ څخه اخیستل شوی دی.'] } },
   }[language];
@@ -106,8 +116,8 @@ export const PublicTrackingView: React.FC = () => {
         <section className="mt-8 overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-xl shadow-stone-900/5">
           <div className="bg-[#173b3b] px-4 py-7 text-white sm:px-10 sm:py-10">
               <div className="flex items-center gap-3 text-[#e4bd63]">
-              <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-black"><img src={shopSettings.logoUrl || '/mujeeb-afghan-logo.jpeg'} alt="Mujeeb Afghan Fashion" className="h-full w-full object-contain" /></div>
-              <span className="text-xs font-bold uppercase tracking-[0.2em]">{language === 'ps' ? shopSettings.shopNamePs : language === 'fa' ? shopSettings.shopNameFa : shopSettings.shopNameEn}</span>
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-black"><img src={shopSettings.logoUrl || '/royal-kawsar-logo.png'} alt="Royal Kawsar Brand Fashion" className="h-full w-full object-contain" /></div>
+              <span className="min-w-0 break-all text-xs font-bold uppercase tracking-[0.12em] sm:tracking-[0.2em]">{language === 'ps' ? shopSettings.shopNamePs : language === 'fa' ? shopSettings.shopNameFa : shopSettings.shopNameEn}</span>
             </div>
             <h1 className="mt-6 sm:mt-8 max-w-lg text-2xl min-[400px]:text-3xl font-black tracking-tight sm:text-5xl">{copy.title}</h1>
             <p className="mt-4 max-w-lg text-sm leading-6 text-teal-50/80">{copy.description}</p>
@@ -155,7 +165,7 @@ export const PublicTrackingView: React.FC = () => {
           </div>
         </section>
 
-        <footer className="py-6 text-center text-xs text-stone-500">{language === 'ps' ? shopSettings.addressPs : language === 'fa' ? shopSettings.addressFa : shopSettings.addressEn}<br />{shopSettings.phone1} · {shopSettings.phone2}<br /><a href="https://rayan-tech-solution.tech" target="_blank" rel="noreferrer" className="underline">{copy.developed}</a></footer>
+        <footer className="py-6 text-center text-xs text-stone-500">{language === 'ps' ? shopSettings.addressPs : language === 'fa' ? shopSettings.addressFa : shopSettings.addressEn}<br />{shopSettings.phone1}{shopSettings.phone2 ? ` · ${shopSettings.phone2}` : ''}<br /><a href="https://rayan-tech-solution.tech" target="_blank" rel="noreferrer" className="underline">{copy.developed}</a></footer>
       </main>
       <a href="/login" className="fixed bottom-4 left-4 z-10 rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm font-bold text-stone-700 shadow-lg shadow-stone-900/10 transition hover:border-[#173b3b] hover:bg-[#173b3b] hover:text-white">{copy.staff}</a>
     </div>

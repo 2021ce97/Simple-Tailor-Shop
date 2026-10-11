@@ -315,7 +315,7 @@ function createLocalFallbackClient() {
         return { data: { session: null }, error: null };
       },
       async signInWithPassword({ email, password: _password }: { email: string; password?: string }) {
-        const cleanEmail = (email || 'admin@mujeeb.af').trim().toLowerCase();
+        const cleanEmail = (email || 'admin@royalkawsar.af').trim().toLowerCase();
         const user = { email: cleanEmail, name: cleanEmail.split('@')[0] || 'Admin' };
         setStoredUser(user);
         const session = { access_token: 'local_session', user: { id: 'local_admin', email: cleanEmail, user_metadata: { name: user.name } } };

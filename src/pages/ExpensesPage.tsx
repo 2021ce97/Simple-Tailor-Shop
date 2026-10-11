@@ -113,7 +113,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
     });
     // Add default popular Afghan shop staff names if empty
     if (set.size === 0) {
-      set.add('Mujeeb (مجیب)');
+      set.add('Kawsar (کوثر)');
       set.add('Ahmad (احمد)');
       set.add('Ustad Karim (استاد کریم)');
     }
@@ -126,7 +126,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
     setFormCategory('materials');
     setFormAmount('');
     setFormDate(new Date().toISOString().slice(0, 10));
-    setFormSpentBy(existingPersons[0] || 'Mujeeb (مجیب)');
+    setFormSpentBy(existingPersons[0] || 'Kawsar (کوثر)');
     setFormPaymentMethod('cash');
     setFormReceiptNumber('');
     setFormNotes('');
@@ -1035,7 +1035,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
                     required
                     value={formSpentBy}
                     onChange={e => setFormSpentBy(e.target.value)}
-                    placeholder={language === 'fa' ? 'نام شخص پرداخت‌کننده (مثلاً: مجیب، احمد، استاد کریم...)' : language === 'ps' ? 'د لګوونکي کس نوم (لکه: مجیب، احمد، استاد کریم...)' : 'Name of person who made expense (e.g. Mujeeb, Ahmad...)'}
+                    placeholder={language === 'fa' ? 'نام شخص پرداخت‌کننده (مثلاً: کوثر، احمد، استاد کریم...)' : language === 'ps' ? 'د لګوونکي کس نوم (لکه: کوثر، احمد، استاد کریم...)' : 'Name of person who made expense (e.g. Kawsar, Ahmad...)'}
                     className="w-full text-xs font-medium border border-stone-300 rounded-xl px-3 py-2.5 outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400"
                   />
                 </div>
