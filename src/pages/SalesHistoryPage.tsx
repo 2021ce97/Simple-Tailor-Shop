@@ -828,7 +828,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                     type="text"
                     value={productSearchQuery}
                     onChange={e => setProductSearchQuery(e.target.value)}
-                    placeholder={language === 'fa' ? 'جستجوی نام جنس یا کد...' : 'Filter products list...'}
+                    placeholder={language === 'fa' ? 'جستجوی نام جنس یا کد...' : language === 'ps' ? 'د توکو نوم یا کوډ وپلټئ...' : 'Filter products list...'}
                     className="w-full px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-lg text-xs font-medium focus:bg-white outline-hidden"
                   />
 

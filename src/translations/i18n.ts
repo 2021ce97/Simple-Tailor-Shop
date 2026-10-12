@@ -131,6 +131,7 @@ export interface Translations {
   outOfStock: string;
   selectFabric: string;
   customerFabric: string;
+  shopFabric: string;
   fabricUsed: string;
   selectFromInventory: string;
   fabricDetails: string;
@@ -256,6 +257,7 @@ export interface Translations {
   product: string;
   customer: string;
   searchProductPlaceholder: string;
+  searchSalesPlaceholder: string;
   noProductsFound: string;
   quantityToSell: string;
   confirmSale: string;
@@ -511,6 +513,7 @@ export const translations: Record<Language, Translations> = {
     outOfStock: 'Out of Stock',
     selectFabric: 'Select Fabric',
     customerFabric: "Customer's Own Fabric",
+    shopFabric: 'Shop Fabric',
     fabricUsed: 'Fabric Used (Meters)',
     selectFromInventory: 'Select from Shop Inventory',
     fabricDetails: 'Fabric Details',
@@ -631,6 +634,7 @@ export const translations: Record<Language, Translations> = {
     product: 'Product',
     customer: 'Customer',
     searchProductPlaceholder: 'Search products by name, brand, SKU...',
+    searchSalesPlaceholder: 'Search sales by product, category, customer, phone, or code...',
     noProductsFound: 'No products found matching your search',
     quantityToSell: 'Quantity to Sell',
     confirmSale: 'Confirm Sale',
@@ -883,6 +887,7 @@ export const translations: Record<Language, Translations> = {
     outOfStock: 'ختم شده',
     selectFabric: 'انتخاب رخت',
     customerFabric: 'رخت از خود مشتری',
+    shopFabric: 'رخت از دکان',
     fabricUsed: 'مقدار رخت (متر)',
     selectFromInventory: 'انتخاب از گدام خیاطی',
     fabricDetails: 'مشخصات رخت',
@@ -1003,6 +1008,7 @@ export const translations: Record<Language, Translations> = {
     product: 'جنس',
     customer: 'مشتری',
     searchProductPlaceholder: 'جستجوی اجناس بر اساس نام، برند، کد...',
+    searchSalesPlaceholder: 'جستجوی فروش با نام جنس، کتگوری، مشتری، شماره یا کد...',
     noProductsFound: 'هیچ جنسی یافت نشد',
     quantityToSell: 'تعداد فروش',
     confirmSale: 'تأیید و ثبت فروش',
@@ -1255,6 +1261,7 @@ export const translations: Record<Language, Translations> = {
     outOfStock: 'ختم شوی',
     selectFabric: 'رخت وټاکئ',
     customerFabric: 'د مشتري خپل رخت',
+    shopFabric: 'د دوکان رخت',
     fabricUsed: 'کارېدلی رخت (متره)',
     selectFromInventory: 'د هټۍ له ذخیرې څخه انتخاب',
     fabricDetails: 'د رخت تفصیلات',
@@ -1375,6 +1382,7 @@ export const translations: Record<Language, Translations> = {
     product: 'جنس',
     customer: 'پیرودونکی',
     searchProductPlaceholder: 'د توکو پلټنه د نوم، برانډ یا کوډ له مخې...',
+    searchSalesPlaceholder: 'پلور د توکي، کټګورۍ، پېرودونکي، ټلیفون یا کوډ له مخې وپلټئ...',
     noProductsFound: 'هیڅ جنس ونه موندل شو',
     quantityToSell: 'د خرڅلاو شمېر',
     confirmSale: 'د پلور بشپړول',

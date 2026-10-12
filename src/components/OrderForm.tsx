@@ -14,6 +14,7 @@ import {
 import { translations } from '../translations/i18n';
 import { storageService } from '../services/storage';
 import { getErrorMessage } from '../lib/errors';
+import { normalizeDigits, searchText, textIncludes } from '../lib/search';
 import { 
   Scissors, 
   User, 
@@ -51,11 +52,8 @@ interface OrderFormProps {
   onCancel: () => void;
 }
 
-const normalizedSearchText = (value: unknown): string =>
-  typeof value === 'string' ? value.toLowerCase() : '';
-
 const normalizedPhoneDigits = (value: unknown): string =>
-  String(value || '').replace(/\D/g, '');
+  normalizeDigits(value).replace(/\D/g, '');
 
 export const OrderForm: React.FC<OrderFormProps> = ({
   initialOrder,
@@ -199,12 +197,12 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   // Filtered fabrics based on search query
   const filteredFabricsList = useMemo(() => {
     if (!fabricSearchQuery.trim()) return fabricsList;
-    const q = fabricSearchQuery.toLowerCase();
+    const q = searchText(fabricSearchQuery);
     return fabricsList.filter(f => 
-      normalizedSearchText(f.name).includes(q) ||
-      normalizedSearchText(f.code).includes(q) ||
-      normalizedSearchText(f.color).includes(q) ||
-      normalizedSearchText(f.type).includes(q)
+      textIncludes(f.name, q) ||
+      textIncludes(f.code, q) ||
+      textIncludes(f.color, q) ||
+      textIncludes(f.type, q)
     );
   }, [fabricsList, fabricSearchQuery]);
 
@@ -596,7 +594,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 {/* 1. Search Fabric Box */}
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1.5">
-                    {language === 'fa' ? 'جستجوی سریع رخت در گدام (کد، نام، رنگ):' : 'Search Fabric in Inventory:'}
+                    {language === 'fa' ? 'جستجوی سریع رخت در گدام (کد، نام، رنگ):' : language === 'ps' ? 'په زېرمه کې رخت د کوډ، نوم یا رنګ له مخې وپلټئ:' : 'Search Fabric in Inventory:'}
                   </label>
                   <div className="relative">
                     <Search className="w-4 h-4 text-stone-400 absolute start-3 top-1/2 -translate-y-1/2" />
@@ -604,7 +602,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                       type="text"
                       value={fabricSearchQuery}
                       onChange={e => setFabricSearchQuery(e.target.value)}
-                      placeholder={language === 'fa' ? 'مثال: F-01 یا سفید...' : 'e.g. F-01 or white...'}
+                      placeholder={language === 'fa' ? 'مثال: F-01 یا سفید...' : language === 'ps' ? 'لکه: F-01 یا سپین...' : 'e.g. F-01 or white...'}
                       className="w-full ps-9 pe-3 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-xs font-bold text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-hidden"
                     />
                   </div>

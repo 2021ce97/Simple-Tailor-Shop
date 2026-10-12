@@ -65,6 +65,7 @@ const copy = {
     tailorSlipTitle: 'Tailor Production Slip',
     customerReceiptTitle: 'Customer Receipt',
     developedBy: 'Developed by: Rayan Tech solution',
+    fabricSource: 'Fabric Source',
     fabricDetails: 'Fabric Details',
     customerFabric: 'Customer Own Fabric',
     shopFabric: 'Shop Fabric',
@@ -95,6 +96,7 @@ const copy = {
     tailorSlipTitle: 'برگه مشخصات و اندازه خیاط',
     customerReceiptTitle: 'قبض حساب مشتری',
     developedBy: 'ساخته شده توسط: Rayan Tech solution',
+    fabricSource: 'منبع رخت',
     fabricDetails: 'مشخصات تکه (پارچه)',
     customerFabric: 'تکه از خود مشتری',
     shopFabric: 'تکه از دکان',
@@ -125,6 +127,7 @@ const copy = {
     tailorSlipTitle: 'د خیاط کاري پاڼه او اندازې',
     customerReceiptTitle: 'د پیرودونکي رسید او بِل',
     developedBy: 'جوړونکی: Rayan Tech solution',
+    fabricSource: 'د رخت سرچینه',
     fabricDetails: 'د رخت / ټوکر مشخصات',
     customerFabric: 'د مشتري خپل رخت',
     shopFabric: 'د دوکان رخت',
@@ -182,6 +185,7 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
   const logoUrl = shopSettings.logoUrl || '/royal-kawsar-logo.png';
   const showLogo = shopSettings.receiptShowLogo !== false;
   const showBarcode = shopSettings.receiptShowBarcode !== false;
+  const fabricSourceLabel = order.isCustomerFabric ? dict.customerFabric : dict.shopFabric;
 
   // Active Measurements list
   const activeMeasurements = (measurementFields || [])
@@ -377,7 +381,23 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
         </div>
       </div>
 
-      {/* 4. Special Tailor Instructions Note (if present) */}
+      {/* 4. Fabric source is always explicit for workshop handling. */}
+      <div className="border-2 border-stone-950 bg-stone-50 text-[9.5px] font-semibold mb-1.5 overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-1.5 py-1">
+          <span className="text-stone-700 font-bold">{dict.fabricSource}:</span>
+          <span className={`px-2 py-0.5 rounded-sm font-black ${order.isCustomerFabric ? 'bg-amber-200 text-amber-950' : 'bg-emerald-100 text-emerald-950'}`}>
+            {fabricSourceLabel}
+          </span>
+        </div>
+        {(order.fabricName || order.fabricColor) && (
+          <div className="border-t border-stone-400 px-1.5 py-1 flex items-center justify-between gap-2">
+            <span className="text-stone-600">{dict.fabricDetails}:</span>
+            <span className="font-bold text-stone-950 text-end">{order.fabricName || '---'} {order.fabricColor ? `(${order.fabricColor})` : ''}</span>
+          </div>
+        )}
+      </div>
+
+      {/* 5. Special Tailor Instructions Note (if present) */}
       {order.specialInstructions && (
         <div className="p-1 bg-amber-50 border-2 border-stone-950 text-[9.5px] font-semibold text-stone-950 mb-1.5 leading-tight">
           <span className="font-bold text-amber-950 block text-[9px]">{dict.tailorNotes}:</span>
@@ -385,14 +405,14 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
         </div>
       )}
 
-      {/* 5. Cut Line Divider */}
+      {/* 6. Cut Line Divider */}
       <div className="my-1 border-t-2 border-dashed border-stone-800 relative text-center">
         <span className="bg-white px-2 text-[8px] text-stone-500 uppercase tracking-widest relative -top-2">
           ✂ {dict.tailorSlipTitle}
         </span>
       </div>
 
-      {/* 6. Return Date & Order Date Strip */}
+      {/* 7. Return Date & Order Date Strip */}
       <div className="border-2 border-stone-950 bg-stone-100 text-[10px] font-bold p-1 mb-1.5 flex justify-between items-center">
         <div className="flex items-center gap-1">
           <span className="text-stone-700">{dict.returnDate}:</span>
@@ -404,7 +424,7 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
         </div>
       </div>
 
-      {/* 7. Barcodes Row (Phone Barcode & Order Barcode) */}
+      {/* 8. Barcodes Row (Phone Barcode & Order Barcode) */}
       {showBarcode && (
         <div className="border-2 border-stone-950 p-1 flex justify-between items-center divide-x-2 divide-stone-950 bg-white mb-1.5">
           <div className="flex-1 text-center px-0.5">
@@ -428,7 +448,7 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
         </div>
       )}
 
-      {/* 8. Bottom strip with Cabinet & Quantity */}
+      {/* 9. Bottom strip with Cabinet & Quantity */}
       <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 bg-stone-200 text-center font-black text-xs py-1">
         <div className="flex justify-between items-center px-2">
           <span className="text-[10px] text-stone-700">{dict.cabinet}:</span>
@@ -567,13 +587,21 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
         </div>
       </div>
 
-      {/* 6. Fabric Details (if any) */}
-      {order.fabricName && (
-        <div className="border-2 border-stone-950 p-1 bg-stone-50 text-[9.5px] font-semibold mb-1.5 flex justify-between items-center">
-          <span className="text-stone-700">{dict.fabricDetails}:</span>
-          <span className="font-bold text-stone-950">{order.fabricName} {order.fabricColor ? `(${order.fabricColor})` : ''}</span>
+      {/* 6. Fabric source and details are always included for the customer. */}
+      <div className="border-2 border-stone-950 bg-stone-50 text-[9.5px] font-semibold mb-1.5 overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-1.5 py-1">
+          <span className="text-stone-700 font-bold">{dict.fabricSource}:</span>
+          <span className={`px-2 py-0.5 rounded-sm font-black ${order.isCustomerFabric ? 'bg-amber-200 text-amber-950' : 'bg-emerald-100 text-emerald-950'}`}>
+            {fabricSourceLabel}
+          </span>
         </div>
-      )}
+        {(order.fabricName || order.fabricColor) && (
+          <div className="border-t border-stone-400 px-1.5 py-1 flex items-center justify-between gap-2">
+            <span className="text-stone-600">{dict.fabricDetails}:</span>
+            <span className="font-bold text-stone-950 text-end">{order.fabricName || '---'} {order.fabricColor ? `(${order.fabricColor})` : ''}</span>
+          </div>
+        )}
+      </div>
 
       {/* 7. Footer Thank you Note & Attribution */}
       <div className="text-center pt-1.5 border-t border-dotted border-stone-300 text-[9px] text-stone-600">

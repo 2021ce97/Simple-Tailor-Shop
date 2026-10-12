@@ -153,7 +153,7 @@ export const GroupPaymentModal: React.FC<GroupPaymentModalProps> = ({
             <div className="space-y-3 overflow-y-auto p-4">
               <div className="grid gap-3 sm:grid-cols-2">
                 <input value={payerName} onChange={event => setPayerName(event.target.value)} placeholder={language === 'fa' ? 'نام پرداخت کننده' : 'Payer name'} className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold outline-none focus:border-amber-500" />
-                <div className="relative"><Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" /><input value={search} onChange={event => setSearch(event.target.value)} placeholder={language === 'fa' ? 'جستجوی نام، شماره یا بل' : 'Search name, phone, or order'} className="w-full rounded-xl border border-stone-200 bg-stone-50 py-2.5 pe-3 ps-9 text-xs outline-none focus:border-amber-500" /></div>
+                <div className="relative"><Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" /><input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder={language === 'fa' ? 'جستجوی نام، شماره یا بل' : language === 'ps' ? 'نوم، ټلیفون یا فرمایش وپلټئ' : 'Search name, phone, or order'} aria-label={language === 'fa' ? 'جستجوی فرمایش' : language === 'ps' ? 'د فرمایش پلټنه' : 'Search orders'} className="w-full rounded-xl border border-stone-200 bg-stone-50 py-2.5 pe-3 ps-9 text-xs outline-none focus:border-amber-500" /></div>
               </div>
               {error && <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-bold text-rose-700">{error}</div>}
               <div className="space-y-2">

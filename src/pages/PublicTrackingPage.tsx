@@ -3,6 +3,7 @@ import { CheckCircle2, Clock3, Scissors, Search, Shirt, XCircle } from 'lucide-r
 import { Language } from '../types';
 import { translations } from '../translations/i18n';
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
+import { normalizeDigits } from '../lib/search';
 
 type PublicOrder = {
   orderNumber: string;
@@ -61,7 +62,7 @@ export const PublicTrackingView: React.FC = () => {
 
   const handleSearch = async (event: React.FormEvent) => {
     event.preventDefault();
-    const value = lookup.trim();
+    const value = normalizeDigits(lookup).trim();
     if (!value) return;
     if (!isSupabaseConfigured) {
       setError('Supabase is not configured.');

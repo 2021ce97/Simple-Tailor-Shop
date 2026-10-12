@@ -1036,7 +1036,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <h3 className="text-sm font-bold text-stone-800">{t.noDataFound}</h3>
               <p className="text-xs text-stone-500 mt-1 max-w-sm mx-auto">
                 {searchTerm 
-                  ? (language === 'fa' ? `هیچ فرمایشی مطابق با "${searchTerm}" یافت نشد.` : `No orders matched "${searchTerm}".`) 
+                  ? (language === 'fa' ? `هیچ فرمایشی مطابق با "${searchTerm}" یافت نشد.` : language === 'ps' ? `له "${searchTerm}" سره سم کوم فرمایش ونه موندل شو.` : `No orders matched "${searchTerm}".`)
                   : (language === 'fa' ? 'هنوز فرمایشی ثبت نشده است.' : 'No orders registered yet.')}
               </p>
               {searchTerm ? (
