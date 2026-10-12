@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Order, 
+  OrderItem,
   Customer, 
   MeasurementField, 
   DesignCategory, 
@@ -37,7 +38,8 @@ import {
   AlertCircle,
   PackageCheck,
   Filter,
-  Shirt
+  Shirt,
+  X
 } from 'lucide-react';
 
 interface OrderFormProps {
@@ -94,7 +96,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
 
   // Selected Garment Type State
   const defaultGarmentName = () => {
-    const savedGarmentName = initialOrder?.garmentType || prefilledCustomer?.preferredGarmentType;
+    const savedGarmentName = initialOrder?.items?.[0]?.garmentType || initialOrder?.garmentType || prefilledCustomer?.preferredGarmentType;
     if (savedGarmentName) {
       const savedConfig = garmentTypes.find(g =>
         g.key === savedGarmentName ||
@@ -103,19 +105,37 @@ export const OrderForm: React.FC<OrderFormProps> = ({
         g.namePs === savedGarmentName
       );
       if (savedConfig) {
-        return language === 'ps' ? savedConfig.namePs : language === 'fa' ? savedConfig.nameFa : savedConfig.nameEn;
+        return savedConfig.nameEn;
       }
       return savedGarmentName;
     }
     const first = garmentTypes[0];
     if (first) {
-      return language === 'ps' ? first.namePs : language === 'fa' ? first.nameFa : first.nameEn;
+      return first.nameEn;
     }
     return 'پیراهن و تنبان (Perahan Tunban)';
   };
 
   const [garmentType, setGarmentType] = useState<string>(defaultGarmentName);
-  const [quantity, setQuantity] = useState<number>(initialOrder?.quantity || 1);
+  const [garmentSelections, setGarmentSelections] = useState<Array<Pick<OrderItem, 'id' | 'garmentType' | 'quantity'>>>(() => {
+    if (initialOrder?.items?.length) {
+      return initialOrder.items.map((item, index) => {
+        const config = garmentTypes.find(g =>
+          g.key === item.garmentType || g.nameEn === item.garmentType || g.nameFa === item.garmentType || g.namePs === item.garmentType
+        );
+        return {
+          id: item.id || `item_${index + 1}`,
+          garmentType: config?.nameEn || item.garmentType,
+          quantity: Math.max(1, Number(item.quantity) || 1),
+        };
+      });
+    }
+    return [{
+      id: `item_${Date.now()}`,
+      garmentType: defaultGarmentName(),
+      quantity: Math.max(1, Number(initialOrder?.quantity) || 1),
+    }];
+  });
 
   // Toggle to see all fields or only garment-specific fields
   const [showAllFields, setShowAllFields] = useState<boolean>(false);
@@ -215,7 +235,16 @@ export const OrderForm: React.FC<OrderFormProps> = ({
       setMeasurements(cust.standardMeasurements);
     }
     if (cust.preferredGarmentType) {
-      setGarmentType(cust.preferredGarmentType);
+      const preferredConfig = garmentTypes.find(g =>
+        g.key === cust.preferredGarmentType || g.nameEn === cust.preferredGarmentType ||
+        g.nameFa === cust.preferredGarmentType || g.namePs === cust.preferredGarmentType
+      );
+      const preferredGarment = preferredConfig?.nameEn || cust.preferredGarmentType;
+      setGarmentType(preferredGarment);
+      setGarmentSelections(current => current.some(item => item.garmentType === preferredGarment)
+        ? current
+        : [...current, { id: `item_preferred_${Date.now()}`, garmentType: preferredGarment, quantity: 1 }]
+      );
     }
     setShowCustomerSuggestions(false);
   };
@@ -241,11 +270,28 @@ export const OrderForm: React.FC<OrderFormProps> = ({
     ? (language === 'ps' ? activeGarmentConfig.namePs : language === 'fa' ? activeGarmentConfig.nameFa : activeGarmentConfig.nameEn)
     : garmentType;
 
-  useEffect(() => {
-    if (activeGarmentConfig && garmentType !== localizedActiveGarmentName) {
-      setGarmentType(localizedActiveGarmentName);
-    }
-  }, [language, activeGarmentConfig, garmentType, localizedActiveGarmentName]);
+  const totalGarmentQuantity = garmentSelections.reduce((sum, item) => sum + item.quantity, 0);
+
+  const addOrActivateGarment = (garment: GarmentTypeConfig) => {
+    setGarmentType(garment.nameEn);
+    setGarmentSelections(current => current.some(item => item.garmentType === garment.nameEn)
+      ? current
+      : [...current, { id: `item_${garment.key}_${Date.now()}`, garmentType: garment.nameEn, quantity: 1 }]
+    );
+  };
+
+  const updateGarmentQuantity = (id: string, nextQuantity: number) => {
+    setGarmentSelections(current => current.map(item =>
+      item.id === id ? { ...item, quantity: Math.max(1, nextQuantity) } : item
+    ));
+  };
+
+  const removeGarment = (id: string) => {
+    if (garmentSelections.length <= 1) return;
+    const next = garmentSelections.filter(item => item.id !== id);
+    setGarmentSelections(next);
+    if (!next.some(item => item.garmentType === garmentType)) setGarmentType(next[0].garmentType);
+  };
 
   // Filtered measurement fields
   const filteredMeasurementFields = useMemo(() => {
@@ -293,6 +339,35 @@ export const OrderForm: React.FC<OrderFormProps> = ({
     setIsSaving(true);
     setSaveError('');
     try {
+      const unitPrice = totalGarmentQuantity > 0 ? (Number(totalAmount) || 0) / totalGarmentQuantity : 0;
+      const savedItems: OrderItem[] = garmentSelections.map(item => {
+        const config = garmentTypes.find(g => g.nameEn === item.garmentType || g.nameFa === item.garmentType || g.namePs === item.garmentType || g.key === item.garmentType);
+        const garmentKey = config?.key;
+        const itemMeasurements = Object.fromEntries(
+          measurementFields
+            .filter(field => !field.garmentCategory || field.garmentCategory === garmentKey)
+            .filter(field => measurements[field.key] !== undefined && measurements[field.key] !== '')
+            .map(field => [field.key, measurements[field.key]])
+        );
+        const itemDesignSelections = Object.fromEntries(
+          Object.entries(designSelections).filter(([categoryKey]) => {
+            const category = designCategories.find(entry => entry.key === categoryKey);
+            return !category?.garmentCategory || category.garmentCategory === garmentKey;
+          })
+        );
+        return {
+          id: item.id,
+          garmentType: config?.nameEn || item.garmentType,
+          quantity: item.quantity,
+          pricePerUnit: unitPrice,
+          totalPrice: unitPrice * item.quantity,
+          measurements: itemMeasurements,
+          designSelections: itemDesignSelections,
+          fabricNotes: [fabricName, fabricColor].filter(Boolean).join(' - ') || undefined,
+          specialInstructions: specialInstructions || undefined,
+        };
+      });
+      const garmentSummary = savedItems.map(item => item.garmentType).join(' + ');
       const orderData: Order = {
         id: initialOrder?.id || 'ord_' + Date.now(),
         orderNumber: orderNumber || storageService.generateNextOrderNumber(),
@@ -300,8 +375,8 @@ export const OrderForm: React.FC<OrderFormProps> = ({
         customerName: customerName.trim(),
         customerPhone: customerPhone.trim(),
         customerWhatsApp: customerWhatsApp.trim() || customerPhone.trim(),
-        garmentType,
-        quantity: Number(quantity) || 1,
+        garmentType: garmentSummary,
+        quantity: totalGarmentQuantity,
         fabricId: isCustomerFabric ? undefined : selectedFabricId,
         fabricName: isCustomerFabric ? (fabricName || 'رخت از خود مشتری') : fabricName,
         fabricColor: fabricColor,
@@ -311,7 +386,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
         designSelections,
         specialInstructions,
         cabinetSlot: cabinetSlot.trim() || undefined,
-        items: initialOrder?.items || [],
+        items: savedItems,
         totalAmount: Number(totalAmount) || 0,
         paidAmount: Number(paidAmount) || 0,
         balanceAmount,
@@ -479,68 +554,86 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             </div>
           </div>
 
-          {/* Garment Selection Bar */}
-          <div className="space-y-2 pt-2 border-t border-stone-100">
+          {/* Multi-garment selection */}
+          <div className="space-y-3 pt-3 border-t border-stone-100">
             <div className="flex items-center justify-between">
               <label className="block text-xs font-bold text-stone-800 flex items-center gap-1.5">
                 <Shirt className="w-3.5 h-3.5 text-amber-600" />
-                <span>{t.garmentType} (انتخاب نوع لباس برای اندازه و دیزاین)</span>
+                <span>{t.garmentType}</span>
               </label>
               <span className="text-[10px] text-stone-500 font-bold">
-                {garmentTypes.length} {language === 'fa' ? 'نوع لباس فعال' : 'Active types'}
+                {totalGarmentQuantity} {language === 'fa' ? 'دست لباس' : language === 'ps' ? 'جوړه کالي' : 'garment(s)'}
               </span>
             </div>
+
+            <p className="text-[11px] text-stone-500">
+              {language === 'fa'
+                ? 'یک یا چند نوع لباس را انتخاب کنید. برای ویرایش اندازه و دیزاین، روی همان لباس بزنید.'
+                : language === 'ps'
+                  ? 'یو یا څو ډوله کالي وټاکئ. د اندازو او ډیزاین لپاره پر هماغه کالي کلیک وکړئ.'
+                  : 'Select one or more garment types. Choose a selected garment to edit its measurements and design.'}
+            </p>
 
             <div className="flex flex-wrap gap-2">
               {garmentTypes.map(g => {
                 const localizedName = language === 'ps' ? g.namePs : language === 'fa' ? g.nameFa : g.nameEn;
-                const isSelected = garmentType === localizedName || garmentType === g.nameEn || garmentType === g.nameFa || garmentType === g.namePs;
+                const isSelected = garmentSelections.some(item => item.garmentType === g.nameEn);
+                const isActive = garmentType === g.nameEn;
 
                 return (
                   <button
                     key={g.key}
                     type="button"
-                    onClick={() => setGarmentType(localizedName)}
+                    onClick={() => addOrActivateGarment(g)}
+                    aria-pressed={isSelected}
                     className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center shadow-2xs ${
-                      isSelected
+                      isActive
                         ? 'bg-amber-600 text-white font-black ring-2 ring-amber-400'
+                        : isSelected
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-300'
                         : 'bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-200'
                     }`}
                   >
+                    {isSelected ? <Check className="w-3.5 h-3.5 me-1.5" /> : <Plus className="w-3.5 h-3.5 me-1.5" />}
                     <span>{localizedName}</span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Quantity */}
-            <div className="pt-2 flex items-center justify-between">
-              <span className="text-xs font-bold text-stone-700">
-                {t.quantity} (تعداد دست لباس):
-              </span>
-              <div className="flex items-center border border-stone-200 rounded-xl bg-stone-50 overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="px-3 py-1 hover:bg-stone-200 text-stone-700 cursor-pointer"
-                >
-                  <Minus className="w-3.5 h-3.5" />
-                </button>
-                <input
-                  type="number"
-                  min="1"
-                  value={quantity}
-                  onChange={e => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-16 text-center bg-transparent text-xs font-mono font-bold text-stone-900 focus:outline-hidden"
-                />
-                <button
-                  type="button"
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="px-3 py-1 hover:bg-stone-200 text-stone-700 cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
-              </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {garmentSelections.map(item => {
+                const config = garmentTypes.find(g => g.nameEn === item.garmentType);
+                const itemName = config ? (language === 'ps' ? config.namePs : language === 'fa' ? config.nameFa : config.nameEn) : item.garmentType;
+                const isActive = item.garmentType === garmentType;
+                return (
+                  <div key={item.id} className={`rounded-xl border p-2.5 transition ${isActive ? 'border-amber-400 bg-amber-50 ring-1 ring-amber-200' : 'border-stone-200 bg-white'}`}>
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <button type="button" onClick={() => setGarmentType(item.garmentType)} className="min-w-0 text-start cursor-pointer">
+                        <span className="block truncate text-xs font-extrabold text-stone-900">{itemName}</span>
+                        <span className="text-[10px] text-stone-500">{isActive ? (language === 'en' ? 'Editing now' : language === 'fa' ? 'در حال ویرایش' : 'اوس سمول کېږي') : (language === 'en' ? 'Select to edit' : language === 'fa' ? 'برای ویرایش انتخاب کنید' : 'د سمون لپاره وټاکئ')}</span>
+                      </button>
+                      {garmentSelections.length > 1 && (
+                        <button type="button" onClick={() => removeGarment(item.id)} aria-label={`${language === 'en' ? 'Remove' : 'حذف'} ${itemName}`} className="rounded-lg p-1 text-stone-400 hover:bg-rose-50 hover:text-rose-600 cursor-pointer">
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-bold text-stone-600">{t.quantity}</span>
+                      <div className="flex items-center overflow-hidden rounded-lg border border-stone-200 bg-stone-50">
+                        <button type="button" onClick={() => updateGarmentQuantity(item.id, item.quantity - 1)} aria-label="Decrease quantity" className="p-1.5 hover:bg-stone-200 cursor-pointer"><Minus className="h-3.5 w-3.5" /></button>
+                        <input type="number" min="1" value={item.quantity} onChange={event => updateGarmentQuantity(item.id, parseInt(event.target.value, 10) || 1)} aria-label={`${itemName} ${t.quantity}`} className="w-11 bg-transparent text-center text-xs font-mono font-bold outline-hidden" />
+                        <button type="button" onClick={() => updateGarmentQuantity(item.id, item.quantity + 1)} aria-label="Increase quantity" className="p-1.5 hover:bg-stone-200 cursor-pointer"><Plus className="h-3.5 w-3.5" /></button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="rounded-lg bg-sky-50 px-3 py-2 text-[11px] font-semibold text-sky-900 border border-sky-100">
+              {language === 'en' ? 'Measurements and design below are for' : language === 'fa' ? 'اندازه و دیزاین پایین مربوط به' : 'لاندې اندازې او ډیزاین د دې لپاره دي'}: <strong>{localizedActiveGarmentName}</strong>
             </div>
           </div>
         </div>

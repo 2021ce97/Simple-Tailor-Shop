@@ -47,6 +47,7 @@ const copy = {
     bill: 'Bill No.',
     customer: 'Customer',
     garment: 'Garment',
+    garments: 'Garments',
     quantity: 'Qty',
     cabinet: 'Cabinet',
     orderDate: 'Order Date',
@@ -78,6 +79,7 @@ const copy = {
     bill: 'شماره بل',
     customer: 'مشتری',
     garment: 'لباس',
+    garments: 'لباس‌ها',
     quantity: 'تعداد',
     cabinet: 'کابین',
     orderDate: 'تاریخ ثبت',
@@ -109,6 +111,7 @@ const copy = {
     bill: 'د بِل شمېره',
     customer: 'پېرودونکی',
     garment: 'کالي',
+    garments: 'کالي',
     quantity: 'تعداد',
     cabinet: 'کابین',
     orderDate: 'د ثبت نېټه',
@@ -223,12 +226,22 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
 
   // Garment type translation
   const garmentKeys = ['perahanTunban', 'waistcoat', 'suit', 'coatKorti', 'kameezShalwar', 'kurta', 'otherGarment'] as const;
-  const displayGarmentType = (() => {
+  const localizeGarmentType = (garmentType: string) => {
     const garmentKey = garmentKeys.find(key =>
-      translations.en[key] === order.garmentType || translations.fa[key] === order.garmentType || translations.ps[key] === order.garmentType
+      translations.en[key] === garmentType || translations.fa[key] === garmentType || translations.ps[key] === garmentType
     );
-    return garmentKey ? t[garmentKey] : order.garmentType;
-  })();
+    return garmentKey ? t[garmentKey] : garmentType;
+  };
+  const receiptItems = order.items?.length
+    ? order.items.map(item => ({ id: item.id, name: localizeGarmentType(item.garmentType), quantity: item.quantity }))
+    : order.garmentType.split(/\s*\+\s*/).map((garmentType, index) => ({
+        id: `legacy-${index}`,
+        name: localizeGarmentType(garmentType),
+        quantity: index === 0 ? (order.quantity || 1) : 1,
+      }));
+  const receiptQuantity = order.items?.length
+    ? receiptItems.reduce((sum, item) => sum + item.quantity, 0)
+    : (order.quantity || 1);
 
   // Formatting delivery date with time
   const formattedDeliveryDate = order.deliveryDate ? order.deliveryDate : '';
@@ -328,6 +341,13 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
         <div className="p-1 flex items-center justify-between">
           <span className="text-stone-700 text-[9.5px]">{dict.customer}:</span>
           <span className="font-black text-stone-950 truncate max-w-[120px] text-xs">{order.customerName}</span>
+        </div>
+      </div>
+
+      <div className="border-2 border-stone-950 bg-white mb-1.5 text-[10px]">
+        <div className="px-1.5 py-0.5 bg-stone-200 border-b border-stone-950 font-black">{dict.garments}</div>
+        <div className="flex flex-wrap gap-x-3 gap-y-0.5 px-1.5 py-1">
+          {receiptItems.map(item => <span key={item.id} className="font-bold">{item.name} <b className="font-mono">× {item.quantity}</b></span>)}
         </div>
       </div>
 
@@ -456,7 +476,7 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
         </div>
         <div className="flex justify-between items-center px-2">
           <span className="text-[10px] text-stone-700">{dict.quantity}:</span>
-          <span className="font-mono text-sm text-stone-950">{order.quantity || 1}</span>
+          <span className="font-mono text-sm text-stone-950">{receiptQuantity}</span>
         </div>
       </div>
     </div>
@@ -534,14 +554,18 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
             <span className="font-mono text-stone-950 font-bold text-xs">{order.customerPhone}</span>
           </div>
         </div>
-        <div className="grid grid-cols-3 divide-x-2 divide-stone-950 p-1 bg-white">
-          <div className="flex items-center justify-between px-1">
-            <span className="text-stone-700 text-[9px]">{dict.garment}:</span>
-            <span className="font-black text-stone-950 text-xs truncate max-w-[70px]">{displayGarmentType}</span>
+        <div className="bg-white px-2 py-1">
+          <div className="flex items-start gap-2">
+            <span className="text-stone-700 text-[9px] shrink-0">{dict.garments}:</span>
+            <div className="flex flex-1 flex-wrap justify-end gap-x-3 gap-y-0.5">
+              {receiptItems.map(item => <span key={item.id} className="font-black text-stone-950 text-[10px]">{item.name} <b className="font-mono">× {item.quantity}</b></span>)}
+            </div>
           </div>
+        </div>
+        <div className="grid grid-cols-2 divide-x-2 divide-stone-950 border-t-2 border-stone-950 p-1 bg-white">
           <div className="flex items-center justify-between px-1">
             <span className="text-stone-700 text-[9px]">{dict.quantity}:</span>
-            <span className="font-mono font-black text-stone-950 text-xs">{order.quantity || 1}</span>
+            <span className="font-mono font-black text-stone-950 text-xs">{receiptQuantity}</span>
           </div>
           <div className="flex items-center justify-between px-1">
             <span className="text-stone-700 text-[9px]">{dict.cabinet}:</span>

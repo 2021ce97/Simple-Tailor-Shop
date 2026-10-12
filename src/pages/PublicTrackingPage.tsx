@@ -54,6 +54,9 @@ export const PublicTrackingView: React.FC = () => {
   }, []);
   const garmentKeys = ['perahanTunban', 'waistcoat', 'suit', 'coatKorti', 'kameezShalwar', 'kurta', 'otherGarment'] as const;
   const localizeGarment = (garmentType: string) => {
+    if (garmentType.includes('+')) {
+      return garmentType.split(/\s*\+\s*/).map(localizeGarment).join(' + ');
+    }
     const key = garmentKeys.find(item =>
       translations.en[item] === garmentType || translations.fa[item] === garmentType || translations.ps[item] === garmentType
     );

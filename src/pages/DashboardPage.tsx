@@ -8,7 +8,7 @@ import {
 } from '../types';
 import { translations } from '../translations/i18n';
 import { storageService } from '../services/storage';
-import { textIncludes } from '../lib/search';
+import { searchText, textIncludes } from '../lib/search';
 import {
   ResponsiveContainer,
   BarChart,
@@ -80,6 +80,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOrderUpdated,
 }) => {
   const t = translations[language];
+  const garmentKeys = ['perahanTunban', 'waistcoat', 'suit', 'coatKorti', 'kameezShalwar', 'kurta', 'otherGarment'] as const;
+  const localizeGarment = (garmentType: string) => {
+    const key = garmentKeys.find(item =>
+      translations.en[item] === garmentType || translations.fa[item] === garmentType || translations.ps[item] === garmentType
+    );
+    return key ? translations[language][key] : garmentType;
+  };
+  const orderGarmentSummary = (order: Order) => (order.items?.length
+    ? order.items.map(item => `${localizeGarment(item.garmentType)} × ${item.quantity}`).join(' + ')
+    : order.garmentType.split(/\s*\+\s*/).map(localizeGarment).join(' + '));
+  const garmentSearchVariants = (garmentType: string) => {
+    const key = garmentKeys.find(item =>
+      translations.en[item] === garmentType || translations.fa[item] === garmentType || translations.ps[item] === garmentType
+    );
+    return key ? `${translations.en[key]} ${translations.fa[key]} ${translations.ps[key]}` : garmentType;
+  };
 
   // Active Stream Tab: 'orders' | 'retail' | 'all'
   const [activeStream, setActiveStream] = useState<DashboardViewStream>('orders');
@@ -116,7 +132,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
   // Filtered & Sorted Tailoring Orders
   const filteredOrders = useMemo(() => {
     const list = orders.filter(order => {
-      const q = searchTerm.trim().toLowerCase();
+      const q = searchText(searchTerm);
+      const itemSearchText = (order.items || [])
+        .map(item => `${garmentSearchVariants(item.garmentType)} ${item.quantity} ${item.fabricNotes || ''} ${item.specialInstructions || ''}`)
+        .join(' ');
+      const legacyGarmentSearchText = order.garmentType.split(/\s*\+\s*/).map(garmentSearchVariants).join(' ');
       
       const matchesSearch = !q || (
         textIncludes(order.orderNumber, q) ||
@@ -126,7 +146,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
         textIncludes(order.orderDate, q) ||
         textIncludes(order.deliveryDate, q) ||
         textIncludes(order.fabricName, q) ||
-        textIncludes(order.garmentType, q)
+        textIncludes(order.garmentType, q) ||
+        textIncludes(legacyGarmentSearchText, q) ||
+        textIncludes(itemSearchText, q)
       );
 
       const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
@@ -161,12 +183,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
       }
       return 0;
     });
-  }, [orders, searchTerm, statusFilter, paymentFilter, sortBy]);
+  }, [orders, searchTerm, statusFilter, paymentFilter, sortBy, language]);
 
   // Filtered & Sorted Retail Sales
   const filteredSales = useMemo(() => {
     const list = (productSales || []).filter(sale => {
-      const q = searchTerm.trim().toLowerCase();
+      const q = searchText(searchTerm);
       if (!q) return true;
       return (
         textIncludes(sale.productName, q) ||
@@ -793,13 +815,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* Search & Filter Toolbar */}
-      <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-3">
-        <div className="flex flex-col md:flex-row gap-3">
+      <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-3">
+        <div className="flex flex-col gap-3">
           {/* Main Real-Time Search */}
-          <div className="relative flex-1">
+          <div className="relative w-full">
             <Search className="w-4 h-4 text-stone-400 absolute start-3.5 top-1/2 -translate-y-1/2" />
             <input
-              type="text"
+              type="search"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               placeholder={language === 'fa' 
@@ -807,22 +829,27 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 : language === 'ps' 
                 ? 'د پېرودونکي نوم، ټلیفون شمېرې، بِل یا جنس له مخې لټون...' 
                 : 'Real-time search across orders, retail products, customers...'}
-              className="w-full ps-10 pe-9 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:bg-white focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] outline-hidden"
+              aria-label={language === 'fa' ? 'جستجوی فرمایشات' : language === 'ps' ? 'د فرمایشونو پلټنه' : 'Search orders and sales'}
+              className="w-full min-w-0 ps-10 pe-24 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-medium focus:bg-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/25 outline-hidden transition"
             />
             {searchTerm && (
               <button
+                type="button"
                 onClick={() => setSearchTerm('')}
-                title="Clear search"
-                className="absolute end-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 p-1 cursor-pointer"
+                title={language === 'fa' ? 'پاک کردن جستجو' : language === 'ps' ? 'پلټنه پاکه کړئ' : 'Clear search'}
+                className="absolute end-3 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 rounded-lg bg-stone-200 px-2 py-1 text-[10px] font-bold text-stone-600 hover:bg-stone-300 hover:text-stone-900 cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{language === 'fa' ? 'پاک' : language === 'ps' ? 'پاکول' : 'Clear'}</span>
               </button>
             )}
           </div>
 
+          <div className="flex flex-col xl:flex-row xl:items-center gap-3">
+
           {/* Status Filter for Orders */}
           {activeStream !== 'retail' && (
-            <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl overflow-x-auto pb-1 md:pb-1">
+            <div className="flex flex-wrap items-center gap-1 bg-stone-100 p-1 rounded-xl min-w-0">
               {[
                 { id: 'all', label: t.all, count: metrics.total },
                 { id: 'pending', label: t.statusPending, count: metrics.pending },
@@ -852,11 +879,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           {/* Payment Filter */}
           {activeStream === 'orders' && (
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 sm:ms-auto">
               <select
                 value={paymentFilter}
                 onChange={e => setPaymentFilter(e.target.value)}
-                className="px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold text-stone-700 outline-hidden focus:border-[#D4AF37] cursor-pointer"
+                className="min-w-0 sm:min-w-52 px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold text-stone-700 outline-hidden focus:border-[#D4AF37] cursor-pointer"
               >
                 <option value="all">{t.paymentStatus}: {t.all}</option>
                 <option value="paid">{t.paid}</option>
@@ -870,7 +897,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           )}
 
           {/* Sorting Dropdown */}
-          <div className="flex items-center gap-1 bg-stone-50 border border-stone-200 rounded-xl px-2 py-1 shadow-2xs">
+          <div className="flex items-center gap-1 bg-stone-50 border border-stone-200 rounded-xl px-2 py-1.5 shadow-2xs xl:ms-auto">
             <ArrowUpDown className="w-3.5 h-3.5 text-stone-400 shrink-0" />
             <select
               value={sortBy}
@@ -901,6 +928,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <ArrowUp className="w-3.5 h-3.5 text-[#B39025]" />
               )}
             </button>
+          </div>
           </div>
         </div>
       </div>
@@ -1118,7 +1146,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
                             <td className="py-2.5 px-3 align-middle">
                               <div className="space-y-0.5 min-w-[110px] max-w-[160px]">
-                                <span className="font-bold text-[#1A1A1A] block truncate">{order.garmentType}</span>
+                                <span className="font-bold text-[#1A1A1A] block truncate" title={orderGarmentSummary(order)}>{orderGarmentSummary(order)}</span>
                                 <span className="text-[11px] text-stone-500 block truncate" title={order.fabricName || ''}>
                                   {order.fabricName ? `🧵 ${order.fabricName}` : '—'}
                                 </span>
@@ -1287,7 +1315,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                           <p className="text-xs text-stone-500 font-mono mt-0.5">{order.customerPhone}</p>
                         </div>
                         <div className="text-end">
-                          <span className="text-xs font-bold text-stone-800 block">{order.garmentType}</span>
+                          <span className="text-xs font-bold text-stone-800 block">{orderGarmentSummary(order)}</span>
                           {order.fabricName && (
                             <span className="text-[11px] text-stone-500 block truncate max-w-[140px]">
                               🧵 {order.fabricName}
