@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useMemo } from 'react';
 import { 
   Order, 
   Customer, 
@@ -15,20 +15,21 @@ import {
 import { storageService } from './services/storage';
 import { Navbar } from './components/Navbar';
 import { Sidebar, MainNavTab, SettingsSubTab } from './components/Sidebar';
-import { Dashboard } from './pages/DashboardPage';
-import { OrderForm } from './components/OrderForm';
-import { CustomersView } from './pages/CustomersPage';
-import { FabricsView } from './pages/FabricsPage';
-import { ProductsView } from './pages/ProductsPage';
-import { SalesHistoryView } from './pages/SalesHistoryPage';
-import { ExpensesView } from './pages/ExpensesPage';
-import { DesignSettingsView } from './pages/SettingsPage';
-import { ReceiptSlipModal } from './components/ReceiptSlipModal';
 import { LoginView } from './pages/LoginPage';
 import { PublicTrackingView } from './pages/PublicTrackingPage';
-import { ReportsView } from './pages/ReportsPage';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
 import { getErrorMessage } from './lib/errors';
+
+const Dashboard = lazy(() => import('./pages/DashboardPage').then(module => ({ default: module.Dashboard })));
+const OrderForm = lazy(() => import('./components/OrderForm').then(module => ({ default: module.OrderForm })));
+const CustomersView = lazy(() => import('./pages/CustomersPage').then(module => ({ default: module.CustomersView })));
+const FabricsView = lazy(() => import('./pages/FabricsPage').then(module => ({ default: module.FabricsView })));
+const ProductsView = lazy(() => import('./pages/ProductsPage').then(module => ({ default: module.ProductsView })));
+const SalesHistoryView = lazy(() => import('./pages/SalesHistoryPage').then(module => ({ default: module.SalesHistoryView })));
+const ExpensesView = lazy(() => import('./pages/ExpensesPage').then(module => ({ default: module.ExpensesView })));
+const DesignSettingsView = lazy(() => import('./pages/SettingsPage').then(module => ({ default: module.DesignSettingsView })));
+const ReceiptSlipModal = lazy(() => import('./components/ReceiptSlipModal').then(module => ({ default: module.ReceiptSlipModal })));
+const ReportsView = lazy(() => import('./pages/ReportsPage').then(module => ({ default: module.ReportsView })));
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
@@ -463,6 +464,7 @@ function ShopApp() {
 
         {/* Main Content View Container */}
         <main className="flex-1 min-w-0 w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-3 sm:py-5">
+          <Suspense fallback={<div className="grid min-h-[45vh] place-items-center"><div className="h-9 w-9 animate-spin rounded-full border-4 border-stone-200 border-t-amber-600" /></div>}>
           {currentTab === 'dashboard' && (
             <Dashboard
               orders={orders}
@@ -590,19 +592,22 @@ function ShopApp() {
               onDatabaseRestored={reloadData}
             />
           )}
+          </Suspense>
         </main>
       </div>
 
       {/* Printable Receipt Modal Slip */}
       {activeReceiptOrder && (
-        <ReceiptSlipModal
-          order={activeReceiptOrder}
-          shopSettings={shopSettings}
-          measurementFields={measurementFields}
-          designCategories={designCategories}
-          language={language}
-          onClose={() => setActiveReceiptOrder(null)}
-        />
+        <Suspense fallback={null}>
+          <ReceiptSlipModal
+            order={activeReceiptOrder}
+            shopSettings={shopSettings}
+            measurementFields={measurementFields}
+            designCategories={designCategories}
+            language={language}
+            onClose={() => setActiveReceiptOrder(null)}
+          />
+        </Suspense>
       )}
     </div>
   );

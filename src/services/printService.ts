@@ -3,8 +3,7 @@
  * 100% reliable across Desktop, Mobile, iFrames (AI Studio preview), 
  * POS Thermal Receipt Printers (58mm, 80mm), and Standard A4/Letter printers.
  */
-import jsPDF from 'jspdf';
-import { toPng } from 'html-to-image';
+import type { jsPDF as JsPdfDocument } from 'jspdf';
 
 export interface PrintOptions {
   title?: string;
@@ -13,6 +12,13 @@ export interface PrintOptions {
   onStart?: () => void;
   onComplete?: () => void;
   onError?: (err: unknown) => void;
+}
+
+async function waitForQrCode(element: HTMLElement): Promise<void> {
+  const deadline = Date.now() + 2500;
+  while (element.querySelector('[data-qr-loading="true"]') && Date.now() < deadline) {
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
 }
 
 /**
@@ -39,6 +45,7 @@ export async function printReceiptElement(
   }
 
   onStart?.();
+  await waitForQrCode(element);
 
   // Width calculations for standard sheets and legacy thermal formats.
   const widthCss = pageFormat === 'thermal58' 
@@ -224,6 +231,11 @@ export async function downloadReceiptPdf(
 
   try {
     onStart?.();
+    await waitForQrCode(element);
+    const [{ default: jsPDF }, { toPng }] = await Promise.all([
+      import('jspdf'),
+      import('html-to-image'),
+    ]);
 
     // Ensure all internal images are ready
     const images = Array.from(element.querySelectorAll('img'));
@@ -267,7 +279,7 @@ export async function downloadReceiptPdf(
     const imgHeight = (img.naturalHeight * printableWidth) / (img.naturalWidth || 1);
     
     // Default page heights for standard sheet sizes
-    let pdf: jsPDF;
+    let pdf: JsPdfDocument;
     if (isA6) {
       // If content fits or is close to A6 (<= 148mm), generate exact standard A6 portrait page
       const useFixedA6 = imgHeight + margin * 2 <= 152;

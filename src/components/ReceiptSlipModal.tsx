@@ -9,6 +9,7 @@ import {
 } from '../types';
 import { translations } from '../translations/i18n';
 import { BarcodeView } from './BarcodeView';
+import { QrCodeView } from './QrCodeView';
 import { 
   Printer, 
   Download, 
@@ -29,6 +30,7 @@ import {
 import { printReceiptElement, downloadReceiptPdf } from '../services/printService';
 
 export type ReceiptSlipMode = 'tailor' | 'customer';
+const SHOP_QR_URL = 'https://simple-tailor-shop.vercel.app/';
 
 interface ReceiptSlipModalProps {
   order: Order;
@@ -233,11 +235,34 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
     return garmentKey ? t[garmentKey] : garmentType;
   };
   const receiptItems = order.items?.length
-    ? order.items.map(item => ({ id: item.id, name: localizeGarmentType(item.garmentType), quantity: item.quantity }))
+    ? order.items.map(item => ({
+        id: item.id,
+        name: localizeGarmentType(item.garmentType),
+        quantity: item.quantity,
+        measurements: (measurementFields || []).map(field => {
+          const value = item.measurements?.[field.key];
+          return {
+            key: field.key,
+            label: language === 'ps' ? field.labelPs : language === 'fa' ? field.labelFa : field.labelEn,
+            value: value !== undefined && value !== '' && value !== null ? String(value) : '',
+          };
+        }).filter(entry => Boolean(entry.value)),
+        designs: Object.entries(item.designSelections || {}).map(([categoryKey, value]) => {
+          const category = designCategories.find(entry => entry.key === categoryKey);
+          const option = category?.options.find(entry => entry.nameEn === value || entry.nameFa === value || entry.namePs === value);
+          return {
+            key: categoryKey,
+            title: category ? (language === 'ps' ? category.titlePs : language === 'fa' ? category.titleFa : category.titleEn) : categoryKey,
+            value: option ? (language === 'ps' ? option.namePs : language === 'fa' ? option.nameFa : option.nameEn) : value,
+          };
+        }).filter(entry => Boolean(entry.value)),
+      }))
     : order.garmentType.split(/\s*\+\s*/).map((garmentType, index) => ({
         id: `legacy-${index}`,
         name: localizeGarmentType(garmentType),
         quantity: index === 0 ? (order.quantity || 1) : 1,
+        measurements: index === 0 ? activeMeasurements : [],
+        designs: index === 0 ? activeDesignItems : [],
       }));
   const receiptQuantity = order.items?.length
     ? receiptItems.reduce((sum, item) => sum + item.quantity, 0)
@@ -311,29 +336,23 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
       }}
       dir={language === 'en' ? 'ltr' : 'rtl'}
     >
-      {/* 1. Header with Logo & Contacts */}
-      <div className="text-center pb-2 border-b-2 border-stone-950 mb-1.5">
-        {showLogo && (
-          <img
-            src={logoUrl}
-            alt={shopName}
-            className="mx-auto mb-1 h-14 w-14 rounded-md object-contain"
-          />
-        )}
-        <h1 className="text-sm sm:text-base font-black tracking-tight text-stone-950 font-serif leading-tight break-all">
-          {shopName}
-        </h1>
-        <div className="flex justify-between items-center text-[10px] font-bold text-stone-900 px-1 mt-1 border-t border-dotted border-stone-400 pt-0.5">
-          <span>واتساپ: <b className="font-mono">{shopSettings.whatsapp || '0771221559'}</b></span>
-          <span>تماس: <b className="font-mono">{shopSettings.phone1 || '0771221559'}</b></span>
+      {/* Reference-inspired monochrome header: code, identity and logo. */}
+      <div className="grid grid-cols-[58px_1fr_58px] items-center gap-1 border-b-2 border-stone-950 pb-1 mb-1">
+        <div className="flex h-14 items-center justify-center">
+          <QrCodeView value={SHOP_QR_URL} size={54} label="Royal Kawsar website QR code" />
         </div>
-        <p className="text-[9px] text-stone-700 mt-0.5 leading-tight px-1 font-medium">
-          {shopAddress}
-        </p>
+        <div className="min-w-0 text-center">
+          <h1 className="text-base sm:text-lg font-black tracking-tight text-stone-950 font-serif leading-tight break-words">{shopName}</h1>
+          <span className="inline-block mt-0.5 rounded-full bg-stone-950 px-3 py-0.5 font-mono text-[11px] font-black text-white">{shopSettings.phone1 || '0771221559'}</span>
+        </div>
+        <div className="flex h-12 items-center justify-center">
+          {showLogo && <img src={logoUrl} alt={shopName} className="h-12 w-12 object-contain" />}
+        </div>
       </div>
+      <p className="text-center text-[8.5px] font-semibold border-b border-stone-500 pb-1 mb-1">{shopAddress}</p>
 
       {/* 2. Order & Customer Info Strip */}
-      <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 text-[11px] font-bold bg-stone-100 mb-1.5">
+      <div className="grid grid-cols-2 border-2 border-stone-950 divide-x-2 divide-stone-950 text-[10px] font-bold bg-white mb-1">
         <div className="p-1 flex items-center justify-between">
           <span className="text-stone-700 text-[9.5px]">{dict.bill}:</span>
           <span className="font-mono font-black text-stone-950 text-xs">{order.orderNumber}</span>
@@ -343,62 +362,33 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
           <span className="font-black text-stone-950 truncate max-w-[120px] text-xs">{order.customerName}</span>
         </div>
       </div>
-
-      <div className="border-2 border-stone-950 bg-white mb-1.5 text-[10px]">
-        <div className="px-1.5 py-0.5 bg-stone-200 border-b border-stone-950 font-black">{dict.garments}</div>
-        <div className="flex flex-wrap gap-x-3 gap-y-0.5 px-1.5 py-1">
-          {receiptItems.map(item => <span key={item.id} className="font-bold">{item.name} <b className="font-mono">× {item.quantity}</b></span>)}
-        </div>
+      <div className="grid grid-cols-2 border-x-2 border-b-2 border-stone-950 divide-x-2 divide-stone-950 text-[10px] font-bold mb-1.5 -mt-1">
+        <div className="p-1 flex items-center justify-between"><span className="text-stone-700">{dict.contact}:</span><span className="font-mono">{order.customerPhone || '---'}</span></div>
+        <div className="p-1 flex items-center justify-between"><span className="text-stone-700">{dict.returnDate}:</span><span className="font-mono">{formattedDeliveryDate || '---'}</span></div>
       </div>
 
-      {/* 3. Main 2-Column Matrix: Left=Specs/Design, Right=Measurements (Inspired by Photo 1) */}
-      <div className="border-2 border-stone-950 mb-1.5 bg-white overflow-hidden">
-        {/* Table Header */}
-        <div className="grid grid-cols-2 border-b-2 border-stone-950 bg-stone-200 text-[10px] font-black text-center divide-x-2 divide-stone-950">
-          <div className="py-0.5 px-1 text-stone-950 uppercase flex justify-between">
-            <span>{dict.specs}</span>
-            <span>{dict.shape}</span>
-          </div>
-          <div className="py-0.5 px-1 text-stone-950 uppercase flex justify-between">
-            <span>{dict.measurements}</span>
-            <span>{dict.value}</span>
-          </div>
-        </div>
-
-        {/* Table Body */}
-        <div className="grid grid-cols-2 divide-x-2 divide-stone-950 text-[10.5px]">
-          {/* Left Column: Specs / Design */}
-          <div className="flex flex-col justify-start divide-y divide-stone-300 bg-white">
-            {activeDesignItems.length > 0 ? (
-              activeDesignItems.map((item, idx) => (
-                <div key={idx} className="px-1.5 py-0.5 flex justify-between items-center text-[9.5px] leading-tight hover:bg-stone-50">
-                  <span className="text-stone-800 font-bold truncate max-w-[70px]">{item.title}:</span>
-                  <span className="font-extrabold text-stone-950 text-left truncate max-w-[85px]">{String(item.value)}</span>
+      {/* One clear measurement block per garment, matching the paper workflow. */}
+      <div className="space-y-1.5 mb-1.5">
+        {receiptItems.map(item => (
+          <section key={item.id} className="border-2 border-stone-950 break-inside-avoid">
+            <div className="flex items-center justify-between bg-stone-950 px-2 py-0.5 text-[10px] font-black text-white">
+              <span>{item.name}</span><span className="font-mono">× {item.quantity}</span>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-4 border-b border-stone-950">
+              {item.measurements.length > 0 ? item.measurements.map(measurement => (
+                <div key={measurement.key} className="min-h-9 border-e border-b border-stone-500 px-1 py-0.5 text-center last:border-e-0">
+                  <div className="text-[8px] font-bold text-stone-700">{measurement.label}</div>
+                  <div className="font-mono text-sm font-black leading-tight">{measurement.value}</div>
                 </div>
-              ))
-            ) : (
-              <div className="p-2 text-stone-400 text-center italic text-[9.5px]">
-                {dict.noDesign}
-              </div>
-            )}
-          </div>
-
-          {/* Right Column: Measurements */}
-          <div className="flex flex-col justify-start divide-y divide-stone-300 bg-white">
-            {activeMeasurements.length > 0 ? (
-              activeMeasurements.map((m, idx) => (
-                <div key={idx} className="px-1.5 py-0.5 flex justify-between items-center text-[10.5px] leading-tight hover:bg-stone-50">
-                  <span className="text-stone-800 font-bold truncate max-w-[80px]">{m.label}:</span>
-                  <span className="font-mono font-black text-stone-950 text-xs pl-1 text-right">{m.value}</span>
-                </div>
-              ))
-            ) : (
-              <div className="p-2 text-stone-400 text-center italic text-[9.5px]">
-                {dict.noMeasurements}
-              </div>
-            )}
-          </div>
-        </div>
+              )) : <div className="col-span-full p-2 text-center text-[9px] italic text-stone-500">{dict.noMeasurements}</div>}
+            </div>
+            <div className="flex flex-wrap gap-x-3 gap-y-1 px-1.5 py-1 text-[9px] min-h-7">
+              {item.designs.length > 0 ? item.designs.map(design => (
+                <span key={design.key} className="inline-flex items-center gap-1 font-bold"><span className="inline-block h-3 w-3 border border-stone-950" />{design.title}: <b>{String(design.value)}</b></span>
+              )) : <span className="italic text-stone-500">{dict.noDesign}</span>}
+            </div>
+          </section>
+        ))}
       </div>
 
       {/* 4. Fabric source is always explicit for workshop handling. */}
@@ -497,25 +487,22 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
       }}
       dir={language === 'en' ? 'ltr' : 'rtl'}
     >
-      {/* 1. Header with Logo, Shop Name & Contacts */}
-      <div className="text-center pb-2 border-b-2 border-stone-950 mb-1.5">
-        {showLogo && (
-          <img
-            src={logoUrl}
-            alt={shopName}
-            className="mx-auto mb-1 h-14 w-14 rounded-md object-contain"
-          />
-        )}
-        <h1 className="text-sm sm:text-base font-black tracking-tight text-stone-950 font-serif leading-tight break-all">
-          {shopName}
-        </h1>
-        <div className="flex justify-between items-center text-[10px] font-bold text-stone-900 px-1 mt-1 border-t border-dotted border-stone-400 pt-0.5">
-          <span>واتساپ: <b className="font-mono">{shopSettings.whatsapp || '0771221559'}</b></span>
-          <span>تماس: <b className="font-mono">{shopSettings.phone1 || '0771221559'}</b></span>
+      {/* 1. Compact header with permanent website QR. */}
+      <div className="grid grid-cols-[58px_1fr_58px] items-center gap-1 border-b-2 border-stone-950 pb-1 mb-1">
+        <div className="flex h-14 items-center justify-center">
+          <QrCodeView value={SHOP_QR_URL} size={54} label="Royal Kawsar website QR code" />
         </div>
-        <p className="text-[9px] text-stone-700 mt-0.5 leading-tight px-1 font-medium">
-          {shopAddress}
-        </p>
+        <div className="min-w-0 text-center">
+          <h1 className="text-base sm:text-lg font-black tracking-tight text-stone-950 font-serif leading-tight break-words">{shopName}</h1>
+          <span className="inline-block mt-0.5 rounded-full bg-stone-950 px-3 py-0.5 font-mono text-[11px] font-black text-white">{shopSettings.phone1 || '0771221559'}</span>
+        </div>
+        <div className="flex h-12 items-center justify-center">
+          {showLogo && <img src={logoUrl} alt={shopName} className="h-12 w-12 object-contain" />}
+        </div>
+      </div>
+      <div className="mb-1.5 flex items-center justify-between border-b border-stone-500 px-1 pb-1 text-[8.5px] font-semibold">
+        <span className="truncate">{shopAddress}</span>
+        <span className="ms-2 shrink-0 font-mono font-black">{dict.bill}: {order.orderNumber}</span>
       </div>
 
       {/* 2. Customer Barcode & Bill Barcode Row (Matching Photo 2) */}

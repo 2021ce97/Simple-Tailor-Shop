@@ -9,6 +9,7 @@ import { translations } from '../translations/i18n';
 import { storageService } from '../services/storage';
 import { printReceiptElement, downloadReceiptPdf } from '../services/printService';
 import { BarcodeView } from './BarcodeView';
+import { QrCodeView } from './QrCodeView';
 import { 
   Printer, 
   FileText, 
@@ -34,6 +35,8 @@ interface ReceiptSettingsPanelProps {
   onSettingsUpdated?: () => void;
 }
 
+const SHOP_QR_URL = 'https://simple-tailor-shop.vercel.app/';
+
 export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
   shopSettings,
   language,
@@ -51,9 +54,9 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
     receiptShowQrCode: true,
     receiptShowNotes: true,
     receiptShowTerms: true,
-    receiptHeaderNoteFa: 'بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ',
-    receiptHeaderNotePs: 'بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ',
-    receiptHeaderNoteEn: 'IN THE NAME OF ALLAH',
+    receiptHeaderNoteFa: '',
+    receiptHeaderNotePs: '',
+    receiptHeaderNoteEn: '',
     ...shopSettings,
   }));
 
@@ -68,6 +71,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isTestPrinting, setIsTestPrinting] = useState(false);
   const [isTestPdf, setIsTestPdf] = useState(false);
+  const [settingsSection, setSettingsSection] = useState<'basic' | 'advanced'>('basic');
   const previewRef = useRef<HTMLDivElement>(null);
 
   // Active preferences
@@ -76,9 +80,16 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
 
   // Save changes to Supabase and notify the parent view.
   const handleSave = async () => {
-    await storageService.saveShopSettings(settings);
+    const updated = {
+      ...settings,
+      receiptHeaderNoteFa: '',
+      receiptHeaderNotePs: '',
+      receiptHeaderNoteEn: '',
+    };
+    setSettings(updated);
+    await storageService.saveShopSettings(updated);
     if (onUpdateShopSettings) {
-      onUpdateShopSettings(settings);
+      onUpdateShopSettings(updated);
     }
     if (onSettingsUpdated) {
       onSettingsUpdated();
@@ -158,12 +169,6 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
     ? settings.shopNameFa 
     : settings.shopNameEn;
 
-  const headerBlessing = language === 'ps'
-    ? settings.receiptHeaderNotePs
-    : language === 'fa'
-    ? settings.receiptHeaderNoteFa
-    : settings.receiptHeaderNoteEn;
-
   const footerNotice = language === 'ps'
     ? settings.receiptFooterPs
     : language === 'fa'
@@ -211,11 +216,20 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
         </div>
       </div>
 
+      <div className="inline-flex w-full rounded-2xl border border-stone-200 bg-stone-100 p-1 sm:w-auto">
+        <button type="button" onClick={() => setSettingsSection('basic')} className={`flex-1 rounded-xl px-5 py-2 text-xs font-black transition sm:flex-none ${settingsSection === 'basic' ? 'bg-white text-stone-950 shadow-xs' : 'text-stone-500 hover:text-stone-800'}`}>
+          {language === 'fa' ? 'تنظیمات ساده' : language === 'ps' ? 'ساده ترتیبات' : 'Basic'}
+        </button>
+        <button type="button" onClick={() => setSettingsSection('advanced')} className={`flex-1 rounded-xl px-5 py-2 text-xs font-black transition sm:flex-none ${settingsSection === 'advanced' ? 'bg-white text-stone-950 shadow-xs' : 'text-stone-500 hover:text-stone-800'}`}>
+          {language === 'fa' ? 'تنظیمات پیشرفته' : language === 'ps' ? 'پرمختللي ترتیبات' : 'Advanced'}
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* ================= LEFT CONFIGURATION PANEL (7 COLS) ================= */}
         <div className="lg:col-span-7 space-y-6">
           {/* SECTION 1: Paper & Printer Format Selection */}
-          <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
+          {settingsSection === 'basic' ? <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
             <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-3">
               <div className="flex items-center gap-2">
                 <Printer className="w-4 h-4 text-[#D4AF37]" />
@@ -361,10 +375,10 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 </div>
               </div>
             </div>
-          </div>
+          </div> : null}
 
           {/* SECTION 2: Thermal Printer Style Variations */}
-          <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
+          {settingsSection === 'advanced' ? <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
             <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-[#D4AF37]" />
@@ -444,10 +458,10 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 </p>
               </div>
             </div>
-          </div>
+          </div> : null}
 
           {/* SECTION 3: Content Display Toggles */}
-          <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
+          {settingsSection === 'basic' ? <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
             <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-3">
               <div className="flex items-center gap-2">
                 <Settings2 className="w-4 h-4 text-[#D4AF37]" />
@@ -525,7 +539,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
               </label>
 
               {/* Toggle QR Code */}
-              <label className="flex items-center justify-between p-3 bg-[#F9F7F2] rounded-xl border border-[#E5E5E5] cursor-pointer hover:bg-stone-100 transition">
+              <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-xl border border-emerald-200">
                 <div className="flex items-center gap-2.5">
                   <QrCode className="w-4 h-4 text-stone-600" />
                   <div>
@@ -537,39 +551,23 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                     </span>
                   </div>
                 </div>
-                <input
-                  type="checkbox"
-                  checked={settings.receiptShowQrCode !== false}
-                  onChange={() => handleToggle('receiptShowQrCode')}
-                  className="w-4 h-4 accent-[#D4AF37] rounded cursor-pointer"
-                />
-              </label>
+                <span className="rounded-md bg-emerald-100 px-2 py-1 text-[10px] font-black text-emerald-800">
+                  {language === 'fa' ? 'همیشه فعال' : language === 'ps' ? 'تل فعال' : 'Always on'}
+                </span>
+              </div>
             </div>
-          </div>
+          </div> : null}
 
           {/* SECTION 4: Header Notice & Footer Policy */}
-          <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
+          {settingsSection === 'advanced' ? <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
             <div className="flex items-center gap-2 border-b border-[#E5E5E5] pb-3">
               <FileSpreadsheet className="w-4 h-4 text-[#D4AF37]" />
               <h4 className="font-bold text-xs text-[#1A1A1A] uppercase tracking-wider">
-                {language === 'fa' ? '۴. متن سربرگ و پاورقی رسید' : language === 'ps' ? '۴. د بِل د سر او پښې پیغامونه' : '4. Header Blessing & Receipt Footer'}
+                {language === 'fa' ? 'پاورقی رسید' : language === 'ps' ? 'د بِل د پښې پیغام' : 'Receipt Footer'}
               </h4>
             </div>
 
             <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-bold text-[#706E6B] mb-1">
-                  {language === 'fa' ? 'متن متبرکه بالای بل (دری)' : language === 'ps' ? 'د بِل د سر متن (دري)' : 'Header Blessing (Dari)'}
-                </label>
-                <input
-                  type="text"
-                  value={settings.receiptHeaderNoteFa || ''}
-                  onChange={e => setSettings({ ...settings, receiptHeaderNoteFa: e.target.value })}
-                  placeholder="بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
-                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-serif text-center"
-                />
-              </div>
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-[#706E6B] mb-1">
@@ -608,7 +606,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 <span>{language === 'fa' ? 'ذخیره دایمی در تنظیمات' : language === 'ps' ? 'په ترتیباتو کې ساتل' : 'Save All Receipt Settings'}</span>
               </button>
             </div>
-          </div>
+          </div> : null}
         </div>
 
         {/* ================= RIGHT LIVE PREVIEW PANEL (5 COLS) ================= */}
@@ -675,13 +673,6 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                     : 'font-sans'
                 }`}
               >
-                {/* Blessing / Bismillah */}
-                {headerBlessing && (
-                  <div className="text-center font-serif text-[10px] text-stone-600 pb-1 mb-1 border-b border-stone-200">
-                    {headerBlessing}
-                  </div>
-                )}
-
                 {/* Shop Logo & Name */}
                 <div className="text-center pb-2 border-b-2 border-stone-900">
                   {settings.receiptShowLogo !== false && (
@@ -764,24 +755,18 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 </div>
 
                 {/* Barcode & QR Code Section */}
-                {(settings.receiptShowBarcode !== false || settings.receiptShowQrCode !== false) && (
-                  <div className="py-2 border-t border-b border-dashed border-stone-400 my-1 flex items-center justify-around">
+                <div className="py-2 border-t border-b border-dashed border-stone-400 my-1 flex items-center justify-around">
                     {settings.receiptShowBarcode !== false && (
                       <div className="text-center">
                         <BarcodeView value="ORD-8821" height={22} width={1.1} fontSize={8} />
                         <span className="text-[8px] text-stone-500 block">ORD-8821</span>
                       </div>
                     )}
-                    {settings.receiptShowQrCode !== false && (
-                      <div className="text-center">
-                        <div className="w-12 h-12 border border-stone-400 bg-stone-50 rounded flex flex-col items-center justify-center p-1 mx-auto">
-                          <QrCode className="w-7 h-7 text-stone-800" />
-                        </div>
-                        <span className="text-[7px] text-stone-500 block mt-0.5">TRACK #8821</span>
-                      </div>
-                    )}
-                  </div>
-                )}
+                    <div className="text-center">
+                      <QrCodeView value={SHOP_QR_URL} size={48} className="mx-auto" label="Royal Kawsar website QR code" />
+                      <span className="text-[7px] text-stone-500 block mt-0.5">simple-tailor-shop.vercel.app</span>
+                    </div>
+                </div>
 
                 {/* Footer Notice */}
                 <div className="text-center pt-1 text-[9px] text-stone-500">

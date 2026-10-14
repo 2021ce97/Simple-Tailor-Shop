@@ -50,6 +50,36 @@ interface DesignSettingsViewProps {
   onDatabaseRestored?: () => void;
 }
 
+const measurementTemplates = [
+  {
+    id: 'shirt',
+    nameEn: 'Shirt / Perahan', nameFa: 'پیراهن', namePs: 'کمیس',
+    fields: [
+      ['length', 'Length', 'قد', 'قد'], ['shoulder', 'Shoulder', 'شانه', 'اوږه'],
+      ['sleeve', 'Sleeve', 'آستین', 'لستوڼی'], ['chest', 'Chest', 'سینه', 'سینه'],
+      ['collar', 'Collar', 'یخن', 'غاړه'], ['waist', 'Waist', 'کمر', 'ملا'],
+    ],
+  },
+  {
+    id: 'trouser',
+    nameEn: 'Trouser / Tunban', nameFa: 'تنبان', namePs: 'پرتوګ',
+    fields: [
+      ['trouser_length', 'Trouser Length', 'قد تنبان', 'د پرتوګ اوږدوالی'], ['trouser_waist', 'Waist', 'کمر', 'ملا'],
+      ['hip', 'Hip', 'باسن', 'کوناټي'], ['thigh', 'Thigh', 'ران', 'ورن'],
+      ['knee', 'Knee', 'زانو', 'زنګون'], ['bottom', 'Bottom', 'پاچه', 'پایڅه'],
+    ],
+  },
+  {
+    id: 'waistcoat',
+    nameEn: 'Waistcoat', nameFa: 'واسکت', namePs: 'واسکټ',
+    fields: [
+      ['waistcoat_length', 'Length', 'قد', 'اوږدوالی'], ['waistcoat_shoulder', 'Shoulder', 'شانه', 'اوږه'],
+      ['waistcoat_chest', 'Chest', 'سینه', 'سینه'], ['waistcoat_waist', 'Waist', 'کمر', 'ملا'],
+      ['armhole', 'Armhole', 'حلقه آستین', 'د لاس حلقه'],
+    ],
+  },
+] as const;
+
 export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
   designCategories,
   measurementFields,
@@ -162,6 +192,8 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
   // Notification Toast
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [showAddMeasurement, setShowAddMeasurement] = useState(false);
+  const [showAddDesignCategory, setShowAddDesignCategory] = useState(false);
 
   const showNotification = (msg: string) => {
     setSaveMessage(msg);
@@ -312,6 +344,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     setNewCatTitleFa('');
     setNewCatTitlePs('');
     setNewCatTitleEn('');
+    setShowAddDesignCategory(false);
     showNotification(t.savedSuccessfully);
   };
 
@@ -489,7 +522,37 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     setNewFieldFa('');
     setNewFieldPs('');
     setNewFieldEn('');
+    setShowAddMeasurement(false);
     showNotification(t.savedSuccessfully);
+  };
+
+  const applyMeasurementTemplate = async (templateId: string) => {
+    const template = measurementTemplates.find(item => item.id === templateId);
+    if (!template || !activeGarmentKey) return;
+    const existingKeys = new Set(fields.filter(field => field.garmentCategory === activeGarmentKey).map(field => field.key));
+    const additions: MeasurementField[] = template.fields
+      .filter(([key]) => !existingKeys.has(`${activeGarmentKey}_${key}`))
+      .map(([key, labelEn, labelFa, labelPs], index) => ({
+        id: `field_${activeGarmentKey}_${key}_${Date.now()}_${index}`,
+        key: `${activeGarmentKey}_${key}`,
+        garmentCategory: activeGarmentKey,
+        labelEn,
+        labelFa,
+        labelPs,
+        unit: 'in',
+        isStandard: false,
+        sortOrder: fields.length + index + 1,
+      }));
+    if (!additions.length) {
+      showNotification(language === 'fa' ? 'این قالب قبلاً اضافه شده است' : language === 'ps' ? 'دا قالب لا دمخه اضافه شوی' : 'This template is already applied');
+      return;
+    }
+    const updated = [...fields, ...additions];
+    setFields(updated);
+    await storageService.saveMeasurementFields(updated);
+    if (onUpdateMeasurementFields) onUpdateMeasurementFields(updated);
+    if (onMeasurementFieldsUpdated) onMeasurementFieldsUpdated();
+    showNotification(language === 'fa' ? 'قالب اندازه اضافه شد' : language === 'ps' ? 'د اندازې قالب اضافه شو' : 'Measurement template applied');
   };
 
   const startEditField = (field: MeasurementField) => {
@@ -633,6 +696,19 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
             <span>{saveMessage}</span>
           </div>
         )}
+      </div>
+
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        {[
+          language === 'fa' ? 'لباس را انتخاب کنید' : language === 'ps' ? 'کالي وټاکئ' : 'Choose a garment',
+          language === 'fa' ? 'اندازه‌ها را تنظیم کنید' : language === 'ps' ? 'اندازې تنظیم کړئ' : 'Set measurement fields',
+          language === 'fa' ? 'گزینه‌های دیزاین را بسازید' : language === 'ps' ? 'د ډیزاین انتخابونه جوړ کړئ' : 'Add design choices',
+        ].map((step, index) => (
+          <div key={step} className="flex items-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-xs font-bold text-stone-700">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-stone-950 text-[10px] text-amber-300">{index + 1}</span>
+            <span>{step}</span>
+          </div>
+        ))}
       </div>
 
       {/* Main Tabs Navigation */}
@@ -910,14 +986,20 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
         <div className="space-y-6">
           {/* Garment Selection Bar - Select garment to see only its measurement fields */}
           <div className="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs space-y-2">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2 text-xs font-bold text-stone-800">
                 <Shirt className="w-4 h-4 text-amber-600" />
                 <span>{language === 'fa' ? 'انتخاب نوع لباس جهت تنظیم فیلدهای اندازه:' : language === 'ps' ? 'د اندازو د تنظیم لپاره کالي وټاکئ:' : 'Select Garment to Configure Measurements:'}</span>
               </div>
-              <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-lg">
-                {filteredMeasurementFields.length} {language === 'fa' ? 'اندازه برای این لباس' : language === 'ps' ? 'اندازې د دې کالي لپاره' : 'fields for this garment'}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-lg">
+                  {filteredMeasurementFields.length} {language === 'fa' ? 'اندازه برای این لباس' : language === 'ps' ? 'اندازې د دې کالي لپاره' : 'fields for this garment'}
+                </span>
+                <button type="button" onClick={() => setShowAddMeasurement(value => !value)} className="inline-flex items-center gap-1 rounded-lg bg-stone-950 px-3 py-1.5 text-[11px] font-bold text-amber-300 cursor-pointer">
+                  {showAddMeasurement ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                  {showAddMeasurement ? t.cancel : t.addMeasurementField}
+                </button>
+              </div>
             </div>
             <div className="flex flex-wrap gap-2 pt-1">
               {garmentTypes.map(g => {
@@ -951,8 +1033,29 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
             </div>
           </div>
 
+          <div className="rounded-2xl border border-sky-200 bg-sky-50/60 p-4">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 className="text-xs font-black text-sky-950">{language === 'fa' ? 'قالب‌های آماده اندازه' : language === 'ps' ? 'د اندازې چمتو قالبونه' : 'Reusable measurement templates'}</h3>
+                <p className="mt-0.5 text-[10px] text-sky-800">{language === 'fa' ? 'قالب را انتخاب کنید تا اندازه‌های معمول به لباس فعلی اضافه شود.' : language === 'ps' ? 'قالب وټاکئ؛ عامې اندازې به اوسني کالي ته اضافه شي.' : 'Apply common measurement fields to the selected garment in one click.'}</p>
+              </div>
+              <span className="rounded-lg bg-white px-2 py-1 text-[10px] font-bold text-sky-800">{getGarmentName(activeGarmentKey)}</span>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {measurementTemplates.map(template => {
+                const templateName = language === 'ps' ? template.namePs : language === 'fa' ? template.nameFa : template.nameEn;
+                return (
+                  <button key={template.id} type="button" onClick={() => applyMeasurementTemplate(template.id)} className="flex items-center justify-between rounded-xl border border-sky-200 bg-white px-3 py-2 text-start text-xs font-bold text-stone-800 transition hover:border-sky-400 hover:bg-sky-50 cursor-pointer">
+                    <span>{templateName}</span>
+                    <span className="rounded-md bg-sky-100 px-1.5 py-0.5 text-[10px] text-sky-800">+{template.fields.length}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Add New Measurement Field Box */}
-          <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-3">
+          {showAddMeasurement && <div className="bg-amber-50/40 p-5 rounded-2xl border border-amber-200 shadow-xs space-y-3">
             <h3 className="font-bold text-sm text-[#1A1A1A] flex items-center gap-2">
               <span className="w-1 h-3.5 bg-[#D4AF37] rounded-full inline-block" />
               <Plus className="w-4 h-4 text-[#D4AF37]" />
@@ -1034,7 +1137,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 <span>{t.addMeasurementField}</span>
               </button>
             </div>
-          </div>
+          </div>}
 
           {/* Current Measurement Fields List */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -1120,7 +1223,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                       <div className="flex items-center justify-between">
                         <div>
                           <span className="font-extrabold text-xs text-[#1A1A1A] block">{label}</span>
-                          <span className="text-[10px] text-stone-400 font-mono">key: {f.key} ({f.unit || 'in'})</span>
+                          <span className="text-[10px] text-stone-400">{language === 'fa' ? 'واحد' : language === 'ps' ? 'واحد' : 'Unit'}: {f.unit || 'in'}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <button
@@ -1160,14 +1263,20 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
         <div className="space-y-6">
           {/* Garment Selection Bar - Select garment to see only its design categories */}
           <div className="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs space-y-2">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2 text-xs font-bold text-stone-800">
                 <Sparkles className="w-4 h-4 text-amber-600" />
                 <span>{language === 'fa' ? 'انتخاب نوع لباس جهت تنظیم طرح‌ها و دیزاین:' : language === 'ps' ? 'د ډیزاینونو د تنظیم لپاره کالي وټاکئ:' : 'Select Garment to Configure Designs:'}</span>
               </div>
-              <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-lg">
-                {filteredDesignCategories.length} {language === 'fa' ? 'دسته دیزاین برای این لباس' : language === 'ps' ? 'ډیزاینونه د دې کالي لپاره' : 'design categories for this garment'}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-lg">
+                  {filteredDesignCategories.length} {language === 'fa' ? 'دسته دیزاین برای این لباس' : language === 'ps' ? 'ډیزاینونه د دې کالي لپاره' : 'design categories for this garment'}
+                </span>
+                <button type="button" onClick={() => setShowAddDesignCategory(value => !value)} className="inline-flex items-center gap-1 rounded-lg bg-stone-950 px-3 py-1.5 text-[11px] font-bold text-amber-300 cursor-pointer">
+                  {showAddDesignCategory ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                  {showAddDesignCategory ? t.cancel : t.addCategory}
+                </button>
+              </div>
             </div>
             <div className="flex flex-wrap gap-2 pt-1">
               {garmentTypes.map(g => {
@@ -1202,7 +1311,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
           </div>
 
           {/* Add New Category Box */}
-          <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-3">
+          {showAddDesignCategory && <div className="bg-amber-50/40 p-5 rounded-2xl border border-amber-200 shadow-xs space-y-3">
             <h3 className="font-bold text-sm text-[#1A1A1A] flex items-center gap-2">
               <span className="w-1 h-3.5 bg-[#D4AF37] rounded-full inline-block" />
               <Plus className="w-4 h-4 text-[#D4AF37]" />
@@ -1272,7 +1381,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 <span>{t.addCategory}</span>
               </button>
             </div>
-          </div>
+          </div>}
 
           {/* Existing Categories & Options List */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
