@@ -28,7 +28,9 @@ import {
   CheckCircle2,
   AlertCircle,
   Printer,
-  RefreshCw
+  RefreshCw,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react';
 import { ReceiptSettingsPanel } from '../components/ReceiptSettingsPanel';
 
@@ -225,12 +227,16 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
   // Filtered fields based on active selected garment - only fields of that particular garment are shown
   const filteredMeasurementFields = useMemo(() => {
-    return fields.filter(f => f.garmentCategory === activeGarmentKey);
+    return fields
+      .filter(f => f.garmentCategory === activeGarmentKey)
+      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
   }, [fields, activeGarmentKey]);
 
   // Filtered design categories based on active selected garment - only designs of that particular garment are shown
   const filteredDesignCategories = useMemo(() => {
-    return categories.filter(c => c.garmentCategory === activeGarmentKey);
+    return categories
+      .filter(c => c.garmentCategory === activeGarmentKey)
+      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
   }, [categories, activeGarmentKey]);
 
   // ================= GARMENT TYPES ACTIONS =================
@@ -325,6 +331,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
       titlePs,
       titleEn,
       allowCustomInput: true,
+      sortOrder: categories.filter(category => category.garmentCategory === newCatGarment).length + 1,
       options: [
         { id: 'opt_1', nameFa: 'ساده', namePs: 'ساده', nameEn: 'Standard' },
       ],
@@ -387,6 +394,24 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
       if (onCategoryUpdated) onCategoryUpdated();
       showNotification(t.deletedSuccessfully);
     }
+  };
+
+  const moveDesignCategory = async (categoryId: string, direction: -1 | 1) => {
+    const ordered = [...filteredDesignCategories];
+    const currentIndex = ordered.findIndex(category => category.id === categoryId);
+    const nextIndex = currentIndex + direction;
+    if (currentIndex < 0 || nextIndex < 0 || nextIndex >= ordered.length) return;
+
+    [ordered[currentIndex], ordered[nextIndex]] = [ordered[nextIndex], ordered[currentIndex]];
+    const positions = new Map(ordered.map((category, index) => [category.id, index + 1]));
+    const updated = categories.map(category => positions.has(category.id)
+      ? { ...category, sortOrder: positions.get(category.id) }
+      : category
+    );
+    setCategories(updated);
+    await storageService.saveDesignCategories(updated);
+    if (onUpdateDesignCategories) onUpdateDesignCategories(updated);
+    if (onCategoryUpdated) onCategoryUpdated();
   };
 
   const handleAddOptionToCategory = async (catId: string) => {
@@ -505,6 +530,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
       labelEn,
       unit: newFieldUnit,
       isStandard: false,
+      sortOrder: fields.filter(field => field.garmentCategory === newFieldGarment).length + 1,
     };
 
     const updated = [...fields, newF];
@@ -596,6 +622,24 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
       if (onMeasurementFieldsUpdated) onMeasurementFieldsUpdated();
       showNotification(t.deletedSuccessfully);
     }
+  };
+
+  const moveMeasurementField = async (fieldId: string, direction: -1 | 1) => {
+    const ordered = [...filteredMeasurementFields];
+    const currentIndex = ordered.findIndex(field => field.id === fieldId);
+    const nextIndex = currentIndex + direction;
+    if (currentIndex < 0 || nextIndex < 0 || nextIndex >= ordered.length) return;
+
+    [ordered[currentIndex], ordered[nextIndex]] = [ordered[nextIndex], ordered[currentIndex]];
+    const positions = new Map(ordered.map((field, index) => [field.id, index + 1]));
+    const updated = fields.map(field => positions.has(field.id)
+      ? { ...field, sortOrder: positions.get(field.id) }
+      : field
+    );
+    setFields(updated);
+    await storageService.saveMeasurementFields(updated);
+    if (onUpdateMeasurementFields) onUpdateMeasurementFields(updated);
+    if (onMeasurementFieldsUpdated) onMeasurementFieldsUpdated();
   };
 
   // ================= SHOP PROFILE ACTIONS =================
@@ -1115,7 +1159,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
           {/* Current Measurement Fields List */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {filteredMeasurementFields.map(f => {
+            {filteredMeasurementFields.map((f, fieldIndex) => {
               const label = language === 'ps' ? f.labelPs : language === 'fa' ? f.labelFa : f.labelEn;
               const isEditing = editingFieldId === f.id;
               const garmentName = getGarmentName(f.garmentCategory || 'all');
@@ -1200,6 +1244,24 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                           <span className="text-[10px] text-stone-400">{language === 'fa' ? 'واحد' : language === 'ps' ? 'واحد' : 'Unit'}: {f.unit || 'in'}</span>
                         </div>
                         <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => moveMeasurementField(f.id, -1)}
+                            disabled={fieldIndex === 0}
+                            className="p-1 text-stone-400 hover:text-amber-700 hover:bg-amber-50 rounded-md transition disabled:opacity-25 disabled:cursor-not-allowed"
+                            title={language === 'fa' ? 'انتقال به بالا' : language === 'ps' ? 'پورته انتقال' : 'Move up'}
+                          >
+                            <ArrowUp className="w-3 h-3" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveMeasurementField(f.id, 1)}
+                            disabled={fieldIndex === filteredMeasurementFields.length - 1}
+                            className="p-1 text-stone-400 hover:text-amber-700 hover:bg-amber-50 rounded-md transition disabled:opacity-25 disabled:cursor-not-allowed"
+                            title={language === 'fa' ? 'انتقال به پایین' : language === 'ps' ? 'ښکته انتقال' : 'Move down'}
+                          >
+                            <ArrowDown className="w-3 h-3" />
+                          </button>
                           <button
                             onClick={() => startEditField(f)}
                             className="p-1 text-stone-400 hover:text-[#D4AF37] hover:bg-stone-100 rounded-md transition"
@@ -1358,7 +1420,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
           {/* Existing Categories & Options List */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredDesignCategories.map(category => {
+            {filteredDesignCategories.map((category, categoryIndex) => {
               const catTitle = language === 'ps' 
                 ? category.titlePs 
                 : language === 'fa' 
@@ -1460,6 +1522,24 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                       </div>
 
                       <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => moveDesignCategory(category.id, -1)}
+                          disabled={categoryIndex === 0}
+                          className="p-1.5 text-stone-400 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed"
+                          title={language === 'fa' ? 'انتقال به بالا' : language === 'ps' ? 'پورته انتقال' : 'Move up'}
+                        >
+                          <ArrowUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveDesignCategory(category.id, 1)}
+                          disabled={categoryIndex === filteredDesignCategories.length - 1}
+                          className="p-1.5 text-stone-400 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed"
+                          title={language === 'fa' ? 'انتقال به پایین' : language === 'ps' ? 'ښکته انتقال' : 'Move down'}
+                        >
+                          <ArrowDown className="w-3.5 h-3.5" />
+                        </button>
                         <button
                           onClick={() => startEditCategory(category)}
                           className="p-1.5 text-stone-400 hover:text-[#D4AF37] hover:bg-stone-100 rounded-lg transition cursor-pointer"

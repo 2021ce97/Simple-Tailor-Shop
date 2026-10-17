@@ -37,7 +37,6 @@ import {
   Minus,
   AlertCircle,
   PackageCheck,
-  Filter,
   Shirt,
   X
 } from 'lucide-react';
@@ -137,9 +136,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({
     }];
   });
 
-  // Toggle to see all fields or only garment-specific fields
-  const [showAllFields, setShowAllFields] = useState<boolean>(false);
-  
   // Fabric Inventory Selection State
   const [isCustomerFabric, setIsCustomerFabric] = useState<boolean>(
     initialOrder?.isCustomerFabric ?? (!prefilledFabric && !initialOrder?.fabricId)
@@ -295,15 +291,17 @@ export const OrderForm: React.FC<OrderFormProps> = ({
 
   // Filtered measurement fields
   const filteredMeasurementFields = useMemo(() => {
-    if (showAllFields) return measurementFields;
-    return measurementFields.filter(f => f.garmentCategory === activeGarmentKey || !f.garmentCategory);
-  }, [measurementFields, activeGarmentKey, showAllFields]);
+    return measurementFields
+      .filter(field => field.garmentCategory === activeGarmentKey || field.garmentCategory === 'all')
+      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  }, [measurementFields, activeGarmentKey]);
 
   // Filtered design categories
   const filteredDesignCategories = useMemo(() => {
-    if (showAllFields) return designCategories;
-    return designCategories.filter(c => c.garmentCategory === activeGarmentKey || !c.garmentCategory);
-  }, [designCategories, activeGarmentKey, showAllFields]);
+    return designCategories
+      .filter(category => category.garmentCategory === activeGarmentKey || category.garmentCategory === 'all')
+      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  }, [designCategories, activeGarmentKey]);
 
   const handleSelectShopFabric = (fab: Fabric) => {
     setSelectedFabricId(fab.id);
@@ -345,14 +343,14 @@ export const OrderForm: React.FC<OrderFormProps> = ({
         const garmentKey = config?.key;
         const itemMeasurements = Object.fromEntries(
           measurementFields
-            .filter(field => !field.garmentCategory || field.garmentCategory === garmentKey)
+            .filter(field => field.garmentCategory === garmentKey || field.garmentCategory === 'all')
             .filter(field => measurements[field.key] !== undefined && measurements[field.key] !== '')
             .map(field => [field.key, measurements[field.key]])
         );
         const itemDesignSelections = Object.fromEntries(
           Object.entries(designSelections).filter(([categoryKey]) => {
             const category = designCategories.find(entry => entry.key === categoryKey);
-            return !category?.garmentCategory || category.garmentCategory === garmentKey;
+            return category?.garmentCategory === garmentKey || category?.garmentCategory === 'all';
           })
         );
         return {
@@ -863,18 +861,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             </div>
 
             <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setShowAllFields(!showAllFields)}
-                className="text-[11px] font-bold text-stone-700 hover:text-amber-700 flex items-center gap-1 cursor-pointer transition"
-              >
-                <Filter className="w-3 h-3 text-amber-600" />
-                <span>
-                  {showAllFields 
-                    ? (language === 'fa' ? 'فقط اندازه‌های این لباس' : 'Show Only Garment Fields')
-                    : (language === 'fa' ? 'نمایش همه اندازه‌ها' : 'Show All Fields')}
-                </span>
-              </button>
               <span className="text-[11px] font-mono text-stone-500 font-semibold">
                 {t.unitInch} (in)
               </span>
