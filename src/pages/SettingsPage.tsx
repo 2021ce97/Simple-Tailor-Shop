@@ -175,12 +175,10 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
   const [newGarmentFa, setNewGarmentFa] = useState('');
   const [newGarmentPs, setNewGarmentPs] = useState('');
   const [newGarmentEn, setNewGarmentEn] = useState('');
-  const [newGarmentIcon, setNewGarmentIcon] = useState('✂️');
 
   const [editGarmentFa, setEditGarmentFa] = useState('');
   const [editGarmentPs, setEditGarmentPs] = useState('');
   const [editGarmentEn, setEditGarmentEn] = useState('');
-  const [editGarmentIcon, setEditGarmentIcon] = useState('');
 
   // Shop Profile State
   const [shop, setShop] = useState<ShopSettings>({ ...shopSettings });
@@ -252,7 +250,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
       nameFa,
       namePs,
       nameEn,
-      icon: newGarmentIcon.trim() || '✂️',
+      icon: '✂️',
       isStandard: false,
       sortOrder: garmentTypes.length + 1,
     };
@@ -265,7 +263,6 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     setNewGarmentFa('');
     setNewGarmentPs('');
     setNewGarmentEn('');
-    setNewGarmentIcon('✂️');
     showNotification(t.savedSuccessfully);
   };
 
@@ -274,7 +271,6 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
     setEditGarmentFa(g.nameFa);
     setEditGarmentPs(g.namePs);
     setEditGarmentEn(g.nameEn);
-    setEditGarmentIcon(g.icon || '✂️');
   };
 
   const handleSaveGarmentEdit = async () => {
@@ -286,7 +282,6 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
           nameFa: editGarmentFa.trim() || g.nameFa,
           namePs: editGarmentPs.trim() || g.namePs,
           nameEn: editGarmentEn.trim() || g.nameEn,
-          icon: editGarmentIcon.trim() || g.icon,
         };
       }
       return g;
@@ -809,7 +804,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
               <span>{t.addGarmentType || 'افزودن نوع لباس جدید (Add Garment Type)'}</span>
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">دری (Dari)</label>
                 <input
@@ -837,16 +832,6 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                   value={newGarmentEn}
                   onChange={e => setNewGarmentEn(e.target.value)}
                   placeholder="e.g. Perahan Tunban / Kurta"
-                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
-                />
-              </div>
-              <div>
-                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">آیکون / Icon</label>
-                <input
-                  type="text"
-                  value={newGarmentIcon}
-                  onChange={e => setNewGarmentIcon(e.target.value)}
-                  placeholder="✂️, 🥻, 🧥, 👔"
                   className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
                 />
               </div>
@@ -909,15 +894,6 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                           className="w-full px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
                         />
                       </div>
-                      <div>
-                        <label className="block text-[10px] text-stone-500 mb-0.5">Icon</label>
-                        <input
-                          type="text"
-                          value={editGarmentIcon}
-                          onChange={e => setEditGarmentIcon(e.target.value)}
-                          className="w-full px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
-                        />
-                      </div>
                       <div className="flex justify-end gap-2 pt-1">
                         <button
                           type="button"
@@ -939,7 +915,6 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                     <>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="text-xl">{g.icon || '✂️'}</span>
                           <div>
                             <h4 className="font-extrabold text-sm text-[#1A1A1A]">{displayName}</h4>
                             <span className="text-[10px] text-stone-400 font-mono">key: {g.key}</span>
@@ -1020,7 +995,6 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                         : 'bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-200'
                     }`}
                   >
-                    <span className="text-base">{g.icon || '✂️'}</span>
                     <span>{name}</span>
                     <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
                       isSelected ? 'bg-black/20 text-white' : 'bg-stone-200 text-stone-700'
@@ -1297,7 +1271,6 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                         : 'bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-200'
                     }`}
                   >
-                    <span className="text-base">{g.icon || '✂️'}</span>
                     <span>{name}</span>
                     <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
                       isSelected ? 'bg-black/20 text-white' : 'bg-stone-200 text-stone-700'
