@@ -369,26 +369,43 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
 
       {/* One clear measurement block per garment, matching the paper workflow. */}
       <div className="space-y-1.5 mb-1.5">
-        {receiptItems.map(item => (
-          <section key={item.id} className="border-2 border-stone-950 break-inside-avoid">
-            <div className="flex items-center justify-between bg-stone-950 px-2 py-0.5 text-[10px] font-black text-white">
-              <span>{item.name}</span><span className="font-mono">× {item.quantity}</span>
-            </div>
-            <div className="grid grid-cols-3 sm:grid-cols-4 border-b border-stone-950">
-              {item.measurements.length > 0 ? item.measurements.map(measurement => (
-                <div key={measurement.key} className="min-h-9 border-e border-b border-stone-500 px-1 py-0.5 text-center last:border-e-0">
-                  <div className="text-[8px] font-bold text-stone-700">{measurement.label}</div>
-                  <div className="font-mono text-sm font-black leading-tight">{measurement.value}</div>
-                </div>
-              )) : <div className="col-span-full p-2 text-center text-[9px] italic text-stone-500">{dict.noMeasurements}</div>}
-            </div>
-            <div className="flex flex-wrap gap-x-3 gap-y-1 px-1.5 py-1 text-[9px] min-h-7">
-              {item.designs.length > 0 ? item.designs.map(design => (
-                <span key={design.key} className="inline-flex items-center gap-1 font-bold"><span className="inline-block h-3 w-3 border border-stone-950" />{design.title}: <b>{String(design.value)}</b></span>
-              )) : <span className="italic text-stone-500">{dict.noDesign}</span>}
-            </div>
-          </section>
-        ))}
+        {receiptItems.map(item => {
+          const rowCount = Math.max(item.measurements.length, item.designs.length, 1);
+          const rows = Array.from({ length: rowCount }, (_, index) => ({
+            measurement: item.measurements[index],
+            design: item.designs[index],
+          }));
+          return (
+            <section key={item.id} className="border-2 border-stone-950 break-inside-avoid overflow-hidden">
+              <div className="flex items-center justify-between border-b-2 border-stone-950 bg-stone-200 px-2 py-1 text-[10px] font-black">
+                <span>{item.name}</span><span className="font-mono">{dict.quantity}: {item.quantity}</span>
+              </div>
+              <table className="w-full table-fixed border-collapse text-[10px]">
+                <colgroup>
+                  <col className="w-[23%]" /><col className="w-[14%]" /><col className="w-[25%]" /><col className="w-[38%]" />
+                </colgroup>
+                <thead>
+                  <tr className="bg-stone-100 text-[8px] font-black">
+                    <th className="border-e-2 border-b-2 border-stone-950 px-1 py-1 text-center">{dict.measurements}</th>
+                    <th className="border-e-2 border-b-2 border-stone-950 px-1 py-1 text-center">{dict.value}</th>
+                    <th className="border-e-2 border-b-2 border-stone-950 px-1 py-1 text-center">{dict.specs}</th>
+                    <th className="border-b-2 border-stone-950 px-1 py-1 text-center">{dict.shape}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((row, index) => (
+                    <tr key={`${item.id}-row-${index}`} className="h-7">
+                      <td className="border-e-2 border-b border-stone-500 px-1.5 py-1 font-black text-stone-950">{row.measurement?.label || ''}</td>
+                      <td className="border-e-2 border-b border-stone-500 px-1 py-1 text-center font-mono text-[13px] font-black leading-none">{row.measurement?.value || ''}</td>
+                      <td className="border-e-2 border-b border-stone-500 px-1.5 py-1 font-bold text-stone-800">{row.design?.title || ''}</td>
+                      <td className="border-b border-stone-500 px-1.5 py-1 font-black text-stone-950">{row.design ? String(row.design.value) : ''}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          );
+        })}
       </div>
 
       {/* 4. Fabric source is always explicit for workshop handling. */}
@@ -407,13 +424,11 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
         )}
       </div>
 
-      {/* 5. Special Tailor Instructions Note (if present) */}
-      {order.specialInstructions && (
-        <div className="p-1 bg-amber-50 border-2 border-stone-950 text-[9.5px] font-semibold text-stone-950 mb-1.5 leading-tight">
-          <span className="font-bold text-amber-950 block text-[9px]">{dict.tailorNotes}:</span>
-          <span>{order.specialInstructions}</span>
-        </div>
-      )}
+      {/* 5. Large workshop note area, inspired by the reference slip. */}
+      <div className="min-h-14 border-2 border-stone-950 p-2 text-[10px] font-semibold text-stone-950 mb-1.5 leading-relaxed">
+        <span className="font-black block text-[9px] mb-1">{dict.tailorNotes}:</span>
+        <span>{order.specialInstructions || ' '}</span>
+      </div>
 
       {/* 6. Cut Line Divider */}
       <div className="my-1 border-t-2 border-dashed border-stone-800 relative text-center">
