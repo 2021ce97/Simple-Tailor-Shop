@@ -9,7 +9,6 @@ import {
 } from '../types';
 import { translations } from '../translations/i18n';
 import { storageService } from '../services/storage';
-import { isSupabaseConfigured } from '../lib/supabase';
 import { 
   Sparkles, 
   Scissors, 
@@ -28,7 +27,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Printer,
-  RefreshCw,
   ArrowUp,
   ArrowDown
 } from 'lucide-react';
@@ -184,11 +182,6 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
   // Shop Profile State
   const [shop, setShop] = useState<ShopSettings>({ ...shopSettings });
-
-  // Supabase Custom Config State
-  const [supabaseUrlInput, setSupabaseUrlInput] = useState(() => localStorage.getItem('custom_supabase_url') || import.meta.env.VITE_SUPABASE_URL || '');
-  const [supabaseKeyInput, setSupabaseKeyInput] = useState(() => localStorage.getItem('custom_supabase_key') || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '');
-  const [isSavingDb, setIsSavingDb] = useState(false);
 
   // Notification Toast
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -680,32 +673,6 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
       }
     };
     reader.readAsText(file);
-  };
-
-  const handleSaveSupabaseConfig = () => {
-    setIsSavingDb(true);
-    if (supabaseUrlInput.trim() && supabaseKeyInput.trim()) {
-      localStorage.setItem('custom_supabase_url', supabaseUrlInput.trim());
-      localStorage.setItem('custom_supabase_key', supabaseKeyInput.trim());
-      showNotification(language === 'fa' ? 'اطلاعات دیتابیس ابری ذخیره شد. در حال بارگذاری مجدد...' : 'Cloud database config saved. Reloading...');
-      setTimeout(() => {
-        window.location.reload();
-      }, 700);
-    } else {
-      showNotification(language === 'fa' ? 'لطفاً هم آدرس و هم کلید Supabase را وارد نمایید' : 'Please provide both URL and Key');
-      setIsSavingDb(false);
-    }
-  };
-
-  const handleClearSupabaseConfig = () => {
-    localStorage.removeItem('custom_supabase_url');
-    localStorage.removeItem('custom_supabase_key');
-    setSupabaseUrlInput('');
-    setSupabaseKeyInput('');
-    showNotification(language === 'fa' ? 'اتصال ابری حذف شد و سیستم به حالت ذخیره محلی بازگشت.' : 'Cloud settings cleared. Switched to local mode.');
-    setTimeout(() => {
-      window.location.reload();
-    }, 700);
   };
 
   return (
@@ -2014,7 +1981,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Export Backup */}
             <div className="p-5 bg-[#F9F7F2] rounded-2xl border border-[#E5E5E5] space-y-3 flex flex-col justify-between">
               <div>
@@ -2063,84 +2030,6 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
           </div>
 
-          {/* Cloud Database (Supabase) Configuration & Status */}
-          <div className="p-5 rounded-2xl border border-stone-200 bg-stone-50/70 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <div className={`p-2 rounded-xl ${isSupabaseConfigured ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                  <Database className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-xs text-[#1A1A1A]">
-                    {language === 'fa' ? 'اتصال دیتابیس ابری (Supabase)' : language === 'ps' ? 'د کلاوډ ډیټابیس پیوستون (Supabase)' : 'Cloud Database Connection (Supabase)'}
-                  </h4>
-                  <p className="text-[11px] text-stone-500">
-                    {isSupabaseConfigured 
-                      ? (language === 'fa' ? 'سیستم با موفقیت به دیتابیس ابری متصل است.' : 'System is connected to Cloud Supabase database.')
-                      : (language === 'fa' ? 'سیستم در حالت حافظه محلی فعال و آماده است. در صورت نیاز می‌توانید کلیدهای دیتابیس اختصاصی خود را وارد نمایید.' : 'Running in offline local storage mode. You can optionally connect to your own Supabase project below.')}
-                  </p>
-                </div>
-              </div>
-              <span className={`text-xs font-bold px-2.5 py-1 rounded-lg border ${
-                isSupabaseConfigured 
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-300' 
-                  : 'bg-teal-50 text-teal-700 border-teal-300'
-              }`}>
-                {isSupabaseConfigured ? 'Cloud Connected' : 'Local Storage Mode (Active)'}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-stone-200">
-              <div>
-                <label className="block text-[11px] font-bold text-stone-600 mb-1">
-                  Supabase Project URL
-                </label>
-                <input
-                  type="text"
-                  placeholder="https://xyzcompany.supabase.co"
-                  value={supabaseUrlInput}
-                  onChange={(e) => setSupabaseUrlInput(e.target.value)}
-                  dir="ltr"
-                  className="w-full px-3 py-2 text-xs font-mono bg-white border border-stone-300 rounded-xl focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-stone-600 mb-1">
-                  Supabase Anon / Publishable Key
-                </label>
-                <input
-                  type="password"
-                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..."
-                  value={supabaseKeyInput}
-                  onChange={(e) => setSupabaseKeyInput(e.target.value)}
-                  dir="ltr"
-                  className="w-full px-3 py-2 text-xs font-mono bg-white border border-stone-300 rounded-xl focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
-              {isSupabaseConfigured && (
-                <button
-                  type="button"
-                  onClick={handleClearSupabaseConfig}
-                  className="px-3 py-2 rounded-xl text-xs font-bold text-stone-600 hover:text-stone-800 hover:bg-stone-200 transition cursor-pointer"
-                >
-                  {language === 'fa' ? 'قطع اتصال / بازگشت به حالت محلی' : 'Disconnect / Use Local Mode'}
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={handleSaveSupabaseConfig}
-                disabled={isSavingDb}
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-[#1A1A1A] hover:bg-black text-[#D4AF37] transition flex items-center gap-1.5 shadow-xs cursor-pointer"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${isSavingDb ? 'animate-spin' : ''}`} />
-                <span>{language === 'fa' ? 'ذخیره و اتصال به دیتابیس ابری' : 'Save & Connect to Supabase'}</span>
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>
