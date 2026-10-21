@@ -32,6 +32,25 @@ import { printReceiptElement, downloadReceiptPdf } from '../services/printServic
 export type ReceiptSlipMode = 'tailor' | 'customer';
 const SHOP_QR_URL = 'https://simple-tailor-shop.vercel.app/';
 
+const LEGACY_MEASUREMENT_FIELDS: Record<string, {
+  en: string;
+  fa: string;
+  ps: string;
+  sortOrder: number;
+}> = {
+  qad: { en: 'Length (Qad)', fa: 'قد', ps: 'قد', sortOrder: 1 },
+  shana: { en: 'Shoulder (Shana)', fa: 'شانه', ps: 'شانه', sortOrder: 2 },
+  chati: { en: 'Chest (Chati)', fa: 'چاتی (سینه)', ps: 'چاتی (سینه)', sortOrder: 5 },
+  baghal: { en: 'Armpit (Baghal)', fa: 'بغل', ps: 'بغل', sortOrder: 6 },
+  kamar: { en: 'Waist (Kamar)', fa: 'کمر', ps: 'کمر', sortOrder: 7 },
+  pacha: { en: 'Bottom (Pacha)', fa: 'پاچه', ps: 'پاچه', sortOrder: 10 },
+};
+
+const humanizeStoredKey = (key: string) => key
+  .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+  .replace(/[_-]+/g, ' ')
+  .replace(/\b\w/g, character => character.toUpperCase());
+
 interface ReceiptSlipModalProps {
   order: Order;
   shopSettings: ShopSettings;
@@ -192,39 +211,62 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
   const showBarcode = shopSettings.receiptShowBarcode !== false;
   const fabricSourceLabel = order.isCustomerFabric ? dict.customerFabric : dict.shopFabric;
 
-  // Active Measurements list
-  const activeMeasurements = (measurementFields || [])
-    .map(field => {
-      const val = order.measurements?.[field.key];
-      const label = language === 'ps' ? field.labelPs : language === 'fa' ? field.labelFa : field.labelEn;
-      return {
-        key: field.key,
-        label,
-        value: val !== undefined && val !== '' && val !== null ? String(val) : '',
-      };
-    })
-    .filter(m => Boolean(m.value));
+  // Build print rows from the order snapshot first. Current settings supply labels and
+  // ordering, but removed settings must never hide measurements from historical orders.
+  const buildMeasurementEntries = (values: Order['measurements'] | undefined) => {
+    const fieldByKey = new Map(measurementFields.map(field => [field.key, field]));
+    return Object.entries(values || {})
+      .map(([key, value], sourceIndex) => {
+        const field = fieldByKey.get(key);
+        const legacyField = LEGACY_MEASUREMENT_FIELDS[key];
+        const label = field
+          ? (language === 'ps' ? field.labelPs : language === 'fa' ? field.labelFa : field.labelEn)
+          : legacyField?.[language] || humanizeStoredKey(key);
+        const sortOrder = field?.sortOrder ?? legacyField?.sortOrder ?? 10_000 + sourceIndex;
+        return {
+          key,
+          label,
+          value: value !== undefined && value !== '' && value !== null ? String(value) : '',
+          sortOrder,
+          sourceIndex,
+        };
+      })
+      .filter(entry => Boolean(entry.value))
+      .sort((a, b) => a.sortOrder - b.sortOrder || a.sourceIndex - b.sourceIndex)
+      .map(({ sortOrder: _sortOrder, sourceIndex: _sourceIndex, ...entry }) => entry);
+  };
 
-  // Active Design list
-  const activeDesignItems = Object.entries(order.designSelections || {})
-    .map(([catKey, value]) => {
-      const cat = (designCategories || []).find(c => c.key === catKey);
-      const option = cat?.options.find(
-        item => item.nameEn === value || item.nameFa === value || item.namePs === value
-      );
-      const title = cat 
-        ? (language === 'ps' ? cat.titlePs : language === 'fa' ? cat.titleFa : cat.titleEn) 
-        : catKey;
-      const displayVal = option 
-        ? (language === 'ps' ? option.namePs : language === 'fa' ? option.nameFa : option.nameEn) 
-        : value;
-      return {
-        key: catKey,
-        title,
-        value: displayVal,
-      };
-    })
-    .filter(d => Boolean(d.value));
+  const buildDesignEntries = (values: Order['designSelections'] | undefined) => {
+    const categoryByKey = new Map(designCategories.map(category => [category.key, category]));
+    return Object.entries(values || {})
+      .map(([key, value], sourceIndex) => {
+        const category = categoryByKey.get(key);
+        const option = category?.options.find(
+          item => item.nameEn === value || item.nameFa === value || item.namePs === value
+        );
+        const title = category
+          ? (language === 'ps' ? category.titlePs : language === 'fa' ? category.titleFa : category.titleEn)
+          : humanizeStoredKey(key);
+        const displayValue = option
+          ? (language === 'ps' ? option.namePs : language === 'fa' ? option.nameFa : option.nameEn)
+          : value;
+        return {
+          key,
+          title,
+          value: displayValue,
+          sortOrder: category?.sortOrder ?? 10_000 + sourceIndex,
+          sourceIndex,
+        };
+      })
+      .filter(entry => entry.value !== undefined && entry.value !== '' && entry.value !== null)
+      .sort((a, b) => a.sortOrder - b.sortOrder || a.sourceIndex - b.sourceIndex)
+      .map(({ sortOrder: _sortOrder, sourceIndex: _sourceIndex, ...entry }) => entry);
+  };
+
+  // Active values for older single-garment orders.
+  const activeMeasurements = buildMeasurementEntries(order.measurements);
+
+  const activeDesignItems = buildDesignEntries(order.designSelections);
 
   // Garment type translation
   const garmentKeys = ['perahanTunban', 'waistcoat', 'suit', 'coatKorti', 'kameezShalwar', 'kurta', 'otherGarment'] as const;
@@ -239,23 +281,8 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
         id: item.id,
         name: localizeGarmentType(item.garmentType),
         quantity: item.quantity,
-        measurements: (measurementFields || []).map(field => {
-          const value = item.measurements?.[field.key];
-          return {
-            key: field.key,
-            label: language === 'ps' ? field.labelPs : language === 'fa' ? field.labelFa : field.labelEn,
-            value: value !== undefined && value !== '' && value !== null ? String(value) : '',
-          };
-        }).filter(entry => Boolean(entry.value)),
-        designs: Object.entries(item.designSelections || {}).map(([categoryKey, value]) => {
-          const category = designCategories.find(entry => entry.key === categoryKey);
-          const option = category?.options.find(entry => entry.nameEn === value || entry.nameFa === value || entry.namePs === value);
-          return {
-            key: categoryKey,
-            title: category ? (language === 'ps' ? category.titlePs : language === 'fa' ? category.titleFa : category.titleEn) : categoryKey,
-            value: option ? (language === 'ps' ? option.namePs : language === 'fa' ? option.nameFa : option.nameEn) : value,
-          };
-        }).filter(entry => Boolean(entry.value)),
+        measurements: buildMeasurementEntries(item.measurements),
+        designs: buildDesignEntries(item.designSelections),
       }))
     : order.garmentType.split(/\s*\+\s*/).map((garmentType, index) => ({
         id: `legacy-${index}`,
