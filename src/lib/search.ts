@@ -27,3 +27,13 @@ export const searchText = (value: unknown): string =>
 
 export const textIncludes = (value: unknown, query: string): boolean =>
   searchText(value).includes(searchText(query));
+
+/** Keeps leading zeroes while standardizing localized digits and legacy IDs. */
+export const normalizeOrderNumber = (value: unknown): string =>
+  normalizeDigits(value).trim().toUpperCase();
+
+export const isManualOrderNumber = (value: unknown): boolean =>
+  /^\d+$/.test(normalizeOrderNumber(value));
+
+export const isLegacyOrderNumber = (value: unknown): boolean =>
+  /^MA-\d+$/.test(normalizeOrderNumber(value));

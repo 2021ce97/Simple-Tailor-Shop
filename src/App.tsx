@@ -332,7 +332,7 @@ function ShopApp() {
       const detail = getErrorMessage(error);
       setNotification({ type: 'error', message: detail });
       window.setTimeout(() => setNotification(null), 8000);
-      return;
+      throw error;
     }
     reloadData();
     setEditingOrder(null);
@@ -483,6 +483,7 @@ function ShopApp() {
           {currentTab === 'new_order' && (
             <OrderForm
               initialOrder={editingOrder}
+              orders={orders}
               prefilledCustomer={prefilledCustomer}
               prefilledFabric={prefilledFabric}
               measurementFields={measurementFields}

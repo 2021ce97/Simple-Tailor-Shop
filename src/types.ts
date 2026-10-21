@@ -142,7 +142,7 @@ export interface OrderItem {
 
 export interface Order {
   id: string;
-  orderNumber: string; // Sequential tracking number, formatted as MA-0001, MA-0002, ...
+  orderNumber: string; // Legacy MA-0001 format or a user-entered digits-only number such as 001.
   customerId: string;
   customerName: string;
   customerPhone: string;

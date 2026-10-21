@@ -17,7 +17,7 @@ import {
   toDatabaseRows,
   isSupabaseConfigured,
 } from "../lib/supabase";
-import { textIncludes } from "../lib/search";
+import { isLegacyOrderNumber, isManualOrderNumber, normalizeOrderNumber, textIncludes } from "../lib/search";
 
 type UiPreferences = {
   fabricLowStockThreshold: number;
@@ -127,6 +127,19 @@ function assertUniqueCustomerPhone(customer: Pick<Customer, "id" | "phone">) {
   );
   if (duplicate) {
     throw new Error(`A customer with phone number ${customer.phone} already exists.`);
+  }
+}
+
+function assertUniqueOrderNumber(order: Pick<Order, "id" | "orderNumber">) {
+  const orderNumber = normalizeOrderNumber(order.orderNumber);
+  if (!isManualOrderNumber(orderNumber) && !isLegacyOrderNumber(orderNumber)) {
+    throw new Error("Order numbers must be digits only, except for existing legacy MA-numbers.");
+  }
+  const duplicate = state.orders.find(
+    (row) => row.id !== order.id && normalizeOrderNumber(row.orderNumber) === orderNumber,
+  );
+  if (duplicate) {
+    throw new Error(`Order number ${orderNumber} already exists. Please choose another number.`);
   }
 }
 
@@ -317,13 +330,15 @@ export const storageService = {
   getOrderById: (id: string) =>
     state.orders.find((row) => row.id === id || row.orderNumber === id),
   async saveOrder(value: Order, sync = true) {
-    let saved = value;
+    const normalizedOrderNumber = normalizeOrderNumber(value.orderNumber);
+    assertUniqueOrderNumber({ ...value, orderNumber: normalizedOrderNumber });
+    let saved = { ...value, orderNumber: normalizedOrderNumber };
     if (sync) {
       // The orders.customer_id foreign key requires the customer row to exist
       // before the order is written. Use the canonical customer ID as a phone
       // match may resolve a newly generated ID to an existing customer.
-      const customer = await this.syncCustomerFromOrder(value);
-      saved = { ...value, customerId: customer.id };
+      const customer = await this.syncCustomerFromOrder(saved);
+      saved = { ...saved, customerId: customer.id };
       await upsert("orders", saved);
     }
     replace(state.orders, saved);

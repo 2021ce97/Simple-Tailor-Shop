@@ -15,7 +15,7 @@ import {
 import { translations } from '../translations/i18n';
 import { storageService } from '../services/storage';
 import { getErrorMessage } from '../lib/errors';
-import { normalizeDigits, searchText, textIncludes } from '../lib/search';
+import { isLegacyOrderNumber, isManualOrderNumber, normalizeDigits, normalizeOrderNumber, searchText, textIncludes } from '../lib/search';
 import { 
   Scissors, 
   User, 
@@ -43,6 +43,7 @@ import {
 
 interface OrderFormProps {
   initialOrder?: Order | null;
+  orders: Order[];
   prefilledCustomer?: Customer | null;
   prefilledFabric?: Fabric | null;
   measurementFields: MeasurementField[];
@@ -58,6 +59,7 @@ const normalizedPhoneDigits = (value: unknown): string =>
 
 export const OrderForm: React.FC<OrderFormProps> = ({
   initialOrder,
+  orders,
   prefilledCustomer,
   prefilledFabric,
   measurementFields,
@@ -77,9 +79,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   const [garmentTypes] = useState<GarmentTypeConfig[]>(() => storageService.getGarmentTypes());
 
   // Form State
-  const [orderNumber] = useState<string>(
-    initialOrder?.orderNumber || storageService.generateNextOrderNumber()
-  );
+  const [orderNumber, setOrderNumber] = useState<string>(initialOrder?.orderNumber || '');
   const [customerName, setCustomerName] = useState<string>(
     initialOrder?.customerName || prefilledCustomer?.name || ''
   );
@@ -192,6 +192,15 @@ export const OrderForm: React.FC<OrderFormProps> = ({
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<string>('');
+
+  const normalizedOrderNumber = normalizeOrderNumber(orderNumber);
+  const editingLegacyOrder = Boolean(initialOrder && isLegacyOrderNumber(initialOrder.orderNumber));
+  const validOrderNumber = isManualOrderNumber(normalizedOrderNumber)
+    || (editingLegacyOrder && isLegacyOrderNumber(normalizedOrderNumber));
+  const duplicateOrder = useMemo(() => orders.find(order =>
+    order.id !== initialOrder?.id
+    && normalizeOrderNumber(order.orderNumber) === normalizedOrderNumber
+  ), [initialOrder?.id, normalizedOrderNumber, orders]);
 
   // Auto-suggest existing customers
   const [showCustomerSuggestions, setShowCustomerSuggestions] = useState<boolean>(false);
@@ -329,6 +338,18 @@ export const OrderForm: React.FC<OrderFormProps> = ({
 
   // Save handler
   const handleSave = async () => {
+    if (!normalizedOrderNumber) {
+      setSaveError(language === 'fa' ? 'لطفاً شماره سفارش را وارد نمایید' : language === 'ps' ? 'مهرباني وکړئ د فرمایش شمېره ولیکئ' : 'Please enter an order number');
+      return;
+    }
+    if (!validOrderNumber) {
+      setSaveError(language === 'fa' ? 'شماره سفارش جدید باید فقط شامل ارقام باشد' : language === 'ps' ? 'د نوي فرمایش شمېره باید یوازې شمېرې ولري' : 'New order numbers must contain digits only');
+      return;
+    }
+    if (duplicateOrder) {
+      setSaveError(language === 'fa' ? `شماره سفارش ${normalizedOrderNumber} قبلاً استفاده شده است` : language === 'ps' ? `د فرمایش شمېره ${normalizedOrderNumber} مخکې کارول شوې ده` : `Order number ${normalizedOrderNumber} already exists`);
+      return;
+    }
     if (!customerName.trim()) {
       alert(language === 'fa' ? 'لطفاً نام مشتری را وارد نمایید' : language === 'ps' ? 'مهرباني وکړئ د مشتري نوم ولیکئ' : 'Please enter customer name');
       return;
@@ -368,7 +389,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
       const garmentSummary = savedItems.map(item => item.garmentType).join(' + ');
       const orderData: Order = {
         id: initialOrder?.id || 'ord_' + Date.now(),
-        orderNumber: orderNumber || storageService.generateNextOrderNumber(),
+        orderNumber: normalizedOrderNumber,
         customerId: customerId || 'cust_' + Date.now(),
         customerName: customerName.trim(),
         customerPhone: customerPhone.trim(),
@@ -421,7 +442,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 {initialOrder ? t.editOrder : t.newOrder}
               </h1>
               <span className="text-xs font-mono font-bold px-2 py-0.5 bg-[#D4AF37]/20 text-[#1A1A1A] rounded-md border border-[#D4AF37]/30">
-                {orderNumber}
+                {orderNumber || '—'}
               </span>
             </div>
             <p className="text-xs text-stone-500 mt-0.5">
@@ -460,6 +481,58 @@ export const OrderForm: React.FC<OrderFormProps> = ({
 
       {/* Single Vertical Unified Flow Container */}
       <div className="space-y-6">
+
+        {/* Manual order number */}
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-3">
+          <div className="flex items-center gap-2 text-stone-900 font-extrabold text-sm">
+            <span className="w-1.5 h-5 bg-amber-600 rounded-full inline-block" />
+            <Tag className="w-4 h-4 text-amber-600" />
+            <span>{t.orderNumber}</span>
+          </div>
+          <div className="max-w-sm">
+            <label htmlFor="order-number" className="block text-xs font-bold text-stone-700 mb-1">
+              {t.orderNumber} <span className="text-rose-500">*</span>
+            </label>
+            <input
+              id="order-number"
+              type="text"
+              inputMode={editingLegacyOrder ? 'text' : 'numeric'}
+              autoComplete="off"
+              dir="ltr"
+              value={orderNumber}
+              onChange={event => {
+                const nextValue = normalizeDigits(event.target.value).replace(/\s/g, '').toUpperCase();
+                setOrderNumber(editingLegacyOrder ? nextValue : nextValue.replace(/\D/g, ''));
+                setSaveError('');
+              }}
+              placeholder="001, 0023"
+              aria-invalid={Boolean(orderNumber && (!validOrderNumber || duplicateOrder))}
+              aria-describedby="order-number-help"
+              className={`w-full px-3.5 py-3 bg-stone-50 border rounded-xl text-base font-mono font-black tracking-wider outline-hidden transition ${
+                orderNumber && (!validOrderNumber || duplicateOrder)
+                  ? 'border-rose-400 focus:ring-2 focus:ring-rose-200'
+                  : 'border-stone-200 focus:bg-white focus:border-amber-600 focus:ring-2 focus:ring-amber-200'
+              }`}
+            />
+            <div id="order-number-help" className="mt-2 text-[11px] font-medium">
+              {duplicateOrder ? (
+                <span role="alert" className="flex items-center gap-1 text-rose-700"><AlertCircle className="w-3.5 h-3.5" />{
+                  language === 'fa' ? 'این شماره سفارش قبلاً استفاده شده است.' : language === 'ps' ? 'دا فرمایش شمېره مخکې کارول شوې ده.' : 'This order number is already in use.'
+                }</span>
+              ) : orderNumber && validOrderNumber ? (
+                <span className="flex items-center gap-1 text-emerald-700"><CheckCircle2 className="w-3.5 h-3.5" />{
+                  language === 'fa' ? 'این شماره موجود است و صفرهای اول حفظ می‌شود.' : language === 'ps' ? 'دا شمېره شته؛ مخکښ صفرونه به وساتل شي.' : 'This number is available; leading zeroes will be preserved.'
+                }</span>
+              ) : (
+                <span className="text-stone-500">{
+                  editingLegacyOrder
+                    ? (language === 'fa' ? 'شماره قدیمی MA را نگه دارید یا آن را به یک شماره عددی تغییر دهید.' : language === 'ps' ? 'پخوانۍ MA شمېره وساتئ، یا یې په عددي شمېره بدله کړئ.' : 'Keep the legacy MA number, or change it to a digits-only number.')
+                    : (language === 'fa' ? 'فقط ارقام؛ مانند 001 یا 0023.' : language === 'ps' ? 'یوازې شمېرې؛ لکه 001 یا 0023.' : 'Digits only, for example 001 or 0023.')
+                }</span>
+              )}
+            </div>
+          </div>
+        </div>
 
         {/* 1. Customer Information Card */}
         <div className="bg-white p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">

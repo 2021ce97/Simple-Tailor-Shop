@@ -346,18 +346,14 @@ function createLocalFallbackClient() {
     },
     async rpc(fnName: string, args: Record<string, any>) {
       if (fnName === 'lookup_public_orders') {
-        const lookup = String(args?.lookup_value || '').trim().toLowerCase();
+        const lookup = String(args?.lookup_value || '').trim().toUpperCase();
         const orders = getStoredRows('orders');
         const matched = orders.filter(row => {
-          const ordNum = String(row.order_number || '').toLowerCase();
+          const ordNum = String(row.order_number || '').trim().toUpperCase();
           const phone = String(row.customer_phone || '').replace(/[^0-9]/g, '');
           const whatsapp = String(row.customer_whatsapp || '').replace(/[^0-9]/g, '');
-          const cleanLookup = lookup.replace(/[^a-z0-9]/g, '');
-          return (
-            ordNum.toLowerCase().includes(cleanLookup) ||
-            ordNum.replace(/[^0-9]/g, '').includes(cleanLookup) ||
-            (cleanLookup.length >= 3 && (phone.includes(cleanLookup) || whatsapp.includes(cleanLookup)))
-          );
+          const phoneLookup = lookup.replace(/[^0-9]/g, '');
+          return ordNum === lookup || (phoneLookup.length > 0 && (phone === phoneLookup || whatsapp === phoneLookup));
         });
 
         return {

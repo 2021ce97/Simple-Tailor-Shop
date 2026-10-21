@@ -8,7 +8,7 @@ import {
 } from '../types';
 import { translations } from '../translations/i18n';
 import { storageService } from '../services/storage';
-import { searchText, textIncludes } from '../lib/search';
+import { isManualOrderNumber, normalizeDigits, normalizeOrderNumber, searchText, textIncludes } from '../lib/search';
 import {
   ResponsiveContainer,
   BarChart,
@@ -133,23 +133,32 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const filteredOrders = useMemo(() => {
     const list = orders.filter(order => {
       const q = searchText(searchTerm);
+      const rawQuery = normalizeDigits(searchTerm).trim();
+      const isLegacyQuery = /^MA-\d+$/i.test(rawQuery);
+      const isNumericQuery = /^\d+$/.test(rawQuery);
+      const phoneQueryMatch = [order.customerPhone, order.customerWhatsApp]
+        .some(value => normalizeDigits(value).replace(/\D/g, '').includes(rawQuery));
       const itemSearchText = (order.items || [])
         .map(item => `${garmentSearchVariants(item.garmentType)} ${item.quantity} ${item.fabricNotes || ''} ${item.specialInstructions || ''}`)
         .join(' ');
       const legacyGarmentSearchText = order.garmentType.split(/\s*\+\s*/).map(garmentSearchVariants).join(' ');
       
-      const matchesSearch = !q || (
-        textIncludes(order.orderNumber, q) ||
-        textIncludes(order.customerName, q) ||
-        textIncludes(order.customerPhone, q) ||
-        textIncludes(order.customerWhatsApp, q) ||
-        textIncludes(order.orderDate, q) ||
-        textIncludes(order.deliveryDate, q) ||
-        textIncludes(order.fabricName, q) ||
-        textIncludes(order.garmentType, q) ||
-        textIncludes(legacyGarmentSearchText, q) ||
-        textIncludes(itemSearchText, q)
-      );
+      const matchesSearch = !q || (isLegacyQuery
+        ? normalizeOrderNumber(order.orderNumber) === normalizeOrderNumber(rawQuery)
+        : isNumericQuery
+          ? (isManualOrderNumber(order.orderNumber) && normalizeOrderNumber(order.orderNumber) === rawQuery) || phoneQueryMatch
+          : (
+              textIncludes(order.orderNumber, q) ||
+              textIncludes(order.customerName, q) ||
+              textIncludes(order.customerPhone, q) ||
+              textIncludes(order.customerWhatsApp, q) ||
+              textIncludes(order.orderDate, q) ||
+              textIncludes(order.deliveryDate, q) ||
+              textIncludes(order.fabricName, q) ||
+              textIncludes(order.garmentType, q) ||
+              textIncludes(legacyGarmentSearchText, q) ||
+              textIncludes(itemSearchText, q)
+            ));
 
       const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
       const matchesPayment = 
