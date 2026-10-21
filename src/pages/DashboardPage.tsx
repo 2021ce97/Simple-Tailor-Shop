@@ -846,7 +846,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="relative w-full">
               <Search className="w-4 h-4 text-stone-400 absolute start-3.5 top-1/2 -translate-y-1/2" />
               <input
-                type="search"
+                type="text"
                 dir="ltr"
                 value={orderNumberSearchTerm}
                 onChange={e => setOrderNumberSearchTerm(normalizeDigits(e.target.value).replace(/\s/g, '').toUpperCase())}
@@ -856,7 +856,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   ? 'یوازې د فرمایش په شمېره لټون؛ لکه MA-0223 یا 0023'
                   : 'Search by order number only, e.g. MA-0223 or 0023'}
                 aria-label={language === 'fa' ? 'جستجو فقط با شماره سفارش' : language === 'ps' ? 'یوازې د فرمایش په شمېره لټون' : 'Search by order number only'}
-                className="w-full min-w-0 ps-10 pe-24 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-mono font-bold focus:bg-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/25 outline-hidden transition"
+                className={`w-full min-w-0 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-mono font-bold focus:bg-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/25 outline-hidden transition ${
+                  language === 'en' ? 'pl-10 pr-24' : 'pl-24 pr-10'
+                }`}
               />
               {orderNumberSearchTerm && (
                 <button
