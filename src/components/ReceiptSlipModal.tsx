@@ -277,13 +277,24 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
     return garmentKey ? t[garmentKey] : garmentType;
   };
   const receiptItems = order.items?.length
-    ? order.items.map(item => ({
-        id: item.id,
-        name: localizeGarmentType(item.garmentType),
-        quantity: item.quantity,
-        measurements: buildMeasurementEntries(item.measurements),
-        designs: buildDesignEntries(item.designSelections),
-      }))
+    ? order.items.map(item => {
+        // Early versions created a single item shell while keeping the real values
+        // on the order itself. Merge that snapshot only for a one-garment order;
+        // multi-garment orders must remain isolated per item.
+        const measurementSnapshot = order.items?.length === 1
+          ? { ...(order.measurements || {}), ...(item.measurements || {}) }
+          : item.measurements;
+        const designSnapshot = order.items?.length === 1
+          ? { ...(order.designSelections || {}), ...(item.designSelections || {}) }
+          : item.designSelections;
+        return {
+          id: item.id,
+          name: localizeGarmentType(item.garmentType),
+          quantity: item.quantity,
+          measurements: buildMeasurementEntries(measurementSnapshot),
+          designs: buildDesignEntries(designSnapshot),
+        };
+      })
     : order.garmentType.split(/\s*\+\s*/).map((garmentType, index) => ({
         id: `legacy-${index}`,
         name: localizeGarmentType(garmentType),
