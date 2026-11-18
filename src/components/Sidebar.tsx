@@ -98,7 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Light, Elegant Sidebar Container */}
       <aside
         id="app-sidebar"
-        className={`fixed top-0 bottom-0 z-50 flex flex-col w-[min(18rem,88vw)] bg-surface-muted text-stone-800 transition-transform duration-300 ease-in-out lg:translate-x-0 no-print shadow-xl lg:shadow-xs ${
+        className={`fixed top-0 bottom-0 z-50 flex flex-col w-[min(18rem,88vw)] bg-sidebar text-stone-800 transition-transform duration-300 ease-in-out lg:translate-x-0 no-print shadow-xl lg:shadow-xs ${
           isRtl 
             ? 'right-0 border-l border-stone-200' 
             : 'left-0 border-r border-stone-200'
@@ -111,7 +111,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         }`}
       >
         {/* Brand Header */}
-        <div className="flex items-center justify-between p-4.5 border-b border-stone-200 shrink-0 bg-stone-50/70">
+        <div className="flex items-center justify-between p-4.5 border-b border-stone-200 shrink-0 bg-sidebar">
           <div 
             onClick={() => handleNavClick('dashboard')}
             className="flex items-center gap-3 cursor-pointer group select-none overflow-hidden"
