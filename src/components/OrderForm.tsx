@@ -197,10 +197,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   const editingLegacyOrder = Boolean(initialOrder && isLegacyOrderNumber(initialOrder.orderNumber));
   const validOrderNumber = isManualOrderNumber(normalizedOrderNumber)
     || (editingLegacyOrder && isLegacyOrderNumber(normalizedOrderNumber));
-  const duplicateOrder = useMemo(() => orders.find(order =>
-    order.id !== initialOrder?.id
-    && normalizeOrderNumber(order.orderNumber) === normalizedOrderNumber
-  ), [initialOrder?.id, normalizedOrderNumber, orders]);
 
   // Auto-suggest existing customers
   const [showCustomerSuggestions, setShowCustomerSuggestions] = useState<boolean>(false);
@@ -346,10 +342,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({
       setSaveError(language === 'fa' ? 'شماره سفارش جدید باید فقط شامل ارقام باشد' : language === 'ps' ? 'د نوي فرمایش شمېره باید یوازې شمېرې ولري' : 'New order numbers must contain digits only');
       return;
     }
-    if (duplicateOrder) {
-      setSaveError(language === 'fa' ? `شماره سفارش ${normalizedOrderNumber} قبلاً استفاده شده است` : language === 'ps' ? `د فرمایش شمېره ${normalizedOrderNumber} مخکې کارول شوې ده` : `Order number ${normalizedOrderNumber} already exists`);
-      return;
-    }
     if (!customerName.trim()) {
       alert(language === 'fa' ? 'لطفاً نام مشتری را وارد نمایید' : language === 'ps' ? 'مهرباني وکړئ د مشتري نوم ولیکئ' : 'Please enter customer name');
       return;
@@ -388,7 +380,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
       });
       const garmentSummary = savedItems.map(item => item.garmentType).join(' + ');
       const orderData: Order = {
-        id: initialOrder?.id || 'ord_' + Date.now(),
+        id: initialOrder?.id || 'ord_' + crypto.randomUUID(),
         orderNumber: normalizedOrderNumber,
         customerId: customerId || 'cust_' + Date.now(),
         customerName: customerName.trim(),
@@ -506,22 +498,18 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 setSaveError('');
               }}
               placeholder="001, 0023"
-              aria-invalid={Boolean(orderNumber && (!validOrderNumber || duplicateOrder))}
+              aria-invalid={Boolean(orderNumber && !validOrderNumber)}
               aria-describedby="order-number-help"
               className={`w-full px-3.5 py-3 bg-stone-50 border rounded-xl text-base font-mono font-black tracking-wider outline-hidden transition ${
-                orderNumber && (!validOrderNumber || duplicateOrder)
+                orderNumber && !validOrderNumber
                   ? 'border-rose-400 focus:ring-2 focus:ring-rose-200'
                   : 'border-stone-200 focus:bg-surface focus:border-teal-600 focus:ring-2 focus:ring-teal-200'
               }`}
             />
             <div id="order-number-help" className="mt-2 text-[11px] font-medium">
-              {duplicateOrder ? (
-                <span role="alert" className="flex items-center gap-1 text-rose-700"><AlertCircle className="w-3.5 h-3.5" />{
-                  language === 'fa' ? 'این شماره سفارش قبلاً استفاده شده است.' : language === 'ps' ? 'دا فرمایش شمېره مخکې کارول شوې ده.' : 'This order number is already in use.'
-                }</span>
-              ) : orderNumber && validOrderNumber ? (
+              {orderNumber && validOrderNumber ? (
                 <span className="flex items-center gap-1 text-emerald-700"><CheckCircle2 className="w-3.5 h-3.5" />{
-                  language === 'fa' ? 'این شماره موجود است و صفرهای اول حفظ می‌شود.' : language === 'ps' ? 'دا شمېره شته؛ مخکښ صفرونه به وساتل شي.' : 'This number is available; leading zeroes will be preserved.'
+                  language === 'fa' ? 'شماره بل می‌تواند تکراری باشد؛ صفرهای اول حفظ می‌شود.' : language === 'ps' ? 'د بل شمېره تکرارېدای شي؛ مخکښ صفرونه به وساتل شي.' : 'Bill numbers can be reused; leading zeroes will be preserved.'
                 }</span>
               ) : (
                 <span className="text-stone-500">{

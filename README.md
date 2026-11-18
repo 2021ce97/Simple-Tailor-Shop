@@ -21,6 +21,12 @@ A tailored shop-management system for orders, customer measurements, fabric and 
 
 The React app connects directly to Supabase. On the first successful login, legacy browser data is uploaded to Supabase and removed from browser storage after the upload succeeds.
 
+## Duplicate bill numbers
+
+Run `supabase/migrations/20261118_allow_duplicate_order_numbers.sql` in the Supabase SQL Editor before deploying the duplicate-bill-number update. Apply it after the earlier migrations, including `20261021_manual_order_numbers.sql`.
+
+The migration removes bill-number uniqueness while preserving each order's internal ID and existing data. It also lets public tracking return every matching bill, beyond the previous 20-result limit. Both dashboard search fields show all matching orders, subject to the selected status and payment filters.
+
 ## Production
 
 Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in the deployment provider, then run `npm run build`....,,,,..m.....

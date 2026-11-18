@@ -142,12 +142,12 @@ export const PublicTrackingView: React.FC = () => {
 
             {orders.length > 0 && (
               <div className="mt-8 space-y-4 border-t border-stone-200 pt-8">
-                {orders.map(order => {
+            {orders.map((order, index) => {
                   const meta = statusMeta[order.status] || statusMeta.pending;
                   const statusText = copy.statuses[order.status] || copy.statuses.pending;
                   const StatusIcon = meta.icon || Shirt;
                   return (
-              <div key={order.orderNumber} className="rounded-2xl border border-stone-200 p-5">
+              <div key={`${order.orderNumber}-${index}`} className="rounded-2xl border border-stone-200 p-5">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-wider text-stone-500">{copy.clothId}</p>

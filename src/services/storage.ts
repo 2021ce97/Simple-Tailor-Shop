@@ -130,16 +130,10 @@ function assertUniqueCustomerPhone(customer: Pick<Customer, "id" | "phone">) {
   }
 }
 
-function assertUniqueOrderNumber(order: Pick<Order, "id" | "orderNumber">) {
+function assertValidOrderNumber(order: Pick<Order, "orderNumber">) {
   const orderNumber = normalizeOrderNumber(order.orderNumber);
   if (!isManualOrderNumber(orderNumber) && !isLegacyOrderNumber(orderNumber)) {
     throw new Error("Order numbers must be digits only, except for existing legacy MA-numbers.");
-  }
-  const duplicate = state.orders.find(
-    (row) => row.id !== order.id && normalizeOrderNumber(row.orderNumber) === orderNumber,
-  );
-  if (duplicate) {
-    throw new Error(`Order number ${orderNumber} already exists. Please choose another number.`);
   }
 }
 
@@ -328,10 +322,10 @@ export const storageService = {
   },
   getOrders: () => state.orders,
   getOrderById: (id: string) =>
-    state.orders.find((row) => row.id === id || row.orderNumber === id),
+    state.orders.find((row) => row.id === id),
   async saveOrder(value: Order, sync = true) {
     const normalizedOrderNumber = normalizeOrderNumber(value.orderNumber);
-    assertUniqueOrderNumber({ ...value, orderNumber: normalizedOrderNumber });
+    assertValidOrderNumber({ orderNumber: normalizedOrderNumber });
     let saved = { ...value, orderNumber: normalizedOrderNumber };
     if (sync) {
       // The orders.customer_id foreign key requires the customer row to exist

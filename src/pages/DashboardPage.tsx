@@ -233,7 +233,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
     });
   }, [productSales, orderSearchTerm, globalSearchTerm, sortBy]);
 
-  const visibleOrders = orderSearchTerm.trim() ? filteredOrders : filteredOrders.slice(0, visibleOrderCount);
+  const visibleOrders = orderSearchTerm.trim() || globalSearchTerm.trim()
+    ? filteredOrders
+    : filteredOrders.slice(0, visibleOrderCount);
   const visibleSales = filteredSales.slice(0, visibleSaleCount);
 
   useEffect(() => {
