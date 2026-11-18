@@ -806,7 +806,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
       {/* ================= TAB 1: GARMENT CATEGORIES ================= */}
       {activeTab === 'garments' && (
-        <div className="space-y-6">
+        <div className="settings-section tone-blue space-y-6">
           {/* Add New Garment Category Box */}
           <div className="bg-surface p-5 rounded-2xl border border-line shadow-xs space-y-3">
             <h3 className="font-bold text-sm text-ink flex items-center gap-2">
@@ -852,7 +852,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
               <button
                 type="button"
                 onClick={handleAddGarmentType}
-                className="px-5 py-2 bg-ink hover:bg-black text-accent-soft text-xs font-bold rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5"
+                className="ui-button ui-button--primary px-5 py-2 bg-ink hover:bg-black text-accent-soft text-xs font-bold rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t.addGarmentType || 'افزودن لباس'}</span>
@@ -935,14 +935,14 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => startEditGarment(g)}
-                            className="p-1.5 text-stone-400 hover:text-accent hover:bg-stone-100 rounded-lg transition"
+                            className="ui-icon-button p-1.5 text-stone-400 hover:text-accent hover:bg-stone-100 rounded-lg transition"
                             title={t.edit}
                           >
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => handleDeleteGarment(g.key)}
-                            className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                            className="ui-icon-button ui-icon-button--danger p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
                             title={t.delete}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -969,7 +969,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
       {/* ================= TAB 2: MEASUREMENT SETTINGS ================= */}
       {activeTab === 'measurements' && (
-        <div className="space-y-6">
+        <div className="settings-section tone-clay space-y-6">
           {/* Garment Selection Bar - Select garment to see only its measurement fields */}
           <div className="bg-surface p-4 rounded-2xl border border-stone-200 shadow-xs space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1030,7 +1030,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
               {measurementTemplates.map(template => {
                 const templateName = language === 'ps' ? template.namePs : language === 'fa' ? template.nameFa : template.nameEn;
                 return (
-                  <button key={template.id} type="button" onClick={() => applyMeasurementTemplate(template.id)} className="flex items-center justify-between rounded-xl border border-sky-200 bg-surface px-3 py-2 text-start text-xs font-bold text-stone-800 transition hover:border-sky-400 hover:bg-sky-50 cursor-pointer">
+                  <button key={template.id} type="button" onClick={() => applyMeasurementTemplate(template.id)} className="ui-button ui-button--secondary flex items-center justify-between rounded-xl border border-sky-200 bg-surface px-3 py-2 text-start text-xs font-bold text-stone-800 transition hover:border-sky-400 hover:bg-sky-50 cursor-pointer">
                     <span>{templateName}</span>
                     <span className="rounded-md bg-sky-100 px-1.5 py-0.5 text-[10px] text-sky-800">+{template.fields.length}</span>
                   </button>
@@ -1116,7 +1116,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
               <button
                 type="button"
                 onClick={handleAddField}
-                className="px-5 py-2 bg-ink hover:bg-black text-accent-soft text-xs font-bold rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5"
+                className="ui-button ui-button--primary px-5 py-2 bg-ink hover:bg-black text-accent-soft text-xs font-bold rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t.addMeasurementField}</span>
@@ -1263,7 +1263,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
       {/* ================= TAB 3: DESIGN TEMPLATES ================= */}
       {activeTab === 'design' && (
-        <div className="space-y-6">
+        <div className="settings-section tone-violet space-y-6">
           {/* Garment Selection Bar - Select garment to see only its design categories */}
           <div className="bg-surface p-4 rounded-2xl border border-stone-200 shadow-xs space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1377,7 +1377,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
               <button
                 type="button"
                 onClick={handleAddCategory}
-                className="px-5 py-2 bg-ink hover:bg-black text-accent-soft text-xs font-bold rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5"
+                className="ui-button ui-button--primary px-5 py-2 bg-ink hover:bg-black text-accent-soft text-xs font-bold rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t.addCategory}</span>
@@ -1493,7 +1493,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                           type="button"
                           onClick={() => moveDesignCategory(category.id, -1)}
                           disabled={categoryIndex === 0}
-                          className="p-1.5 text-stone-400 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed"
+                          className="ui-icon-button p-1.5 text-stone-400 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed"
                           title={language === 'fa' ? 'انتقال به بالا' : language === 'ps' ? 'پورته انتقال' : 'Move up'}
                         >
                           <ArrowUp className="w-3.5 h-3.5" />
@@ -1502,21 +1502,21 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                           type="button"
                           onClick={() => moveDesignCategory(category.id, 1)}
                           disabled={categoryIndex === filteredDesignCategories.length - 1}
-                          className="p-1.5 text-stone-400 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed"
+                          className="ui-icon-button p-1.5 text-stone-400 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed"
                           title={language === 'fa' ? 'انتقال به پایین' : language === 'ps' ? 'ښکته انتقال' : 'Move down'}
                         >
                           <ArrowDown className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => startEditCategory(category)}
-                          className="p-1.5 text-stone-400 hover:text-accent hover:bg-stone-100 rounded-lg transition cursor-pointer"
+                          className="ui-icon-button p-1.5 text-stone-400 hover:text-accent hover:bg-stone-100 rounded-lg transition cursor-pointer"
                           title={t.edit}
                         >
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDeleteCategory(category.id)}
-                          className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                          className="ui-icon-button ui-icon-button--danger p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
                           title={t.delete}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -1687,7 +1687,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
       {/* ================= TAB 4: SHOP PROFILE ================= */}
       {activeTab === 'shop' && (
-        <form onSubmit={handleSaveShopSettings} className="bg-surface p-4 sm:p-6 rounded-2xl border border-line shadow-xs space-y-6">
+        <form onSubmit={handleSaveShopSettings} className="settings-section tone-sage bg-surface p-4 sm:p-6 rounded-2xl border border-line shadow-xs space-y-6">
           <div className="border-b border-line pb-3">
             <h3 className="font-bold text-sm text-ink">
               {t.shopProfile}
@@ -1947,7 +1947,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
           <div className="flex justify-end pt-2">
             <button
               type="submit"
-              className="px-6 py-2.5 bg-accent hover:bg-accent-hover text-white font-black rounded-xl text-xs transition cursor-pointer shadow-xs"
+              className="ui-button ui-button--primary px-6 py-2.5 bg-accent hover:bg-accent-hover text-white font-black rounded-xl text-xs transition cursor-pointer shadow-xs"
             >
               {t.save}
             </button>
@@ -1971,7 +1971,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
       {/* ================= TAB 6: BACKUP & RESTORE ================= */}
       {activeTab === 'backup' && (
-        <div className="bg-surface p-4 sm:p-6 rounded-2xl border border-line shadow-xs space-y-6">
+        <div className="settings-section tone-rose bg-surface p-4 sm:p-6 rounded-2xl border border-line shadow-xs space-y-6">
           <div>
             <h3 className="font-bold text-sm text-ink">
               {t.backupAndRestore}

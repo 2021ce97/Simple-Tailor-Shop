@@ -380,9 +380,9 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
       </div>
 
       <div className="grid grid-cols-1 min-[430px]:grid-cols-3 gap-3">
-        <div className="rounded-2xl border border-stone-200 bg-surface p-4"><div className="flex items-center gap-2 text-stone-500 text-xs font-bold"><Users className="w-4 h-4" /> {language === 'fa' ? 'همه مشتریان' : language === 'ps' ? 'ټول پېرودونکي' : 'All customers'}</div><p className="mt-2 text-2xl font-black text-stone-900">{allCustomers.length}</p></div>
-        <div className="rounded-2xl border border-teal-200 bg-teal-50/60 p-4"><div className="flex items-center gap-2 text-teal-800 text-xs font-bold"><Scissors className="w-4 h-4" /> {language === 'fa' ? 'مشتریان خیاطی' : language === 'ps' ? 'د خیاطۍ پېرودونکي' : 'Tailoring customers'}</div><p className="mt-2 text-2xl font-black text-teal-900">{customerCounts.tailoring}</p></div>
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4"><div className="flex items-center gap-2 text-emerald-800 text-xs font-bold"><ShoppingBag className="w-4 h-4" /> {language === 'fa' ? 'مشتریان محصولات' : language === 'ps' ? 'د محصولاتو پېرودونکي' : 'Product customers'}</div><p className="mt-2 text-2xl font-black text-emerald-900">{customerCounts.products}</p></div>
+        <div className="ui-summary tone-blue rounded-2xl border border-stone-200 bg-surface p-4"><div className="flex items-center gap-2 text-stone-500 text-xs font-bold"><Users className="w-4 h-4" /> {language === 'fa' ? 'همه مشتریان' : language === 'ps' ? 'ټول پېرودونکي' : 'All customers'}</div><p className="mt-2 text-2xl font-black text-stone-900">{allCustomers.length}</p></div>
+        <div className="ui-summary tone-sage rounded-2xl border border-teal-200 bg-teal-50/60 p-4"><div className="flex items-center gap-2 text-teal-800 text-xs font-bold"><Scissors className="w-4 h-4" /> {language === 'fa' ? 'مشتریان خیاطی' : language === 'ps' ? 'د خیاطۍ پېرودونکي' : 'Tailoring customers'}</div><p className="mt-2 text-2xl font-black text-teal-900">{customerCounts.tailoring}</p></div>
+        <div className="ui-summary tone-violet rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4"><div className="flex items-center gap-2 text-emerald-800 text-xs font-bold"><ShoppingBag className="w-4 h-4" /> {language === 'fa' ? 'مشتریان محصولات' : language === 'ps' ? 'د محصولاتو پېرودونکي' : 'Product customers'}</div><p className="mt-2 text-2xl font-black text-emerald-900">{customerCounts.products}</p></div>
       </div>
 
       {/* Main 2-Column Layout */}
@@ -458,7 +458,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                         .filter(Boolean);
                       setSelectedMeasurementGarment(customerGarmentTypes[0] || cust.preferredGarmentType || '');
                     }}
-                    className={`p-4 rounded-2xl border transition cursor-pointer flex items-center justify-between gap-3 ${
+                    className={`customer-record p-4 rounded-2xl border transition cursor-pointer flex items-center justify-between gap-3 ${
                       isSelected
                         ? 'bg-surface-muted border-accent shadow-xs ring-1 ring-accent'
                         : 'bg-surface border-line hover:bg-surface-muted/60 shadow-2xs'
@@ -491,7 +491,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                           e.stopPropagation();
                           onNewOrderForCustomer(cust);
                         }}
-                        className="p-1.5 text-white bg-accent hover:bg-accent-hover rounded-lg transition shadow-2xs cursor-pointer"
+                        className="ui-icon-button p-1.5 text-white bg-accent hover:bg-accent-hover rounded-lg transition shadow-2xs cursor-pointer"
                         title={t.createNewOrderForCustomer}
                       >
                         <Scissors className="w-4 h-4" />
@@ -507,7 +507,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
         {/* RIGHT COLUMN: Active Customer Details & Saved Measurements (7 Cols) */}
         <div className="lg:col-span-7">
           {activeCustomer ? (
-            <div className="bg-surface rounded-2xl border border-line shadow-xs p-4 sm:p-6 space-y-5 sm:space-y-6">
+            <div className="ui-panel tone-violet bg-surface rounded-2xl border border-line shadow-xs p-4 sm:p-6 space-y-5 sm:space-y-6">
               {/* Profile Top Bar */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
                 <div className="flex items-center gap-3 min-w-0">
@@ -533,7 +533,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                   <button
                     onClick={() => onNewOrderForCustomer(activeCustomer)}
                     id="new-order-from-profile-btn"
-                    className="inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 px-3.5 py-2 bg-accent hover:bg-accent-hover active:scale-98 text-white font-black rounded-xl text-xs transition cursor-pointer shadow-xs"
+                    className="ui-button ui-button--primary inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 px-3.5 py-2 bg-accent hover:bg-accent-hover active:scale-98 text-white font-black rounded-xl text-xs transition cursor-pointer shadow-xs"
                   >
                     <Scissors className="w-4 h-4" />
                     <span>{t.createNewOrderForCustomer}</span>
@@ -541,7 +541,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
 
                   <button
                     onClick={() => handleOpenEditModal(activeCustomer)}
-                    className="p-1.5 text-ink hover:text-black bg-surface-muted hover:bg-stone-200 rounded-lg transition border border-line cursor-pointer"
+                    className="ui-icon-button p-1.5 text-ink hover:text-black bg-surface-muted hover:bg-stone-200 rounded-lg transition border border-line cursor-pointer"
                     title={t.edit}
                   >
                     <Edit3 className="w-4 h-4" />
@@ -549,7 +549,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
 
                   <button
                     onClick={() => handleDeleteCustomer(activeCustomer)}
-                    className="p-1.5 text-stone-400 hover:text-rose-600 bg-surface-muted hover:bg-rose-50 rounded-lg transition border border-line cursor-pointer"
+                    className="ui-icon-button ui-icon-button--danger p-1.5 text-stone-400 hover:text-rose-600 bg-surface-muted hover:bg-rose-50 rounded-lg transition border border-line cursor-pointer"
                     title={t.delete}
                   >
                     <Trash2 className="w-4 h-4" />
@@ -774,7 +774,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                             </span>
                             {ord.balanceAmount > 0 ? (
                               <span className="text-rose-600 font-bold">
-                                ({t.balanceDue}: {ord.balanceAmount} {currencySymbol})
+                                ({t.balanceRemaining}: {ord.balanceAmount} {currencySymbol})
                               </span>
                             ) : (
                               <span className="text-emerald-700 font-bold">({t.paid})</span>
@@ -826,7 +826,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                               {sale.totalAmount.toLocaleString()} {currencySymbol}
                             </span>
                             <span className="text-stone-400">
-                              ({sale.sellingPrice.toLocaleString()} {currencySymbol}/{t.unitPiece || 'unit'})
+                              ({sale.sellingPrice.toLocaleString()} {currencySymbol}/{t.units || 'unit'})
                             </span>
                             {sale.paymentMethod && (
                               <span className="text-[10px] uppercase font-bold text-stone-500 font-sans">
@@ -991,14 +991,14 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
               <button
                 type="button"
                 onClick={() => setIsEditingModalOpen(false)}
-                className="px-4 py-2 bg-surface-muted hover:bg-stone-200 text-muted text-xs font-bold rounded-xl border border-line cursor-pointer"
+                className="ui-button ui-button--secondary px-4 py-2 bg-surface-muted hover:bg-stone-200 text-muted text-xs font-bold rounded-xl border border-line cursor-pointer"
               >
                 {t.cancel}
               </button>
               <button
                 type="button"
                 onClick={handleSaveCustomer}
-                className="px-5 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-black rounded-xl shadow-xs cursor-pointer"
+                className="ui-button ui-button--primary px-5 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-black rounded-xl shadow-xs cursor-pointer"
               >
                 {t.save}
               </button>

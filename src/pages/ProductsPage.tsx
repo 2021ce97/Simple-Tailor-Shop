@@ -288,7 +288,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
           <button
             onClick={handleOpenAddModal}
             id="btn-add-new-product"
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-extrabold shadow-sm transition cursor-pointer"
+            className="ui-button ui-button--primary flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-extrabold shadow-sm transition cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>{t.addProduct}</span>
@@ -297,8 +297,8 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
       </div>
 
       {/* Top 4 Summary Cards */}
-      <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div className="bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
+      <div className="grid grid-cols-1 min-[360px]:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="ui-summary tone-blue bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-700 block">
               {language === 'fa' ? 'تعداد اجناس' : language === 'ps' ? 'د توکو شمیر' : 'Total Items'}
@@ -312,7 +312,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
           </div>
         </div>
 
-        <div className="bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
+        <div className="ui-summary tone-sage bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-700 block">
               {language === 'fa' ? 'موجودی کل' : language === 'ps' ? 'ټوله موجوده' : 'Stock in Store'}
@@ -326,7 +326,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
           </div>
         </div>
 
-        <div className="bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
+        <div className="ui-summary tone-violet bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-700 block">
               {language === 'fa' ? 'سرمایه جنس گدام' : language === 'ps' ? 'د ګدام سرمایه' : 'Inventory Cost'}
@@ -340,7 +340,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
           </div>
         </div>
 
-        <div className="bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
+        <div className="ui-summary tone-clay bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-700 block">
               {language === 'fa' ? 'مجموع مفاد فروش' : language === 'ps' ? 'د پلور ټوله ګټه' : 'Total Sales Profit'}
@@ -514,15 +514,15 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
               </p>
               <button
                 onClick={handleOpenAddModal}
-                className="mt-4 px-4 py-2 bg-accent text-white font-bold text-xs rounded-xl hover:bg-accent-hover transition cursor-pointer"
+                className="ui-button ui-button--primary mt-4 px-4 py-2 bg-accent text-white font-bold text-xs rounded-xl hover:bg-accent-hover transition cursor-pointer"
               >
                 {t.addProduct}
               </button>
             </div>
           ) : (
-            <div className="bg-surface rounded-2xl border border-line shadow-xs overflow-hidden divide-y divide-stone-200">
+            <div className="ui-panel ui-data-list tone-violet bg-surface rounded-2xl border border-line shadow-xs overflow-hidden divide-y divide-stone-200">
               {/* Header Row for Large Screens */}
-              <div className="hidden lg:grid grid-cols-12 gap-3 px-5 py-3 bg-stone-50 text-[11px] font-bold text-stone-600 uppercase tracking-wider border-b border-stone-200">
+              <div className="ui-list-heading hidden lg:grid grid-cols-12 gap-3 px-5 py-3 bg-stone-50 text-[11px] font-bold text-stone-600 uppercase tracking-wider border-b border-stone-200">
                 <div className="col-span-3">
                   {language === 'fa' ? 'محصول و کتگوری' : language === 'ps' ? 'توکی او کتګوري' : 'Product & Category'}
                 </div>
@@ -550,7 +550,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                   <div
                     key={product.id}
                     id={`product-row-${product.id}`}
-                    className={`p-4 lg:px-5 lg:py-3.5 hover:bg-stone-50/70 transition-colors flex flex-col lg:grid lg:grid-cols-12 gap-3 items-start lg:items-center ${
+                    className={`ui-list-row p-4 lg:px-5 lg:py-3.5 hover:bg-stone-50/70 transition-colors flex flex-col lg:grid lg:grid-cols-12 gap-3 items-start lg:items-center ${
                       isLow ? 'bg-teal-50/30' : ''
                     }`}
                   >
@@ -645,12 +645,12 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                     </div>
 
                     {/* 5. Row Actions (Sell / Edit / Delete) */}
-                    <div className="w-full lg:col-span-3 flex items-center justify-between lg:justify-end gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-stone-100">
+                    <div className="w-full lg:col-span-3 row-action-group flex flex-wrap items-center justify-between lg:justify-end gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-stone-100">
                       {/* Sell Button - Decides selling price now! */}
                       <button
                         onClick={() => onMakeSale(product)}
                         disabled={stock <= 0}
-                        className={`py-1.5 px-3 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 cursor-pointer shadow-2xs ${
+                        className={`ui-button ui-button--primary py-1.5 px-3 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 cursor-pointer shadow-2xs ${
                           stock <= 0
                             ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
                             : 'bg-emerald-600 hover:bg-emerald-700 text-white'
@@ -664,7 +664,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                         <button
                           type="button"
                           onClick={() => handleRestock(product)}
-                          className="py-1.5 px-3 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 cursor-pointer shadow-2xs bg-teal-500 hover:bg-teal-600 text-white"
+                          className="ui-button ui-button--secondary py-1.5 px-3 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 cursor-pointer shadow-2xs bg-teal-500 hover:bg-teal-600 text-white"
                         >
                           <Package className="w-3.5 h-3.5" />
                           <span>{language === 'fa' ? 'افزایش موجودی' : language === 'ps' ? 'موجودي زیاته کړئ' : 'Restock'}</span>
@@ -675,14 +675,14 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                         <button
                           onClick={() => handleOpenEditModal(product)}
                           title={t.edit}
-                          className="p-1.5 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition cursor-pointer"
+                          className="ui-icon-button p-1.5 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition cursor-pointer"
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => onDeleteProduct(product.id)}
                           title={t.delete}
-                          className="p-1.5 text-stone-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                          className="ui-icon-button ui-icon-button--danger p-1.5 text-stone-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -696,7 +696,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
         </>
       ) : (
         /* Sales History View */
-        <div className="bg-surface rounded-2xl border border-line shadow-xs overflow-hidden">
+        <div className="ui-panel tone-clay bg-surface rounded-2xl border border-line shadow-xs overflow-hidden">
           <div className="p-4 border-b border-stone-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-emerald-600" />
@@ -713,7 +713,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-start text-xs">
+              <table className="ui-table tone-clay w-full text-start text-xs">
                 <thead>
                   <tr className="bg-stone-50 border-b border-stone-200 text-stone-600 font-bold uppercase text-[10px]">
                     <th className="py-2.5 px-4 text-start">{t.date}</th>
@@ -923,13 +923,13 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold cursor-pointer"
+                  className="ui-button ui-button--secondary px-4 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold cursor-pointer"
                 >
                   {t.cancel}
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-extrabold shadow-sm transition cursor-pointer"
+                  className="ui-button ui-button--primary px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-extrabold shadow-sm transition cursor-pointer"
                 >
                   {editingProduct ? t.updateProduct : t.addProduct}
                 </button>

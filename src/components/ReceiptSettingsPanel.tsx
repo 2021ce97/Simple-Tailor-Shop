@@ -208,7 +208,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
           <button
             type="button"
             onClick={handleSave}
-            className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white font-black rounded-xl text-xs transition cursor-pointer shadow-xs flex items-center gap-2"
+            className="ui-button ui-button--primary px-5 py-2.5 bg-accent hover:bg-accent-hover text-white font-black rounded-xl text-xs transition cursor-pointer shadow-xs flex items-center gap-2"
           >
             <Check className="w-4 h-4 stroke-[2.5]" />
             <span>{language === 'fa' ? 'ذخیره در تنظیمات دکان' : language === 'ps' ? 'د هټۍ په ترتیباتو کې ساتل' : 'Save Receipt Preferences'}</span>
@@ -600,7 +600,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
               <button
                 type="button"
                 onClick={handleSave}
-                className="px-6 py-2.5 bg-accent hover:bg-accent-hover text-white font-black rounded-xl text-xs transition cursor-pointer shadow-xs flex items-center gap-2"
+                className="ui-button ui-button--primary px-6 py-2.5 bg-accent hover:bg-accent-hover text-white font-black rounded-xl text-xs transition cursor-pointer shadow-xs flex items-center gap-2"
               >
                 <Check className="w-4 h-4 stroke-[2.5]" />
                 <span>{language === 'fa' ? 'ذخیره دایمی در تنظیمات' : language === 'ps' ? 'په ترتیباتو کې ساتل' : 'Save All Receipt Settings'}</span>
@@ -646,7 +646,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 type="button"
                 onClick={handleTestDownloadPdf}
                 disabled={isTestPdf}
-                className="px-4 py-2 bg-surface-muted hover:bg-stone-200 border border-line text-ink font-bold rounded-xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
+                className="ui-icon-button px-4 py-2 bg-surface-muted hover:bg-stone-200 border border-line text-ink font-bold rounded-xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
                 title="Download PDF"
               >
                 <Download className="w-3.5 h-3.5 text-stone-700" />

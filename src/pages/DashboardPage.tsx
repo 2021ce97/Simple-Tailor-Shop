@@ -536,7 +536,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <button
             onClick={onNewOrder}
             id="dashboard-new-order-btn"
-            className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-hover active:scale-98 text-white font-black rounded-xl text-sm transition cursor-pointer shadow-xs"
+            className="ui-button ui-button--primary inline-flex w-full sm:w-auto items-center justify-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-hover active:scale-98 text-white font-black rounded-xl text-sm transition cursor-pointer shadow-xs"
           >
             <Plus className="w-5 h-5 stroke-[2.5]" />
             <span>{t.newOrder}</span>
@@ -868,7 +868,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   type="button"
                   onClick={() => setOrderSearchTerm('')}
                   title={language === 'fa' ? 'پاک کردن جستجو' : language === 'ps' ? 'پلټنه پاکه کړئ' : 'Clear search'}
-                  className="absolute end-3 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 rounded-lg bg-stone-200 px-2 py-1 text-[10px] font-bold text-stone-600 hover:bg-stone-300 hover:text-stone-900 cursor-pointer"
+                  className="ui-icon-button absolute end-3 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 rounded-lg bg-stone-200 px-2 py-1 text-[10px] font-bold text-stone-600 hover:bg-stone-300 hover:text-stone-900 cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">{language === 'fa' ? 'پاک' : language === 'ps' ? 'پاکول' : 'Clear'}</span>
@@ -921,7 +921,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <option value="paid">{t.paid}</option>
                 <option value="balance">{t.balanceRemaining} ({t.partial})</option>
               </select>
-              <button type="button" onClick={() => setIsGroupPaymentOpen(true)} className="flex items-center gap-1.5 whitespace-nowrap rounded-xl bg-emerald-700 px-3 py-2 text-xs font-black text-white shadow-xs hover:bg-emerald-800">
+              <button type="button" onClick={() => setIsGroupPaymentOpen(true)} className="ui-button ui-button--primary flex items-center gap-1.5 whitespace-nowrap rounded-xl bg-emerald-700 px-3 py-2 text-xs font-black text-white shadow-xs hover:bg-emerald-800">
                 <CreditCard className="h-3.5 w-3.5" />
                 {language === 'fa' ? 'پرداخت گروهی' : language === 'ps' ? 'ډله‌ییزه تادیه' : 'Group Payment'}
               </button>
@@ -980,9 +980,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <p className="text-xs text-stone-500">{t.noDataFound}</p>
             </div>
           ) : (
-            <div className="bg-surface rounded-2xl border border-stone-200 overflow-hidden shadow-xs">
+            <div className="ui-panel tone-sage bg-surface rounded-2xl border border-stone-200 overflow-hidden shadow-xs">
               <div className="overflow-x-auto">
-                <table className="w-full text-start text-xs border-collapse">
+                <table className="ui-table tone-sage w-full text-start text-xs border-collapse">
                   <thead>
                     <tr className="bg-emerald-50/60 border-b border-emerald-100 text-emerald-950 font-bold uppercase tracking-wider text-[11px]">
                       <th className="py-3 px-4 text-start">ID / {t.date}</th>
@@ -1049,7 +1049,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                               type="button"
                               onClick={() => handleDeleteSale(sale)}
                               title={t.delete}
-                              className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition cursor-pointer"
+                              className="ui-icon-button ui-icon-button--danger p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition cursor-pointer"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -1065,7 +1065,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <button
                     type="button"
                     onClick={() => setVisibleSaleCount(count => count + 20)}
-                    className="px-5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-black transition cursor-pointer"
+                    className="ui-button ui-button--secondary px-5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-black transition cursor-pointer"
                   >
                     {language === 'fa' ? 'نمایش ۲۰ مورد بیشتر' : language === 'ps' ? '۲۰ نور ریکارډونه وښایاست' : 'See 20 more records'}
                   </button>
@@ -1102,14 +1102,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
               {orderSearchTerm ? (
                 <button
                   onClick={() => { setOrderSearchTerm(''); setStatusFilter('all'); setPaymentFilter('all'); }}
-                  className="mt-4 px-4 py-2 bg-stone-100 text-stone-700 hover:bg-stone-200 rounded-xl text-xs font-bold transition cursor-pointer"
+                  className="ui-button ui-button--secondary mt-4 px-4 py-2 bg-stone-100 text-stone-700 hover:bg-stone-200 rounded-xl text-xs font-bold transition cursor-pointer"
                 >
                   {language === 'fa' ? 'پاک کردن جستجو' : 'Clear Search'}
                 </button>
               ) : (
                 <button
                   onClick={onNewOrder}
-                  className="mt-4 px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-black transition cursor-pointer shadow-xs"
+                  className="ui-button ui-button--primary mt-4 px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-black transition cursor-pointer shadow-xs"
                 >
                   + {t.newOrder}
                 </button>
@@ -1118,14 +1118,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
           ) : (
             <div className="space-y-3">
               {/* Desktop Table Layout */}
-              <div className="hidden lg:block bg-surface rounded-2xl border border-line overflow-hidden shadow-xs">
+              <div className="ui-panel tone-blue hidden lg:block bg-surface rounded-2xl border border-line overflow-hidden shadow-xs">
                 <div className="overflow-x-auto w-full">
-                  <table className="w-full text-start text-xs border-collapse min-w-[760px]">
+                  <table className="ui-table tone-blue w-full text-start text-xs border-collapse min-w-[760px]">
                     <thead>
                       <tr className="bg-stone-50 border-b border-line text-stone-600 font-bold uppercase tracking-wider text-[11px]">
                         <th className="py-3 px-3 text-start whitespace-nowrap">{t.orderNumber}</th>
-                        <th className="py-3 px-3 text-start">{t.customerDetails}</th>
-                        <th className="py-3 px-3 text-start">{t.garmentType} & {t.fabric}</th>
+                        <th className="py-3 px-3 text-start">{t.customerInfo}</th>
+                        <th className="py-3 px-3 text-start">{t.garmentType} & {t.fabricDetails}</th>
                         <th className="py-3 px-3 text-start whitespace-nowrap">{t.dates}</th>
                         <th className="py-3 px-3 text-start whitespace-nowrap">{t.orderStatus}</th>
                         <th className="py-3 px-3 text-start whitespace-nowrap">{t.paymentStatus}</th>
@@ -1261,7 +1261,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                                   type="button"
                                   onClick={() => onViewReceipt(order)}
                                   title={t.print}
-                                  className="p-1.5 bg-accent hover:bg-accent-hover text-white rounded-lg transition cursor-pointer shadow-2xs"
+                                  className="ui-icon-button p-1.5 bg-accent hover:bg-accent-hover text-white rounded-lg transition cursor-pointer shadow-2xs"
                                 >
                                   <Printer className="w-4 h-4" />
                                 </button>
@@ -1269,7 +1269,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                                   type="button"
                                   onClick={() => onEditOrder(order)}
                                   title={t.edit}
-                                  className="p-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg transition cursor-pointer"
+                                  className="ui-icon-button p-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg transition cursor-pointer"
                                 >
                                   <Edit3 className="w-4 h-4" />
                                 </button>
@@ -1277,7 +1277,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                                   type="button"
                                   onClick={() => handleDeleteOrder(order)}
                                   title={t.delete}
-                                  className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition cursor-pointer"
+                                  className="ui-icon-button ui-icon-button--danger p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition cursor-pointer"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
@@ -1300,7 +1300,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   return (
                     <div
                       key={order.id}
-                      className="bg-surface p-4 rounded-2xl border border-line shadow-xs space-y-3"
+                      className="ui-panel tone-blue bg-surface p-4 rounded-2xl border border-line shadow-xs space-y-3"
                     >
                       <div className="flex items-center justify-between gap-2 border-b border-stone-100 pb-2.5">
                         <span className="font-mono font-black text-sm text-ink">
@@ -1411,7 +1411,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <button
                     type="button"
                     onClick={() => setVisibleOrderCount(count => count + 20)}
-                    className="px-5 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-900 border border-teal-200 text-xs font-black transition cursor-pointer"
+                    className="ui-button ui-button--secondary px-5 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-900 border border-teal-200 text-xs font-black transition cursor-pointer"
                   >
                     {language === 'fa' ? 'نمایش ۲۰ مورد بیشتر' : language === 'ps' ? '۲۰ نور ریکارډونه وښایاست' : 'See 20 more records'}
                   </button>
@@ -1485,14 +1485,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <button
                 type="button"
                 onClick={() => setPaymentModalOrder(null)}
-                className="px-3 py-2 bg-stone-100 hover:bg-stone-200 rounded-xl text-xs font-bold text-stone-700 cursor-pointer"
+                className="ui-button ui-button--secondary px-3 py-2 bg-stone-100 hover:bg-stone-200 rounded-xl text-xs font-bold text-stone-700 cursor-pointer"
               >
                 {t.cancel}
               </button>
               <button
                 type="button"
                 onClick={handleSavePaymentUpdate}
-                className="px-4 py-2 bg-accent hover:bg-accent-hover rounded-xl text-xs font-black text-white cursor-pointer"
+                className="ui-button ui-button--primary px-4 py-2 bg-accent hover:bg-accent-hover rounded-xl text-xs font-black text-white cursor-pointer"
               >
                 {t.save}
               </button>
@@ -1640,7 +1640,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveRetailReceipt(null)}
-                className="px-3.5 py-2 bg-stone-200 hover:bg-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer"
+                className="ui-button ui-button--secondary px-3.5 py-2 bg-stone-200 hover:bg-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer"
               >
                 {t.close}
               </button>
@@ -1648,7 +1648,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 type="button"
                 onClick={handleDownloadRetailPdf}
                 disabled={isGeneratingRetailPdf}
-                className="px-3.5 py-2 bg-surface hover:bg-stone-100 border border-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                className="ui-icon-button px-3.5 py-2 bg-surface hover:bg-stone-100 border border-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
                 title="Download PDF"
               >
                 <Download className="w-3.5 h-3.5" />
@@ -1658,7 +1658,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 type="button"
                 onClick={handlePrintRetailReceipt}
                 disabled={isPrintingRetail}
-                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl text-xs font-black shadow-xs transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                className="ui-button ui-button--primary px-5 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl text-xs font-black shadow-xs transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
               >
                 <Printer className="w-4 h-4" />
                 <span>{isPrintingRetail ? t.loading : (language === 'fa' ? 'چاپ رسید' : 'Print Slip')}</span>

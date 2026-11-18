@@ -419,7 +419,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   };
 
   return (
-    <div className="max-w-4xl min-w-0 mx-auto pb-20 animate-in fade-in duration-200">
+    <div className="max-w-7xl min-w-0 mx-auto pb-20 animate-in fade-in duration-200">
       {saveError && <div role="alert" className="mb-4 flex items-start gap-2 rounded-xl border border-rose-300 bg-rose-50 p-4 text-sm font-bold text-rose-800"><AlertCircle className="h-5 w-5 shrink-0" /><span>{saveError}</span></div>}
       
       {/* Top Banner & Header */}
@@ -442,7 +442,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 ? 'ثبت دقیق اندازه‌ها، انتخاب رخت، دیزاین و مشخصات سفارش به صورت پیوسته' 
                 : language === 'ps' 
                 ? 'د کالي د ډول پر بنسټ د فرمایش، رخت، ډیزاین او اندازو ثبت' 
-                : 'Complete Afghan tailoring order form in a single continuous flow'}
+                : 'Customer & bill details, tailoring specifications, delivery, and payment'}
             </p>
           </div>
         </div>
@@ -451,7 +451,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2.5 text-xs font-bold text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-xl transition cursor-pointer"
+            className="ui-button ui-button--secondary px-4 py-2.5 text-xs font-bold text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-xl transition cursor-pointer"
           >
             {t.cancel}
           </button>
@@ -459,7 +459,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             type="button"
             disabled={isSaving}
             onClick={handleSave}
-            className="px-6 py-2.5 text-xs font-black text-white bg-accent hover:bg-accent-hover active:scale-98 rounded-xl transition cursor-pointer flex items-center gap-2 shadow-sm disabled:opacity-60"
+            className="ui-button ui-button--primary px-6 py-2.5 text-xs font-black text-white bg-accent hover:bg-accent-hover active:scale-98 rounded-xl transition cursor-pointer flex items-center gap-2 shadow-sm disabled:opacity-60"
           >
             {isSaving ? (
               <div className="w-4 h-4 border-2 border-ink border-t-transparent rounded-full animate-spin" />
@@ -472,16 +472,34 @@ export const OrderForm: React.FC<OrderFormProps> = ({
       </div>
 
       {/* Single Vertical Unified Flow Container */}
-      <div className="space-y-6">
+      <div className="space-y-5">
+<section id="order-customer" className="ui-panel tone-blue bg-surface p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+            <div className="flex items-center gap-2 text-stone-900 font-extrabold text-sm">
+              <span className="w-1.5 h-5 bg-teal-600 rounded-full inline-block" />
+              <User className="w-4 h-4 text-teal-600" />
+              <h2>{t.customerInfo}</h2>
+            </div>
 
-        {/* Manual order number */}
-        <div className="bg-surface p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-3">
-          <div className="flex items-center gap-2 text-stone-900 font-extrabold text-sm">
-            <span className="w-1.5 h-5 bg-teal-600 rounded-full inline-block" />
-            <Tag className="w-4 h-4 text-teal-600" />
-            <span>{t.orderNumber}</span>
+            {matchedExistingCustomer && (
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>{t.existingCustomerFound} ({matchedExistingCustomer.name})</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={handleLoadSavedMeasurements}
+                  className="text-[11px] text-teal-700 hover:underline font-bold"
+                >
+                  {language === 'fa' ? 'بارگذاری اندازه‌های قبلی' : 'Load Saved Measurements'}
+                </button>
+              </div>
+            )}
           </div>
-          <div className="max-w-sm">
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative">
+<div className="min-w-0">
             <label htmlFor="order-number" className="block text-xs font-bold text-stone-700 mb-1">
               {t.orderNumber} <span className="text-rose-500">*</span>
             </label>
@@ -520,35 +538,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               )}
             </div>
           </div>
-        </div>
-
-        {/* 1. Customer Information Card */}
-        <div className="bg-surface p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-            <div className="flex items-center gap-2 text-stone-900 font-extrabold text-sm">
-              <span className="w-1.5 h-5 bg-teal-600 rounded-full inline-block" />
-              <User className="w-4 h-4 text-teal-600" />
-              <span>{t.customerDetails}</span>
-            </div>
-
-            {matchedExistingCustomer && (
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>{t.existingCustomer} ({matchedExistingCustomer.name})</span>
-                </span>
-                <button
-                  type="button"
-                  onClick={handleLoadSavedMeasurements}
-                  className="text-[11px] text-teal-700 hover:underline font-bold"
-                >
-                  {language === 'fa' ? 'بارگذاری اندازه‌های قبلی' : 'Load Saved Measurements'}
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative">
             {/* Customer Name */}
             <div className="relative">
               <label className="block text-xs font-bold text-stone-700 mb-1">
@@ -558,6 +547,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 <input
                   type="text"
                   required
+                  id="order-customer-name"
                   value={customerName}
                   onChange={e => setCustomerName(e.target.value)}
                   onFocus={() => setShowCustomerSuggestions(false)}
@@ -572,13 +562,14 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             {/* Customer Phone */}
             <div className="relative">
               <label className="block text-xs font-bold text-stone-700 mb-1">
-                {t.customerPhone} <span className="text-rose-500">*</span>
+                {t.contactNumber} <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <input
                   type="tel"
                   dir="ltr"
                   required
+                  id="order-customer-phone"
                   value={customerPhone}
                   onChange={e => {
                     setCustomerPhone(e.target.value);
@@ -695,10 +686,10 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               {language === 'en' ? 'Measurements and design below are for' : language === 'fa' ? 'اندازه و دیزاین پایین مربوط به' : 'لاندې اندازې او ډیزاین د دې لپاره دي'}: <strong>{localizedActiveGarmentName}</strong>
             </div>
           </div>
-        </div>
-
-        {/* 2. Fabric Inventory Selection Card (Prominent Switcher + Search + Dropdown) */}
-        <div className="bg-surface p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
+        </section>
+<div className="order-form-layout">
+<div className="space-y-5">
+<section id="order-fabric" className="ui-panel tone-clay bg-surface p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-stone-100 pb-3">
             <div className="flex items-center gap-2 text-stone-900 font-extrabold text-sm">
               <span className="w-1.5 h-5 bg-teal-600 rounded-full inline-block" />
@@ -837,7 +828,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    {t.fabricMeters} ({t.meters}):
+                    {t.fabricUsed} ({t.meters}):
                   </label>
                   <input
                     type="number"
@@ -893,7 +884,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold text-stone-700 mb-1">
-                    {t.fabricMeters} ({t.meters}):
+                    {t.fabricUsed} ({t.meters}):
                   </label>
                   <input
                     type="number"
@@ -907,15 +898,13 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               </div>
             </div>
           )}
-        </div>
-
-        {/* 3. Measurement Fields Grid */}
-        <div className="bg-surface p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
+        </section>
+<section id="order-measurements" className="ui-panel tone-violet bg-surface p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
           <div className="flex flex-wrap items-center justify-between border-b border-stone-100 pb-3 gap-2">
             <div className="flex items-center gap-2 text-stone-900 font-extrabold text-sm">
               <span className="w-1.5 h-5 bg-teal-600 rounded-full inline-block" />
               <Scissors className="w-4 h-4 text-teal-600" />
-              <span>{t.bodyMeasurements}</span>
+              <span>{t.measurements}</span>
               <span className="px-2 py-0.5 bg-teal-50 text-teal-900 rounded-md text-xs font-bold border border-teal-200">
                 {localizedActiveGarmentName}
               </span>
@@ -923,12 +912,12 @@ export const OrderForm: React.FC<OrderFormProps> = ({
 
             <div className="flex items-center gap-3">
               <span className="text-[11px] font-mono text-stone-500 font-semibold">
-                {t.unitInch} (in)
+                {t.unitInches}
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 2xl:grid-cols-4 gap-3">
             {filteredMeasurementFields.map(field => {
               const label = language === 'ps' 
                 ? field.labelPs 
@@ -957,12 +946,13 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                         setMeasurements(prev => ({ ...prev, [field.key]: v }));
                       }}
                       placeholder="0"
+                      aria-label={label}
                       className="w-full px-2.5 py-1.5 bg-surface border border-stone-200 rounded-lg text-sm font-mono font-black text-center text-stone-900 focus:outline-hidden focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
                     />
                   </div>
 
                   {/* Step +/- Adjustment Pills */}
-                  <div className="flex items-center justify-center gap-1 pt-0.5">
+                  <div className="measurement-adjustments flex items-center justify-center gap-1 pt-0.5">
                     <button
                       type="button"
                       onClick={() => adjustMeasurement(field.key, -0.5)}
@@ -996,15 +986,13 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               );
             })}
           </div>
-        </div>
-
-        {/* 4. Garment Design Options Card */}
-        <div className="bg-surface p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
+        </section>
+<section id="order-design" className="ui-panel tone-rose bg-surface p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-stone-100 pb-3">
             <div className="flex items-center gap-2 text-stone-900 font-extrabold text-sm">
               <span className="w-1.5 h-5 bg-teal-600 rounded-full inline-block" />
               <Sparkles className="w-4 h-4 text-teal-600" />
-              <span>{t.garmentDesign}</span>
+              <span>{t.designAndStyle}</span>
               <span className="px-2 py-0.5 bg-teal-50 text-teal-900 rounded-md text-xs font-bold border border-teal-200">
                 {localizedActiveGarmentName}
               </span>
@@ -1076,17 +1064,17 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               );
             })}
           </div>
-        </div>
-
-        {/* 5. Order Status, Expected Date & Special Notes Card (Following downward in one flow) */}
-        <div className="bg-surface p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-5">
+        </section>
+</div>
+<aside className="space-y-5 min-w-0">
+<section id="order-delivery" className="ui-panel tone-slate bg-surface p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-5">
           <div className="flex items-center gap-2 text-stone-900 font-extrabold text-sm border-b border-stone-100 pb-3">
             <span className="w-1.5 h-5 bg-teal-600 rounded-full inline-block" />
             <PackageCheck className="w-4 h-4 text-teal-600" />
             <span>{language === 'fa' ? 'وضعیت، تاریخ وعده و توضیحات' : 'Status, Expected Date & Notes'}</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             {/* Order Status */}
             <div>
               <label className="block text-xs font-bold text-stone-700 mb-2">
@@ -1137,10 +1125,11 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             {/* Delivery Date */}
             <div>
               <label className="block text-xs font-bold text-stone-700 mb-1">
-                {t.deliveryDate} (تاریخ وعده)
+                {t.deliveryDate}
               </label>
               <input
                 type="date"
+                aria-label={t.deliveryDate}
                 value={deliveryDate}
                 onChange={e => setDeliveryDate(e.target.value)}
                 className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-stone-900 focus:bg-surface focus:border-teal-600 outline-hidden"
@@ -1174,10 +1163,10 @@ export const OrderForm: React.FC<OrderFormProps> = ({
           </div>
 
           {/* Special Notes & Cabinet Slot */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+          <div className="grid grid-cols-1 gap-4 pt-2">
             <div>
               <label className="block text-xs font-bold text-stone-700 mb-1">
-                {t.specialNotes} (توضیحات و نکات خاص)
+                {t.specialNotes}
               </label>
               <textarea
                 rows={2}
@@ -1200,10 +1189,8 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               />
             </div>
           </div>
-        </div>
-
-        {/* 6. Pricing, Advance & Payment Card */}
-        <div className="bg-surface p-4 sm:p-6 rounded-2xl border-2 border-stone-900 shadow-md space-y-4">
+        </section>
+<section id="order-payment" className="ui-panel tone-sage bg-surface p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-stone-100 pb-3">
             <div className="flex items-center gap-2 text-stone-900 font-black text-sm">
               <DollarSign className="w-4 h-4 text-teal-600" />
@@ -1220,15 +1207,16 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             {/* Total Amount */}
             <div>
               <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1">
-                {t.totalAmount} (جمله)
+                {t.totalAmount}
               </label>
               <div className="relative">
                 <input
                   type="number"
+                  aria-label={t.totalAmount}
                   value={totalAmount}
                   onChange={e => setTotalAmount(parseFloat(e.target.value) || 0)}
                   className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-base font-mono font-black text-stone-900 focus:bg-surface focus:border-teal-600 outline-hidden"
@@ -1242,11 +1230,12 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             {/* Paid / Advance */}
             <div>
               <label className="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">
-                {t.paidAmount} (رسید)
+                {t.paidAmount}
               </label>
               <div className="relative">
                 <input
                   type="number"
+                  aria-label={t.paidAmount}
                   value={paidAmount}
                   onChange={e => setPaidAmount(parseFloat(e.target.value) || 0)}
                   className="w-full px-3.5 py-2.5 bg-emerald-50 border border-emerald-300 rounded-xl text-base font-mono font-black text-emerald-900 focus:bg-surface focus:border-emerald-600 outline-hidden"
@@ -1277,33 +1266,32 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             {/* Balance Remaining Display */}
             <div className="p-3.5 bg-stone-50 rounded-xl border border-stone-200 flex flex-col justify-center">
               <span className="text-xs font-bold text-stone-700">
-                {t.balanceRemaining} (باقیات):
+                {t.balanceRemaining}:
               </span>
               <span className={`font-mono text-xl font-black mt-0.5 ${balanceAmount > 0 ? 'text-rose-600' : 'text-emerald-700'}`}>
                 {balanceAmount} <span className="text-xs font-normal text-stone-500">{currencySymbol}</span>
               </span>
             </div>
           </div>
-        </div>
-
-        {/* Bottom Save Action Button */}
-        <div className="pt-4">
+        </section>
+</aside>
+</div>
+<div className="order-save-bar no-print">
           <button
             type="button"
             disabled={isSaving}
             onClick={handleSave}
-            className="w-full py-4 px-6 bg-teal-600 hover:bg-teal-700 active:scale-98 text-white font-black rounded-2xl text-base transition flex items-center justify-center gap-2 shadow-md cursor-pointer disabled:opacity-60"
+            className="ui-button ui-button--primary w-full py-4 px-6 bg-teal-600 hover:bg-teal-700 active:scale-98 text-white font-black rounded-2xl text-base transition flex items-center justify-center gap-2 shadow-md cursor-pointer disabled:opacity-60"
           >
             {isSaving ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
               <Save className="w-5 h-5" />
             )}
-            <span>{isSaving ? (language === 'fa' ? 'در حال ثبت در دیتابیس...' : 'Saving to Database...') : t.saveOrder}</span>
+            <span>{isSaving ? (language === 'fa' ? 'در حال ثبت سفارش...' : 'Saving order...') : t.saveOrder}</span>
           </button>
         </div>
-
-      </div>
+</div>
     </div>
   );
 };

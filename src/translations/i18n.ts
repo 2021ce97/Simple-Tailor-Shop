@@ -2,6 +2,11 @@ import { Language } from '../types';
 
 export interface Translations {
   // Common
+  editOrder: string;
+  units: string;
+  dates: string;
+  receipt: string;
+  add: string;
   appName: string;
   appSubtitle: string;
   save: string;
@@ -391,6 +396,11 @@ export interface Translations {
 
 export const translations: Record<Language, Translations> = {
   en: {
+    editOrder: 'Edit Order',
+    units: 'units',
+    dates: 'Dates',
+    receipt: 'Receipt',
+    add: 'Add',
     appName: 'ROYAL_KAWSAR_BRAND_FASHION',
     appSubtitle: 'Orders, Measurements & Customer Management',
     save: 'Save',
@@ -765,6 +775,11 @@ export const translations: Record<Language, Translations> = {
   },
 
   fa: {
+    editOrder: 'ویرایش سفارش',
+    units: 'عدد',
+    dates: 'تاریخ‌ها',
+    receipt: 'رسید',
+    add: 'افزودن',
     appName: 'رایل کوثر برانډ فیشن',
     appSubtitle: 'سیستم جامع مدیریت سفارشات، اندازه‌ها و مشتریان',
     save: 'ذخیره',
@@ -1139,6 +1154,11 @@ export const translations: Record<Language, Translations> = {
   },
 
   ps: {
+    editOrder: 'فرمایش سمول',
+    units: 'دانې',
+    dates: 'نېټې',
+    receipt: 'رسید',
+    add: 'زیاتول',
     appName: 'رایل کوثر برانډ فیشن',
     appSubtitle: 'د فرمایشونو، اندازو او پیرودونکو د مدیریت جامع سیستم',
     save: 'ساتل / ثبت',

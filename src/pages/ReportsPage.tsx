@@ -51,6 +51,11 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
   language
 }) => {
   const t = translations[language];
+  const sectionLabels = language === 'fa'
+    ? { overview: 'نمای کلی', tailor: 'خیاطی', retail: 'فروش محصولات', collections: 'پول جمع‌آوری شده' }
+    : language === 'ps'
+    ? { overview: 'عمومي کتنه', tailor: 'خیاطي', retail: 'پرچون پلور', collections: 'راټولې شوې پیسې' }
+    : { overview: 'Overview', tailor: 'Tailoring', retail: 'Retail', collections: 'Collections' };
   const [period, setPeriod] = useState<Period>('daily');
   const [activeTab, setActiveTab] = useState<StreamTab>('overview');
 
@@ -325,13 +330,14 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
 
         {/* Time Period Selector, CSV & Print Controls */}
         <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto no-print">
-          <div className="flex items-center gap-1 rounded-xl bg-stone-100 p-1 border border-stone-200">
+          <div className="grid w-full grid-cols-2 min-[480px]:grid-cols-4 sm:w-auto gap-1 rounded-xl bg-stone-100 p-1 border border-stone-200">
             {(['daily', 'weekly', 'monthly', 'all'] as Period[]).map(option => (
               <button
                 key={option}
                 type="button"
                 onClick={() => setPeriod(option)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                aria-pressed={period === option}
+                className={`ui-tab rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
                   period === option 
                     ? 'bg-accent text-white shadow-xs'
                     : 'text-stone-600 hover:bg-surface hover:text-stone-900'
@@ -352,7 +358,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           <button
             type="button"
             onClick={downloadCsv}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-surface px-3.5 py-2 text-xs font-bold text-stone-700 hover:bg-stone-50 transition cursor-pointer shadow-2xs"
+            className="ui-button ui-button--secondary inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-surface px-3.5 py-2 text-xs font-bold text-stone-700 hover:bg-stone-50 transition cursor-pointer shadow-2xs"
           >
             <Download className="h-3.5 w-3.5" />
             <span>Export CSV</span>
@@ -362,85 +368,90 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             type="button"
             onClick={handlePrint}
             disabled={isPrinting}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-xs font-black text-white hover:bg-accent-hover transition cursor-pointer shadow-2xs disabled:opacity-50"
+            className="ui-button ui-button--primary inline-flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-xs font-black text-white hover:bg-accent-hover transition cursor-pointer shadow-2xs disabled:opacity-50"
           >
             <Printer className="h-3.5 w-3.5" />
-            <span>{isPrinting ? t.loading : t.print}</span>
+            <span>{isPrinting ? t.loading : language === 'fa' ? 'چاپ گزارش' : language === 'ps' ? 'راپور چاپول' : 'Print report'}</span>
           </button>
         </div>
       </div>
 
       {/* 2. Range Badge and Stream Navigation Tabs */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-stone-50 border border-stone-200 rounded-2xl p-3 no-print">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-stone-50 border border-stone-200 rounded-2xl p-3 no-print">
         {/* Stream Tabs */}
         <div className="flex flex-wrap items-center gap-1.5">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
+            aria-pressed={activeTab === 'overview'}
+            className={`ui-tab px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'overview'
                 ? 'bg-accent text-white shadow-xs'
                 : 'bg-surface text-stone-700 hover:bg-stone-200 border border-stone-200'
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
-            <span>{t.combinedStream}</span>
+            <span>{sectionLabels.overview}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('tailor')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
+            aria-pressed={activeTab === 'tailor'}
+            className={`ui-tab px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'tailor'
                 ? 'bg-teal-700 text-white shadow-xs'
                 : 'bg-surface text-stone-700 hover:bg-stone-200 border border-stone-200'
             }`}
           >
             <Scissors className="w-3.5 h-3.5 text-teal-500" />
-            <span>{t.tailoringStream} ({report.periodOrders.length})</span>
+            <span>{sectionLabels.tailor} ({report.periodOrders.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('retail')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
+            aria-pressed={activeTab === 'retail'}
+            className={`ui-tab px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'retail'
                 ? 'bg-emerald-700 text-white shadow-xs'
                 : 'bg-surface text-stone-700 hover:bg-stone-200 border border-stone-200'
             }`}
           >
             <ShoppingBag className="w-3.5 h-3.5 text-emerald-500" />
-            <span>{t.retailStream} ({report.periodSales.length})</span>
+            <span>{sectionLabels.retail} ({report.periodSales.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('collections')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
+            aria-pressed={activeTab === 'collections'}
+            className={`ui-tab px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'collections'
                 ? 'bg-blue-700 text-white shadow-xs'
                 : 'bg-surface text-stone-700 hover:bg-stone-200 border border-stone-200'
             }`}
           >
             <DollarSign className="w-3.5 h-3.5 text-blue-500" />
-            <span>{t.moneyCollectedBreakdown}</span>
+            <span>{sectionLabels.collections}</span>
           </button>
         </div>
 
-        <div className="text-xs font-mono font-bold text-stone-600 bg-surface px-3 py-1.5 rounded-xl border border-stone-200">
-          📅 {periodLabel}: {dateKey(range.start.toISOString())} ➔ {dateKey(range.end.toISOString())}
+        <div className="text-[11px] whitespace-nowrap font-mono font-bold text-stone-600 bg-surface px-3 py-1.5 rounded-xl border border-stone-200">
+          📅 {periodLabel}: {range.start.toLocaleDateString(language === 'en' ? 'en-CA' : 'fa-AF')} ➔ {range.end.toLocaleDateString(language === 'en' ? 'en-CA' : 'fa-AF')}
         </div>
       </div>
 
       {/* 3. Top KPI Cards: Combined Overview */}
-      <div className="grid grid-cols-1 min-[430px]:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      {activeTab === 'overview' && (
+<div className="grid grid-cols-1 min-[360px]:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Card 1: Total Money Collected */}
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-xs">
+        <div className="ui-summary tone-sage rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-xs">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-900">
-                💰 {t.totalShopCollected}
+                {t.totalShopCollected}
               </p>
               <p className="mt-1.5 text-2xl font-black text-emerald-950 font-mono">
                 {money(report.totalShopCollected)}
               </p>
-              <p className="mt-1 text-[11px] font-bold text-emerald-800">
+              <p className="hidden sm:block mt-1 text-[11px] font-bold text-emerald-800">
                 ✂️ {t.tailorCollected}: {money(report.tailorCollected)}<br />
                 🛍️ {t.retailCollected}: {money(report.retailCollected)}
               </p>
@@ -452,16 +463,16 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         </div>
 
         {/* Card 2: Total Shop Revenue (Billed + Retail) */}
-        <div className="rounded-2xl border border-blue-200 bg-blue-50/70 p-4 shadow-xs">
+        <div className="ui-summary tone-blue rounded-2xl border border-blue-200 bg-blue-50/70 p-4 shadow-xs">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-[11px] font-extrabold uppercase tracking-wider text-blue-900">
-                📊 {t.totalShopRevenue}
+                {t.totalShopRevenue}
               </p>
               <p className="mt-1.5 text-2xl font-black text-blue-950 font-mono">
                 {money(report.totalShopBilled)}
               </p>
-              <p className="mt-1 text-[11px] font-bold text-blue-800">
+              <p className="hidden sm:block mt-1 text-[11px] font-bold text-blue-800">
                 ✂️ {t.tailorRevenue}: {money(report.tailorBilled)}<br />
                 🛍️ {t.retailRevenue}: {money(report.retailRevenue)}
               </p>
@@ -473,18 +484,18 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         </div>
 
         {/* Card 3: Total Net Profit (Tailor + Retail - Expenses) */}
-        <div className="rounded-2xl border border-teal-200 bg-teal-50/70 p-4 shadow-xs">
+        <div className="ui-summary tone-violet rounded-2xl border border-teal-200 bg-teal-50/70 p-4 shadow-xs">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-[11px] font-extrabold uppercase tracking-wider text-teal-900">
-                ✨ {t.netProfit}
+                {t.netProfit}
               </p>
               <p className="mt-1.5 text-2xl font-black text-teal-950 font-mono">
                 {money(report.totalShopNetProfit)}
               </p>
-              <p className="mt-1 text-[11px] font-bold text-teal-800">
-                🏷️ {t.totalShopProfit}: {money(report.totalShopProfit)}<br />
-                💸 {t.totalExpenses}: -{money(report.totalShopExpenses)}
+              <p className="hidden sm:block mt-1 text-[11px] font-bold text-teal-800">
+                {t.totalShopProfit}: {money(report.totalShopProfit)}<br />
+                {t.totalExpenses}: -{money(report.totalShopExpenses)}
               </p>
             </div>
             <div className="rounded-xl border border-teal-300 bg-surface p-2.5 text-teal-700 shadow-2xs">
@@ -494,7 +505,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         </div>
 
         {/* Card 4: Outstanding Tailoring Balance */}
-        <div className="rounded-2xl border border-rose-200 bg-rose-50/70 p-4 shadow-xs">
+        <div className="ui-summary tone-rose rounded-2xl border border-rose-200 bg-rose-50/70 p-4 shadow-xs">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-[11px] font-extrabold uppercase tracking-wider text-rose-900">
@@ -503,7 +514,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               <p className="mt-1.5 text-2xl font-black text-rose-950 font-mono">
                 {money(report.tailorBalance)}
               </p>
-              <p className="mt-1 text-[11px] font-bold text-rose-800">
+              <p className="hidden sm:block mt-1 text-[11px] font-bold text-rose-800">
                 {report.paymentCounts.partial} {language === 'fa' ? 'پرداخت قسمی' : 'Partial'} · {report.paymentCounts.unpaid} {language === 'fa' ? 'پرداخت نشده' : 'Unpaid'}
               </p>
             </div>
@@ -513,12 +524,15 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           </div>
         </div>
       </div>
+)}
 
       {/* 4. Side-by-Side Detailed Breakdown: Tailoring vs Retail vs Collected Money */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {activeTab !== 'collections' && (
+<div className={activeTab === 'overview' ? 'grid grid-cols-1 lg:grid-cols-2 gap-5' : 'grid grid-cols-1 gap-5'}>
         {/* Stream 1: Tailoring Department */}
-        <div className="rounded-2xl border border-line bg-surface p-5 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+        {(activeTab === 'overview' || activeTab === 'tailor') && (
+<div className="ui-panel tone-blue rounded-2xl border border-line bg-surface p-5 shadow-xs space-y-4">
+          <div className="ui-panel-heading flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-3">
             <h2 className="text-base font-black text-ink flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center">
                 <Scissors className="w-4 h-4" />
@@ -581,10 +595,12 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             </div>
           </div>
         </div>
+)}
 
         {/* Stream 2: Retail Boutique Department */}
-        <div className="rounded-2xl border border-line bg-surface p-5 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+        {(activeTab === 'overview' || activeTab === 'retail') && (
+<div className="ui-panel tone-sage rounded-2xl border border-line bg-surface p-5 shadow-xs space-y-4">
+          <div className="ui-panel-heading flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-3">
             <h2 className="text-base font-black text-ink flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center">
                 <ShoppingBag className="w-4 h-4" />
@@ -647,14 +663,17 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             </div>
           </div>
         </div>
+)}
       </div>
+)}
 
       {/* 5. Comprehensive Money Collected Breakdown Table */}
-      <div className="rounded-2xl border border-line bg-surface p-5 shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+      {(activeTab === 'overview' || activeTab === 'collections') && (
+<div className="ui-panel tone-violet rounded-2xl border border-line bg-surface p-5 shadow-xs space-y-4">
+        <div className="ui-panel-heading flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-3">
           <h2 className="text-base font-black text-ink flex items-center gap-2">
             <DollarSign className="w-5 h-5 text-emerald-600" />
-            <span>{t.moneyCollectedBreakdown} ({language === 'fa' ? 'تحلیل نقدینگی و پول جمع‌آوری شده' : 'Cash Flow & Collections Data'})</span>
+            <span>{t.moneyCollectedBreakdown}</span>
           </h2>
           <span className="text-xs font-mono font-bold bg-emerald-100 text-emerald-900 px-3 py-1 rounded-lg">
             {language === 'fa' ? 'مجموع نقدینگی وصولی' : 'Total Cash Inflow'}: {money(report.totalShopCollected)}
@@ -662,7 +681,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-xs text-start">
+          <table className="ui-table tone-violet w-full min-w-[720px] text-xs text-start">
             <thead>
               <tr className="bg-stone-50 text-stone-600 border-b border-stone-200">
                 <th className="py-2.5 px-3 text-start">{language === 'fa' ? 'بخش کاری / منبع' : 'Business Stream'}</th>
@@ -670,7 +689,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                 <th className="py-2.5 px-3 text-start">{language === 'fa' ? 'مبلغ مجموعی (Billed/Gross)' : 'Gross Billed'}</th>
                 <th className="py-2.5 px-3 text-start">{language === 'fa' ? 'پول نقد دریافت شده (Collected)' : 'Money Collected (Cash)'}</th>
                 <th className="py-2.5 px-3 text-start">{language === 'fa' ? 'باقیمانده وصول‌نشده' : 'Outstanding Balance'}</th>
-                <th className="py-2.5 px-3 text-start">{language === 'fa' ? 'مفاد خالص تخمینی' : 'Net Profit'}</th>
+                <th className="py-2.5 px-3 text-start">{language === 'fa' ? 'مفاد پیش از مصارف' : language === 'ps' ? 'له لګښتونو مخکې ګټه' : 'Profit before expenses'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-150">
@@ -701,7 +720,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
               </tr>
 
               {/* Combined Grand Total Row */}
-              <tr className="bg-stone-100 font-black text-sm">
+              <tr className="ui-total-row bg-stone-100 font-black text-sm">
                 <td className="py-3 px-3 text-ink flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-accent" />
                   <span>{t.totalShopRevenue}</span>
@@ -716,9 +735,11 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           </table>
         </div>
       </div>
+)}
 
       {/* 6. Low Stock & Inventory Alerts */}
-      <div className="rounded-2xl border border-rose-200 bg-surface p-5 shadow-xs">
+      {activeTab === 'overview' && (
+<div className="ui-panel tone-clay rounded-2xl border border-rose-200 bg-surface p-5 shadow-xs">
         <h2 className="flex items-center gap-2 text-sm font-black text-rose-900 mb-3">
           <Package className="h-4 w-4 text-rose-700" />
           <span>{language === 'fa' ? 'هشدارهای گدام و موجودی کم:' : 'Inventory & Low Stock Alerts:'}</span>
@@ -755,6 +776,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           )}
         </div>
       </div>
+)}
     </div>
   );
 };

@@ -419,7 +419,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
           {onNavigateToProducts && (
             <button
               onClick={onNavigateToProducts}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl text-xs font-bold transition cursor-pointer border border-stone-200"
+              className="ui-button ui-button--secondary flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl text-xs font-bold transition cursor-pointer border border-stone-200"
             >
               <ShoppingBag className="w-4 h-4 text-stone-600" />
               <span>{t.productsInventory || (language === 'fa' ? 'موجودی اجناس' : 'Products Inventory')}</span>
@@ -429,7 +429,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
           <button
             onClick={() => handleOpenNewSaleModal()}
             id="btn-make-new-sale"
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white rounded-xl text-xs font-black shadow-sm transition cursor-pointer"
+            className="ui-button ui-button--primary flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white rounded-xl text-xs font-black shadow-sm transition cursor-pointer"
           >
             <Plus className="w-4 h-4 stroke-[3]" />
             <span>{t.newSale || (language === 'fa' ? 'ثبت فروش جدید' : 'Make a New Sale')}</span>
@@ -438,9 +438,9 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
       </div>
 
       {/* 2. Top Analytics Metrics Cards */}
-      <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-1 min-[360px]:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Total Sales Revenue */}
-        <div className="bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
+        <div className="ui-summary tone-blue bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">
               {t.totalSalesRevenue || (language === 'fa' ? 'مجموع عواید فروش' : 'Sales Revenue')}
@@ -456,7 +456,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
         </div>
 
         {/* Total Net Profit */}
-        <div className="bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
+        <div className="ui-summary tone-sage bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">
               {t.totalSalesProfit || (language === 'fa' ? 'مجموع مفاد خالص' : 'Net Sales Profit')}
@@ -475,7 +475,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
         </div>
 
         {/* Total Units Sold */}
-        <div className="bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
+        <div className="ui-summary tone-violet bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">
               {language === 'fa' ? 'اجناس فروخته شده' : language === 'ps' ? 'پلورل شوي توکي' : 'Items Sold'}
@@ -491,7 +491,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
         </div>
 
         {/* Total Transactions */}
-        <div className="bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
+        <div className="ui-summary tone-clay bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">
               {language === 'fa' ? 'تعداد معاملات' : language === 'ps' ? 'د راکړو ورکړو شمیر' : 'Transactions'}
@@ -615,16 +615,16 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
           </p>
           <button
             onClick={() => handleOpenNewSaleModal()}
-            className="mt-4 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer inline-flex items-center gap-2"
+            className="ui-button ui-button--primary mt-4 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer inline-flex items-center gap-2"
           >
             <Plus className="w-4 h-4 stroke-[3]" />
             <span>{t.newSale || (language === 'fa' ? 'ثبت فروش جدید' : 'Make a New Sale')}</span>
           </button>
         </div>
       ) : (
-        <div className="bg-surface rounded-2xl border border-line shadow-xs overflow-hidden">
+        <div className="ui-panel ui-data-list tone-sage bg-surface rounded-2xl border border-line shadow-xs overflow-hidden">
           {/* Header for large screens */}
-          <div className="hidden lg:grid grid-cols-12 gap-3 px-5 py-3 bg-stone-50 text-[11px] font-bold text-stone-500 uppercase tracking-wider border-b border-stone-200">
+          <div className="ui-list-heading hidden lg:grid grid-cols-12 gap-3 px-5 py-3 bg-stone-50 text-[11px] font-bold text-stone-500 uppercase tracking-wider border-b border-stone-200">
             <div className="col-span-3">{language === 'fa' ? 'جنس و کتگوری' : 'Product & Category'}</div>
             <div className="col-span-2">{language === 'fa' ? 'تاریخ و زمان' : 'Date & Time'}</div>
             <div className="col-span-2">{t.customer || 'Customer'}</div>
@@ -654,7 +654,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                 <div
                   key={sale.id}
                   id={`sale-row-${sale.id}`}
-                  className="p-4 lg:px-5 lg:py-3.5 hover:bg-stone-50/80 transition-colors flex flex-col lg:grid lg:grid-cols-12 gap-3 items-start lg:items-center"
+                  className="ui-list-row p-4 lg:px-5 lg:py-3.5 hover:bg-stone-50/80 transition-colors flex flex-col lg:grid lg:grid-cols-12 gap-3 items-start lg:items-center"
                 >
                   {/* 1. Product Info */}
                   <div className="w-full lg:col-span-3 flex items-center gap-3">
@@ -736,7 +736,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                   </div>
 
                   {/* 6. Net Profit & Print Receipt Action */}
-                  <div className="w-full lg:col-span-2 flex items-center justify-between lg:justify-end gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-stone-100">
+                  <div className="w-full lg:col-span-2 row-action-group flex flex-wrap items-center justify-between lg:justify-end gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-stone-100">
                     <div className="text-start lg:text-end">
                       <span className={`inline-block font-mono font-bold text-xs px-2 py-0.5 rounded-full ${
                         isProfitable ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
@@ -765,7 +765,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                       <button
                         onClick={() => setActiveReceiptSale(sale)}
                         title={language === 'fa' ? 'مشاهده و چاپ کامل رسید' : 'View Receipt Modal'}
-                        className="p-1.5 text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-lg transition cursor-pointer"
+                        className="ui-icon-button p-1.5 text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-lg transition cursor-pointer"
                       >
                         <FileText className="w-3.5 h-3.5" />
                       </button>
@@ -1065,13 +1065,13 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsNewSaleModalOpen(false)}
-                  className="px-4 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold cursor-pointer"
+                  className="ui-button ui-button--secondary px-4 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold cursor-pointer"
                 >
                   {t.cancel || 'Cancel'}
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold shadow-sm transition cursor-pointer flex items-center gap-1.5"
+                  className="ui-button ui-button--primary px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold shadow-sm transition cursor-pointer flex items-center gap-1.5"
                 >
                   <Check className="w-4 h-4 stroke-[3]" />
                   <span>{t.confirmSale || (language === 'fa' ? 'تایید و ثبت فروش' : 'Confirm Sale')}</span>
@@ -1223,7 +1223,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveReceiptSale(null)}
-                className="px-3.5 py-2 bg-stone-200 hover:bg-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer"
+                className="ui-button ui-button--secondary px-3.5 py-2 bg-stone-200 hover:bg-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer"
               >
                 {t.close || 'Close'}
               </button>
@@ -1231,7 +1231,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                 type="button"
                 onClick={handleDownloadReceiptPdf}
                 disabled={isGeneratingPdf}
-                className="px-3.5 py-2 bg-surface hover:bg-stone-100 border border-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                className="ui-icon-button px-3.5 py-2 bg-surface hover:bg-stone-100 border border-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
                 title="Download PDF"
               >
                 <Download className="w-3.5 h-3.5" />
@@ -1241,7 +1241,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                 type="button"
                 onClick={handlePrintReceipt}
                 disabled={isPrintingReceipt}
-                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl text-xs font-black shadow-xs transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                className="ui-button ui-button--primary px-5 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl text-xs font-black shadow-xs transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
               >
                 <Printer className="w-4 h-4" />
                 <span>{isPrintingReceipt ? t.loading : (t.print || 'Print Receipt')}</span>

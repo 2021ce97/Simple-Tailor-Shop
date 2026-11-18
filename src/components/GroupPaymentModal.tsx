@@ -144,8 +144,8 @@ export const GroupPaymentModal: React.FC<GroupPaymentModalProps> = ({
               </div>
             </div>
             <div className="flex justify-end gap-2 border-t border-stone-200 p-3 no-print">
-              <button type="button" onClick={onClose} className="rounded-xl bg-stone-100 px-4 py-2 text-xs font-bold">{language === 'fa' ? 'بستن' : 'Close'}</button>
-              <button type="button" onClick={printReceipt} className="flex items-center gap-2 rounded-xl bg-teal-500 px-4 py-2 text-xs font-black text-white"><Printer className="h-4 w-4" />{language === 'fa' ? 'چاپ رسید' : 'Print Receipt'}</button>
+              <button type="button" onClick={onClose} className="ui-button ui-button--secondary rounded-xl bg-stone-100 px-4 py-2 text-xs font-bold">{language === 'fa' ? 'بستن' : 'Close'}</button>
+              <button type="button" onClick={printReceipt} className="ui-button ui-button--primary flex items-center gap-2 rounded-xl bg-teal-500 px-4 py-2 text-xs font-black text-white"><Printer className="h-4 w-4" />{language === 'fa' ? 'چاپ رسید' : 'Print Receipt'}</button>
             </div>
           </>
         ) : (
@@ -169,7 +169,7 @@ export const GroupPaymentModal: React.FC<GroupPaymentModalProps> = ({
             </div>
             <div className="flex items-center justify-between border-t border-stone-200 bg-stone-50 p-3">
               <div className="text-xs">{language === 'fa' ? 'مجموع پرداخت:' : 'Payment total:'} <strong className="font-mono text-emerald-700">{allocatedTotal} {currency}</strong></div>
-              <div className="flex gap-2"><button type="button" onClick={onClose} className="rounded-xl bg-stone-200 px-4 py-2 text-xs font-bold">{language === 'fa' ? 'لغو' : 'Cancel'}</button><button type="button" disabled={saving} onClick={savePayments} className="rounded-xl bg-teal-500 px-4 py-2 text-xs font-black text-white disabled:opacity-50">{saving ? (language === 'fa' ? 'در حال ذخیره...' : 'Saving...') : (language === 'fa' ? 'ذخیره و ساخت رسید' : 'Save & Create Receipt')}</button></div>
+              <div className="flex gap-2"><button type="button" onClick={onClose} className="ui-button ui-button--secondary rounded-xl bg-stone-200 px-4 py-2 text-xs font-bold">{language === 'fa' ? 'لغو' : 'Cancel'}</button><button type="button" disabled={saving} onClick={savePayments} className="ui-button ui-button--primary rounded-xl bg-teal-500 px-4 py-2 text-xs font-black text-white disabled:opacity-50">{saving ? (language === 'fa' ? 'در حال ذخیره...' : 'Saving...') : (language === 'fa' ? 'ذخیره و ساخت رسید' : 'Save & Create Receipt')}</button></div>
             </div>
           </>
         )}

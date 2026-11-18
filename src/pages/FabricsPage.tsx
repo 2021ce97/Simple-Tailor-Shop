@@ -204,7 +204,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
         <button
           onClick={openAddModal}
           id="btn-add-new-fabric"
-          className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl font-bold text-xs shadow-sm transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+          className="ui-button ui-button--primary flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl font-bold text-xs shadow-sm transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
         >
           <Plus className="w-4 h-4" />
           <span>{t.addFabric}</span>
@@ -212,8 +212,8 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
       </div>
 
       {/* Summary KPI Cards */}
-      <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="bg-surface p-4 rounded-xl border border-line shadow-xs flex items-center justify-between">
+      <div className="grid grid-cols-1 min-[360px]:grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="ui-summary tone-blue bg-surface p-4 rounded-xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-700 block">
               {language === 'fa' ? 'انواع رخت ثبت شده' : language === 'ps' ? 'د رختونو ډولونه' : 'Fabric Types'}
@@ -227,7 +227,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
           </div>
         </div>
 
-        <div className="bg-surface p-4 rounded-xl border border-line shadow-xs flex items-center justify-between">
+        <div className="ui-summary tone-sage bg-surface p-4 rounded-xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-700 block">
               {language === 'fa' ? 'مجموع موجودی (متر)' : language === 'ps' ? 'ټوله ذخیره (متره)' : 'Total Stock'}
@@ -241,7 +241,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
           </div>
         </div>
 
-        <div className="bg-surface p-4 rounded-xl border border-line shadow-xs flex items-center justify-between">
+        <div className="ui-summary tone-violet bg-surface p-4 rounded-xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-700 block">
               {language === 'fa' ? 'موجودی کم / هشدار' : language === 'ps' ? 'لږ پاتې رختونه' : 'Low Stock Warning'}
@@ -255,7 +255,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
           </div>
         </div>
 
-        <div className="bg-surface p-4 rounded-xl border border-line shadow-xs flex items-center justify-between">
+        <div className="ui-summary tone-clay bg-surface p-4 rounded-xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-700 block">
               {language === 'fa' ? 'ارزش کل موجودی' : language === 'ps' ? 'د ذخیرې ټول ارزښت' : 'Inventory Value'}
@@ -358,7 +358,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
           </p>
           <button
             onClick={openAddModal}
-            className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-xl font-bold text-xs inline-flex items-center gap-2 cursor-pointer shadow-xs"
+            className="ui-button ui-button--primary px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-xl font-bold text-xs inline-flex items-center gap-2 cursor-pointer shadow-xs"
           >
             <Plus className="w-4 h-4" />
             <span>{t.addFabric}</span>
@@ -366,9 +366,9 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
         </div>
       ) : (
         /* Fabric Inventory Rows Form */
-        <div className="bg-surface rounded-2xl border border-line shadow-xs overflow-hidden divide-y divide-stone-200">
+        <div className="ui-panel ui-data-list tone-blue bg-surface rounded-2xl border border-line shadow-xs overflow-hidden divide-y divide-stone-200">
           {/* Header Row for Large Screens */}
-          <div className="hidden lg:grid grid-cols-12 gap-3 px-5 py-3 bg-stone-50 text-[11px] font-bold text-stone-600 uppercase tracking-wider border-b border-stone-200">
+          <div className="ui-list-heading hidden lg:grid grid-cols-12 gap-3 px-5 py-3 bg-stone-50 text-[11px] font-bold text-stone-600 uppercase tracking-wider border-b border-stone-200">
             <div className="col-span-2">
               {language === 'fa' ? 'کد و رخت' : language === 'ps' ? 'کوډ او رخت' : 'Code & Name'}
             </div>
@@ -397,7 +397,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
               <div
                 key={fabric.id}
                 id={`fabric-row-${fabric.id}`}
-                className={`p-4 lg:px-5 lg:py-3.5 hover:bg-stone-50/70 transition-colors flex flex-col lg:grid lg:grid-cols-12 gap-3 items-start lg:items-center ${
+                className={`ui-list-row p-4 lg:px-5 lg:py-3.5 hover:bg-stone-50/70 transition-colors flex flex-col lg:grid lg:grid-cols-12 gap-3 items-start lg:items-center ${
                   isLow ? 'bg-teal-50/30' : ''
                 }`}
               >
@@ -494,7 +494,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
                 </div>
 
                 {/* 5. Row Actions */}
-                <div className="w-full lg:col-span-3 flex items-center justify-between lg:justify-end gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-stone-100">
+                <div className="w-full lg:col-span-3 row-action-group flex flex-wrap items-center justify-between lg:justify-end gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-stone-100">
                   {(isLow || isOut) && (
                     <button
                       type="button"
@@ -510,14 +510,14 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
                     <button
                       onClick={() => openEditModal(fabric)}
                       title={t.edit}
-                      className="p-1.5 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition cursor-pointer"
+                      className="ui-icon-button p-1.5 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition cursor-pointer"
                     >
                       <Edit3 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(fabric)}
                       title={t.delete}
-                      className="p-1.5 text-stone-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                      className="ui-icon-button ui-icon-button--danger p-1.5 text-stone-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -695,13 +695,13 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsAddingNew(false)}
-                  className="px-4 py-2.5 border border-stone-200 text-stone-600 hover:bg-stone-100 rounded-xl text-xs font-bold transition cursor-pointer"
+                  className="ui-button ui-button--secondary px-4 py-2.5 border border-stone-200 text-stone-600 hover:bg-stone-100 rounded-xl text-xs font-bold transition cursor-pointer"
                 >
                   {t.cancel}
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-extrabold shadow-sm transition cursor-pointer flex items-center gap-1.5"
+                  className="ui-button ui-button--primary px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-extrabold shadow-sm transition cursor-pointer flex items-center gap-1.5"
                 >
                   <Check className="w-4 h-4" />
                   <span>{t.save}</span>
