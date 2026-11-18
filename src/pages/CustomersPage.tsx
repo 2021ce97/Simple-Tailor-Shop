@@ -365,23 +365,23 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
   return (
     <div className="space-y-4 sm:space-y-6 pb-12 animate-in fade-in duration-200 min-w-0">
       {/* Header Banner - Bento Style */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-surface p-5 rounded-2xl border border-line shadow-xs">
         <div>
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-4 bg-[#D4AF37] rounded-full inline-block" />
-            <h1 className="text-xl font-black text-[#1A1A1A] tracking-tight">
+            <span className="w-1.5 h-4 bg-accent rounded-full inline-block" />
+            <h1 className="text-xl font-black text-ink tracking-tight">
               {t.customers}
             </h1>
           </div>
-          <p className="text-xs text-[#706E6B] mt-0.5">
+          <p className="text-xs text-muted mt-0.5">
             {allCustomers.length} {t.customersList} • {t.newCustomerAutoSaved}
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 min-[430px]:grid-cols-3 gap-3">
-        <div className="rounded-2xl border border-stone-200 bg-white p-4"><div className="flex items-center gap-2 text-stone-500 text-xs font-bold"><Users className="w-4 h-4" /> {language === 'fa' ? 'همه مشتریان' : language === 'ps' ? 'ټول پېرودونکي' : 'All customers'}</div><p className="mt-2 text-2xl font-black text-stone-900">{allCustomers.length}</p></div>
-        <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4"><div className="flex items-center gap-2 text-amber-800 text-xs font-bold"><Scissors className="w-4 h-4" /> {language === 'fa' ? 'مشتریان خیاطی' : language === 'ps' ? 'د خیاطۍ پېرودونکي' : 'Tailoring customers'}</div><p className="mt-2 text-2xl font-black text-amber-900">{customerCounts.tailoring}</p></div>
+        <div className="rounded-2xl border border-stone-200 bg-surface p-4"><div className="flex items-center gap-2 text-stone-500 text-xs font-bold"><Users className="w-4 h-4" /> {language === 'fa' ? 'همه مشتریان' : language === 'ps' ? 'ټول پېرودونکي' : 'All customers'}</div><p className="mt-2 text-2xl font-black text-stone-900">{allCustomers.length}</p></div>
+        <div className="rounded-2xl border border-teal-200 bg-teal-50/60 p-4"><div className="flex items-center gap-2 text-teal-800 text-xs font-bold"><Scissors className="w-4 h-4" /> {language === 'fa' ? 'مشتریان خیاطی' : language === 'ps' ? 'د خیاطۍ پېرودونکي' : 'Tailoring customers'}</div><p className="mt-2 text-2xl font-black text-teal-900">{customerCounts.tailoring}</p></div>
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4"><div className="flex items-center gap-2 text-emerald-800 text-xs font-bold"><ShoppingBag className="w-4 h-4" /> {language === 'fa' ? 'مشتریان محصولات' : language === 'ps' ? 'د محصولاتو پېرودونکي' : 'Product customers'}</div><p className="mt-2 text-2xl font-black text-emerald-900">{customerCounts.products}</p></div>
       </div>
 
@@ -390,7 +390,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
         {/* LEFT COLUMN: Customer Search & List (5 Cols) */}
         <div className="lg:col-span-5 space-y-4">
           {/* Search Box */}
-          <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs">
+          <div className="bg-surface p-4 rounded-2xl border border-line shadow-xs">
             <div className="relative">
               <Search className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
               <input
@@ -398,7 +398,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 placeholder={t.searchCustomersPlaceholder}
-                className="w-full pl-9 pr-4 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs focus:bg-white focus:border-[#D4AF37] outline-hidden font-medium"
+                className="w-full pl-9 pr-4 py-2 bg-surface-muted border border-line rounded-xl text-xs focus:bg-surface focus:border-accent outline-hidden font-medium"
               />
               {searchTerm && (
                 <button
@@ -413,22 +413,22 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
               <button
                 type="button"
                 onClick={() => setCustomerTypeFilter('all')}
-                className={`flex-1 px-2.5 py-1.5 rounded-lg cursor-pointer ${customerTypeFilter === 'all' ? 'bg-white text-[#1A1A1A] shadow-xs' : 'text-stone-600'}`}
+                className={`flex-1 px-2.5 py-1.5 rounded-lg cursor-pointer ${customerTypeFilter === 'all' ? 'bg-surface text-ink shadow-xs' : 'text-stone-600'}`}
               >
                 {language === 'fa' ? 'همه' : 'All'}
               </button>
               <button
                 type="button"
                 onClick={() => setCustomerTypeFilter('tailoring')}
-                className={`flex-1 px-2.5 py-1.5 rounded-lg cursor-pointer flex items-center justify-center gap-1 ${customerTypeFilter === 'tailoring' ? 'bg-white text-[#1A1A1A] shadow-xs' : 'text-stone-600'}`}
+                className={`flex-1 px-2.5 py-1.5 rounded-lg cursor-pointer flex items-center justify-center gap-1 ${customerTypeFilter === 'tailoring' ? 'bg-surface text-ink shadow-xs' : 'text-stone-600'}`}
               >
-                <Scissors className="w-3 h-3 text-[#D4AF37]" />
+                <Scissors className="w-3 h-3 text-accent" />
                 <span>{language === 'fa' ? 'خیاطی' : 'Tailoring'}</span>
               </button>
               <button
                 type="button"
                 onClick={() => setCustomerTypeFilter('products')}
-                className={`flex-1 px-2.5 py-1.5 rounded-lg cursor-pointer flex items-center justify-center gap-1 ${customerTypeFilter === 'products' ? 'bg-white text-[#1A1A1A] shadow-xs' : 'text-stone-600'}`}
+                className={`flex-1 px-2.5 py-1.5 rounded-lg cursor-pointer flex items-center justify-center gap-1 ${customerTypeFilter === 'products' ? 'bg-surface text-ink shadow-xs' : 'text-stone-600'}`}
               >
                 <ShoppingBag className="w-3 h-3 text-emerald-600" />
                 <span>{language === 'fa' ? 'محصولات' : 'Products'}</span>
@@ -439,7 +439,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
           {/* Customers Cards List */}
           <div className="space-y-2 max-h-[640px] overflow-y-auto pr-1">
             {filteredCustomers.length === 0 ? (
-              <div className="bg-white p-8 text-center rounded-2xl border border-[#E5E5E5] text-xs text-[#706E6B]">
+              <div className="bg-surface p-8 text-center rounded-2xl border border-line text-xs text-muted">
                 {t.noDataFound}
               </div>
             ) : (
@@ -460,21 +460,21 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                     }}
                     className={`p-4 rounded-2xl border transition cursor-pointer flex items-center justify-between gap-3 ${
                       isSelected
-                        ? 'bg-[#F9F7F2] border-[#D4AF37] shadow-xs ring-1 ring-[#D4AF37]'
-                        : 'bg-white border-[#E5E5E5] hover:bg-[#F9F7F2]/60 shadow-2xs'
+                        ? 'bg-surface-muted border-accent shadow-xs ring-1 ring-accent'
+                        : 'bg-surface border-line hover:bg-surface-muted/60 shadow-2xs'
                     }`}
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-sm text-[#1A1A1A] truncate">{cust.name}</h3>
+                        <h3 className="font-bold text-sm text-ink truncate">{cust.name}</h3>
                         {cust.preferredGarmentType && (
-                          <span className="text-[9px] bg-[#F9F7F2] text-[#706E6B] px-2 py-0.5 rounded-md font-medium border border-[#E5E5E5]">
+                          <span className="text-[9px] bg-surface-muted text-muted px-2 py-0.5 rounded-md font-medium border border-line">
                             {cust.preferredGarmentType}
                           </span>
                         )}
                       </div>
 
-                      <div className="flex items-center gap-3 text-xs text-[#706E6B] mt-1 font-mono">
+                      <div className="flex items-center gap-3 text-xs text-muted mt-1 font-mono">
                         <span className="flex items-center gap-1">
                           <Phone className="w-3 h-3 text-stone-400" />
                           <span>{cust.phone || '---'}</span>
@@ -491,7 +491,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                           e.stopPropagation();
                           onNewOrderForCustomer(cust);
                         }}
-                        className="p-1.5 text-[#1A1A1A] bg-[#D4AF37] hover:bg-[#B39025] rounded-lg transition shadow-2xs cursor-pointer"
+                        className="p-1.5 text-white bg-accent hover:bg-accent-hover rounded-lg transition shadow-2xs cursor-pointer"
                         title={t.createNewOrderForCustomer}
                       >
                         <Scissors className="w-4 h-4" />
@@ -507,18 +507,18 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
         {/* RIGHT COLUMN: Active Customer Details & Saved Measurements (7 Cols) */}
         <div className="lg:col-span-7">
           {activeCustomer ? (
-            <div className="bg-white rounded-2xl border border-[#E5E5E5] shadow-xs p-4 sm:p-6 space-y-5 sm:space-y-6">
+            <div className="bg-surface rounded-2xl border border-line shadow-xs p-4 sm:p-6 space-y-5 sm:space-y-6">
               {/* Profile Top Bar */}
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E5E5E5] pb-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-12 h-12 rounded-2xl bg-[#1A1A1A] border border-[#1A1A1A] flex items-center justify-center text-[#D4AF37] font-black text-lg">
+                  <div className="w-12 h-12 rounded-2xl bg-ink border border-ink flex items-center justify-center text-accent-soft font-black text-lg">
                     {activeCustomer.name.charAt(0)}
                   </div>
                   <div className="min-w-0">
-                    <h2 className="text-lg font-black text-[#1A1A1A] truncate">
+                    <h2 className="text-lg font-black text-ink truncate">
                       {activeCustomer.name}
                     </h2>
-                    <div className="flex items-center gap-2 text-xs text-[#706E6B] font-mono mt-0.5">
+                    <div className="flex items-center gap-2 text-xs text-muted font-mono mt-0.5">
                       <Phone className="w-3.5 h-3.5" />
                       <span>{activeCustomer.phone}</span>
                       {activeCustomer.whatsapp && activeCustomer.whatsapp !== activeCustomer.phone && (
@@ -533,7 +533,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                   <button
                     onClick={() => onNewOrderForCustomer(activeCustomer)}
                     id="new-order-from-profile-btn"
-                    className="inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 px-3.5 py-2 bg-[#D4AF37] hover:bg-[#B39025] active:scale-98 text-[#1A1A1A] font-black rounded-xl text-xs transition cursor-pointer shadow-xs"
+                    className="inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 px-3.5 py-2 bg-accent hover:bg-accent-hover active:scale-98 text-white font-black rounded-xl text-xs transition cursor-pointer shadow-xs"
                   >
                     <Scissors className="w-4 h-4" />
                     <span>{t.createNewOrderForCustomer}</span>
@@ -541,7 +541,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
 
                   <button
                     onClick={() => handleOpenEditModal(activeCustomer)}
-                    className="p-1.5 text-[#1A1A1A] hover:text-black bg-[#F9F7F2] hover:bg-stone-200 rounded-lg transition border border-[#E5E5E5] cursor-pointer"
+                    className="p-1.5 text-ink hover:text-black bg-surface-muted hover:bg-stone-200 rounded-lg transition border border-line cursor-pointer"
                     title={t.edit}
                   >
                     <Edit3 className="w-4 h-4" />
@@ -549,7 +549,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
 
                   <button
                     onClick={() => handleDeleteCustomer(activeCustomer)}
-                    className="p-1.5 text-stone-400 hover:text-rose-600 bg-[#F9F7F2] hover:bg-rose-50 rounded-lg transition border border-[#E5E5E5] cursor-pointer"
+                    className="p-1.5 text-stone-400 hover:text-rose-600 bg-surface-muted hover:bg-rose-50 rounded-lg transition border border-line cursor-pointer"
                     title={t.delete}
                   >
                     <Trash2 className="w-4 h-4" />
@@ -560,12 +560,12 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
               {/* Saved Measurements Matrix */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-sm text-[#1A1A1A] flex items-center gap-1.5">
-                    <span className="w-1 h-3.5 bg-[#D4AF37] rounded-full inline-block" />
-                    <Scissors className="w-4 h-4 text-[#D4AF37]" />
+                  <h3 className="font-bold text-sm text-ink flex items-center gap-1.5">
+                    <span className="w-1 h-3.5 bg-accent rounded-full inline-block" />
+                    <Scissors className="w-4 h-4 text-accent" />
                     <span>{t.savedMeasurements} ({t.unitInches})</span>
                   </h3>
-                  <span className="text-xs text-[#706E6B]">
+                  <span className="text-xs text-muted">
                     {language === 'fa' ? 'اندازه‌های استاندارد این مشتری' : 'Standard measurements profile'}
                   </span>
                 </div>
@@ -579,8 +579,8 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                         onClick={() => setSelectedMeasurementGarment(garmentType)}
                         className={`rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
                           selectedMeasurementGarment === garmentType
-                            ? 'bg-white text-[#1A1A1A] shadow-xs'
-                            : 'text-stone-600 hover:bg-white/70'
+                            ? 'bg-surface text-ink shadow-xs'
+                            : 'text-stone-600 hover:bg-surface/70'
                         }`}
                       >
                         {garmentType}
@@ -590,7 +590,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                 )}
 
                 {savedMeasurementsToDisplay.length === 0 ? (
-                  <div className="py-6 px-4 bg-[#F9F7F2] rounded-xl border border-dashed border-[#E5E5E5] text-center">
+                  <div className="py-6 px-4 bg-surface-muted rounded-xl border border-dashed border-line text-center">
                     <p className="text-xs text-stone-500 font-medium">
                       {language === 'fa' 
                         ? 'هیچ اندازه ثبت شده‌ای برای این مشتری موجود نیست.' 
@@ -604,12 +604,12 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                     {savedMeasurementsToDisplay.map(item => (
                       <div 
                         key={item.id} 
-                        className="p-2.5 bg-[#F9F7F2] rounded-xl border border-[#E5E5E5] text-center hover:border-[#D4AF37]/60 transition"
+                        className="p-2.5 bg-surface-muted rounded-xl border border-line text-center hover:border-accent/60 transition"
                       >
-                        <span className="text-[11px] font-semibold text-[#706E6B] block truncate" title={item.label}>
+                        <span className="text-[11px] font-semibold text-muted block truncate" title={item.label}>
                           {item.label}
                         </span>
-                        <span className="font-mono font-black text-sm text-[#1A1A1A] mt-0.5 block">
+                        <span className="font-mono font-black text-sm text-ink mt-0.5 block">
                           {item.val}
                         </span>
                       </div>
@@ -620,15 +620,15 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
 
               {/* Notes & Address */}
               {(activeCustomer.notes || activeCustomer.address) && (
-                <div className="p-3 bg-[#F9F7F2] rounded-xl border border-[#E5E5E5] text-xs space-y-1">
+                <div className="p-3 bg-surface-muted rounded-xl border border-line text-xs space-y-1">
                   {activeCustomer.address && (
-                    <p className="text-[#2D2926]">
-                      <b className="text-[#1A1A1A]">{t.shopAddress}:</b> {activeCustomer.address}
+                    <p className="text-ink">
+                      <b className="text-ink">{t.shopAddress}:</b> {activeCustomer.address}
                     </p>
                   )}
                   {activeCustomer.notes && (
-                    <p className="text-[#2D2926]">
-                      <b className="text-[#1A1A1A]">{t.notes}:</b> {activeCustomer.notes}
+                    <p className="text-ink">
+                      <b className="text-ink">{t.notes}:</b> {activeCustomer.notes}
                     </p>
                   )}
                 </div>
@@ -641,7 +641,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                     {language === 'fa' ? 'سفارشات خیاطی' : language === 'ps' ? 'د خیاطۍ فرمایشونه' : 'Tailoring Orders'}
                   </span>
                   <div className="flex items-baseline gap-1 mt-0.5">
-                    <span className="font-mono font-black text-sm text-[#1A1A1A]">
+                    <span className="font-mono font-black text-sm text-ink">
                       {customerStats.totalOrderSpend.toLocaleString()}
                     </span>
                     <span className="text-[10px] text-stone-500">{currencySymbol}</span>
@@ -682,9 +682,9 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
               {/* Customer Activity History: Orders & Product Purchases */}
               <div className="space-y-3 pt-2">
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 pb-2">
-                  <h3 className="font-bold text-sm text-[#1A1A1A] flex items-center gap-1.5">
-                    <span className="w-1 h-3.5 bg-[#D4AF37] rounded-full inline-block" />
-                    <History className="w-4 h-4 text-[#D4AF37]" />
+                  <h3 className="font-bold text-sm text-ink flex items-center gap-1.5">
+                    <span className="w-1 h-3.5 bg-accent rounded-full inline-block" />
+                    <History className="w-4 h-4 text-accent" />
                     <span>{t.customerHistory}</span>
                     <span className="text-xs font-mono font-bold text-stone-500">
                       ({customerStats.totalCount})
@@ -698,7 +698,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                       onClick={() => setHistoryTab('all')}
                       className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
                         historyTab === 'all'
-                          ? 'bg-white text-[#1A1A1A] shadow-xs'
+                          ? 'bg-surface text-ink shadow-xs'
                           : 'text-stone-600 hover:text-stone-900'
                       }`}
                     >
@@ -709,11 +709,11 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                       onClick={() => setHistoryTab('orders')}
                       className={`px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1 ${
                         historyTab === 'orders'
-                          ? 'bg-white text-[#1A1A1A] shadow-xs'
+                          ? 'bg-surface text-ink shadow-xs'
                           : 'text-stone-600 hover:text-stone-900'
                       }`}
                     >
-                      <Scissors className="w-3 h-3 text-[#D4AF37]" />
+                      <Scissors className="w-3 h-3 text-accent" />
                       <span>{language === 'fa' ? 'سفارشات' : language === 'ps' ? 'فرمایشونه' : 'Orders'} ({customerStats.ordersCount})</span>
                     </button>
                     <button
@@ -721,7 +721,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                       onClick={() => setHistoryTab('products')}
                       className={`px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1 ${
                         historyTab === 'products'
-                          ? 'bg-white text-[#1A1A1A] shadow-xs'
+                          ? 'bg-surface text-ink shadow-xs'
                           : 'text-stone-600 hover:text-stone-900'
                       }`}
                     >
@@ -733,7 +733,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
 
                 {/* Empty State */}
                 {customerStats.totalCount === 0 ? (
-                  <p className="text-xs text-[#706E6B] italic py-3 text-center">
+                  <p className="text-xs text-muted italic py-3 text-center">
                     {language === 'fa' ? 'هنوز سفارشی یا خریدی برای این مشتری ثبت نشده است.' : 'No orders or product purchases recorded for this customer.'}
                   </p>
                 ) : (
@@ -742,13 +742,13 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                     {(historyTab === 'all' || historyTab === 'orders') && activeCustomerOrders.map(ord => (
                       <div 
                         key={`order-${ord.id}`}
-                        className="p-3 bg-[#F9F7F2] hover:bg-stone-200/50 rounded-xl border border-[#E5E5E5] flex items-center justify-between gap-3 text-xs transition"
+                        className="p-3 bg-surface-muted hover:bg-stone-200/50 rounded-xl border border-line flex items-center justify-between gap-3 text-xs transition"
                       >
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-mono font-black text-[#1A1A1A]">#{ord.orderNumber}</span>
-                            <span className="inline-flex items-center gap-1 font-semibold text-[#1A1A1A]">
-                              <Scissors className="w-3 h-3 text-[#D4AF37]" />
+                            <span className="font-mono font-black text-ink">#{ord.orderNumber}</span>
+                            <span className="inline-flex items-center gap-1 font-semibold text-ink">
+                              <Scissors className="w-3 h-3 text-accent" />
                               <span>{ord.garmentType}</span>
                             </span>
                             {ord.fabricName && (
@@ -757,19 +757,19 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                               ord.status === 'ready' ? 'bg-emerald-100 text-emerald-800' :
                               ord.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                              ord.status === 'delivered' ? 'bg-purple-100 text-purple-800' : 'bg-amber-100 text-amber-800'
+                              ord.status === 'delivered' ? 'bg-purple-100 text-purple-800' : 'bg-teal-100 text-teal-800'
                             }`}>
                               {t[('status' + ord.status.charAt(0).toUpperCase() + ord.status.slice(1).replace('_', '')) as keyof typeof t] || ord.status}
                             </span>
                           </div>
 
-                          <div className="flex items-center gap-3 text-[11px] text-[#706E6B] font-mono flex-wrap">
+                          <div className="flex items-center gap-3 text-[11px] text-muted font-mono flex-wrap">
                             <span className="flex items-center gap-1">
                               <Calendar className="w-3 h-3 text-stone-400" />
                               <span>{ord.orderDate}</span>
                             </span>
                             <span>•</span>
-                            <span className="font-bold text-[#1A1A1A]">
+                            <span className="font-bold text-ink">
                               {ord.totalAmount} {currencySymbol}
                             </span>
                             {ord.balanceAmount > 0 ? (
@@ -785,7 +785,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                         <button
                           type="button"
                           onClick={() => onViewReceipt(ord)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white hover:bg-stone-100 border border-[#E5E5E5] rounded-lg text-[11px] font-bold text-[#1A1A1A] transition cursor-pointer shadow-2xs shrink-0"
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-surface hover:bg-stone-100 border border-line rounded-lg text-[11px] font-bold text-ink transition cursor-pointer shadow-2xs shrink-0"
                           title={t.print}
                         >
                           <Printer className="w-3.5 h-3.5" />
@@ -802,12 +802,12 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                       >
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="inline-flex items-center gap-1 font-bold text-[#1A1A1A]">
+                            <span className="inline-flex items-center gap-1 font-bold text-ink">
                               <ShoppingBag className="w-3.5 h-3.5 text-emerald-600" />
                               <span>{sale.productName}</span>
                             </span>
                             {sale.category && (
-                              <span className="text-[10px] px-1.5 py-0.5 bg-white rounded-md border border-emerald-200 text-emerald-800 font-semibold">
+                              <span className="text-[10px] px-1.5 py-0.5 bg-surface rounded-md border border-emerald-200 text-emerald-800 font-semibold">
                                 {sale.category}
                               </span>
                             )}
@@ -822,7 +822,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                               <span>{sale.saleDate ? sale.saleDate.split('T')[0] : '-'}</span>
                             </span>
                             <span>•</span>
-                            <span className="font-bold text-[#1A1A1A]">
+                            <span className="font-bold text-ink">
                               {sale.totalAmount.toLocaleString()} {currencySymbol}
                             </span>
                             <span className="text-stone-400">
@@ -860,9 +860,9 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-[#E5E5E5] shadow-xs p-12 text-center text-[#706E6B]">
-              <Users className="w-12 h-12 mx-auto mb-2 opacity-40 text-[#D4AF37]" />
-              <p className="text-sm font-bold text-[#1A1A1A]">{t.customerProfile}</p>
+            <div className="bg-surface rounded-2xl border border-line shadow-xs p-12 text-center text-muted">
+              <Users className="w-12 h-12 mx-auto mb-2 opacity-40 text-accent" />
+              <p className="text-sm font-bold text-ink">{t.customerProfile}</p>
               <p className="text-xs mt-1">
                 {language === 'fa' ? 'لطفاً یک مشتری را از لیست سمت چپ انتخاب کنید' : 'Please select a customer from the left list'}
               </p>
@@ -873,12 +873,12 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
 
       {/* Add / Edit Customer Modal */}
       {isEditingModalOpen && editingCustomer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1A1A1A]/70 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl border border-[#E5E5E5] space-y-4 max-h-[calc(100dvh-1rem)] sm:max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/70 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-surface rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl border border-line space-y-4 max-h-[calc(100dvh-1rem)] sm:max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center gap-2">
-                <span className="w-1.5 h-4 bg-[#D4AF37] rounded-full inline-block" />
-                <h3 className="font-bold text-base text-[#1A1A1A]">
+                <span className="w-1.5 h-4 bg-accent rounded-full inline-block" />
+                <h3 className="font-bold text-base text-ink">
                   {editingCustomer.id.startsWith('cust_') && !(customers || []).find(c => c.id === editingCustomer.id) 
                     ? t.addNewCustomer 
                     : t.editCustomer}
@@ -896,21 +896,21 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
               {/* Basic Fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-[#706E6B] uppercase tracking-wider mb-1">{t.customerName} *</label>
+                  <label className="block font-bold text-muted uppercase tracking-wider mb-1">{t.customerName} *</label>
                   <input
                     type="text"
                     value={editingCustomer.name}
                     onChange={e => setEditingCustomer({ ...editingCustomer, name: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
+                    className="w-full px-3 py-2.5 bg-surface-muted border border-line rounded-xl text-xs font-semibold focus:outline-hidden focus:border-accent"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-[#706E6B] uppercase tracking-wider mb-1">{t.contactNumber} *</label>
+                  <label className="block font-bold text-muted uppercase tracking-wider mb-1">{t.contactNumber} *</label>
                   <input
                     type="text"
                     value={editingCustomer.phone}
                     onChange={e => setEditingCustomer({ ...editingCustomer, phone: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-mono focus:outline-hidden focus:border-[#D4AF37]"
+                    className="w-full px-3 py-2.5 bg-surface-muted border border-line rounded-xl text-xs font-mono focus:outline-hidden focus:border-accent"
                   />
                 </div>
               </div>
@@ -918,30 +918,30 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
               {/* WhatsApp & Address */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-[#706E6B] uppercase tracking-wider mb-1">{t.whatsappNumber}</label>
+                  <label className="block font-bold text-muted uppercase tracking-wider mb-1">{t.whatsappNumber}</label>
                   <input
                     type="text"
                     value={editingCustomer.whatsapp || ''}
                     onChange={e => setEditingCustomer({ ...editingCustomer, whatsapp: e.target.value })}
                     placeholder="0771221559..."
-                    className="w-full px-3 py-2.5 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-mono focus:outline-hidden focus:border-[#D4AF37]"
+                    className="w-full px-3 py-2.5 bg-surface-muted border border-line rounded-xl text-xs font-mono focus:outline-hidden focus:border-accent"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-[#706E6B] uppercase tracking-wider mb-1">{t.shopAddress}</label>
+                  <label className="block font-bold text-muted uppercase tracking-wider mb-1">{t.shopAddress}</label>
                   <input
                     type="text"
                     value={editingCustomer.address || ''}
                     onChange={e => setEditingCustomer({ ...editingCustomer, address: e.target.value })}
                     placeholder="Kabul, Afghanistan..."
-                    className="w-full px-3 py-2.5 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs focus:outline-hidden focus:border-[#D4AF37]"
+                    className="w-full px-3 py-2.5 bg-surface-muted border border-line rounded-xl text-xs focus:outline-hidden focus:border-accent"
                   />
                 </div>
               </div>
 
               {/* Standard Measurements Grid */}
-              <div className="border-t border-[#E5E5E5] pt-3">
-                <label className="block font-bold text-[#1A1A1A] mb-2">
+              <div className="border-t border-line pt-3">
+                <label className="block font-bold text-ink mb-2">
                   {t.savedMeasurements} ({t.unitInches})
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -955,8 +955,8 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                       const val = editingCustomer.standardMeasurements?.[field.key] || '';
 
                     return (
-                      <div key={field.id} className="p-2 bg-[#F9F7F2] rounded-lg border border-[#E5E5E5]">
-                        <span className="text-[10px] font-bold text-[#706E6B] block">{label}</span>
+                      <div key={field.id} className="p-2 bg-surface-muted rounded-lg border border-line">
+                        <span className="text-[10px] font-bold text-muted block">{label}</span>
                         <input
                           type="text"
                           value={val}
@@ -965,7 +965,7 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
                             setEditingCustomer({ ...editingCustomer, standardMeasurements: newM });
                           }}
                           placeholder="0.0"
-                          className="w-full mt-1 px-1.5 py-1 bg-white border border-[#E5E5E5] rounded text-xs font-mono font-bold text-center focus:outline-hidden focus:border-[#D4AF37]"
+                          className="w-full mt-1 px-1.5 py-1 bg-surface border border-line rounded text-xs font-mono font-bold text-center focus:outline-hidden focus:border-accent"
                         />
                       </div>
                     );
@@ -975,30 +975,30 @@ export const CustomersView: React.FC<CustomersViewProps> = ({
 
               {/* Notes */}
               <div>
-                <label className="block font-bold text-[#706E6B] uppercase tracking-wider mb-1">{t.notes}</label>
+                <label className="block font-bold text-muted uppercase tracking-wider mb-1">{t.notes}</label>
                 <textarea
                   rows={2}
                   value={editingCustomer.notes || ''}
                   onChange={e => setEditingCustomer({ ...editingCustomer, notes: e.target.value })}
                   placeholder="Special instructions or fitting preferences..."
-                  className="w-full p-2.5 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs focus:outline-hidden focus:border-[#D4AF37]"
+                  className="w-full p-2.5 bg-surface-muted border border-line rounded-xl text-xs focus:outline-hidden focus:border-accent"
                 />
               </div>
             </div>
 
             {/* Modal Actions */}
-            <div className="flex items-center justify-end gap-2 border-t border-[#E5E5E5] pt-3">
+            <div className="flex items-center justify-end gap-2 border-t border-line pt-3">
               <button
                 type="button"
                 onClick={() => setIsEditingModalOpen(false)}
-                className="px-4 py-2 bg-[#F9F7F2] hover:bg-stone-200 text-[#706E6B] text-xs font-bold rounded-xl border border-[#E5E5E5] cursor-pointer"
+                className="px-4 py-2 bg-surface-muted hover:bg-stone-200 text-muted text-xs font-bold rounded-xl border border-line cursor-pointer"
               >
                 {t.cancel}
               </button>
               <button
                 type="button"
                 onClick={handleSaveCustomer}
-                className="px-5 py-2 bg-[#D4AF37] hover:bg-[#B39025] text-[#1A1A1A] text-xs font-black rounded-xl shadow-xs cursor-pointer"
+                className="px-5 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-black rounded-xl shadow-xs cursor-pointer"
               >
                 {t.save}
               </button>

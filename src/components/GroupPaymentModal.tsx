@@ -109,10 +109,10 @@ export const GroupPaymentModal: React.FC<GroupPaymentModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-3 backdrop-blur-xs">
-      <div className="flex max-h-[94vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-2xl">
+      <div className="flex max-h-[94vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-stone-200 bg-surface shadow-2xl">
         <div className="flex items-center justify-between border-b border-stone-200 bg-stone-50 px-4 py-3 no-print">
           <h2 className="flex items-center gap-2 text-sm font-black text-stone-900">
-            <CreditCard className="h-4 w-4 text-amber-600" />
+            <CreditCard className="h-4 w-4 text-teal-600" />
             {receiptRows ? (language === 'fa' ? 'رسید پرداخت گروهی' : 'Combined Payment Receipt') : (language === 'fa' ? 'پرداخت چند فرمایش' : 'Group Payment')}
           </h2>
           <button type="button" onClick={onClose} className="rounded-lg p-1.5 text-stone-500 hover:bg-stone-200"><X className="h-4 w-4" /></button>
@@ -145,31 +145,31 @@ export const GroupPaymentModal: React.FC<GroupPaymentModalProps> = ({
             </div>
             <div className="flex justify-end gap-2 border-t border-stone-200 p-3 no-print">
               <button type="button" onClick={onClose} className="rounded-xl bg-stone-100 px-4 py-2 text-xs font-bold">{language === 'fa' ? 'بستن' : 'Close'}</button>
-              <button type="button" onClick={printReceipt} className="flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2 text-xs font-black text-stone-950"><Printer className="h-4 w-4" />{language === 'fa' ? 'چاپ رسید' : 'Print Receipt'}</button>
+              <button type="button" onClick={printReceipt} className="flex items-center gap-2 rounded-xl bg-teal-500 px-4 py-2 text-xs font-black text-white"><Printer className="h-4 w-4" />{language === 'fa' ? 'چاپ رسید' : 'Print Receipt'}</button>
             </div>
           </>
         ) : (
           <>
             <div className="space-y-3 overflow-y-auto p-4">
               <div className="grid gap-3 sm:grid-cols-2">
-                <input value={payerName} onChange={event => setPayerName(event.target.value)} placeholder={language === 'fa' ? 'نام پرداخت کننده' : 'Payer name'} className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold outline-none focus:border-amber-500" />
-                <div className="relative"><Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" /><input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder={language === 'fa' ? 'جستجوی نام، شماره یا بل' : language === 'ps' ? 'نوم، ټلیفون یا فرمایش وپلټئ' : 'Search name, phone, or order'} aria-label={language === 'fa' ? 'جستجوی فرمایش' : language === 'ps' ? 'د فرمایش پلټنه' : 'Search orders'} className="w-full rounded-xl border border-stone-200 bg-stone-50 py-2.5 pe-3 ps-9 text-xs outline-none focus:border-amber-500" /></div>
+                <input value={payerName} onChange={event => setPayerName(event.target.value)} placeholder={language === 'fa' ? 'نام پرداخت کننده' : 'Payer name'} className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold outline-none focus:border-teal-500" />
+                <div className="relative"><Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" /><input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder={language === 'fa' ? 'جستجوی نام، شماره یا بل' : language === 'ps' ? 'نوم، ټلیفون یا فرمایش وپلټئ' : 'Search name, phone, or order'} aria-label={language === 'fa' ? 'جستجوی فرمایش' : language === 'ps' ? 'د فرمایش پلټنه' : 'Search orders'} className="w-full rounded-xl border border-stone-200 bg-stone-50 py-2.5 pe-3 ps-9 text-xs outline-none focus:border-teal-500" /></div>
               </div>
               {error && <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-bold text-rose-700">{error}</div>}
               <div className="space-y-2">
                 {availableOrders.map(order => {
                   const isSelected = !!selected[order.id];
-                  return <div key={order.id} className={`grid items-center gap-3 rounded-xl border p-3 sm:grid-cols-[auto_1fr_150px] ${isSelected ? 'border-amber-400 bg-amber-50' : 'border-stone-200'}`}>
-                    <input type="checkbox" checked={isSelected} onChange={event => setSelected(current => ({ ...current, [order.id]: event.target.checked }))} className="h-4 w-4 accent-amber-600" />
+                  return <div key={order.id} className={`grid items-center gap-3 rounded-xl border p-3 sm:grid-cols-[auto_1fr_150px] ${isSelected ? 'border-teal-400 bg-teal-50' : 'border-stone-200'}`}>
+                    <input type="checkbox" checked={isSelected} onChange={event => setSelected(current => ({ ...current, [order.id]: event.target.checked }))} className="h-4 w-4 accent-teal-600" />
                     <div><div className="font-bold text-stone-900">{order.customerName} <span className="font-mono text-stone-500">#{order.orderNumber}</span></div><div className="mt-0.5 text-[11px] text-stone-500">{order.customerPhone} · {language === 'fa' ? 'باقی' : 'Balance'}: <strong className="text-rose-600">{order.balanceAmount} {currency}</strong></div></div>
-                    <input type="number" min="0" max={order.balanceAmount} disabled={!isSelected} value={amounts[order.id] || ''} onChange={event => setAmounts(current => ({ ...current, [order.id]: Number(event.target.value) }))} placeholder={language === 'fa' ? 'مبلغ پرداخت' : 'Payment amount'} className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-end font-mono text-xs font-bold disabled:bg-stone-100" />
+                    <input type="number" min="0" max={order.balanceAmount} disabled={!isSelected} value={amounts[order.id] || ''} onChange={event => setAmounts(current => ({ ...current, [order.id]: Number(event.target.value) }))} placeholder={language === 'fa' ? 'مبلغ پرداخت' : 'Payment amount'} className="rounded-lg border border-stone-300 bg-surface px-3 py-2 text-end font-mono text-xs font-bold disabled:bg-stone-100" />
                   </div>;
                 })}
               </div>
             </div>
             <div className="flex items-center justify-between border-t border-stone-200 bg-stone-50 p-3">
               <div className="text-xs">{language === 'fa' ? 'مجموع پرداخت:' : 'Payment total:'} <strong className="font-mono text-emerald-700">{allocatedTotal} {currency}</strong></div>
-              <div className="flex gap-2"><button type="button" onClick={onClose} className="rounded-xl bg-stone-200 px-4 py-2 text-xs font-bold">{language === 'fa' ? 'لغو' : 'Cancel'}</button><button type="button" disabled={saving} onClick={savePayments} className="rounded-xl bg-amber-500 px-4 py-2 text-xs font-black text-stone-950 disabled:opacity-50">{saving ? (language === 'fa' ? 'در حال ذخیره...' : 'Saving...') : (language === 'fa' ? 'ذخیره و ساخت رسید' : 'Save & Create Receipt')}</button></div>
+              <div className="flex gap-2"><button type="button" onClick={onClose} className="rounded-xl bg-stone-200 px-4 py-2 text-xs font-bold">{language === 'fa' ? 'لغو' : 'Cancel'}</button><button type="button" disabled={saving} onClick={savePayments} className="rounded-xl bg-teal-500 px-4 py-2 text-xs font-black text-white disabled:opacity-50">{saving ? (language === 'fa' ? 'در حال ذخیره...' : 'Saving...') : (language === 'fa' ? 'ذخیره و ساخت رسید' : 'Save & Create Receipt')}</button></div>
             </div>
           </>
         )}

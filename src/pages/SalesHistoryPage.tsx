@@ -398,9 +398,9 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
   return (
     <div className="space-y-6 pb-16 animate-in fade-in duration-200">
       {/* 1. Header & Quick Actions */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-surface p-5 rounded-2xl border border-line shadow-xs">
         <div>
-          <h1 className="text-2xl font-black text-[#1A1A1A] tracking-tight flex items-center gap-3">
+          <h1 className="text-2xl font-black text-ink tracking-tight flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
               <TrendingUp className="w-5 h-5 stroke-[2.5]" />
             </div>
@@ -440,12 +440,12 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
       {/* 2. Top Analytics Metrics Cards */}
       <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Total Sales Revenue */}
-        <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs flex items-center justify-between">
+        <div className="bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">
               {t.totalSalesRevenue || (language === 'fa' ? 'مجموع عواید فروش' : 'Sales Revenue')}
             </span>
-            <span className="text-xl sm:text-2xl font-black text-[#1A1A1A] font-mono mt-1 block">
+            <span className="text-xl sm:text-2xl font-black text-ink font-mono mt-1 block">
               {analytics.totalRevenue.toLocaleString()}{' '}
               <span className="text-xs font-normal text-stone-500">{currencySymbol}</span>
             </span>
@@ -456,7 +456,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
         </div>
 
         {/* Total Net Profit */}
-        <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs flex items-center justify-between">
+        <div className="bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">
               {t.totalSalesProfit || (language === 'fa' ? 'مجموع مفاد خالص' : 'Net Sales Profit')}
@@ -475,28 +475,28 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
         </div>
 
         {/* Total Units Sold */}
-        <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs flex items-center justify-between">
+        <div className="bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">
               {language === 'fa' ? 'اجناس فروخته شده' : language === 'ps' ? 'پلورل شوي توکي' : 'Items Sold'}
             </span>
-            <span className="text-xl sm:text-2xl font-black text-[#1A1A1A] font-mono mt-1 block">
+            <span className="text-xl sm:text-2xl font-black text-ink font-mono mt-1 block">
               {analytics.totalUnitsSold}{' '}
               <span className="text-xs font-normal text-stone-500">{t.units || 'units'}</span>
             </span>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-[#B39025]">
+          <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-accent-hover">
             <Package className="w-5 h-5" />
           </div>
         </div>
 
         {/* Total Transactions */}
-        <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs flex items-center justify-between">
+        <div className="bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">
               {language === 'fa' ? 'تعداد معاملات' : language === 'ps' ? 'د راکړو ورکړو شمیر' : 'Transactions'}
             </span>
-            <span className="text-xl sm:text-2xl font-black text-[#1A1A1A] font-mono mt-1 block">
+            <span className="text-xl sm:text-2xl font-black text-ink font-mono mt-1 block">
               {analytics.totalTransactions}
             </span>
           </div>
@@ -507,7 +507,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
       </div>
 
       {/* 3. Filters, Search & Time Presets */}
-      <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-3.5">
+      <div className="bg-surface p-4 rounded-2xl border border-line shadow-xs space-y-3.5">
         <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 justify-between">
           {/* Search Box */}
           <div className="relative flex-1">
@@ -517,7 +517,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               placeholder={t.searchSalesPlaceholder || (language === 'fa' ? 'جستجوی فروش (نام جنس، کتگوری، مشتری یا کد)...' : 'Search sales by product, category, customer, or SKU...')}
-              className="w-full ps-10 pe-9 py-2 bg-stone-50 border border-[#E5E5E5] rounded-xl text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
+              className="w-full ps-10 pe-9 py-2 bg-stone-50 border border-line rounded-xl text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-emerald-500 focus:bg-surface transition"
             />
             {searchTerm && (
               <button
@@ -534,7 +534,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
             <button
               onClick={() => setDateFilter('all')}
               className={`px-3 py-1.5 rounded-lg transition cursor-pointer whitespace-nowrap ${
-                dateFilter === 'all' ? 'bg-white text-[#1A1A1A] shadow-xs' : 'text-stone-600 hover:text-stone-900'
+                dateFilter === 'all' ? 'bg-surface text-ink shadow-xs' : 'text-stone-600 hover:text-stone-900'
               }`}
             >
               {language === 'fa' ? 'همه اوقات' : 'All Time'}
@@ -542,7 +542,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
             <button
               onClick={() => setDateFilter('today')}
               className={`px-3 py-1.5 rounded-lg transition cursor-pointer whitespace-nowrap ${
-                dateFilter === 'today' ? 'bg-white text-[#1A1A1A] shadow-xs' : 'text-stone-600 hover:text-stone-900'
+                dateFilter === 'today' ? 'bg-surface text-ink shadow-xs' : 'text-stone-600 hover:text-stone-900'
               }`}
             >
               {language === 'fa' ? 'امروز' : 'Today'}
@@ -550,7 +550,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
             <button
               onClick={() => setDateFilter('7days')}
               className={`px-3 py-1.5 rounded-lg transition cursor-pointer whitespace-nowrap ${
-                dateFilter === '7days' ? 'bg-white text-[#1A1A1A] shadow-xs' : 'text-stone-600 hover:text-stone-900'
+                dateFilter === '7days' ? 'bg-surface text-ink shadow-xs' : 'text-stone-600 hover:text-stone-900'
               }`}
             >
               {language === 'fa' ? '۷ روز اخیر' : 'Last 7 Days'}
@@ -558,7 +558,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
             <button
               onClick={() => setDateFilter('month')}
               className={`px-3 py-1.5 rounded-lg transition cursor-pointer whitespace-nowrap ${
-                dateFilter === 'month' ? 'bg-white text-[#1A1A1A] shadow-xs' : 'text-stone-600 hover:text-stone-900'
+                dateFilter === 'month' ? 'bg-surface text-ink shadow-xs' : 'text-stone-600 hover:text-stone-900'
               }`}
             >
               {language === 'fa' ? 'این ماه' : 'This Month'}
@@ -572,7 +572,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
             onClick={() => setCategoryFilter('all')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
               categoryFilter === 'all'
-                ? 'bg-[#1A1A1A] text-white shadow-xs'
+                ? 'bg-ink text-white shadow-xs'
                 : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
             }`}
           >
@@ -603,7 +603,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
 
       {/* 4. Sales History Table */}
       {filteredSales.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#E5E5E5] p-12 text-center shadow-xs">
+        <div className="bg-surface rounded-2xl border border-line p-12 text-center shadow-xs">
           <TrendingUp className="w-12 h-12 text-stone-300 mx-auto mb-3" />
           <h3 className="font-extrabold text-stone-800 text-sm">
             {t.noSalesRecorded || (language === 'fa' ? 'هیچ فروش ثبت نشده است' : 'No sales recorded yet')}
@@ -622,7 +622,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
           </button>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-[#E5E5E5] shadow-xs overflow-hidden">
+        <div className="bg-surface rounded-2xl border border-line shadow-xs overflow-hidden">
           {/* Header for large screens */}
           <div className="hidden lg:grid grid-cols-12 gap-3 px-5 py-3 bg-stone-50 text-[11px] font-bold text-stone-500 uppercase tracking-wider border-b border-stone-200">
             <div className="col-span-3">{language === 'fa' ? 'جنس و کتگوری' : 'Product & Category'}</div>
@@ -667,7 +667,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                           {sale.category}
                         </span>
                       </div>
-                      <h4 className="font-extrabold text-xs sm:text-sm text-[#1A1A1A] leading-tight truncate">
+                      <h4 className="font-extrabold text-xs sm:text-sm text-ink leading-tight truncate">
                         {sale.productName}
                       </h4>
                       {sale.notes && (
@@ -697,7 +697,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                     <span className="text-[10px] text-stone-400 block lg:hidden">{t.customer || 'Customer'}:</span>
                     {sale.customerName ? (
                       <div>
-                        <span className="font-bold text-[#1A1A1A] block">{sale.customerName}</span>
+                        <span className="font-bold text-ink block">{sale.customerName}</span>
                         {sale.customerPhone && (
                           <span className="text-[11px] text-stone-500 font-mono flex items-center gap-1 mt-0.5">
                             <Phone className="w-3 h-3 text-stone-400" />
@@ -715,7 +715,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                   {/* 4. Quantity */}
                   <div className="w-full lg:col-span-1 text-xs lg:text-center">
                     <span className="text-[10px] text-stone-400 inline-block lg:hidden me-2">{t.quantity || 'Qty'}:</span>
-                    <span className="font-mono font-black text-sm text-[#1A1A1A] bg-stone-100 px-2 py-0.5 rounded-md">
+                    <span className="font-mono font-black text-sm text-ink bg-stone-100 px-2 py-0.5 rounded-md">
                       {sale.quantity}
                     </span>
                   </div>
@@ -725,7 +725,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                     <div className="flex items-center justify-between lg:block">
                       <span className="text-[10px] text-stone-400 block lg:hidden">{t.totalAmount || 'Total'}:</span>
                       <div>
-                        <span className="font-mono font-black text-sm text-[#1A1A1A]">
+                        <span className="font-mono font-black text-sm text-ink">
                           {Number(sale.totalAmount).toLocaleString()} <span className="text-[10px] font-normal text-stone-500">{currencySymbol}</span>
                         </span>
                         <div className="text-[10px] text-stone-500 font-mono mt-0.5">
@@ -753,7 +753,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                         onClick={(e) => handleQuickPrint(sale, e)}
                         disabled={isPrintingReceipt && quickPrintSale?.id === sale.id}
                         title={language === 'fa' ? 'چاپ سریع رسید (مستقیم)' : language === 'ps' ? 'د بِل سملاسي چاپ' : 'Quick Print Receipt'}
-                        className="flex items-center gap-1 px-2.5 py-1.5 bg-[#D4AF37] hover:bg-[#B39025] text-[#1A1A1A] text-[11px] font-black rounded-lg transition cursor-pointer shadow-xs disabled:opacity-50 shrink-0"
+                        className="flex items-center gap-1 px-2.5 py-1.5 bg-accent hover:bg-accent-hover text-white text-[11px] font-black rounded-lg transition cursor-pointer shadow-xs disabled:opacity-50 shrink-0"
                       >
                         <Printer className="w-3.5 h-3.5" />
                         <span className="hidden sm:inline">
@@ -781,7 +781,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
       {/* 5. MODAL: Make a New Sale */}
       {isNewSaleModalOpen && (
         <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[calc(100dvh-1rem)] sm:max-h-[90vh]">
+          <div className="bg-surface w-full max-w-lg rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[calc(100dvh-1rem)] sm:max-h-[90vh]">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-stone-100 bg-emerald-50 shrink-0">
               <div className="flex items-center gap-2.5">
@@ -789,7 +789,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                   <TrendingUp className="w-4 h-4 stroke-[3]" />
                 </div>
                 <div>
-                  <h2 className="font-black text-base text-[#1A1A1A]">
+                  <h2 className="font-black text-base text-ink">
                     {t.newSale || (language === 'fa' ? 'ثبت فروش جدید' : 'Make a New Sale')}
                   </h2>
                   <p className="text-[11px] text-stone-500">
@@ -829,14 +829,14 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                     value={productSearchQuery}
                     onChange={e => setProductSearchQuery(e.target.value)}
                     placeholder={language === 'fa' ? 'جستجوی نام جنس یا کد...' : language === 'ps' ? 'د توکو نوم یا کوډ وپلټئ...' : 'Filter products list...'}
-                    className="w-full px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-lg text-xs font-medium focus:bg-white outline-hidden"
+                    className="w-full px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-lg text-xs font-medium focus:bg-surface outline-hidden"
                   />
 
                   <select
                     value={selectedProductId}
                     onChange={e => handleSelectProduct(e.target.value)}
                     required
-                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-bold text-[#1A1A1A] outline-hidden cursor-pointer focus:bg-white focus:border-emerald-600"
+                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-bold text-ink outline-hidden cursor-pointer focus:bg-surface focus:border-emerald-600"
                   >
                     <option value="" disabled>
                       {language === 'fa' ? '-- انتخاب محصول --' : '-- Choose a Product --'}
@@ -865,7 +865,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                   <div className="text-end">
                     <span className="text-stone-500 block">{t.inStock || 'Stock Available'}:</span>
                     <span className={`font-mono font-black text-sm ${
-                      (Number(selectedProduct.stockQuantity) || 0) <= 2 ? 'text-amber-700' : 'text-emerald-700'
+                      (Number(selectedProduct.stockQuantity) || 0) <= 2 ? 'text-teal-700' : 'text-emerald-700'
                     }`}>
                       {selectedProduct.stockQuantity} {t.units || 'units'}
                     </span>
@@ -887,7 +887,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                     required
                     value={quantity}
                     onChange={e => setQuantity(parseInt(e.target.value) || 1)}
-                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-[#1A1A1A] focus:bg-white focus:border-emerald-600 outline-hidden"
+                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-ink focus:bg-surface focus:border-emerald-600 outline-hidden"
                   />
                 </div>
 
@@ -907,7 +907,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                       setSellingPrice(val === '' ? 0 : parseFloat(val) || 0);
                     }}
                     placeholder="قیمت فروش دلخواه..."
-                    className="w-full px-3.5 py-2.5 bg-emerald-50/40 border-2 border-emerald-500 rounded-xl text-sm font-mono font-black text-[#1A1A1A] focus:bg-white focus:border-emerald-600 outline-hidden"
+                    className="w-full px-3.5 py-2.5 bg-emerald-50/40 border-2 border-emerald-500 rounded-xl text-sm font-mono font-black text-ink focus:bg-surface focus:border-emerald-600 outline-hidden"
                   />
                   <span className="text-[10px] text-stone-500 mt-0.5 block">
                     {language === 'fa' 
@@ -924,7 +924,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                 <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl space-y-1.5 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-stone-600">{t.totalAmount || 'Total Amount'}:</span>
-                    <span className="font-mono font-black text-sm text-[#1A1A1A]">
+                    <span className="font-mono font-black text-sm text-ink">
                       {((Number(quantity) || 1) * (Number(sellingPrice) || 0)).toLocaleString()} {currencySymbol}
                     </span>
                   </div>
@@ -953,14 +953,14 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                     value={paidAmount === 0 ? '' : paidAmount}
                     onChange={e => setPaidAmount(e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
                     placeholder="مبلغ پرداختی..."
-                    className="w-full px-3.5 py-2 bg-white border border-stone-300 rounded-lg text-xs font-mono font-bold text-[#1A1A1A] outline-hidden focus:border-emerald-600"
+                    className="w-full px-3.5 py-2 bg-surface border border-stone-300 rounded-lg text-xs font-mono font-bold text-ink outline-hidden focus:border-emerald-600"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
                     ⏳ {language === 'fa' ? 'باقی‌مانده (قرض مشتری)' : 'Remaining Balance (باقی‌مانده)'}
                   </label>
-                  <div className="px-3.5 py-2 bg-white border border-stone-200 rounded-lg text-xs font-mono font-bold text-rose-600 flex items-center justify-between">
+                  <div className="px-3.5 py-2 bg-surface border border-stone-200 rounded-lg text-xs font-mono font-bold text-rose-600 flex items-center justify-between">
                     <span>
                       {Math.max(0, ((Number(quantity) || 1) * (Number(sellingPrice) || 0)) - (Number(paidAmount) || 0)).toLocaleString()} {currencySymbol}
                     </span>
@@ -968,7 +968,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                       ((Number(quantity) || 1) * (Number(sellingPrice) || 0)) - (Number(paidAmount) || 0) === 0
                         ? 'bg-emerald-100 text-emerald-800'
                         : Number(paidAmount) > 0
-                        ? 'bg-amber-100 text-amber-800'
+                        ? 'bg-teal-100 text-teal-800'
                         : 'bg-rose-100 text-rose-800'
                     }`}>
                       {((Number(quantity) || 1) * (Number(sellingPrice) || 0)) - (Number(paidAmount) || 0) === 0
@@ -997,7 +997,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                         setCustomCustomerPhone('');
                       }
                     }}
-                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium text-[#1A1A1A] outline-hidden cursor-pointer"
+                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium text-ink outline-hidden cursor-pointer"
                   >
                     <option value="">{language === 'fa' ? '-- مشتری ثبت شده --' : '-- Registered Customer --'}</option>
                     {customers.map(c => (
@@ -1013,7 +1013,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                     disabled={!!selectedCustomerId}
                     onChange={e => setCustomCustomerName(e.target.value)}
                     placeholder={language === 'fa' ? 'یا نام مشتری جدید...' : 'Or enter new customer name...'}
-                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:bg-white outline-hidden disabled:opacity-50"
+                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:bg-surface outline-hidden disabled:opacity-50"
                   />
                 </div>
 
@@ -1024,7 +1024,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                     onChange={e => setCustomCustomerPhone(e.target.value)}
                     required
                     placeholder={language === 'fa' ? 'شماره تماس مشتری...' : 'Customer phone...'}
-                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:bg-white outline-hidden"
+                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:bg-surface outline-hidden"
                   />
                 )}
               </div>
@@ -1038,7 +1038,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                   <select
                     value={paymentMethod}
                     onChange={e => setPaymentMethod(e.target.value)}
-                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-bold text-[#1A1A1A] outline-hidden cursor-pointer"
+                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-bold text-ink outline-hidden cursor-pointer"
                   >
                     <option value="cash">{t.cashPayment || 'Cash (نقدی)'}</option>
                     <option value="card">{t.bankTransfer || 'Card / Bank (حساب بانکی)'}</option>
@@ -1055,7 +1055,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                     value={saleNotes}
                     onChange={e => setSaleNotes(e.target.value)}
                     placeholder="e.g. رنگ، سایز، یا تخفیف ویژه..."
-                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:bg-white outline-hidden"
+                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:bg-surface outline-hidden"
                   />
                 </div>
               </div>
@@ -1085,10 +1085,10 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
       {/* 6. MODAL: Printable Receipt Slip for Sale */}
       {activeReceiptSale && (
         <div id="retail-receipt-modal" className="print-modal-container fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="retail-receipt-container bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col">
+          <div className="retail-receipt-container bg-surface w-full max-w-sm rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col">
             <div className="flex items-center justify-between px-4 py-3 border-b border-stone-100 bg-stone-50 no-print">
-              <h3 className="font-extrabold text-sm text-[#1A1A1A] flex items-center gap-1.5">
-                <Printer className="w-4 h-4 text-[#B39025]" />
+              <h3 className="font-extrabold text-sm text-ink flex items-center gap-1.5">
+                <Printer className="w-4 h-4 text-accent-hover" />
                 <span>{t.receipt || (language === 'fa' ? 'بل فروش جنس' : 'Sales Receipt')}</span>
               </h3>
               <button
@@ -1231,7 +1231,7 @@ export const SalesHistoryView: React.FC<SalesHistoryViewProps> = ({
                 type="button"
                 onClick={handleDownloadReceiptPdf}
                 disabled={isGeneratingPdf}
-                className="px-3.5 py-2 bg-white hover:bg-stone-100 border border-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                className="px-3.5 py-2 bg-surface hover:bg-stone-100 border border-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
                 title="Download PDF"
               >
                 <Download className="w-3.5 h-3.5" />

@@ -431,17 +431,17 @@ export const OrderForm: React.FC<OrderFormProps> = ({
       {saveError && <div role="alert" className="mb-4 flex items-start gap-2 rounded-xl border border-rose-300 bg-rose-50 p-4 text-sm font-bold text-rose-800"><AlertCircle className="h-5 w-5 shrink-0" /><span>{saveError}</span></div>}
       
       {/* Top Banner & Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 bg-surface p-5 rounded-2xl border border-line shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-[#1A1A1A] flex items-center justify-center text-[#D4AF37] shadow-xs">
+          <div className="w-12 h-12 rounded-xl bg-ink flex items-center justify-center text-accent-soft shadow-xs">
             <Scissors className="w-6 h-6 transform -rotate-45" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-black text-[#1A1A1A] tracking-tight">
+              <h1 className="text-xl font-black text-ink tracking-tight">
                 {initialOrder ? t.editOrder : t.newOrder}
               </h1>
-              <span className="text-xs font-mono font-bold px-2 py-0.5 bg-[#D4AF37]/20 text-[#1A1A1A] rounded-md border border-[#D4AF37]/30">
+              <span className="text-xs font-mono font-bold px-2 py-0.5 bg-accent/20 text-ink rounded-md border border-accent/30">
                 {orderNumber || '—'}
               </span>
             </div>
@@ -467,10 +467,10 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             type="button"
             disabled={isSaving}
             onClick={handleSave}
-            className="px-6 py-2.5 text-xs font-black text-[#1A1A1A] bg-[#D4AF37] hover:bg-[#C29E2E] active:scale-98 rounded-xl transition cursor-pointer flex items-center gap-2 shadow-sm disabled:opacity-60"
+            className="px-6 py-2.5 text-xs font-black text-white bg-accent hover:bg-accent-hover active:scale-98 rounded-xl transition cursor-pointer flex items-center gap-2 shadow-sm disabled:opacity-60"
           >
             {isSaving ? (
-              <div className="w-4 h-4 border-2 border-[#1A1A1A] border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-ink border-t-transparent rounded-full animate-spin" />
             ) : (
               <Save className="w-4 h-4" />
             )}
@@ -483,10 +483,10 @@ export const OrderForm: React.FC<OrderFormProps> = ({
       <div className="space-y-6">
 
         {/* Manual order number */}
-        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-3">
+        <div className="bg-surface p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-3">
           <div className="flex items-center gap-2 text-stone-900 font-extrabold text-sm">
-            <span className="w-1.5 h-5 bg-amber-600 rounded-full inline-block" />
-            <Tag className="w-4 h-4 text-amber-600" />
+            <span className="w-1.5 h-5 bg-teal-600 rounded-full inline-block" />
+            <Tag className="w-4 h-4 text-teal-600" />
             <span>{t.orderNumber}</span>
           </div>
           <div className="max-w-sm">
@@ -511,7 +511,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               className={`w-full px-3.5 py-3 bg-stone-50 border rounded-xl text-base font-mono font-black tracking-wider outline-hidden transition ${
                 orderNumber && (!validOrderNumber || duplicateOrder)
                   ? 'border-rose-400 focus:ring-2 focus:ring-rose-200'
-                  : 'border-stone-200 focus:bg-white focus:border-amber-600 focus:ring-2 focus:ring-amber-200'
+                  : 'border-stone-200 focus:bg-surface focus:border-teal-600 focus:ring-2 focus:ring-teal-200'
               }`}
             />
             <div id="order-number-help" className="mt-2 text-[11px] font-medium">
@@ -535,11 +535,11 @@ export const OrderForm: React.FC<OrderFormProps> = ({
         </div>
 
         {/* 1. Customer Information Card */}
-        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
+        <div className="bg-surface p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-stone-100 pb-3">
             <div className="flex items-center gap-2 text-stone-900 font-extrabold text-sm">
-              <span className="w-1.5 h-5 bg-amber-600 rounded-full inline-block" />
-              <User className="w-4 h-4 text-amber-600" />
+              <span className="w-1.5 h-5 bg-teal-600 rounded-full inline-block" />
+              <User className="w-4 h-4 text-teal-600" />
               <span>{t.customerDetails}</span>
             </div>
 
@@ -552,7 +552,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 <button
                   type="button"
                   onClick={handleLoadSavedMeasurements}
-                  className="text-[11px] text-amber-700 hover:underline font-bold"
+                  className="text-[11px] text-teal-700 hover:underline font-bold"
                 >
                   {language === 'fa' ? 'بارگذاری اندازه‌های قبلی' : 'Load Saved Measurements'}
                 </button>
@@ -574,7 +574,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                   onChange={e => setCustomerName(e.target.value)}
                   onFocus={() => setShowCustomerSuggestions(false)}
                   placeholder="e.g. احمد، فرهاد، شکیل خان..."
-                  className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-bold text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-hidden"
+                  className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-bold text-stone-900 focus:bg-surface focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-hidden"
                 />
                 <User className="w-4 h-4 text-stone-400 absolute end-3 top-2.5" />
               </div>
@@ -598,14 +598,14 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                   }}
                   onFocus={() => setShowCustomerSuggestions(true)}
                   placeholder="0771221559"
-                  className="w-full pl-3.5 pr-10 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-hidden"
+                  className="w-full pl-3.5 pr-10 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-stone-900 focus:bg-surface focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-hidden"
                 />
                 <Phone className="w-4 h-4 text-stone-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
 
               {/* Existing customers are suggested only by phone number. */}
               {showCustomerSuggestions && matchingCustomers.length > 0 && (
-                <div className="absolute top-full start-0 end-0 mt-1 bg-white border border-stone-200 rounded-xl shadow-lg z-30 p-1.5 space-y-1">
+                <div className="absolute top-full start-0 end-0 mt-1 bg-surface border border-stone-200 rounded-xl shadow-lg z-30 p-1.5 space-y-1">
                   <div className="text-[10px] font-bold text-stone-400 px-2 py-0.5">
                     {language === 'fa' ? 'مشتریان با شماره مشابه (کلیک برای انتخاب):' : 'Matching phone numbers:'}
                   </div>
@@ -614,7 +614,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                       key={cust.id}
                       type="button"
                       onClick={() => selectCustomer(cust)}
-                      className="w-full text-start p-2 rounded-lg hover:bg-amber-50 text-xs flex items-center justify-between transition cursor-pointer"
+                      className="w-full text-start p-2 rounded-lg hover:bg-teal-50 text-xs flex items-center justify-between transition cursor-pointer"
                     >
                       <span className="font-bold text-stone-900">{cust.name}</span>
                       <span className="font-mono text-stone-500 text-[11px]">{cust.phone}</span>
@@ -629,7 +629,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
           <div className="space-y-3 pt-3 border-t border-stone-100">
             <div className="flex items-center justify-between">
               <label className="block text-xs font-bold text-stone-800 flex items-center gap-1.5">
-                <Shirt className="w-3.5 h-3.5 text-amber-600" />
+                <Shirt className="w-3.5 h-3.5 text-teal-600" />
                 <span>{t.garmentType}</span>
               </label>
               <span className="text-[10px] text-stone-500 font-bold">
@@ -659,7 +659,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                     aria-pressed={isSelected}
                     className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center shadow-2xs ${
                       isActive
-                        ? 'bg-amber-600 text-white font-black ring-2 ring-amber-400'
+                        ? 'bg-teal-600 text-white font-black ring-2 ring-teal-400'
                         : isSelected
                           ? 'bg-emerald-50 text-emerald-800 border border-emerald-300'
                         : 'bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-200'
@@ -678,7 +678,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 const itemName = config ? (language === 'ps' ? config.namePs : language === 'fa' ? config.nameFa : config.nameEn) : item.garmentType;
                 const isActive = item.garmentType === garmentType;
                 return (
-                  <div key={item.id} className={`rounded-xl border p-2.5 transition ${isActive ? 'border-amber-400 bg-amber-50 ring-1 ring-amber-200' : 'border-stone-200 bg-white'}`}>
+                  <div key={item.id} className={`rounded-xl border p-2.5 transition ${isActive ? 'border-teal-400 bg-teal-50 ring-1 ring-teal-200' : 'border-stone-200 bg-surface'}`}>
                     <div className="flex items-center justify-between gap-2 mb-2">
                       <button type="button" onClick={() => setGarmentType(item.garmentType)} className="min-w-0 text-start cursor-pointer">
                         <span className="block truncate text-xs font-extrabold text-stone-900">{itemName}</span>
@@ -710,11 +710,11 @@ export const OrderForm: React.FC<OrderFormProps> = ({
         </div>
 
         {/* 2. Fabric Inventory Selection Card (Prominent Switcher + Search + Dropdown) */}
-        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
+        <div className="bg-surface p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-stone-100 pb-3">
             <div className="flex items-center gap-2 text-stone-900 font-extrabold text-sm">
-              <span className="w-1.5 h-5 bg-amber-600 rounded-full inline-block" />
-              <Layers className="w-4 h-4 text-amber-600" />
+              <span className="w-1.5 h-5 bg-teal-600 rounded-full inline-block" />
+              <Layers className="w-4 h-4 text-teal-600" />
               <span>{t.selectFabric}</span>
             </div>
 
@@ -725,8 +725,8 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 onClick={() => setIsCustomerFabric(false)}
                 className={`px-4 py-2 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
                   !isCustomerFabric
-                    ? 'bg-amber-600 text-white shadow-sm font-black'
-                    : 'text-stone-600 hover:text-stone-900 bg-white'
+                    ? 'bg-teal-600 text-white shadow-sm font-black'
+                    : 'text-stone-600 hover:text-stone-900 bg-surface'
                 }`}
               >
                 <span>🏬</span>
@@ -741,8 +741,8 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 }}
                 className={`px-4 py-2 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
                   isCustomerFabric
-                    ? 'bg-amber-600 text-white shadow-sm font-black'
-                    : 'text-stone-600 hover:text-stone-900 bg-white'
+                    ? 'bg-teal-600 text-white shadow-sm font-black'
+                    : 'text-stone-600 hover:text-stone-900 bg-surface'
                 }`}
               >
                 <span>👤</span>
@@ -767,7 +767,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                       value={fabricSearchQuery}
                       onChange={e => setFabricSearchQuery(e.target.value)}
                       placeholder={language === 'fa' ? 'مثال: F-01 یا سفید...' : language === 'ps' ? 'لکه: F-01 یا سپین...' : 'e.g. F-01 or white...'}
-                      className="w-full ps-9 pe-3 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-xs font-bold text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-hidden"
+                      className="w-full ps-9 pe-3 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-xs font-bold text-stone-900 focus:bg-surface focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-hidden"
                     />
                   </div>
                 </div>
@@ -788,7 +788,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                         setFabricName('');
                       }
                     }}
-                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-xs font-bold text-stone-900 focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-hidden cursor-pointer"
+                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-xs font-bold text-stone-900 focus:bg-surface focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-hidden cursor-pointer"
                   >
                     <option value="">
                       {language === 'fa' 
@@ -809,10 +809,10 @@ export const OrderForm: React.FC<OrderFormProps> = ({
 
               {/* Selected Fabric Banner / Detail */}
               {selectedFabricId && (
-                <div className="p-3.5 bg-amber-50 border border-amber-300 rounded-xl flex items-center justify-between text-xs">
+                <div className="p-3.5 bg-teal-50 border border-teal-300 rounded-xl flex items-center justify-between text-xs">
                   <div>
                     <div className="font-extrabold text-stone-900 flex items-center gap-2">
-                      <span className="font-mono text-[11px] px-2 py-0.5 bg-amber-200 text-amber-900 rounded font-black">
+                      <span className="font-mono text-[11px] px-2 py-0.5 bg-teal-200 text-teal-900 rounded font-black">
                         {selectedFabric?.code}
                       </span>
                       <span>{selectedFabric?.name}</span>
@@ -826,7 +826,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                   </div>
                   <div className="text-end">
                     <span className="text-[10px] text-stone-500 block">{t.stockMeters}:</span>
-                    <span className={`font-mono font-black text-sm ${(selectedFabric?.stockMeters || 0) < 15 ? 'text-amber-700' : 'text-emerald-700'}`}>
+                    <span className={`font-mono font-black text-sm ${(selectedFabric?.stockMeters || 0) < 15 ? 'text-teal-700' : 'text-emerald-700'}`}>
                       {selectedFabric?.stockMeters} {t.meters}
                     </span>
                   </div>
@@ -844,7 +844,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                     value={fabricName}
                     onChange={e => setFabricName(e.target.value)}
                     placeholder="e.g. تکه نخی اعلا"
-                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-bold text-stone-900 focus:bg-white focus:border-amber-600 outline-hidden"
+                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-bold text-stone-900 focus:bg-surface focus:border-teal-600 outline-hidden"
                   />
                 </div>
                 <div>
@@ -857,7 +857,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                     min="0.5"
                     value={fabricMeters}
                     onChange={e => setFabricMeters(Math.max(0.5, parseFloat(e.target.value) || 4))}
-                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-stone-900 focus:bg-white focus:border-amber-600 outline-hidden"
+                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-stone-900 focus:bg-surface focus:border-teal-600 outline-hidden"
                   />
                   {/* Quick Meters chips */}
                   <div className="flex items-center gap-1.5 mt-1.5">
@@ -881,9 +881,9 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             </div>
           ) : (
             /* Mode B: Customer Provided Their Own Fabric */
-            <div className="p-4 bg-amber-50 rounded-xl border border-amber-300 text-xs space-y-3">
-              <div className="flex items-center gap-2 text-amber-900 font-bold">
-                <Scissors className="w-4 h-4 text-amber-700" />
+            <div className="p-4 bg-teal-50 rounded-xl border border-teal-300 text-xs space-y-3">
+              <div className="flex items-center gap-2 text-teal-900 font-bold">
+                <Scissors className="w-4 h-4 text-teal-700" />
                 <span>
                   {language === 'fa' 
                     ? 'رخت توسط خود مشتری آورده شده است (تکه شخصی مشتری)' 
@@ -900,7 +900,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                     value={fabricName}
                     onChange={e => setFabricName(e.target.value)}
                     placeholder="مثال: تکه نخی کرمی آورده شد..."
-                    className="w-full px-3 py-2 bg-white border border-amber-300 rounded-xl text-xs font-bold text-stone-900 focus:outline-hidden focus:ring-1 focus:ring-amber-600"
+                    className="w-full px-3 py-2 bg-surface border border-teal-300 rounded-xl text-xs font-bold text-stone-900 focus:outline-hidden focus:ring-1 focus:ring-teal-600"
                   />
                 </div>
                 <div>
@@ -913,7 +913,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                     min="0.5"
                     value={fabricMeters}
                     onChange={e => setFabricMeters(Math.max(0.5, parseFloat(e.target.value) || 4))}
-                    className="w-full px-3 py-2 bg-white border border-amber-300 rounded-xl text-xs font-mono font-bold text-stone-900 focus:outline-hidden focus:ring-1 focus:ring-amber-600"
+                    className="w-full px-3 py-2 bg-surface border border-teal-300 rounded-xl text-xs font-mono font-bold text-stone-900 focus:outline-hidden focus:ring-1 focus:ring-teal-600"
                   />
                 </div>
               </div>
@@ -922,13 +922,13 @@ export const OrderForm: React.FC<OrderFormProps> = ({
         </div>
 
         {/* 3. Measurement Fields Grid */}
-        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
+        <div className="bg-surface p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
           <div className="flex flex-wrap items-center justify-between border-b border-stone-100 pb-3 gap-2">
             <div className="flex items-center gap-2 text-stone-900 font-extrabold text-sm">
-              <span className="w-1.5 h-5 bg-amber-600 rounded-full inline-block" />
-              <Scissors className="w-4 h-4 text-amber-600" />
+              <span className="w-1.5 h-5 bg-teal-600 rounded-full inline-block" />
+              <Scissors className="w-4 h-4 text-teal-600" />
               <span>{t.bodyMeasurements}</span>
-              <span className="px-2 py-0.5 bg-amber-50 text-amber-900 rounded-md text-xs font-bold border border-amber-200">
+              <span className="px-2 py-0.5 bg-teal-50 text-teal-900 rounded-md text-xs font-bold border border-teal-200">
                 {localizedActiveGarmentName}
               </span>
             </div>
@@ -953,7 +953,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
               return (
                 <div 
                   key={field.id}
-                  className="p-3 bg-stone-50 rounded-xl border border-stone-200 hover:border-amber-400 transition space-y-1.5"
+                  className="p-3 bg-stone-50 rounded-xl border border-stone-200 hover:border-teal-400 transition space-y-1.5"
                 >
                   <div className="flex items-center justify-between text-xs font-bold text-stone-800">
                     <span>{label}</span>
@@ -969,7 +969,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                         setMeasurements(prev => ({ ...prev, [field.key]: v }));
                       }}
                       placeholder="0"
-                      className="w-full px-2.5 py-1.5 bg-white border border-stone-200 rounded-lg text-sm font-mono font-black text-center text-stone-900 focus:outline-hidden focus:border-amber-600 focus:ring-1 focus:ring-amber-600"
+                      className="w-full px-2.5 py-1.5 bg-surface border border-stone-200 rounded-lg text-sm font-mono font-black text-center text-stone-900 focus:outline-hidden focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
                     />
                   </div>
 
@@ -1011,13 +1011,13 @@ export const OrderForm: React.FC<OrderFormProps> = ({
         </div>
 
         {/* 4. Garment Design Options Card */}
-        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
+        <div className="bg-surface p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-stone-100 pb-3">
             <div className="flex items-center gap-2 text-stone-900 font-extrabold text-sm">
-              <span className="w-1.5 h-5 bg-amber-600 rounded-full inline-block" />
-              <Sparkles className="w-4 h-4 text-amber-600" />
+              <span className="w-1.5 h-5 bg-teal-600 rounded-full inline-block" />
+              <Sparkles className="w-4 h-4 text-teal-600" />
               <span>{t.garmentDesign}</span>
-              <span className="px-2 py-0.5 bg-amber-50 text-amber-900 rounded-md text-xs font-bold border border-amber-200">
+              <span className="px-2 py-0.5 bg-teal-50 text-teal-900 rounded-md text-xs font-bold border border-teal-200">
                 {localizedActiveGarmentName}
               </span>
             </div>
@@ -1062,8 +1062,8 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                           }))}
                           className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer ${
                             isSelected
-                              ? 'bg-amber-600 text-white font-bold shadow-2xs'
-                              : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-100'
+                              ? 'bg-teal-600 text-white font-bold shadow-2xs'
+                              : 'bg-surface border border-stone-200 text-stone-700 hover:bg-stone-100'
                           }`}
                         >
                           {optName}
@@ -1081,7 +1081,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                         [cat.key]: e.target.value
                       }))}
                       placeholder={language === 'fa' ? 'یا تایپ دیزاین خاص...' : 'Or type custom style...'}
-                      className="w-full px-3 py-1.5 bg-white border border-stone-200 rounded-lg text-xs focus:outline-hidden focus:border-amber-600"
+                      className="w-full px-3 py-1.5 bg-surface border border-stone-200 rounded-lg text-xs focus:outline-hidden focus:border-teal-600"
                     />
                   )}
                 </div>
@@ -1091,10 +1091,10 @@ export const OrderForm: React.FC<OrderFormProps> = ({
         </div>
 
         {/* 5. Order Status, Expected Date & Special Notes Card (Following downward in one flow) */}
-        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-5">
+        <div className="bg-surface p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-5">
           <div className="flex items-center gap-2 text-stone-900 font-extrabold text-sm border-b border-stone-100 pb-3">
-            <span className="w-1.5 h-5 bg-amber-600 rounded-full inline-block" />
-            <PackageCheck className="w-4 h-4 text-amber-600" />
+            <span className="w-1.5 h-5 bg-teal-600 rounded-full inline-block" />
+            <PackageCheck className="w-4 h-4 text-teal-600" />
             <span>{language === 'fa' ? 'وضعیت، تاریخ وعده و توضیحات' : 'Status, Expected Date & Notes'}</span>
           </div>
 
@@ -1110,7 +1110,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                   onClick={() => setStatus('pending')}
                   className={`p-2.5 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 cursor-pointer ${
                     status === 'pending'
-                      ? 'bg-amber-100 text-amber-900 ring-2 ring-amber-500 font-extrabold'
+                      ? 'bg-teal-100 text-teal-900 ring-2 ring-teal-500 font-extrabold'
                       : 'bg-stone-50 border border-stone-200 text-stone-700 hover:bg-stone-100'
                   }`}
                 >
@@ -1155,7 +1155,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 type="date"
                 value={deliveryDate}
                 onChange={e => setDeliveryDate(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-stone-900 focus:bg-white focus:border-amber-600 outline-hidden"
+                className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-stone-900 focus:bg-surface focus:border-teal-600 outline-hidden"
               />
 
               {/* Quick Preset Buttons */}
@@ -1196,7 +1196,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 value={specialInstructions}
                 onChange={e => setSpecialInstructions(e.target.value)}
                 placeholder={language === 'fa' ? 'مثال: کالر یی نرم باشد، دوخت زنجیری...' : 'e.g. Soft collar, special stitching...'}
-                className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:bg-white focus:border-amber-600 outline-hidden"
+                className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:bg-surface focus:border-teal-600 outline-hidden"
               />
             </div>
             <div>
@@ -1208,24 +1208,24 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 value={cabinetSlot}
                 onChange={e => setCabinetSlot(e.target.value)}
                 placeholder={language === 'fa' ? 'مثال: A-05 یا الماری ۲' : 'e.g. A-05, Shelf 2'}
-                className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-stone-900 focus:bg-white focus:border-amber-600 outline-hidden"
+                className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-stone-900 focus:bg-surface focus:border-teal-600 outline-hidden"
               />
             </div>
           </div>
         </div>
 
         {/* 6. Pricing, Advance & Payment Card */}
-        <div className="bg-white p-4 sm:p-6 rounded-2xl border-2 border-stone-900 shadow-md space-y-4">
+        <div className="bg-surface p-4 sm:p-6 rounded-2xl border-2 border-stone-900 shadow-md space-y-4">
           <div className="flex items-center justify-between border-b border-stone-100 pb-3">
             <div className="flex items-center gap-2 text-stone-900 font-black text-sm">
-              <DollarSign className="w-4 h-4 text-amber-600" />
+              <DollarSign className="w-4 h-4 text-teal-600" />
               <span>{t.paymentStatus}</span>
             </div>
             <span className={`text-[11px] font-bold px-3 py-1 rounded-full ${
               paymentStatus === 'paid' 
                 ? 'bg-emerald-100 text-emerald-800' 
                 : paymentStatus === 'partial' 
-                ? 'bg-amber-100 text-amber-900' 
+                ? 'bg-teal-100 text-teal-900'
                 : 'bg-rose-100 text-rose-800'
             }`}>
               {t[paymentStatus]}
@@ -1243,7 +1243,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                   type="number"
                   value={totalAmount}
                   onChange={e => setTotalAmount(parseFloat(e.target.value) || 0)}
-                  className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-base font-mono font-black text-stone-900 focus:bg-white focus:border-amber-600 outline-hidden"
+                  className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-base font-mono font-black text-stone-900 focus:bg-surface focus:border-teal-600 outline-hidden"
                 />
                 <span className="absolute end-3 top-3 text-xs text-stone-500 font-bold">
                   {currencySymbol}
@@ -1261,7 +1261,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                   type="number"
                   value={paidAmount}
                   onChange={e => setPaidAmount(parseFloat(e.target.value) || 0)}
-                  className="w-full px-3.5 py-2.5 bg-emerald-50 border border-emerald-300 rounded-xl text-base font-mono font-black text-emerald-900 focus:bg-white focus:border-emerald-600 outline-hidden"
+                  className="w-full px-3.5 py-2.5 bg-emerald-50 border border-emerald-300 rounded-xl text-base font-mono font-black text-emerald-900 focus:bg-surface focus:border-emerald-600 outline-hidden"
                 />
                 <span className="absolute end-3 top-3 text-xs text-emerald-600 font-bold">
                   {currencySymbol}
@@ -1304,7 +1304,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
             type="button"
             disabled={isSaving}
             onClick={handleSave}
-            className="w-full py-4 px-6 bg-amber-600 hover:bg-amber-700 active:scale-98 text-white font-black rounded-2xl text-base transition flex items-center justify-center gap-2 shadow-md cursor-pointer disabled:opacity-60"
+            className="w-full py-4 px-6 bg-teal-600 hover:bg-teal-700 active:scale-98 text-white font-black rounded-2xl text-base transition flex items-center justify-center gap-2 shadow-md cursor-pointer disabled:opacity-60"
           >
             {isSaving ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

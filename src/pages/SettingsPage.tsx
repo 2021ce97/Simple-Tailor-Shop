@@ -678,15 +678,15 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
   return (
     <div className="space-y-6 pb-16 animate-in fade-in duration-200">
       {/* Header Banner */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-surface p-5 rounded-2xl border border-line shadow-xs">
         <div>
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-4 bg-[#D4AF37] rounded-full inline-block" />
-            <h1 className="text-xl font-black text-[#1A1A1A] tracking-tight">
+            <span className="w-1.5 h-4 bg-accent rounded-full inline-block" />
+            <h1 className="text-xl font-black text-ink tracking-tight">
               {t.designAndSettings}
             </h1>
           </div>
-          <p className="text-xs text-[#706E6B] mt-0.5">
+          <p className="text-xs text-muted mt-0.5">
             {language === 'fa' 
               ? 'مدیریت انواع لباس‌ها، فیلدهای اندازه و طرح‌های خیاطی به تفکیک هر لباس' 
               : language === 'ps' 
@@ -697,8 +697,8 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
         {/* Notification Toast */}
         {saveMessage && (
-          <div className="px-4 py-2 bg-[#1A1A1A] text-[#D4AF37] text-xs font-bold rounded-xl shadow-md flex items-center gap-2 animate-in fade-in border border-[#D4AF37]">
-            <Check className="w-4 h-4 text-[#D4AF37]" />
+          <div className="px-4 py-2 bg-ink text-accent-soft text-xs font-bold rounded-xl shadow-md flex items-center gap-2 animate-in fade-in border border-accent">
+            <Check className="w-4 h-4 text-accent" />
             <span>{saveMessage}</span>
           </div>
         )}
@@ -711,25 +711,25 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
           language === 'fa' ? 'گزینه‌های دیزاین را بسازید' : language === 'ps' ? 'د ډیزاین انتخابونه جوړ کړئ' : 'Add design choices',
         ].map((step, index) => (
           <div key={step} className="flex items-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-xs font-bold text-stone-700">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-stone-950 text-[10px] text-amber-300">{index + 1}</span>
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-stone-950 text-[10px] text-teal-300">{index + 1}</span>
             <span>{step}</span>
           </div>
         ))}
       </div>
 
       {/* Main Tabs Navigation */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-[#E5E5E5] pb-2">
+      <div className="flex flex-wrap items-center gap-2 border-b border-line pb-2">
         <button
           onClick={() => handleTabClick('garments')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
             activeTab === 'garments'
-              ? 'bg-[#1A1A1A] text-[#D4AF37] font-black shadow-xs'
-              : 'bg-white text-[#706E6B] hover:bg-[#F9F7F2] border border-[#E5E5E5]'
+              ? 'bg-ink text-accent-soft font-black shadow-xs'
+              : 'bg-surface text-muted hover:bg-surface-muted border border-line'
           }`}
         >
           <Shirt className="w-4 h-4" />
           <span>{t.garmentCategories || 'انواع لباس / کالي'}</span>
-          <span className="px-1.5 py-0.2 bg-[#D4AF37]/20 text-[#D4AF37] rounded-full text-[10px] font-mono font-bold">
+          <span className="px-1.5 py-0.2 bg-teal-100 text-teal-800 rounded-full text-[10px] font-mono font-bold">
             {garmentTypes.length}
           </span>
         </button>
@@ -738,13 +738,13 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
           onClick={() => handleTabClick('measurements')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
             activeTab === 'measurements'
-              ? 'bg-[#1A1A1A] text-[#D4AF37] font-black shadow-xs'
-              : 'bg-white text-[#706E6B] hover:bg-[#F9F7F2] border border-[#E5E5E5]'
+              ? 'bg-ink text-accent-soft font-black shadow-xs'
+              : 'bg-surface text-muted hover:bg-surface-muted border border-line'
           }`}
         >
           <Scissors className="w-4 h-4" />
           <span>{t.measurementSettings}</span>
-          <span className="px-1.5 py-0.2 bg-[#D4AF37]/20 text-[#D4AF37] rounded-full text-[10px] font-mono font-bold">
+          <span className="px-1.5 py-0.2 bg-teal-100 text-teal-800 rounded-full text-[10px] font-mono font-bold">
             {fields.length}
           </span>
         </button>
@@ -753,13 +753,13 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
           onClick={() => handleTabClick('design')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
             activeTab === 'design'
-              ? 'bg-[#1A1A1A] text-[#D4AF37] font-black shadow-xs'
-              : 'bg-white text-[#706E6B] hover:bg-[#F9F7F2] border border-[#E5E5E5]'
+              ? 'bg-ink text-accent-soft font-black shadow-xs'
+              : 'bg-surface text-muted hover:bg-surface-muted border border-line'
           }`}
         >
           <Sparkles className="w-4 h-4" />
           <span>{t.designTemplates}</span>
-          <span className="px-1.5 py-0.2 bg-[#D4AF37]/20 text-[#D4AF37] rounded-full text-[10px] font-mono font-bold">
+          <span className="px-1.5 py-0.2 bg-teal-100 text-teal-800 rounded-full text-[10px] font-mono font-bold">
             {categories.length}
           </span>
         </button>
@@ -768,8 +768,8 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
           onClick={() => handleTabClick('shop')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
             activeTab === 'shop'
-              ? 'bg-[#1A1A1A] text-[#D4AF37] font-black shadow-xs'
-              : 'bg-white text-[#706E6B] hover:bg-[#F9F7F2] border border-[#E5E5E5]'
+              ? 'bg-ink text-accent-soft font-black shadow-xs'
+              : 'bg-surface text-muted hover:bg-surface-muted border border-line'
           }`}
         >
           <Building2 className="w-4 h-4" />
@@ -780,13 +780,13 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
           onClick={() => handleTabClick('receipt')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
             activeTab === 'receipt'
-              ? 'bg-[#1A1A1A] text-[#D4AF37] font-black shadow-xs'
-              : 'bg-white text-[#706E6B] hover:bg-[#F9F7F2] border border-[#E5E5E5]'
+              ? 'bg-ink text-accent-soft font-black shadow-xs'
+              : 'bg-surface text-muted hover:bg-surface-muted border border-line'
           }`}
         >
           <Printer className="w-4 h-4" />
           <span>{language === 'fa' ? 'تنظیمات رسید و پرینتر' : language === 'ps' ? 'د رسید او پرینټر ترتیبات' : 'Receipt Settings'}</span>
-          <span className="px-1.5 py-0.2 bg-[#D4AF37]/20 text-[#D4AF37] rounded-full text-[10px] font-mono font-bold uppercase">
+          <span className="px-1.5 py-0.2 bg-teal-100 text-teal-800 rounded-full text-[10px] font-mono font-bold uppercase">
             {shop.receiptFormat === 'a4' ? 'A4' : shop.receiptFormat === 'thermal58' ? '58mm' : '80mm'}
           </span>
         </button>
@@ -795,8 +795,8 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
           onClick={() => handleTabClick('backup')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
             activeTab === 'backup'
-              ? 'bg-[#1A1A1A] text-[#D4AF37] font-black shadow-xs'
-              : 'bg-white text-[#706E6B] hover:bg-[#F9F7F2] border border-[#E5E5E5]'
+              ? 'bg-ink text-accent-soft font-black shadow-xs'
+              : 'bg-surface text-muted hover:bg-surface-muted border border-line'
           }`}
         >
           <Database className="w-4 h-4" />
@@ -808,42 +808,42 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
       {activeTab === 'garments' && (
         <div className="space-y-6">
           {/* Add New Garment Category Box */}
-          <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-3">
-            <h3 className="font-bold text-sm text-[#1A1A1A] flex items-center gap-2">
-              <span className="w-1 h-3.5 bg-[#D4AF37] rounded-full inline-block" />
-              <Plus className="w-4 h-4 text-[#D4AF37]" />
+          <div className="bg-surface p-5 rounded-2xl border border-line shadow-xs space-y-3">
+            <h3 className="font-bold text-sm text-ink flex items-center gap-2">
+              <span className="w-1 h-3.5 bg-accent rounded-full inline-block" />
+              <Plus className="w-4 h-4 text-accent" />
               <span>{t.addGarmentType || 'افزودن نوع لباس جدید (Add Garment Type)'}</span>
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">دری (Dari)</label>
+                <label className="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">دری (Dari)</label>
                 <input
                   type="text"
                   value={newGarmentFa}
                   onChange={e => setNewGarmentFa(e.target.value)}
                   placeholder="مثال: پیراهن و تنبان"
-                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
+                  className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-semibold focus:outline-hidden focus:border-accent"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">پښتو (Pashto)</label>
+                <label className="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">پښتو (Pashto)</label>
                 <input
                   type="text"
                   value={newGarmentPs}
                   onChange={e => setNewGarmentPs(e.target.value)}
                   placeholder="مثال: کمیس او پرتوګ"
-                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
+                  className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-semibold focus:outline-hidden focus:border-accent"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">English</label>
+                <label className="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">English</label>
                 <input
                   type="text"
                   value={newGarmentEn}
                   onChange={e => setNewGarmentEn(e.target.value)}
                   placeholder="e.g. Perahan Tunban / Kurta"
-                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
+                  className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-semibold focus:outline-hidden focus:border-accent"
                 />
               </div>
             </div>
@@ -852,7 +852,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
               <button
                 type="button"
                 onClick={handleAddGarmentType}
-                className="px-5 py-2 bg-[#1A1A1A] hover:bg-black text-[#D4AF37] text-xs font-bold rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5"
+                className="px-5 py-2 bg-ink hover:bg-black text-accent-soft text-xs font-bold rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t.addGarmentType || 'افزودن لباس'}</span>
@@ -869,10 +869,10 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
               const designCount = categories.filter(c => c.garmentCategory === g.key).length;
 
               return (
-                <div key={g.key} className="bg-white rounded-2xl border border-[#E5E5E5] p-4 space-y-3 shadow-xs">
+                <div key={g.key} className="bg-surface rounded-2xl border border-line p-4 space-y-3 shadow-xs">
                   {isEditing ? (
                     <div className="space-y-2 text-xs">
-                      <div className="font-bold text-[#1A1A1A] flex items-center justify-between">
+                      <div className="font-bold text-ink flex items-center justify-between">
                         <span>{language === 'fa' ? 'ویرایش مشخصات لباس' : 'Edit Garment'}</span>
                         <button onClick={() => setEditingGarmentKey(null)} className="text-stone-400 hover:text-stone-600">
                           <X className="w-3.5 h-3.5" />
@@ -884,7 +884,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                           type="text"
                           value={editGarmentFa}
                           onChange={e => setEditGarmentFa(e.target.value)}
-                          className="w-full px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
+                          className="w-full px-2 py-1 bg-surface-muted border border-line rounded text-xs"
                         />
                       </div>
                       <div>
@@ -893,7 +893,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                           type="text"
                           value={editGarmentPs}
                           onChange={e => setEditGarmentPs(e.target.value)}
-                          className="w-full px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
+                          className="w-full px-2 py-1 bg-surface-muted border border-line rounded text-xs"
                         />
                       </div>
                       <div>
@@ -902,7 +902,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                           type="text"
                           value={editGarmentEn}
                           onChange={e => setEditGarmentEn(e.target.value)}
-                          className="w-full px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
+                          className="w-full px-2 py-1 bg-surface-muted border border-line rounded text-xs"
                         />
                       </div>
                       <div className="flex justify-end gap-2 pt-1">
@@ -916,7 +916,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                         <button
                           type="button"
                           onClick={handleSaveGarmentEdit}
-                          className="px-3 py-1 bg-[#D4AF37] hover:bg-[#B39025] text-[#1A1A1A] font-bold rounded text-xs shadow-xs"
+                          className="px-3 py-1 bg-accent hover:bg-accent-hover text-white font-bold rounded text-xs shadow-xs"
                         >
                           {t.save}
                         </button>
@@ -927,7 +927,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <div>
-                            <h4 className="font-extrabold text-sm text-[#1A1A1A]">{displayName}</h4>
+                            <h4 className="font-extrabold text-sm text-ink">{displayName}</h4>
                             <span className="text-[10px] text-stone-400 font-mono">key: {g.key}</span>
                           </div>
                         </div>
@@ -935,7 +935,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => startEditGarment(g)}
-                            className="p-1.5 text-stone-400 hover:text-[#D4AF37] hover:bg-stone-100 rounded-lg transition"
+                            className="p-1.5 text-stone-400 hover:text-accent hover:bg-stone-100 rounded-lg transition"
                             title={t.edit}
                           >
                             <Pencil className="w-3.5 h-3.5" />
@@ -971,17 +971,17 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
       {activeTab === 'measurements' && (
         <div className="space-y-6">
           {/* Garment Selection Bar - Select garment to see only its measurement fields */}
-          <div className="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs space-y-2">
+          <div className="bg-surface p-4 rounded-2xl border border-stone-200 shadow-xs space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2 text-xs font-bold text-stone-800">
-                <Shirt className="w-4 h-4 text-amber-600" />
+                <Shirt className="w-4 h-4 text-teal-600" />
                 <span>{language === 'fa' ? 'انتخاب نوع لباس جهت تنظیم فیلدهای اندازه:' : language === 'ps' ? 'د اندازو د تنظیم لپاره کالي وټاکئ:' : 'Select Garment to Configure Measurements:'}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-lg">
+                <span className="text-[11px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-2.5 py-0.5 rounded-lg">
                   {filteredMeasurementFields.length} {language === 'fa' ? 'اندازه برای این لباس' : language === 'ps' ? 'اندازې د دې کالي لپاره' : 'fields for this garment'}
                 </span>
-                <button type="button" onClick={() => setShowAddMeasurement(value => !value)} className="inline-flex items-center gap-1 rounded-lg bg-stone-950 px-3 py-1.5 text-[11px] font-bold text-amber-300 cursor-pointer">
+                <button type="button" onClick={() => setShowAddMeasurement(value => !value)} className="inline-flex items-center gap-1 rounded-lg bg-stone-950 px-3 py-1.5 text-[11px] font-bold text-teal-300 cursor-pointer">
                   {showAddMeasurement ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
                   {showAddMeasurement ? t.cancel : t.addMeasurementField}
                 </button>
@@ -1002,7 +1002,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                     }}
                     className={`px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-2 ${
                       isSelected
-                        ? 'bg-amber-600 text-white shadow-xs ring-2 ring-amber-400'
+                        ? 'bg-teal-600 text-white shadow-xs ring-2 ring-teal-400'
                         : 'bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-200'
                     }`}
                   >
@@ -1024,13 +1024,13 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 <h3 className="text-xs font-black text-sky-950">{language === 'fa' ? 'قالب‌های آماده اندازه' : language === 'ps' ? 'د اندازې چمتو قالبونه' : 'Reusable measurement templates'}</h3>
                 <p className="mt-0.5 text-[10px] text-sky-800">{language === 'fa' ? 'قالب را انتخاب کنید تا اندازه‌های معمول به لباس فعلی اضافه شود.' : language === 'ps' ? 'قالب وټاکئ؛ عامې اندازې به اوسني کالي ته اضافه شي.' : 'Apply common measurement fields to the selected garment in one click.'}</p>
               </div>
-              <span className="rounded-lg bg-white px-2 py-1 text-[10px] font-bold text-sky-800">{getGarmentName(activeGarmentKey)}</span>
+              <span className="rounded-lg bg-surface px-2 py-1 text-[10px] font-bold text-sky-800">{getGarmentName(activeGarmentKey)}</span>
             </div>
             <div className="grid gap-2 sm:grid-cols-3">
               {measurementTemplates.map(template => {
                 const templateName = language === 'ps' ? template.namePs : language === 'fa' ? template.nameFa : template.nameEn;
                 return (
-                  <button key={template.id} type="button" onClick={() => applyMeasurementTemplate(template.id)} className="flex items-center justify-between rounded-xl border border-sky-200 bg-white px-3 py-2 text-start text-xs font-bold text-stone-800 transition hover:border-sky-400 hover:bg-sky-50 cursor-pointer">
+                  <button key={template.id} type="button" onClick={() => applyMeasurementTemplate(template.id)} className="flex items-center justify-between rounded-xl border border-sky-200 bg-surface px-3 py-2 text-start text-xs font-bold text-stone-800 transition hover:border-sky-400 hover:bg-sky-50 cursor-pointer">
                     <span>{templateName}</span>
                     <span className="rounded-md bg-sky-100 px-1.5 py-0.5 text-[10px] text-sky-800">+{template.fields.length}</span>
                   </button>
@@ -1040,22 +1040,22 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
           </div>
 
           {/* Add New Measurement Field Box */}
-          {showAddMeasurement && <div className="bg-amber-50/40 p-5 rounded-2xl border border-amber-200 shadow-xs space-y-3">
-            <h3 className="font-bold text-sm text-[#1A1A1A] flex items-center gap-2">
-              <span className="w-1 h-3.5 bg-[#D4AF37] rounded-full inline-block" />
-              <Plus className="w-4 h-4 text-[#D4AF37]" />
+          {showAddMeasurement && <div className="bg-teal-50/40 p-5 rounded-2xl border border-teal-200 shadow-xs space-y-3">
+            <h3 className="font-bold text-sm text-ink flex items-center gap-2">
+              <span className="w-1 h-3.5 bg-accent rounded-full inline-block" />
+              <Plus className="w-4 h-4 text-accent" />
               <span>{t.addMeasurementField}</span>
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
               <div>
-                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+                <label className="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">
                   {t.garmentType || 'نوع لباس'}
                 </label>
                 <select
                   value={newFieldGarment}
                   onChange={e => setNewFieldGarment(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-bold focus:outline-hidden focus:border-[#D4AF37]"
+                  className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-bold focus:outline-hidden focus:border-accent"
                 >
                   <option value="all">{language === 'fa' ? 'عمومی (تمام لباس‌ها)' : 'General (All Garments)'}</option>
                   {garmentTypes.map(g => (
@@ -1067,44 +1067,44 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">دری (Dari)</label>
+                <label className="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">دری (Dari)</label>
                 <input
                   type="text"
                   value={newFieldFa}
                   onChange={e => setNewFieldFa(e.target.value)}
                   placeholder="مثال: قد / بغل / آستین"
-                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
+                  className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-semibold focus:outline-hidden focus:border-accent"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">پښتو (Pashto)</label>
+                <label className="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">پښتو (Pashto)</label>
                 <input
                   type="text"
                   value={newFieldPs}
                   onChange={e => setNewFieldPs(e.target.value)}
                   placeholder="مثال: قد / لستوڼی"
-                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
+                  className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-semibold focus:outline-hidden focus:border-accent"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">English</label>
+                <label className="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">English</label>
                 <input
                   type="text"
                   value={newFieldEn}
                   onChange={e => setNewFieldEn(e.target.value)}
                   placeholder="e.g. Length / Chest"
-                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
+                  className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-semibold focus:outline-hidden focus:border-accent"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">واحد / Unit</label>
+                <label className="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">واحد / Unit</label>
                 <select
                   value={newFieldUnit}
                   onChange={e => setNewFieldUnit(e.target.value as any)}
-                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-bold focus:outline-hidden focus:border-[#D4AF37]"
+                  className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-bold focus:outline-hidden focus:border-accent"
                 >
                   <option value="in">انچ / Inch (in)</option>
                   <option value="cm">سانتی‌متر / Centimeter (cm)</option>
@@ -1116,7 +1116,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
               <button
                 type="button"
                 onClick={handleAddField}
-                className="px-5 py-2 bg-[#1A1A1A] hover:bg-black text-[#D4AF37] text-xs font-bold rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5"
+                className="px-5 py-2 bg-ink hover:bg-black text-accent-soft text-xs font-bold rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t.addMeasurementField}</span>
@@ -1134,11 +1134,11 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
               return (
                 <div 
                   key={f.id}
-                  className="p-3.5 bg-white rounded-xl border border-[#E5E5E5] shadow-xs space-y-2 hover:border-[#D4AF37]/50 transition"
+                  className="p-3.5 bg-surface rounded-xl border border-line shadow-xs space-y-2 hover:border-accent/50 transition"
                 >
                   {isEditing ? (
                     <div className="space-y-2 text-xs">
-                      <div className="font-bold text-[#1A1A1A] flex items-center justify-between">
+                      <div className="font-bold text-ink flex items-center justify-between">
                         <span>{language === 'fa' ? 'ویرایش فیلد اندازه' : 'Edit Measurement'}</span>
                         <button onClick={() => setEditingFieldId(null)} className="text-stone-400 hover:text-stone-600">
                           <X className="w-3.5 h-3.5" />
@@ -1149,7 +1149,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                         <select
                           value={editFieldGarment}
                           onChange={e => setEditFieldGarment(e.target.value)}
-                          className="w-full px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs font-bold"
+                          className="w-full px-2 py-1 bg-surface-muted border border-line rounded text-xs font-bold"
                         >
                           <option value="all">عمومی (همه)</option>
                           {garmentTypes.map(g => (
@@ -1165,7 +1165,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                           type="text"
                           value={editFieldFa}
                           onChange={e => setEditFieldFa(e.target.value)}
-                          className="w-full px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
+                          className="w-full px-2 py-1 bg-surface-muted border border-line rounded text-xs"
                         />
                       </div>
                       <div>
@@ -1174,7 +1174,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                           type="text"
                           value={editFieldPs}
                           onChange={e => setEditFieldPs(e.target.value)}
-                          className="w-full px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
+                          className="w-full px-2 py-1 bg-surface-muted border border-line rounded text-xs"
                         />
                       </div>
                       <div>
@@ -1183,7 +1183,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                           type="text"
                           value={editFieldEn}
                           onChange={e => setEditFieldEn(e.target.value)}
-                          className="w-full px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
+                          className="w-full px-2 py-1 bg-surface-muted border border-line rounded text-xs"
                         />
                       </div>
                       <div className="flex justify-end gap-2 pt-1">
@@ -1197,7 +1197,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                         <button
                           type="button"
                           onClick={handleSaveFieldEdit}
-                          className="px-3 py-1 bg-[#D4AF37] hover:bg-[#B39025] text-[#1A1A1A] font-bold rounded text-xs shadow-xs"
+                          className="px-3 py-1 bg-accent hover:bg-accent-hover text-white font-bold rounded text-xs shadow-xs"
                         >
                           {t.save}
                         </button>
@@ -1207,7 +1207,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                     <>
                       <div className="flex items-center justify-between">
                         <div>
-                          <span className="font-extrabold text-xs text-[#1A1A1A] block">{label}</span>
+                          <span className="font-extrabold text-xs text-ink block">{label}</span>
                           <span className="text-[10px] text-stone-400">{language === 'fa' ? 'واحد' : language === 'ps' ? 'واحد' : 'Unit'}: {f.unit || 'in'}</span>
                         </div>
                         <div className="flex items-center gap-1">
@@ -1215,7 +1215,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                             type="button"
                             onClick={() => moveMeasurementField(f.id, -1)}
                             disabled={fieldIndex === 0}
-                            className="p-1 text-stone-400 hover:text-amber-700 hover:bg-amber-50 rounded-md transition disabled:opacity-25 disabled:cursor-not-allowed"
+                            className="p-1 text-stone-400 hover:text-teal-700 hover:bg-teal-50 rounded-md transition disabled:opacity-25 disabled:cursor-not-allowed"
                             title={language === 'fa' ? 'انتقال به بالا' : language === 'ps' ? 'پورته انتقال' : 'Move up'}
                           >
                             <ArrowUp className="w-3 h-3" />
@@ -1224,14 +1224,14 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                             type="button"
                             onClick={() => moveMeasurementField(f.id, 1)}
                             disabled={fieldIndex === filteredMeasurementFields.length - 1}
-                            className="p-1 text-stone-400 hover:text-amber-700 hover:bg-amber-50 rounded-md transition disabled:opacity-25 disabled:cursor-not-allowed"
+                            className="p-1 text-stone-400 hover:text-teal-700 hover:bg-teal-50 rounded-md transition disabled:opacity-25 disabled:cursor-not-allowed"
                             title={language === 'fa' ? 'انتقال به پایین' : language === 'ps' ? 'ښکته انتقال' : 'Move down'}
                           >
                             <ArrowDown className="w-3 h-3" />
                           </button>
                           <button
                             onClick={() => startEditField(f)}
-                            className="p-1 text-stone-400 hover:text-[#D4AF37] hover:bg-stone-100 rounded-md transition"
+                            className="p-1 text-stone-400 hover:text-accent hover:bg-stone-100 rounded-md transition"
                             title={t.edit}
                           >
                             <Pencil className="w-3 h-3" />
@@ -1247,7 +1247,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                       </div>
 
                       <div className="pt-1 flex items-center justify-between text-[10px]">
-                        <span className="px-2 py-0.5 bg-amber-50 text-[#B39025] border border-[#D4AF37]/30 rounded-md font-bold">
+                        <span className="px-2 py-0.5 bg-teal-50 text-accent-hover border border-accent/30 rounded-md font-bold">
                           {garmentName}
                         </span>
                         <span className="text-stone-400 font-mono font-bold">{f.unit || 'in'}</span>
@@ -1265,17 +1265,17 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
       {activeTab === 'design' && (
         <div className="space-y-6">
           {/* Garment Selection Bar - Select garment to see only its design categories */}
-          <div className="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs space-y-2">
+          <div className="bg-surface p-4 rounded-2xl border border-stone-200 shadow-xs space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2 text-xs font-bold text-stone-800">
-                <Sparkles className="w-4 h-4 text-amber-600" />
+                <Sparkles className="w-4 h-4 text-teal-600" />
                 <span>{language === 'fa' ? 'انتخاب نوع لباس جهت تنظیم طرح‌ها و دیزاین:' : language === 'ps' ? 'د ډیزاینونو د تنظیم لپاره کالي وټاکئ:' : 'Select Garment to Configure Designs:'}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-lg">
+                <span className="text-[11px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-2.5 py-0.5 rounded-lg">
                   {filteredDesignCategories.length} {language === 'fa' ? 'دسته دیزاین برای این لباس' : language === 'ps' ? 'ډیزاینونه د دې کالي لپاره' : 'design categories for this garment'}
                 </span>
-                <button type="button" onClick={() => setShowAddDesignCategory(value => !value)} className="inline-flex items-center gap-1 rounded-lg bg-stone-950 px-3 py-1.5 text-[11px] font-bold text-amber-300 cursor-pointer">
+                <button type="button" onClick={() => setShowAddDesignCategory(value => !value)} className="inline-flex items-center gap-1 rounded-lg bg-stone-950 px-3 py-1.5 text-[11px] font-bold text-teal-300 cursor-pointer">
                   {showAddDesignCategory ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
                   {showAddDesignCategory ? t.cancel : t.addCategory}
                 </button>
@@ -1296,7 +1296,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                     }}
                     className={`px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-2 ${
                       isSelected
-                        ? 'bg-amber-600 text-white shadow-xs ring-2 ring-amber-400'
+                        ? 'bg-teal-600 text-white shadow-xs ring-2 ring-teal-400'
                         : 'bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-200'
                     }`}
                   >
@@ -1313,22 +1313,22 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
           </div>
 
           {/* Add New Category Box */}
-          {showAddDesignCategory && <div className="bg-amber-50/40 p-5 rounded-2xl border border-amber-200 shadow-xs space-y-3">
-            <h3 className="font-bold text-sm text-[#1A1A1A] flex items-center gap-2">
-              <span className="w-1 h-3.5 bg-[#D4AF37] rounded-full inline-block" />
-              <Plus className="w-4 h-4 text-[#D4AF37]" />
+          {showAddDesignCategory && <div className="bg-teal-50/40 p-5 rounded-2xl border border-teal-200 shadow-xs space-y-3">
+            <h3 className="font-bold text-sm text-ink flex items-center gap-2">
+              <span className="w-1 h-3.5 bg-accent rounded-full inline-block" />
+              <Plus className="w-4 h-4 text-accent" />
               <span>{t.addCategory} (e.g. Collar Type / Collar / یخن، Pocket Flap, Cuff...)</span>
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
               <div>
-                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+                <label className="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">
                   {t.garmentType || 'نوع لباس'}
                 </label>
                 <select
                   value={newCatGarment}
                   onChange={e => setNewCatGarment(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-bold focus:outline-hidden focus:border-[#D4AF37]"
+                  className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-bold focus:outline-hidden focus:border-accent"
                 >
                   <option value="all">{language === 'fa' ? 'عمومی (تمام لباس‌ها)' : 'General (All Garments)'}</option>
                   {garmentTypes.map(g => (
@@ -1340,35 +1340,35 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">دری (Dari)</label>
+                <label className="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">دری (Dari)</label>
                 <input
                   type="text"
                   value={newCatTitleFa}
                   onChange={e => setNewCatTitleFa(e.target.value)}
                   placeholder="مثال: نوعیت یخن / جیب / پاچه"
-                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
+                  className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-semibold focus:outline-hidden focus:border-accent"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">پښتو (Pashto)</label>
+                <label className="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">پښتو (Pashto)</label>
                 <input
                   type="text"
                   value={newCatTitlePs}
                   onChange={e => setNewCatTitlePs(e.target.value)}
                   placeholder="مثال: د یخن ډول / جیب / پاچه"
-                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
+                  className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-semibold focus:outline-hidden focus:border-accent"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#706E6B] uppercase tracking-wider mb-1">English</label>
+                <label className="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">English</label>
                 <input
                   type="text"
                   value={newCatTitleEn}
                   onChange={e => setNewCatTitleEn(e.target.value)}
                   placeholder="e.g. Collar Type / Pocket"
-                  className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-semibold focus:outline-hidden focus:border-[#D4AF37]"
+                  className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-semibold focus:outline-hidden focus:border-accent"
                 />
               </div>
             </div>
@@ -1377,7 +1377,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
               <button
                 type="button"
                 onClick={handleAddCategory}
-                className="px-5 py-2 bg-[#1A1A1A] hover:bg-black text-[#D4AF37] text-xs font-bold rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5"
+                className="px-5 py-2 bg-ink hover:bg-black text-accent-soft text-xs font-bold rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t.addCategory}</span>
@@ -1400,12 +1400,12 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
               return (
                 <div 
                   key={category.id}
-                  className="bg-white rounded-2xl border border-[#E5E5E5] shadow-xs p-5 space-y-3"
+                  className="bg-surface rounded-2xl border border-line shadow-xs p-5 space-y-3"
                 >
                   {/* Category Header or Edit Form */}
                   {isEditingThisCategory ? (
-                    <div className="p-3 bg-[#F9F7F2] rounded-xl border border-[#D4AF37]/50 space-y-2.5">
-                      <div className="text-xs font-bold text-[#1A1A1A] flex items-center justify-between">
+                    <div className="p-3 bg-surface-muted rounded-xl border border-accent/50 space-y-2.5">
+                      <div className="text-xs font-bold text-ink flex items-center justify-between">
                         <span>{language === 'fa' ? 'ویرایش نام دسته دیزاین' : 'Edit Design Category'}</span>
                         <button
                           onClick={() => setEditingCategoryId(null)}
@@ -1421,7 +1421,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                           <select
                             value={editCatGarment}
                             onChange={e => setEditCatGarment(e.target.value)}
-                            className="w-full px-2 py-1 bg-white border border-[#E5E5E5] rounded text-xs font-bold"
+                            className="w-full px-2 py-1 bg-surface border border-line rounded text-xs font-bold"
                           >
                             <option value="all">عمومی (همه)</option>
                             {garmentTypes.map(g => (
@@ -1437,7 +1437,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                             type="text"
                             value={editCatTitleFa}
                             onChange={e => setEditCatTitleFa(e.target.value)}
-                            className="w-full px-2 py-1 bg-white border border-[#E5E5E5] rounded text-xs"
+                            className="w-full px-2 py-1 bg-surface border border-line rounded text-xs"
                           />
                         </div>
                         <div>
@@ -1446,7 +1446,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                             type="text"
                             value={editCatTitlePs}
                             onChange={e => setEditCatTitlePs(e.target.value)}
-                            className="w-full px-2 py-1 bg-white border border-[#E5E5E5] rounded text-xs"
+                            className="w-full px-2 py-1 bg-surface border border-line rounded text-xs"
                           />
                         </div>
                         <div>
@@ -1455,7 +1455,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                             type="text"
                             value={editCatTitleEn}
                             onChange={e => setEditCatTitleEn(e.target.value)}
-                            className="w-full px-2 py-1 bg-white border border-[#E5E5E5] rounded text-xs"
+                            className="w-full px-2 py-1 bg-surface border border-line rounded text-xs"
                           />
                         </div>
                       </div>
@@ -1471,21 +1471,21 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                         <button
                           type="button"
                           onClick={handleSaveCategoryEdit}
-                          className="px-3 py-1 bg-[#D4AF37] hover:bg-[#B39025] text-[#1A1A1A] font-bold rounded text-xs shadow-xs"
+                          className="px-3 py-1 bg-accent hover:bg-accent-hover text-white font-bold rounded text-xs shadow-xs"
                         >
                           {t.save}
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-2">
+                    <div className="flex items-center justify-between border-b border-line pb-2">
                       <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-[#D4AF37]" />
-                        <h4 className="font-bold text-sm text-[#1A1A1A]">{catTitle}</h4>
-                        <span className="text-[10px] px-2 py-0.5 bg-amber-50 text-[#B39025] border border-[#D4AF37]/30 rounded-md font-bold">
+                        <Sparkles className="w-4 h-4 text-accent" />
+                        <h4 className="font-bold text-sm text-ink">{catTitle}</h4>
+                        <span className="text-[10px] px-2 py-0.5 bg-teal-50 text-accent-hover border border-accent/30 rounded-md font-bold">
                           {garmentName}
                         </span>
-                        <span className="text-[10px] text-[#706E6B] font-mono">({category.options.length})</span>
+                        <span className="text-[10px] text-muted font-mono">({category.options.length})</span>
                       </div>
 
                       <div className="flex items-center gap-1">
@@ -1493,7 +1493,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                           type="button"
                           onClick={() => moveDesignCategory(category.id, -1)}
                           disabled={categoryIndex === 0}
-                          className="p-1.5 text-stone-400 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed"
+                          className="p-1.5 text-stone-400 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed"
                           title={language === 'fa' ? 'انتقال به بالا' : language === 'ps' ? 'پورته انتقال' : 'Move up'}
                         >
                           <ArrowUp className="w-3.5 h-3.5" />
@@ -1502,14 +1502,14 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                           type="button"
                           onClick={() => moveDesignCategory(category.id, 1)}
                           disabled={categoryIndex === filteredDesignCategories.length - 1}
-                          className="p-1.5 text-stone-400 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed"
+                          className="p-1.5 text-stone-400 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed"
                           title={language === 'fa' ? 'انتقال به پایین' : language === 'ps' ? 'ښکته انتقال' : 'Move down'}
                         >
                           <ArrowDown className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => startEditCategory(category)}
-                          className="p-1.5 text-stone-400 hover:text-[#D4AF37] hover:bg-stone-100 rounded-lg transition cursor-pointer"
+                          className="p-1.5 text-stone-400 hover:text-accent hover:bg-stone-100 rounded-lg transition cursor-pointer"
                           title={t.edit}
                         >
                           <Pencil className="w-3.5 h-3.5" />
@@ -1527,8 +1527,8 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
                   {/* Options Editing Modal/Row */}
                   {editingOption && editingOption.catId === category.id && (
-                    <div className="p-3 bg-[#F9F7F2] rounded-xl border border-[#D4AF37]/50 space-y-2 text-xs">
-                      <div className="text-[11px] font-bold text-[#1A1A1A] flex items-center justify-between">
+                    <div className="p-3 bg-surface-muted rounded-xl border border-accent/50 space-y-2 text-xs">
+                      <div className="text-[11px] font-bold text-ink flex items-center justify-between">
                         <span>{language === 'fa' ? 'ویرایش گزینه دیزاین' : 'Edit Design Option'}</span>
                         <button
                           onClick={() => setEditingOption(null)}
@@ -1544,7 +1544,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                             type="text"
                             value={editingOption.nameFa}
                             onChange={e => setEditingOption({ ...editingOption, nameFa: e.target.value })}
-                            className="w-full px-2 py-1 bg-white border border-[#E5E5E5] rounded text-xs"
+                            className="w-full px-2 py-1 bg-surface border border-line rounded text-xs"
                           />
                         </div>
                         <div>
@@ -1553,7 +1553,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                             type="text"
                             value={editingOption.namePs}
                             onChange={e => setEditingOption({ ...editingOption, namePs: e.target.value })}
-                            className="w-full px-2 py-1 bg-white border border-[#E5E5E5] rounded text-xs"
+                            className="w-full px-2 py-1 bg-surface border border-line rounded text-xs"
                           />
                         </div>
                         <div>
@@ -1562,7 +1562,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                             type="text"
                             value={editingOption.nameEn}
                             onChange={e => setEditingOption({ ...editingOption, nameEn: e.target.value })}
-                            className="w-full px-2 py-1 bg-white border border-[#E5E5E5] rounded text-xs"
+                            className="w-full px-2 py-1 bg-surface border border-line rounded text-xs"
                           />
                         </div>
                       </div>
@@ -1577,7 +1577,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                         <button
                           type="button"
                           onClick={handleSaveOptionEdit}
-                          className="px-3 py-1 bg-[#D4AF37] hover:bg-[#B39025] text-[#1A1A1A] font-bold rounded text-xs shadow-xs"
+                          className="px-3 py-1 bg-accent hover:bg-accent-hover text-white font-bold rounded text-xs shadow-xs"
                         >
                           {t.save}
                         </button>
@@ -1597,14 +1597,14 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                       return (
                         <span 
                           key={opt.id}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#F9F7F2] hover:bg-stone-200/80 rounded-lg text-xs font-semibold text-[#1A1A1A] border border-[#E5E5E5] transition group/opt"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-surface-muted hover:bg-stone-200/80 rounded-lg text-xs font-semibold text-ink border border-line transition group/opt"
                         >
                           <span>{optName}</span>
                           <div className="flex items-center gap-0.5">
                             <button
                               type="button"
                               onClick={() => startEditOption(category.id, opt)}
-                              className="text-stone-400 hover:text-[#D4AF37] transition cursor-pointer p-0.5"
+                              className="text-stone-400 hover:text-accent transition cursor-pointer p-0.5"
                               title={t.edit}
                             >
                               <Pencil className="w-2.5 h-2.5" />
@@ -1625,28 +1625,28 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
                   {/* Add Option Box */}
                   {addingOptionForCatId === category.id ? (
-                    <div className="pt-2 border-t border-[#E5E5E5] space-y-2 text-xs">
+                    <div className="pt-2 border-t border-line space-y-2 text-xs">
                       <div className="grid grid-cols-3 gap-2">
                         <input
                           type="text"
                           value={newOptionNameFa}
                           onChange={e => setNewOptionNameFa(e.target.value)}
                           placeholder="دری (مثال: یخن قاق)"
-                          className="px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
+                          className="px-2 py-1 bg-surface-muted border border-line rounded text-xs"
                         />
                         <input
                           type="text"
                           value={newOptionNamePs}
                           onChange={e => setNewOptionNamePs(e.target.value)}
                           placeholder="پښتو (مثال: قاق یخن)"
-                          className="px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
+                          className="px-2 py-1 bg-surface-muted border border-line rounded text-xs"
                         />
                         <input
                           type="text"
                           value={newOptionNameEn}
                           onChange={e => setNewOptionNameEn(e.target.value)}
                           placeholder="English (e.g. Straight)"
-                          className="px-2 py-1 bg-[#F9F7F2] border border-[#E5E5E5] rounded text-xs"
+                          className="px-2 py-1 bg-surface-muted border border-line rounded text-xs"
                         />
                       </div>
                       <div className="flex justify-end gap-2">
@@ -1660,7 +1660,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                         <button
                           type="button"
                           onClick={() => handleAddOptionToCategory(category.id)}
-                          className="px-3 py-1 bg-[#1A1A1A] hover:bg-black text-[#D4AF37] font-bold rounded text-xs shadow-xs"
+                          className="px-3 py-1 bg-ink hover:bg-black text-accent-soft font-bold rounded text-xs shadow-xs"
                         >
                           + {t.add}
                         </button>
@@ -1671,7 +1671,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                       <button
                         type="button"
                         onClick={() => setAddingOptionForCatId(category.id)}
-                        className="text-xs font-bold text-[#B39025] hover:text-[#D4AF37] flex items-center gap-1 transition"
+                        className="text-xs font-bold text-accent-hover hover:text-accent flex items-center gap-1 transition"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>{t.addOption}</span>
@@ -1687,12 +1687,12 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
       {/* ================= TAB 4: SHOP PROFILE ================= */}
       {activeTab === 'shop' && (
-        <form onSubmit={handleSaveShopSettings} className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-6">
-          <div className="border-b border-[#E5E5E5] pb-3">
-            <h3 className="font-bold text-sm text-[#1A1A1A]">
+        <form onSubmit={handleSaveShopSettings} className="bg-surface p-4 sm:p-6 rounded-2xl border border-line shadow-xs space-y-6">
+          <div className="border-b border-line pb-3">
+            <h3 className="font-bold text-sm text-ink">
               {t.shopProfile}
             </h3>
-            <p className="text-xs text-[#706E6B] mt-0.5">
+            <p className="text-xs text-muted mt-0.5">
               {language === 'fa' ? 'اطلاعاتی که در سربرگ بل و رسیدهای چاپ شده درج می‌شوند' : language === 'ps' ? 'هغه معلومات چې د چاپ شوي بِل او رسيد په سرليک کې ښکاري' : 'Details displayed on printed receipts and PDF slips'}
             </p>
           </div>
@@ -1700,36 +1700,36 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
           {/* Shop Names in 3 Languages */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1">
                 {t.shopName} (دری / Dari) *
               </label>
               <input
                 type="text"
                 value={shop.shopNameFa}
                 onChange={e => setShop({ ...shop, shopNameFa: e.target.value })}
-                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-bold"
+                className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-bold"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1">
                 {t.shopName} (پښتو / Pashto) *
               </label>
               <input
                 type="text"
                 value={shop.shopNamePs}
                 onChange={e => setShop({ ...shop, shopNamePs: e.target.value })}
-                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-bold"
+                className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-bold"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1">
                 {t.shopName} (English) *
               </label>
               <input
                 type="text"
                 value={shop.shopNameEn}
                 onChange={e => setShop({ ...shop, shopNameEn: e.target.value })}
-                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-bold"
+                className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-bold"
               />
             </div>
           </div>
@@ -1737,7 +1737,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
           {/* Phone Numbers & WhatsApp */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1">
                 {t.contactNumber} 1 *
               </label>
               <input
@@ -1745,11 +1745,11 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 value={shop.phone1}
                 onChange={e => setShop({ ...shop, phone1: e.target.value })}
                 placeholder="0771221559"
-                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-mono font-bold"
+                className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-mono font-bold"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1">
                 {t.contactNumber} 2 ({t.optional})
               </label>
               <input
@@ -1757,11 +1757,11 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 value={shop.phone2 || ''}
                 onChange={e => setShop({ ...shop, phone2: e.target.value })}
                 placeholder=""
-                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-mono"
+                className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-mono"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1">
                 WhatsApp *
               </label>
               <input
@@ -1769,7 +1769,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 value={shop.whatsapp}
                 onChange={e => setShop({ ...shop, whatsapp: e.target.value })}
                 placeholder="0771221559"
-                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-mono font-bold"
+                className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-mono font-bold"
               />
             </div>
           </div>
@@ -1777,36 +1777,36 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
           {/* Shop Address */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1">
                 {t.shopAddress} (دری / Dari)
               </label>
               <input
                 type="text"
                 value={shop.addressFa}
                 onChange={e => setShop({ ...shop, addressFa: e.target.value })}
-                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs"
+                className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1">
                 {t.shopAddress} (پښتو / Pashto)
               </label>
               <input
                 type="text"
                 value={shop.addressPs}
                 onChange={e => setShop({ ...shop, addressPs: e.target.value })}
-                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs"
+                className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1">
                 {t.shopAddress} (English)
               </label>
               <input
                 type="text"
                 value={shop.addressEn}
                 onChange={e => setShop({ ...shop, addressEn: e.target.value })}
-                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs"
+                className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs"
               />
             </div>
           </div>
@@ -1814,7 +1814,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
           {/* Receipt Footer & Currency */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1">
                 {t.receiptFooter} (دری / Dari)
               </label>
               <input
@@ -1822,11 +1822,11 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 value={shop.receiptFooterFa || ''}
                 onChange={e => setShop({ ...shop, receiptFooterFa: e.target.value })}
                 placeholder="لطفاً هنگام تحویل بل را همراه داشته باشید..."
-                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs"
+                className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1">
                 {t.receiptFooter} (پښتو / Pashto)
               </label>
               <input
@@ -1834,11 +1834,11 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 value={shop.receiptFooterPs || ''}
                 onChange={e => setShop({ ...shop, receiptFooterPs: e.target.value })}
                 placeholder="مهرباني وکړئ د فرمایش د اخیستلو پر مهال دا بِل له ځان سره ولرئ..."
-                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs"
+                className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1">
                 {t.receiptFooter} (English)
               </label>
               <input
@@ -1846,57 +1846,57 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 value={shop.receiptFooterEn || ''}
                 onChange={e => setShop({ ...shop, receiptFooterEn: e.target.value })}
                 placeholder="Please bring this receipt when collecting your order..."
-                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs"
+                className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1">
                 {t.currency} (دری / Dari)
               </label>
               <input
                 type="text"
                 value={shop.currencyFa}
                 onChange={e => setShop({ ...shop, currencyFa: e.target.value })}
-                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-bold"
+                className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-bold"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1">
                 {t.currency} (پښتو / Pashto)
               </label>
               <input
                 type="text"
                 value={shop.currencyPs}
                 onChange={e => setShop({ ...shop, currencyPs: e.target.value })}
-                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-bold"
+                className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-bold"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-[#706E6B] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1">
                 {t.currency} (English)
               </label>
               <input
                 type="text"
                 value={shop.currencyEn}
                 onChange={e => setShop({ ...shop, currencyEn: e.target.value })}
-                className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs font-bold"
+                className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs font-bold"
               />
             </div>
           </div>
 
           {/* Quick Receipt Format Selector in Shop Profile */}
-          <div className="p-4 bg-[#F9F7F2] rounded-xl border border-[#E5E5E5] space-y-3">
+          <div className="p-4 bg-surface-muted rounded-xl border border-line space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Printer className="w-4 h-4 text-[#D4AF37]" />
-                <h4 className="text-xs font-bold text-[#1A1A1A]">
+                <Printer className="w-4 h-4 text-accent" />
+                <h4 className="text-xs font-bold text-ink">
                   {language === 'fa' ? 'فرمت پیش‌فرض چاپ رسید و بل' : language === 'ps' ? 'د بِل د چاپ بڼه' : 'Default Receipt Format'}
                 </h4>
               </div>
               <button
                 type="button"
                 onClick={() => handleTabClick('receipt')}
-                className="text-[11px] font-bold text-[#B39025] hover:text-[#D4AF37] underline cursor-pointer"
+                className="text-[11px] font-bold text-accent-hover hover:text-accent underline cursor-pointer"
               >
                 {language === 'fa' ? 'مدیریت کامل تنظیمات رسید ←' : language === 'ps' ? 'د بِل بشپړ ترتیبات ←' : 'Open Detailed Receipt Settings →'}
               </button>
@@ -1908,8 +1908,8 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 onClick={() => setShop({ ...shop, receiptFormat: 'thermal80' })}
                 className={`p-3 rounded-lg border text-right sm:text-center transition cursor-pointer ${
                   (shop.receiptFormat || 'thermal80') === 'thermal80'
-                    ? 'border-[#D4AF37] bg-white text-[#1A1A1A] font-bold shadow-xs'
-                    : 'border-[#E5E5E5] bg-white/60 text-[#706E6B]'
+                    ? 'border-accent bg-surface text-ink font-bold shadow-xs'
+                    : 'border-line bg-surface/60 text-muted'
                 }`}
               >
                 <div className="font-bold">{language === 'fa' ? 'حرارتی ۸۰ میلی‌متر (POS)' : 'Thermal 80mm POS'}</div>
@@ -1921,8 +1921,8 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 onClick={() => setShop({ ...shop, receiptFormat: 'thermal58' })}
                 className={`p-3 rounded-lg border text-right sm:text-center transition cursor-pointer ${
                   shop.receiptFormat === 'thermal58'
-                    ? 'border-[#D4AF37] bg-white text-[#1A1A1A] font-bold shadow-xs'
-                    : 'border-[#E5E5E5] bg-white/60 text-[#706E6B]'
+                    ? 'border-accent bg-surface text-ink font-bold shadow-xs'
+                    : 'border-line bg-surface/60 text-muted'
                 }`}
               >
                 <div className="font-bold">{language === 'fa' ? 'حرارتی ۵۸ میلی‌متر (کوچک)' : 'Thermal 58mm Mini'}</div>
@@ -1934,8 +1934,8 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
                 onClick={() => setShop({ ...shop, receiptFormat: 'a4' })}
                 className={`p-3 rounded-lg border text-right sm:text-center transition cursor-pointer ${
                   shop.receiptFormat === 'a4'
-                    ? 'border-[#D4AF37] bg-white text-[#1A1A1A] font-bold shadow-xs'
-                    : 'border-[#E5E5E5] bg-white/60 text-[#706E6B]'
+                    ? 'border-accent bg-surface text-ink font-bold shadow-xs'
+                    : 'border-line bg-surface/60 text-muted'
                 }`}
               >
                 <div className="font-bold">{language === 'fa' ? 'کاغذ رسمی A4' : 'Standard A4 Sheet'}</div>
@@ -1947,7 +1947,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
           <div className="flex justify-end pt-2">
             <button
               type="submit"
-              className="px-6 py-2.5 bg-[#D4AF37] hover:bg-[#B39025] text-[#1A1A1A] font-black rounded-xl text-xs transition cursor-pointer shadow-xs"
+              className="px-6 py-2.5 bg-accent hover:bg-accent-hover text-white font-black rounded-xl text-xs transition cursor-pointer shadow-xs"
             >
               {t.save}
             </button>
@@ -1971,25 +1971,25 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
 
       {/* ================= TAB 6: BACKUP & RESTORE ================= */}
       {activeTab === 'backup' && (
-        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-6">
+        <div className="bg-surface p-4 sm:p-6 rounded-2xl border border-line shadow-xs space-y-6">
           <div>
-            <h3 className="font-bold text-sm text-[#1A1A1A]">
+            <h3 className="font-bold text-sm text-ink">
               {t.backupAndRestore}
             </h3>
-            <p className="text-xs text-[#706E6B] mt-0.5">
+            <p className="text-xs text-muted mt-0.5">
               {t.backupDescription}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Export Backup */}
-            <div className="p-5 bg-[#F9F7F2] rounded-2xl border border-[#E5E5E5] space-y-3 flex flex-col justify-between">
+            <div className="p-5 bg-surface-muted rounded-2xl border border-line space-y-3 flex flex-col justify-between">
               <div>
-                <h4 className="font-bold text-xs text-[#1A1A1A] flex items-center gap-2">
-                  <Download className="w-4 h-4 text-[#D4AF37]" />
+                <h4 className="font-bold text-xs text-ink flex items-center gap-2">
+                  <Download className="w-4 h-4 text-accent" />
                   <span>{t.exportBackup}</span>
                 </h4>
-                <p className="text-[11px] text-[#706E6B] mt-1">
+                <p className="text-[11px] text-muted mt-1">
                   {language === 'fa' ? 'یک نسخه کامل از تمام سفارشات، مشتریان، رخت‌ها، محصولات و تنظیمات دانلود کنید.' : 'Download complete JSON database backup.'}
                 </p>
               </div>
@@ -1997,7 +1997,7 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
               <button
                 type="button"
                 onClick={handleExportBackup}
-                className="w-full py-2.5 bg-[#1A1A1A] hover:bg-black text-[#D4AF37] text-xs font-bold rounded-xl transition cursor-pointer flex items-center justify-center gap-2 shadow-xs"
+                className="w-full py-2.5 bg-ink hover:bg-black text-accent-soft text-xs font-bold rounded-xl transition cursor-pointer flex items-center justify-center gap-2 shadow-xs"
               >
                 <Download className="w-4 h-4" />
                 <span>{t.exportBackup}</span>
@@ -2005,19 +2005,19 @@ export const DesignSettingsView: React.FC<DesignSettingsViewProps> = ({
             </div>
 
             {/* Import Backup */}
-            <div className="p-5 bg-[#F9F7F2] rounded-2xl border border-[#E5E5E5] space-y-3 flex flex-col justify-between">
+            <div className="p-5 bg-surface-muted rounded-2xl border border-line space-y-3 flex flex-col justify-between">
               <div>
-                <h4 className="font-bold text-xs text-[#1A1A1A] flex items-center gap-2">
-                  <Upload className="w-4 h-4 text-[#D4AF37]" />
+                <h4 className="font-bold text-xs text-ink flex items-center gap-2">
+                  <Upload className="w-4 h-4 text-accent" />
                   <span>{t.importBackup}</span>
                 </h4>
-                <p className="text-[11px] text-[#706E6B] mt-1">
+                <p className="text-[11px] text-muted mt-1">
                   {language === 'fa' ? 'فایل نسخه پشتیبان قبلی (JSON) را بارگذاری نمایید.' : 'Restore previous JSON database backup.'}
                 </p>
               </div>
 
-              <label className="w-full py-2.5 bg-white border border-[#E5E5E5] hover:border-[#D4AF37] text-[#1A1A1A] text-xs font-bold rounded-xl transition cursor-pointer flex items-center justify-center gap-2 shadow-xs text-center">
-                <Upload className="w-4 h-4 text-[#D4AF37]" />
+              <label className="w-full py-2.5 bg-surface border border-line hover:border-accent text-ink text-xs font-bold rounded-xl transition cursor-pointer flex items-center justify-center gap-2 shadow-xs text-center">
+                <Upload className="w-4 h-4 text-accent" />
                 <span>{t.importBackup}</span>
                 <input
                   type="file"

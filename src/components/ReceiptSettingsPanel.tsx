@@ -178,17 +178,17 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
   return (
     <div className="space-y-6">
       {/* 1. Header Banner */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E5E5E5] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-surface p-4 sm:p-6 rounded-2xl border border-line shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D4AF37]">
+            <div className="w-8 h-8 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-center text-accent">
               <Printer className="w-4 h-4 stroke-[2.5]" />
             </div>
-            <h3 className="font-black text-base text-[#1A1A1A]">
+            <h3 className="font-black text-base text-ink">
               {language === 'fa' ? 'تنظیمات رسید و پرینتر خیاطی' : language === 'ps' ? 'د خیاطۍ بِل او پرینټر ترتیبات' : 'Receipt & Printer Settings'}
             </h3>
           </div>
-          <p className="text-xs text-[#706E6B] mt-1 max-w-2xl">
+          <p className="text-xs text-muted mt-1 max-w-2xl">
             {language === 'fa'
               ? 'نوع کاغذ چاپ (پرینتر حرارتی POS ۸۰ میلی‌متر، ۵۸ میلی‌متر یا کاغذ رسمی A4)، استایل رسید و اطلاعات مندرج در بل را مطابق نیاز دکان خود تنظیم نمایید.'
               : language === 'ps'
@@ -208,7 +208,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
           <button
             type="button"
             onClick={handleSave}
-            className="px-5 py-2.5 bg-[#D4AF37] hover:bg-[#B39025] text-[#1A1A1A] font-black rounded-xl text-xs transition cursor-pointer shadow-xs flex items-center gap-2"
+            className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white font-black rounded-xl text-xs transition cursor-pointer shadow-xs flex items-center gap-2"
           >
             <Check className="w-4 h-4 stroke-[2.5]" />
             <span>{language === 'fa' ? 'ذخیره در تنظیمات دکان' : language === 'ps' ? 'د هټۍ په ترتیباتو کې ساتل' : 'Save Receipt Preferences'}</span>
@@ -217,10 +217,10 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
       </div>
 
       <div className="inline-flex w-full rounded-2xl border border-stone-200 bg-stone-100 p-1 sm:w-auto">
-        <button type="button" onClick={() => setSettingsSection('basic')} className={`flex-1 rounded-xl px-5 py-2 text-xs font-black transition sm:flex-none ${settingsSection === 'basic' ? 'bg-white text-stone-950 shadow-xs' : 'text-stone-500 hover:text-stone-800'}`}>
+        <button type="button" onClick={() => setSettingsSection('basic')} className={`flex-1 rounded-xl px-5 py-2 text-xs font-black transition sm:flex-none ${settingsSection === 'basic' ? 'bg-surface text-stone-950 shadow-xs' : 'text-stone-500 hover:text-stone-800'}`}>
           {language === 'fa' ? 'تنظیمات ساده' : language === 'ps' ? 'ساده ترتیبات' : 'Basic'}
         </button>
-        <button type="button" onClick={() => setSettingsSection('advanced')} className={`flex-1 rounded-xl px-5 py-2 text-xs font-black transition sm:flex-none ${settingsSection === 'advanced' ? 'bg-white text-stone-950 shadow-xs' : 'text-stone-500 hover:text-stone-800'}`}>
+        <button type="button" onClick={() => setSettingsSection('advanced')} className={`flex-1 rounded-xl px-5 py-2 text-xs font-black transition sm:flex-none ${settingsSection === 'advanced' ? 'bg-surface text-stone-950 shadow-xs' : 'text-stone-500 hover:text-stone-800'}`}>
           {language === 'fa' ? 'تنظیمات پیشرفته' : language === 'ps' ? 'پرمختللي ترتیبات' : 'Advanced'}
         </button>
       </div>
@@ -229,15 +229,15 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
         {/* ================= LEFT CONFIGURATION PANEL (7 COLS) ================= */}
         <div className="lg:col-span-7 space-y-6">
           {/* SECTION 1: Paper & Printer Format Selection */}
-          {settingsSection === 'basic' ? <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
-            <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-3">
+          {settingsSection === 'basic' ? <div className="bg-surface p-5 rounded-2xl border border-line shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center gap-2">
-                <Printer className="w-4 h-4 text-[#D4AF37]" />
-                <h4 className="font-bold text-xs text-[#1A1A1A] uppercase tracking-wider">
+                <Printer className="w-4 h-4 text-accent" />
+                <h4 className="font-bold text-xs text-ink uppercase tracking-wider">
                   {language === 'fa' ? '۱. فرمت پیش‌فرض کاغذ و پرینتر' : language === 'ps' ? '۱. د کاغذ او پرینټر اصلي بڼه' : '1. Default Paper & Printer Format'}
                 </h4>
               </div>
-              <span className="text-[11px] font-mono text-[#706E6B] font-bold">
+              <span className="text-[11px] font-mono text-muted font-bold">
                 {currentFormat === 'a6' ? 'A6 Standard Sheet' : currentFormat === 'a4' ? 'Sheet Paper (A4)' : 'POS Thermal Roll'}
               </span>
             </div>
@@ -248,12 +248,12 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 onClick={() => handleSelectFormat('a6')}
                 className={`p-4 rounded-xl border-2 transition cursor-pointer flex flex-col justify-between relative ${
                   currentFormat === 'a6'
-                    ? 'border-[#D4AF37] bg-amber-50/40 shadow-xs'
-                    : 'border-[#E5E5E5] hover:border-stone-300 bg-white'
+                    ? 'border-accent bg-teal-50/40 shadow-xs'
+                    : 'border-line hover:border-stone-300 bg-surface'
                 }`}
               >
                 {currentFormat === 'a6' && (
-                  <span className="absolute -top-2.5 right-3 px-2 py-0.5 bg-[#D4AF37] text-[#1A1A1A] text-[9px] font-black rounded-full uppercase tracking-wider">
+                  <span className="absolute -top-2.5 right-3 px-2 py-0.5 bg-accent text-white text-[9px] font-black rounded-full uppercase tracking-wider">
                     {language === 'fa' ? 'انتخاب شده' : 'Active'}
                   </span>
                 )}
@@ -261,10 +261,10 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                   <div className="w-8 h-8 rounded-lg bg-stone-100 flex items-center justify-center text-stone-800 mb-2">
                     <FileSpreadsheet className="w-4 h-4" />
                   </div>
-                  <h5 className="font-bold text-xs text-[#1A1A1A]">
+                  <h5 className="font-bold text-xs text-ink">
                     {language === 'fa' ? 'کاغذ A6 (استاندارد)' : language === 'ps' ? 'معیاري A6 پاڼه' : 'A6 Standard (105×148)'}
                   </h5>
-                  <p className="text-[10px] text-[#706E6B] mt-1 leading-snug">
+                  <p className="text-[10px] text-muted mt-1 leading-snug">
                     {language === 'fa' 
                       ? 'سایز ایده‌آل و استاندارد برای قبض مشتری و برگه مشخصات خیاط' 
                       : 'Perfect standard size for Customer Receipts and Tailor Slips'}
@@ -272,7 +272,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 </div>
                 <div className="mt-3 pt-2 border-t border-stone-200 flex items-center justify-between text-[10px] font-mono font-bold text-stone-600">
                   <span>105 × 148 mm</span>
-                  <span className="text-[#D4AF37] font-black">{language === 'fa' ? 'پیشنهادی' : 'Recommended'}</span>
+                  <span className="text-accent font-black">{language === 'fa' ? 'پیشنهادی' : 'Recommended'}</span>
                 </div>
               </div>
 
@@ -281,12 +281,12 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 onClick={() => handleSelectFormat('thermal80')}
                 className={`p-4 rounded-xl border-2 transition cursor-pointer flex flex-col justify-between relative ${
                   currentFormat === 'thermal80'
-                    ? 'border-[#D4AF37] bg-amber-50/40 shadow-xs'
-                    : 'border-[#E5E5E5] hover:border-stone-300 bg-white'
+                    ? 'border-accent bg-teal-50/40 shadow-xs'
+                    : 'border-line hover:border-stone-300 bg-surface'
                 }`}
               >
                 {currentFormat === 'thermal80' && (
-                  <span className="absolute -top-2.5 right-3 px-2 py-0.5 bg-[#D4AF37] text-[#1A1A1A] text-[9px] font-black rounded-full uppercase tracking-wider">
+                  <span className="absolute -top-2.5 right-3 px-2 py-0.5 bg-accent text-white text-[9px] font-black rounded-full uppercase tracking-wider">
                     {language === 'fa' ? 'انتخاب شده' : 'Active'}
                   </span>
                 )}
@@ -294,10 +294,10 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                   <div className="w-8 h-8 rounded-lg bg-stone-100 flex items-center justify-center text-stone-800 mb-2">
                     <Printer className="w-4 h-4" />
                   </div>
-                  <h5 className="font-bold text-xs text-[#1A1A1A]">
+                  <h5 className="font-bold text-xs text-ink">
                     {language === 'fa' ? 'حرارتی ۸۰ میلی‌متر' : language === 'ps' ? 'حرارتي ۸۰ ملي متر' : 'Thermal 80mm POS'}
                   </h5>
-                  <p className="text-[10px] text-[#706E6B] mt-1 leading-snug">
+                  <p className="text-[10px] text-muted mt-1 leading-snug">
                     {language === 'fa' 
                       ? 'رول استاندارد پرینترهای صندوق (Epson, Xprinter, Bixolon)' 
                       : 'Standard retail roll width (3.15" / 576 dots)'}
@@ -314,12 +314,12 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 onClick={() => handleSelectFormat('thermal58')}
                 className={`p-4 rounded-xl border-2 transition cursor-pointer flex flex-col justify-between relative ${
                   currentFormat === 'thermal58'
-                    ? 'border-[#D4AF37] bg-amber-50/40 shadow-xs'
-                    : 'border-[#E5E5E5] hover:border-stone-300 bg-white'
+                    ? 'border-accent bg-teal-50/40 shadow-xs'
+                    : 'border-line hover:border-stone-300 bg-surface'
                 }`}
               >
                 {currentFormat === 'thermal58' && (
-                  <span className="absolute -top-2.5 right-3 px-2 py-0.5 bg-[#D4AF37] text-[#1A1A1A] text-[9px] font-black rounded-full uppercase tracking-wider">
+                  <span className="absolute -top-2.5 right-3 px-2 py-0.5 bg-accent text-white text-[9px] font-black rounded-full uppercase tracking-wider">
                     {language === 'fa' ? 'انتخاب شده' : 'Active'}
                   </span>
                 )}
@@ -327,10 +327,10 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                   <div className="w-8 h-8 rounded-lg bg-stone-100 flex items-center justify-center text-stone-800 mb-2">
                     <Smartphone className="w-4 h-4" />
                   </div>
-                  <h5 className="font-bold text-xs text-[#1A1A1A]">
+                  <h5 className="font-bold text-xs text-ink">
                     {language === 'fa' ? 'حرارتی ۵۸ میلی‌متر' : language === 'ps' ? 'حرارتي ۵۸ ملي متر' : 'Thermal 58mm Mini'}
                   </h5>
-                  <p className="text-[10px] text-[#706E6B] mt-1 leading-snug">
+                  <p className="text-[10px] text-muted mt-1 leading-snug">
                     {language === 'fa'
                       ? 'پرینترهای دستی و بیسیم بلوتوث همراه یا صندوق‌های کوچک'
                       : 'Compact handheld or Bluetooth mobile printers (2.28")'}
@@ -347,12 +347,12 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 onClick={() => handleSelectFormat('a4')}
                 className={`p-4 rounded-xl border-2 transition cursor-pointer flex flex-col justify-between relative ${
                   currentFormat === 'a4'
-                    ? 'border-[#D4AF37] bg-amber-50/40 shadow-xs'
-                    : 'border-[#E5E5E5] hover:border-stone-300 bg-white'
+                    ? 'border-accent bg-teal-50/40 shadow-xs'
+                    : 'border-line hover:border-stone-300 bg-surface'
                 }`}
               >
                 {currentFormat === 'a4' && (
-                  <span className="absolute -top-2.5 right-3 px-2 py-0.5 bg-[#D4AF37] text-[#1A1A1A] text-[9px] font-black rounded-full uppercase tracking-wider">
+                  <span className="absolute -top-2.5 right-3 px-2 py-0.5 bg-accent text-white text-[9px] font-black rounded-full uppercase tracking-wider">
                     {language === 'fa' ? 'انتخاب شده' : 'Active'}
                   </span>
                 )}
@@ -360,10 +360,10 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                   <div className="w-8 h-8 rounded-lg bg-stone-100 flex items-center justify-center text-stone-800 mb-2">
                     <FileText className="w-4 h-4" />
                   </div>
-                  <h5 className="font-bold text-xs text-[#1A1A1A]">
+                  <h5 className="font-bold text-xs text-ink">
                     {language === 'fa' ? 'کاغذ رسمی A4' : language === 'ps' ? 'معیاري A4 پاڼه' : 'Standard A4 Sheet'}
                   </h5>
-                  <p className="text-[10px] text-[#706E6B] mt-1 leading-snug">
+                  <p className="text-[10px] text-muted mt-1 leading-snug">
                     {language === 'fa'
                       ? 'پرینترهای دفتری لیزری / جوهرافشان با ابعاد کامل ورق A4'
                       : 'Full-page laser or inkjet office printouts and PDF files'}
@@ -378,11 +378,11 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
           </div> : null}
 
           {/* SECTION 2: Thermal Printer Style Variations */}
-          {settingsSection === 'advanced' ? <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
-            <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-3">
+          {settingsSection === 'advanced' ? <div className="bg-surface p-5 rounded-2xl border border-line shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#D4AF37]" />
-                <h4 className="font-bold text-xs text-[#1A1A1A] uppercase tracking-wider">
+                <Sparkles className="w-4 h-4 text-accent" />
+                <h4 className="font-bold text-xs text-ink uppercase tracking-wider">
                   {language === 'fa' ? '۲. استایل ظاهری چاپ رسید' : language === 'ps' ? '۲. د چاپ ډیزاین او سټایل' : '2. Receipt Visual Style Variant'}
                 </h4>
               </div>
@@ -397,17 +397,17 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 onClick={() => handleSelectStyle('standard')}
                 className={`p-3.5 rounded-xl border transition cursor-pointer ${
                   currentStyle === 'standard'
-                    ? 'border-[#D4AF37] bg-amber-50/40 text-[#1A1A1A]'
-                    : 'border-[#E5E5E5] hover:border-stone-300 bg-[#F9F7F2]'
+                    ? 'border-accent bg-teal-50/40 text-ink'
+                    : 'border-line hover:border-stone-300 bg-surface-muted'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="font-bold text-xs">
                     {language === 'fa' ? 'مدرن و منظم (استاندارد)' : 'Modern & Balanced'}
                   </span>
-                  {currentStyle === 'standard' && <Check className="w-3.5 h-3.5 text-[#D4AF37]" />}
+                  {currentStyle === 'standard' && <Check className="w-3.5 h-3.5 text-accent" />}
                 </div>
-                <p className="text-[10px] text-[#706E6B] leading-snug">
+                <p className="text-[10px] text-muted leading-snug">
                   {language === 'fa'
                     ? 'خطوط تفکیک واضح، فاصله‌های استاندارد و نمایش متناسب لوگو و بارکد.'
                     : 'Clean line dividers, balanced margins, crisp QR and barcode layout.'}
@@ -419,17 +419,17 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 onClick={() => handleSelectStyle('classic')}
                 className={`p-3.5 rounded-xl border transition cursor-pointer ${
                   currentStyle === 'classic'
-                    ? 'border-[#D4AF37] bg-amber-50/40 text-[#1A1A1A]'
-                    : 'border-[#E5E5E5] hover:border-stone-300 bg-[#F9F7F2]'
+                    ? 'border-accent bg-teal-50/40 text-ink'
+                    : 'border-line hover:border-stone-300 bg-surface-muted'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="font-bold text-xs">
                     {language === 'fa' ? 'کلاسیک مونو‌اسپیس' : 'Classic Monospace'}
                   </span>
-                  {currentStyle === 'classic' && <Check className="w-3.5 h-3.5 text-[#D4AF37]" />}
+                  {currentStyle === 'classic' && <Check className="w-3.5 h-3.5 text-accent" />}
                 </div>
-                <p className="text-[10px] text-[#706E6B] leading-snug">
+                <p className="text-[10px] text-muted leading-snug">
                   {language === 'fa'
                     ? 'فونت سنتی صندوق‌داری مونو، خط‌چین‌های تکرارشونده و ظاهر فاکتورهای حرارتی سنتی.'
                     : 'Fixed-width monospace typography with dashed borders for authentic POS slip feel.'}
@@ -441,17 +441,17 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 onClick={() => handleSelectStyle('compact')}
                 className={`p-3.5 rounded-xl border transition cursor-pointer ${
                   currentStyle === 'compact'
-                    ? 'border-[#D4AF37] bg-amber-50/40 text-[#1A1A1A]'
-                    : 'border-[#E5E5E5] hover:border-stone-300 bg-[#F9F7F2]'
+                    ? 'border-accent bg-teal-50/40 text-ink'
+                    : 'border-line hover:border-stone-300 bg-surface-muted'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="font-bold text-xs">
                     {language === 'fa' ? 'فشرده و کم‌مصرف' : 'Compact Roll Saver'}
                   </span>
-                  {currentStyle === 'compact' && <Check className="w-3.5 h-3.5 text-[#D4AF37]" />}
+                  {currentStyle === 'compact' && <Check className="w-3.5 h-3.5 text-accent" />}
                 </div>
-                <p className="text-[10px] text-[#706E6B] leading-snug">
+                <p className="text-[10px] text-muted leading-snug">
                   {language === 'fa'
                     ? 'حداقل فاصله عمودی و فشردگی اطلاعات جهت کاهش مصرف رول کاغذ حرارتی.'
                     : 'High density spacing with tight margins to minimize thermal paper roll consumption.'}
@@ -461,22 +461,22 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
           </div> : null}
 
           {/* SECTION 3: Content Display Toggles */}
-          {settingsSection === 'basic' ? <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
-            <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-3">
+          {settingsSection === 'basic' ? <div className="bg-surface p-5 rounded-2xl border border-line shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center gap-2">
-                <Settings2 className="w-4 h-4 text-[#D4AF37]" />
-                <h4 className="font-bold text-xs text-[#1A1A1A] uppercase tracking-wider">
+                <Settings2 className="w-4 h-4 text-accent" />
+                <h4 className="font-bold text-xs text-ink uppercase tracking-wider">
                   {language === 'fa' ? '۳. اجزای قابل نمایش در رسید' : language === 'ps' ? '۳. په بِل کې د ښودل کېدونکو برخو ټاکل' : '3. Receipt Display Elements'}
                 </h4>
               </div>
-              <span className="text-[10px] text-[#706E6B]">
+              <span className="text-[10px] text-muted">
                 {language === 'fa' ? 'کنترل بخش‌های چاپی' : 'Toggle Sections'}
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               {/* Toggle Logo */}
-              <label className="flex items-center justify-between p-3 bg-[#F9F7F2] rounded-xl border border-[#E5E5E5] cursor-pointer hover:bg-stone-100 transition">
+              <label className="flex items-center justify-between p-3 bg-surface-muted rounded-xl border border-line cursor-pointer hover:bg-stone-100 transition">
                 <div className="flex items-center gap-2.5">
                   <Sparkles className="w-4 h-4 text-stone-600" />
                   <div>
@@ -492,12 +492,12 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                   type="checkbox"
                   checked={settings.receiptShowLogo !== false}
                   onChange={() => handleToggle('receiptShowLogo')}
-                  className="w-4 h-4 accent-[#D4AF37] rounded cursor-pointer"
+                  className="w-4 h-4 accent-accent rounded cursor-pointer"
                 />
               </label>
 
               {/* Toggle Barcode */}
-              <label className="flex items-center justify-between p-3 bg-[#F9F7F2] rounded-xl border border-[#E5E5E5] cursor-pointer hover:bg-stone-100 transition">
+              <label className="flex items-center justify-between p-3 bg-surface-muted rounded-xl border border-line cursor-pointer hover:bg-stone-100 transition">
                 <div className="flex items-center gap-2.5">
                   <Barcode className="w-4 h-4 text-stone-600" />
                   <div>
@@ -513,12 +513,12 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                   type="checkbox"
                   checked={settings.receiptShowBarcode !== false}
                   onChange={() => handleToggle('receiptShowBarcode')}
-                  className="w-4 h-4 accent-[#D4AF37] rounded cursor-pointer"
+                  className="w-4 h-4 accent-accent rounded cursor-pointer"
                 />
               </label>
 
               {/* Toggle Tailor Notes */}
-              <label className="flex items-center justify-between p-3 bg-[#F9F7F2] rounded-xl border border-[#E5E5E5] cursor-pointer hover:bg-stone-100 transition">
+              <label className="flex items-center justify-between p-3 bg-surface-muted rounded-xl border border-line cursor-pointer hover:bg-stone-100 transition">
                 <div className="flex items-center gap-2.5">
                   <Scissors className="w-4 h-4 text-stone-600" />
                   <div>
@@ -534,7 +534,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                   type="checkbox"
                   checked={settings.receiptShowNotes !== false}
                   onChange={() => handleToggle('receiptShowNotes')}
-                  className="w-4 h-4 accent-[#D4AF37] rounded cursor-pointer"
+                  className="w-4 h-4 accent-accent rounded cursor-pointer"
                 />
               </label>
 
@@ -559,10 +559,10 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
           </div> : null}
 
           {/* SECTION 4: Header Notice & Footer Policy */}
-          {settingsSection === 'advanced' ? <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4">
-            <div className="flex items-center gap-2 border-b border-[#E5E5E5] pb-3">
-              <FileSpreadsheet className="w-4 h-4 text-[#D4AF37]" />
-              <h4 className="font-bold text-xs text-[#1A1A1A] uppercase tracking-wider">
+          {settingsSection === 'advanced' ? <div className="bg-surface p-5 rounded-2xl border border-line shadow-xs space-y-4">
+            <div className="flex items-center gap-2 border-b border-line pb-3">
+              <FileSpreadsheet className="w-4 h-4 text-accent" />
+              <h4 className="font-bold text-xs text-ink uppercase tracking-wider">
                 {language === 'fa' ? 'پاورقی رسید' : language === 'ps' ? 'د بِل د پښې پیغام' : 'Receipt Footer'}
               </h4>
             </div>
@@ -570,7 +570,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
             <div className="space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-[#706E6B] mb-1">
+                  <label className="block text-xs font-bold text-muted mb-1">
                     {language === 'fa' ? 'متن پاورقی رسید (دری)' : 'Receipt Footer (Dari)'}
                   </label>
                   <input
@@ -578,11 +578,11 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                     value={settings.receiptFooterFa || ''}
                     onChange={e => setSettings({ ...settings, receiptFooterFa: e.target.value })}
                     placeholder="لطفاً هنگام دریافت سفارش، این بل را همراه داشته باشید."
-                    className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs"
+                    className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#706E6B] mb-1">
+                  <label className="block text-xs font-bold text-muted mb-1">
                     {language === 'ps' ? 'د بِل د پښې متن (پښتو)' : 'Receipt Footer (Pashto)'}
                   </label>
                   <input
@@ -590,17 +590,17 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                     value={settings.receiptFooterPs || ''}
                     onChange={e => setSettings({ ...settings, receiptFooterPs: e.target.value })}
                     placeholder="مهرباني وکړئ د فرمایش د اخیستلو پر مهال دا بِل له ځان سره ولرئ."
-                    className="w-full px-3 py-2 bg-[#F9F7F2] border border-[#E5E5E5] rounded-xl text-xs"
+                    className="w-full px-3 py-2 bg-surface-muted border border-line rounded-xl text-xs"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end pt-3 border-t border-[#E5E5E5]">
+            <div className="flex justify-end pt-3 border-t border-line">
               <button
                 type="button"
                 onClick={handleSave}
-                className="px-6 py-2.5 bg-[#D4AF37] hover:bg-[#B39025] text-[#1A1A1A] font-black rounded-xl text-xs transition cursor-pointer shadow-xs flex items-center gap-2"
+                className="px-6 py-2.5 bg-accent hover:bg-accent-hover text-white font-black rounded-xl text-xs transition cursor-pointer shadow-xs flex items-center gap-2"
               >
                 <Check className="w-4 h-4 stroke-[2.5]" />
                 <span>{language === 'fa' ? 'ذخیره دایمی در تنظیمات' : language === 'ps' ? 'په ترتیباتو کې ساتل' : 'Save All Receipt Settings'}</span>
@@ -611,20 +611,20 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
 
         {/* ================= RIGHT LIVE PREVIEW PANEL (5 COLS) ================= */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-3">
+          <div className="bg-surface p-5 rounded-2xl border border-line shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Eye className="w-4 h-4 text-[#D4AF37]" />
-                <h4 className="font-bold text-xs text-[#1A1A1A] uppercase tracking-wider">
+                <Eye className="w-4 h-4 text-accent" />
+                <h4 className="font-bold text-xs text-ink uppercase tracking-wider">
                   {language === 'fa' ? 'پیش‌نمایش زنده رسید' : language === 'ps' ? 'د بِل ژوندی مخکتنه' : 'Live Receipt Preview'}
                 </h4>
               </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 bg-amber-50 text-[#B39025] border border-[#D4AF37]/30 rounded-md font-bold uppercase">
+              <span className="text-[10px] font-mono px-2 py-0.5 bg-teal-50 text-accent-hover border border-accent/30 rounded-md font-bold uppercase">
                 {currentFormat}
               </span>
             </div>
 
-            <p className="text-[11px] text-[#706E6B]">
+            <p className="text-[11px] text-muted">
               {language === 'fa' 
                 ? 'نمای شبیه‌سازی شده رسید با اندازه و فونت انتخاب شده در پرینتر:' 
                 : 'Simulated preview reflecting your active printer paper and styling:'}
@@ -636,7 +636,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 type="button"
                 onClick={handleTestPrint}
                 disabled={isTestPrinting}
-                className="flex-1 py-2 bg-[#1A1A1A] hover:bg-black text-[#D4AF37] font-black rounded-xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-xs disabled:opacity-50"
+                className="flex-1 py-2 bg-ink hover:bg-black text-accent-soft font-black rounded-xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-xs disabled:opacity-50"
               >
                 <Printer className="w-3.5 h-3.5" />
                 <span>{isTestPrinting ? t.loading : (language === 'fa' ? 'چاپ آزمایشی' : 'Test Print Slip')}</span>
@@ -646,7 +646,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                 type="button"
                 onClick={handleTestDownloadPdf}
                 disabled={isTestPdf}
-                className="px-4 py-2 bg-[#F9F7F2] hover:bg-stone-200 border border-[#E5E5E5] text-[#1A1A1A] font-bold rounded-xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
+                className="px-4 py-2 bg-surface-muted hover:bg-stone-200 border border-line text-ink font-bold rounded-xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
                 title="Download PDF"
               >
                 <Download className="w-3.5 h-3.5 text-stone-700" />
@@ -659,7 +659,7 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
               <div
                 ref={previewRef}
                 dir={language === 'en' ? 'ltr' : 'rtl'}
-                className={`bg-white shadow-md text-[#1A1A1A] p-4 text-xs transition-all duration-300 relative select-text border border-stone-300 ${
+                className={`bg-white shadow-md text-stone-950 p-4 text-xs transition-all duration-300 relative select-text border border-stone-300 ${
                   currentFormat === 'a4'
                     ? 'w-full max-w-[360px] rounded-lg'
                     : currentFormat === 'thermal58'
@@ -726,8 +726,8 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
 
                 {/* Tailor Notes */}
                 {settings.receiptShowNotes !== false && (
-                  <div className="p-1.5 bg-amber-50/80 border border-amber-300 text-[10px] text-stone-800 my-1 rounded-xs">
-                    <b className="text-amber-900 block">{language === 'fa' ? 'یادداشت خیاط:' : 'Tailor Note:'}</b>
+                  <div className="p-1.5 bg-teal-50/80 border border-teal-300 text-[10px] text-stone-800 my-1 rounded-xs">
+                    <b className="text-teal-900 block">{language === 'fa' ? 'یادداشت خیاط:' : 'Tailor Note:'}</b>
                     <span>{language === 'fa' ? 'یخن قاق ۴ سانتی، جیب دوتایی ساده، دوخت دست‌دوز' : 'Collared neckline, dual side pockets, hand-stitched hem'}</span>
                   </div>
                 )}
@@ -748,8 +748,8 @@ export const ReceiptSettingsPanel: React.FC<ReceiptSettingsPanelProps> = ({
                     <div className="text-[9px] text-emerald-700">{language === 'fa' ? 'رسید' : 'Paid'}</div>
                     <div className="font-mono font-black text-emerald-700 text-xs">2,000 <span className="text-[8px] font-normal">{currencyText}</span></div>
                   </div>
-                  <div className="p-1 bg-amber-50">
-                    <div className="text-[9px] text-amber-800">{language === 'fa' ? 'باقی' : 'Due'}</div>
+                  <div className="p-1 bg-teal-50">
+                    <div className="text-[9px] text-teal-800">{language === 'fa' ? 'باقی' : 'Due'}</div>
                     <div className="font-mono font-black text-rose-600 text-xs">1,500 <span className="text-[8px] font-normal">{currencyText}</span></div>
                   </div>
                 </div>

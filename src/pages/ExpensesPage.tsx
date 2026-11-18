@@ -375,10 +375,10 @@ drop policy if exists anon_manage_expenses on public.expenses;
   return (
     <div className="space-y-6 pb-16">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-stone-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface p-5 rounded-2xl border border-stone-200 shadow-sm">
         <div>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-600 flex items-center justify-center">
               <Wallet className="w-5 h-5" />
             </div>
             <div>
@@ -416,7 +416,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
           {/* Add New Expense CTA */}
           <button
             onClick={handleOpenAdd}
-            className="flex items-center gap-2 px-4 py-2.5 text-xs font-black text-stone-900 bg-amber-400 hover:bg-amber-500 rounded-xl shadow-sm transition-all cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2.5 text-xs font-black text-white bg-accent hover:bg-accent-hover rounded-xl shadow-sm transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4 stroke-[3]" />
             <span>{t.addExpense}</span>
@@ -454,17 +454,17 @@ drop policy if exists anon_manage_expenses on public.expenses;
       <div className="bg-stone-900 text-white p-4 sm:p-5 rounded-2xl border border-stone-800 shadow-md">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs font-bold text-amber-400">
-              <Sparkles className="w-4 h-4 text-amber-400" />
+            <div className="flex items-center gap-2 text-xs font-bold text-accent-soft">
+              <Sparkles className="w-4 h-4 text-accent-soft" />
               <span>{t.netShopBalance}</span>
               <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30">
                 {language === 'fa' ? 'تعدیل خودکار با ثبت و حذف' : language === 'ps' ? 'د ثبت او ړنګولو سره اتومات حساب' : 'Auto-adjusted on delete & add'}
               </span>
             </div>
-            <div className="text-2xl sm:text-3xl font-black font-mono text-emerald-400 tracking-tight">
+            <div className="text-2xl sm:text-3xl font-black font-mono text-emerald-200 tracking-tight">
               {financialTotals.netCashBalance.toLocaleString()} <span className="text-xs font-bold text-stone-300">{currencySymbol}</span>
             </div>
-            <p className="text-[11px] text-stone-400 font-medium max-w-xl">
+            <p className="text-[11px] text-stone-300 font-medium max-w-xl">
               {language === 'fa' 
                 ? 'مجموع پول نقد دریافتی دکان منفی مصارف عملیاتی. هرگاه مصرفی را حذف کنید، پول آن فوراً به دخل دکان برگشت داده می‌شود.' 
                 : language === 'ps' 
@@ -475,16 +475,16 @@ drop policy if exists anon_manage_expenses on public.expenses;
 
           <div className="flex items-center gap-3 bg-stone-950/60 border border-stone-800/80 p-3 rounded-xl shrink-0">
             <div className="text-start">
-              <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">{t.totalInflows}</div>
+              <div className="text-[10px] font-bold text-stone-300 uppercase tracking-wider">{t.totalInflows}</div>
               <div className="text-sm font-bold font-mono text-stone-200">
-                +{financialTotals.totalInflows.toLocaleString()} <span className="text-[10px] text-stone-400">{currencySymbol}</span>
+                +{financialTotals.totalInflows.toLocaleString()} <span className="text-[10px] text-stone-300">{currencySymbol}</span>
               </div>
             </div>
             <div className="text-stone-600 font-bold">−</div>
             <div className="text-start">
-              <div className="text-[10px] font-bold text-rose-400 uppercase tracking-wider">{t.totalExpenses}</div>
-              <div className="text-sm font-bold font-mono text-rose-400">
-                -{financialTotals.totalExpenses.toLocaleString()} <span className="text-[10px] text-rose-500">{currencySymbol}</span>
+              <div className="text-[10px] font-bold text-rose-200 uppercase tracking-wider">{t.totalExpenses}</div>
+              <div className="text-sm font-bold font-mono text-rose-200">
+                -{financialTotals.totalExpenses.toLocaleString()} <span className="text-[10px] text-rose-200">{currencySymbol}</span>
               </div>
             </div>
           </div>
@@ -494,7 +494,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
       {/* KPI Statistic Cards */}
       <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Total Expenses */}
-        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-stone-200 shadow-sm relative overflow-hidden">
+        <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-stone-200 shadow-sm relative overflow-hidden">
           <div className="flex items-center justify-between text-stone-500 text-xs font-bold mb-2">
             <span>{t.totalExpenses}</span>
             <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
@@ -510,15 +510,15 @@ drop policy if exists anon_manage_expenses on public.expenses;
         </div>
 
         {/* This Month's Expenses */}
-        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-stone-200 shadow-sm">
+        <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-stone-200 shadow-sm">
           <div className="flex items-center justify-between text-stone-500 text-xs font-bold mb-2">
             <span>{t.thisMonthExpenses}</span>
-            <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
               <Calendar className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-black text-amber-700 font-mono tracking-tight">
-            {stats.thisMonth.toLocaleString()} <span className="text-xs font-bold text-amber-600">{currencySymbol}</span>
+          <div className="text-xl sm:text-2xl font-black text-teal-700 font-mono tracking-tight">
+            {stats.thisMonth.toLocaleString()} <span className="text-xs font-bold text-teal-600">{currencySymbol}</span>
           </div>
           <div className="mt-1 text-[11px] text-stone-500 font-medium">
             {new Date().toLocaleDateString(language === 'en' ? 'en-US' : 'fa-AF', { month: 'long', year: 'numeric' })}
@@ -526,7 +526,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
         </div>
 
         {/* Today's Expenses */}
-        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-stone-200 shadow-sm">
+        <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-stone-200 shadow-sm">
           <div className="flex items-center justify-between text-stone-500 text-xs font-bold mb-2">
             <span>{t.todayExpenses}</span>
             <div className="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center">
@@ -542,7 +542,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
         </div>
 
         {/* Average per Expense */}
-        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-stone-200 shadow-sm">
+        <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-stone-200 shadow-sm">
           <div className="flex items-center justify-between text-stone-500 text-xs font-bold mb-2">
             <span>{t.averageExpense}</span>
             <div className="w-7 h-7 rounded-lg bg-stone-100 text-stone-600 flex items-center justify-center">
@@ -559,7 +559,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm space-y-3">
+      <div className="bg-surface p-4 rounded-2xl border border-stone-200 shadow-sm space-y-3">
         <div className="flex flex-col md:flex-row gap-3">
           {/* Search Input */}
           <div className="flex-1 relative">
@@ -573,7 +573,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
                 : language === 'ps' 
                 ? 'د لګښت عنوان، د کس نوم، یا د سند نمبر وپلټئ...' 
                 : 'Search expense title, spender name, or receipt #...'}
-              className={`w-full text-xs font-medium bg-stone-50 border border-stone-200 rounded-xl py-2.5 outline-none focus:border-amber-400 focus:bg-white transition-all ${
+              className={`w-full text-xs font-medium bg-stone-50 border border-stone-200 rounded-xl py-2.5 outline-none focus:border-teal-400 focus:bg-surface transition-all ${
                 isRtl ? 'pr-9 pl-3' : 'pl-9 pr-3'
               }`}
             />
@@ -592,7 +592,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
             <select
               value={selectedCategory}
               onChange={e => setSelectedCategory(e.target.value)}
-              className="w-full text-xs font-bold bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-stone-800 outline-none focus:border-amber-400 focus:bg-white cursor-pointer"
+              className="w-full text-xs font-bold bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-stone-800 outline-none focus:border-teal-400 focus:bg-surface cursor-pointer"
             >
               <option value="all">📁 {t.all} ({t.expenseCategory})</option>
               <option value="materials">{CATEGORY_ICONS.materials} {t.categoryMaterials}</option>
@@ -612,7 +612,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
             <select
               value={selectedPerson}
               onChange={e => setSelectedPerson(e.target.value)}
-              className="w-full text-xs font-bold bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-stone-800 outline-none focus:border-amber-400 focus:bg-white cursor-pointer"
+              className="w-full text-xs font-bold bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-stone-800 outline-none focus:border-teal-400 focus:bg-surface cursor-pointer"
             >
               <option value="all">👤 {t.all} ({t.spentBy})</option>
               {existingPersons.map(p => (
@@ -626,7 +626,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
             <select
               value={dateFilter}
               onChange={e => setDateFilter(e.target.value as any)}
-              className="w-full text-xs font-bold bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-stone-800 outline-none focus:border-amber-400 focus:bg-white cursor-pointer"
+              className="w-full text-xs font-bold bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-stone-800 outline-none focus:border-teal-400 focus:bg-surface cursor-pointer"
             >
               <option value="all">🗓️ {t.all} ({t.expenseDate})</option>
               <option value="today">⚡ {t.todayExpenses}</option>
@@ -684,7 +684,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
                 setCustomStartDate('');
                 setCustomEndDate('');
               }}
-              className="text-amber-700 hover:text-amber-800 font-bold hover:underline"
+              className="text-teal-700 hover:text-teal-800 font-bold hover:underline"
             >
               {language === 'fa' ? 'پاک‌سازی تمام فیلترها' : language === 'ps' ? 'ټول فلټرونه پاکول' : 'Reset all filters'}
             </button>
@@ -693,7 +693,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
       </div>
 
       {/* Main Expenses List: Mobile Cards + Desktop Table */}
-      <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+      <div className="bg-surface rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
         {filteredExpenses.length === 0 ? (
           <div className="py-16 text-center px-4">
             <div className="w-16 h-16 rounded-full bg-stone-100 text-stone-400 mx-auto flex items-center justify-center mb-3">
@@ -711,7 +711,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
             </p>
             <button
               onClick={handleOpenAdd}
-              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-black text-stone-900 bg-amber-400 hover:bg-amber-500 rounded-xl transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-black text-white bg-accent hover:bg-accent-hover rounded-xl transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4 stroke-[3]" />
               <span>{t.addExpense}</span>
@@ -764,7 +764,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
                 </thead>
                 <tbody className="divide-y divide-stone-100">
                   {filteredExpenses.map(exp => (
-                    <tr key={exp.id} className="hover:bg-amber-50/40 transition-colors">
+                    <tr key={exp.id} className="hover:bg-teal-50/40 transition-colors">
                       {/* Date */}
                       <td className="py-3.5 px-4 font-mono font-medium text-stone-700 whitespace-nowrap">
                         {exp.date}
@@ -790,8 +790,8 @@ drop policy if exists anon_manage_expenses on public.expenses;
 
                       {/* Person Name (Spender) */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-200/60">
-                          <User className="w-3 h-3 text-amber-600" />
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-teal-50 text-teal-900 border border-teal-200/60">
+                          <User className="w-3 h-3 text-teal-600" />
                           <span>{exp.spentBy}</span>
                         </span>
                       </td>
@@ -823,7 +823,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
                         <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => handleOpenEdit(exp)}
-                            className="p-1.5 text-stone-500 hover:text-amber-700 hover:bg-amber-100/60 rounded-lg transition-colors cursor-pointer"
+                            className="p-1.5 text-stone-500 hover:text-teal-700 hover:bg-teal-100/60 rounded-lg transition-colors cursor-pointer"
                             title={t.edit}
                           >
                             <Edit3 className="w-3.5 h-3.5" />
@@ -874,8 +874,8 @@ drop policy if exists anon_manage_expenses on public.expenses;
 
                   {/* Person and details */}
                   <div className="flex items-center justify-between gap-2 pt-1 border-t border-stone-100">
-                    <div className="flex items-center gap-1.5 text-xs text-amber-900 font-bold bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/50">
-                      <User className="w-3 h-3 text-amber-600" />
+                    <div className="flex items-center gap-1.5 text-xs text-teal-900 font-bold bg-teal-50 px-2.5 py-0.5 rounded-full border border-teal-200/50">
+                      <User className="w-3 h-3 text-teal-600" />
                       <span>{exp.spentBy}</span>
                     </div>
 
@@ -887,7 +887,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
                       )}
                       <button
                         onClick={() => handleOpenEdit(exp)}
-                        className="p-1.5 text-stone-600 hover:text-amber-700 hover:bg-stone-100 rounded-lg transition-colors cursor-pointer"
+                        className="p-1.5 text-stone-600 hover:text-teal-700 hover:bg-stone-100 rounded-lg transition-colors cursor-pointer"
                         title={t.edit}
                       >
                         <Edit3 className="w-3.5 h-3.5" />
@@ -917,10 +917,10 @@ drop policy if exists anon_manage_expenses on public.expenses;
       {/* Add / Edit Expense Modal */}
       {(isAddingNew || editingExpense) && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-start sm:items-center justify-center p-2 sm:p-4 overflow-y-auto">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl border border-stone-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150 my-1 sm:my-8 max-h-[calc(100dvh-1rem)] overflow-y-auto">
+          <div className="bg-surface w-full max-w-lg rounded-2xl shadow-xl border border-stone-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150 my-1 sm:my-8 max-h-[calc(100dvh-1rem)] overflow-y-auto">
             <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100 bg-stone-50">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-amber-400/20 text-amber-700 flex items-center justify-center font-bold">
+                <div className="w-8 h-8 rounded-lg bg-teal-400/20 text-teal-700 flex items-center justify-center font-bold">
                   <Wallet className="w-4 h-4" />
                 </div>
                 <h3 className="font-black text-sm text-stone-900">
@@ -951,7 +951,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
                     : language === 'ps' 
                     ? 'لکه: د خیاطۍ تار پیرودل، د برېښنا بِل، د شاګردانو ډوډۍ...' 
                     : 'e.g. Sewing threads & needles, Electricity bill, Lunch & tea...'}
-                  className="w-full text-xs font-medium border border-stone-300 rounded-xl px-3 py-2.5 outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400"
+                  className="w-full text-xs font-medium border border-stone-300 rounded-xl px-3 py-2.5 outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400"
                 />
               </div>
 
@@ -971,7 +971,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
                       value={formAmount}
                       onChange={e => setFormAmount(e.target.value)}
                       placeholder="0"
-                      className="w-full text-sm font-mono font-black border border-stone-300 rounded-xl px-3 py-2.5 outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400"
+                      className="w-full text-sm font-mono font-black border border-stone-300 rounded-xl px-3 py-2.5 outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400"
                     />
                   </div>
                   {/* Quick amount chips */}
@@ -981,7 +981,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
                         key={val}
                         type="button"
                         onClick={() => setFormAmount(String(val))}
-                        className="text-[10px] font-mono font-bold px-1.5 py-0.5 bg-stone-100 hover:bg-amber-100 text-stone-700 rounded cursor-pointer transition-colors"
+                        className="text-[10px] font-mono font-bold px-1.5 py-0.5 bg-stone-100 hover:bg-teal-100 text-stone-700 rounded cursor-pointer transition-colors"
                       >
                         +{val}
                       </button>
@@ -999,7 +999,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
                     required
                     value={formDate}
                     onChange={e => setFormDate(e.target.value)}
-                    className="w-full text-xs font-medium border border-stone-300 rounded-xl px-3 py-2.5 outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400"
+                    className="w-full text-xs font-medium border border-stone-300 rounded-xl px-3 py-2.5 outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400"
                   />
                   <div className="flex gap-1.5 mt-1.5">
                     <button
@@ -1036,7 +1036,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
                     value={formSpentBy}
                     onChange={e => setFormSpentBy(e.target.value)}
                     placeholder={language === 'fa' ? 'نام شخص پرداخت‌کننده (مثلاً: کوثر، احمد، استاد کریم...)' : language === 'ps' ? 'د لګوونکي کس نوم (لکه: کوثر، احمد، استاد کریم...)' : 'Name of person who made expense (e.g. Kawsar, Ahmad...)'}
-                    className="w-full text-xs font-medium border border-stone-300 rounded-xl px-3 py-2.5 outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400"
+                    className="w-full text-xs font-medium border border-stone-300 rounded-xl px-3 py-2.5 outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400"
                   />
                 </div>
                 {/* Person quick suggestions */}
@@ -1048,7 +1048,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
                       onClick={() => setFormSpentBy(person)}
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-colors cursor-pointer ${
                         formSpentBy === person 
-                          ? 'bg-amber-400 text-stone-900 border-amber-500' 
+                          ? 'bg-teal-100 text-teal-900 border-teal-400'
                           : 'bg-stone-50 text-stone-600 border-stone-200 hover:bg-stone-100'
                       }`}
                     >
@@ -1068,7 +1068,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
                   <select
                     value={formCategory}
                     onChange={e => setFormCategory(e.target.value as ExpenseCategory)}
-                    className="w-full text-xs font-bold bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5 text-stone-800 outline-none focus:border-amber-400 focus:bg-white cursor-pointer"
+                    className="w-full text-xs font-bold bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5 text-stone-800 outline-none focus:border-teal-400 focus:bg-surface cursor-pointer"
                   >
                     <option value="materials">{CATEGORY_ICONS.materials} {t.categoryMaterials}</option>
                     <option value="utilities">{CATEGORY_ICONS.utilities} {t.categoryUtilities}</option>
@@ -1090,7 +1090,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
                   <select
                     value={formPaymentMethod}
                     onChange={e => setFormPaymentMethod(e.target.value as any)}
-                    className="w-full text-xs font-bold bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5 text-stone-800 outline-none focus:border-amber-400 focus:bg-white cursor-pointer"
+                    className="w-full text-xs font-bold bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5 text-stone-800 outline-none focus:border-teal-400 focus:bg-surface cursor-pointer"
                   >
                     <option value="cash">💵 {language === 'fa' ? 'نقد' : language === 'ps' ? 'نغدې' : 'Cash'}</option>
                     <option value="bank_transfer">🏦 {language === 'fa' ? 'حساب بانکی' : language === 'ps' ? 'بانکي حساب' : 'Bank Transfer'}</option>
@@ -1110,7 +1110,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
                   value={formReceiptNumber}
                   onChange={e => setFormReceiptNumber(e.target.value)}
                   placeholder="e.g. RCP-1002, DABS-551, Bill #..."
-                  className="w-full text-xs font-mono border border-stone-300 rounded-xl px-3 py-2.5 outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400"
+                  className="w-full text-xs font-mono border border-stone-300 rounded-xl px-3 py-2.5 outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400"
                 />
               </div>
 
@@ -1124,7 +1124,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
                   value={formNotes}
                   onChange={e => setFormNotes(e.target.value)}
                   placeholder={language === 'fa' ? 'جزئیات اضافه یا یادداشت درباره این هزینه...' : language === 'ps' ? 'د دې لګښت په اړه اضافي معلومات او یادښت...' : 'Extra notes or supplier details...'}
-                  className="w-full text-xs font-medium border border-stone-300 rounded-xl p-3 outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 resize-none"
+                  className="w-full text-xs font-medium border border-stone-300 rounded-xl p-3 outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 resize-none"
                 />
               </div>
 
@@ -1158,7 +1158,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2.5 text-xs font-black text-stone-900 bg-amber-400 hover:bg-amber-500 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+                    className="px-5 py-2.5 text-xs font-black text-white bg-accent hover:bg-accent-hover rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
                   >
                     <Check className="w-4 h-4 stroke-[3]" />
                     <span>{t.save}</span>
@@ -1173,7 +1173,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
       {/* Delete Confirmation Modal with Clear Money Adjustment Back to Shop */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md rounded-3xl p-4 sm:p-6 shadow-2xl border border-stone-200 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-surface w-full max-w-md rounded-3xl p-4 sm:p-6 shadow-2xl border border-stone-200 space-y-4 animate-in fade-in zoom-in-95 duration-150">
             <div className="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 mx-auto flex items-center justify-center border border-rose-100 shadow-xs">
               <Trash2 className="w-7 h-7 stroke-[2]" />
             </div>
@@ -1195,7 +1195,7 @@ drop policy if exists anon_manage_expenses on public.expenses;
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-stone-500 font-medium">{t.spentBy}:</span>
-                <span className="font-bold text-amber-900 bg-amber-100/70 px-2 py-0.5 rounded-md">{deleteTarget.spentBy}</span>
+                <span className="font-bold text-teal-900 bg-teal-100/70 px-2 py-0.5 rounded-md">{deleteTarget.spentBy}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-stone-500 font-medium">{t.expenseDate}:</span>

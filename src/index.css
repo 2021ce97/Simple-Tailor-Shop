@@ -1,6 +1,60 @@
 @import "vazirmatn/Vazirmatn-Variable-font-face.css";
 @import "tailwindcss";
 
+/* Shared screen palette: low-glare surfaces with readable teal controls. */
+@theme {
+  --color-canvas: #e7eef0;
+  --color-surface: #f5f8f7;
+  --color-surface-muted: #edf2f2;
+  --color-line: #cbd7dc;
+  --color-ink: #263b47;
+  --color-muted: #526772;
+  --color-accent: #196e69;
+  --color-accent-hover: #125752;
+  --color-accent-soft: #c5e8e0;
+  --color-night: #192c36;
+  --color-night-raised: #233b47;
+  --color-night-line: #425c68;
+  --color-chart-retail: #687ba1;
+
+  --color-stone-50: #edf2f2;
+  --color-stone-100: #e4ebed;
+  --color-stone-200: #cbd7dc;
+  --color-stone-300: #b1c2c9;
+  --color-stone-400: #60727e;
+  --color-stone-500: #5b6d77;
+  --color-stone-600: #4c626e;
+  --color-stone-700: #3b5260;
+  --color-stone-800: #304653;
+  --color-stone-900: #263b47;
+  --color-stone-950: #182d37;
+
+  --color-teal-50: #e5f1ed;
+  --color-teal-100: #d4e9e3;
+  --color-teal-200: #afd3ca;
+  --color-teal-300: #82b6ac;
+  --color-teal-400: #438c83;
+  --color-teal-500: #257b73;
+  --color-teal-600: #196e69;
+  --color-teal-700: #175d58;
+  --color-teal-800: #174c49;
+  --color-teal-900: #173e3b;
+  --color-teal-950: #102d2b;
+
+  --color-blue-50: #e8eff7;
+  --color-blue-100: #dbe7f3;
+  --color-blue-200: #b6ccdf;
+  --color-blue-500: #4e7fa6;
+  --color-blue-600: #376d99;
+  --color-blue-700: #305d85;
+  --color-emerald-50: #e7f0e9;
+  --color-emerald-100: #d7e8dc;
+  --color-emerald-200: #b4d1be;
+  --color-emerald-500: #438665;
+  --color-emerald-600: #2d7554;
+  --color-emerald-700: #286247;
+}
+
 @layer base {
   html,
   body,
@@ -12,8 +66,8 @@
   }
 
   body {
-    background-color: #0f172a;
-    color: #1e293b;
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
     font-family: 'Plus Jakarta Sans', 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   }
 
@@ -33,6 +87,22 @@
   select {
     touch-action: manipulation;
   }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  input,
+  select,
+  textarea {
+    accent-color: var(--color-accent);
+  }
+
+  ::selection {
+    background: var(--color-teal-200);
+    color: var(--color-ink);
+  }
 }
 
 @media (max-width: 639px) {
@@ -50,41 +120,44 @@
   .print-main-wrapper { min-width: max-content; transform-origin: top center; }
 }
 
-/* Custom Bento Grid theme utilities */
-.bg-bento-canvas {
-  background-color: #0f172a;
+/* Each summary uses a related background, value, icon, and divider tone. */
+.dashboard-metric {
+  background-color: var(--metric-bg);
+  border-color: var(--metric-line);
+  border-top: 3px solid var(--metric-ink);
 }
-
-.bg-bento-dark {
-  background-color: #1A1A1A;
+.dashboard-metric--activity {
+  --metric-bg: #e3edf6;
+  --metric-ink: #305d85;
+  --metric-line: #b9cedf;
+  --metric-icon: #d0e1ef;
 }
-
-.text-bento-gold {
-  color: #14b8a6;
+.dashboard-metric--pending {
+  --metric-bg: #ece8f4;
+  --metric-ink: #655384;
+  --metric-line: #cfc4e0;
+  --metric-icon: #dfd7ec;
 }
-
-.bg-bento-gold {
-  background-color: #0f766e;
+.dashboard-metric--revenue {
+  --metric-bg: #e2eee6;
+  --metric-ink: #2c654b;
+  --metric-line: #b8d1c1;
+  --metric-icon: #cce2d4;
 }
-
-.border-bento-gold {
-  border-color: #14b8a6;
+.dashboard-metric--retail {
+  --metric-bg: #f1e8df;
+  --metric-ink: #87583d;
+  --metric-line: #dbc7b7;
+  --metric-icon: #e8d7c8;
 }
-
-.border-bento-subtle {
-  border-color: #E5E5E5;
+.dashboard-metric .metric-label,
+.dashboard-metric .metric-value { color: var(--metric-ink); }
+.dashboard-metric .metric-icon {
+  background-color: var(--metric-icon);
+  border-color: var(--metric-line);
+  color: var(--metric-ink);
 }
-
-/* Calm slate + teal palette.  These compatibility rules keep the established
-   component markup readable while replacing the former gold-heavy accent. */
-[class~="bg-[#D4AF37]"] { background-color: #0f766e !important; }
-[class~="text-[#D4AF37]"] { color: #14b8a6 !important; }
-[class~="border-[#D4AF37]"] { border-color: #14b8a6 !important; }
-[class~="ring-[#D4AF37]"] { --tw-ring-color: #14b8a6 !important; }
-[class~="hover:bg-[#C29E2E]"]:hover,
-[class~="hover:bg-[#B39025]"]:hover { background-color: #115e59 !important; }
-[class~="focus:border-[#D4AF37]"]:focus { border-color: #14b8a6 !important; }
-[class~="focus:ring-[#D4AF37]"]:focus { --tw-ring-color: #14b8a6 !important; }
+.dashboard-metric .metric-divider { border-color: var(--metric-line); }
 
 @media print {
   html, body {

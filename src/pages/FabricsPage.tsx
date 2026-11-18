@@ -184,11 +184,11 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
   return (
     <div className="space-y-6 pb-12 animate-in fade-in duration-200">
       {/* Top Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-[#E5E5E5] shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-surface p-5 rounded-2xl border border-line shadow-xs">
         <div className="flex items-center gap-3">
-          <span className="w-1.5 h-7 bg-[#D4AF37] rounded-full inline-block shrink-0" />
+          <span className="w-1.5 h-7 bg-accent rounded-full inline-block shrink-0" />
           <div>
-            <h1 className="text-xl font-black text-[#1A1A1A] tracking-tight">
+            <h1 className="text-xl font-black text-ink tracking-tight">
               {t.fabricInventory}
             </h1>
             <p className="text-xs text-stone-700 font-medium">
@@ -204,7 +204,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
         <button
           onClick={openAddModal}
           id="btn-add-new-fabric"
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#D4AF37] hover:bg-[#C29E2E] text-[#1A1A1A] rounded-xl font-bold text-xs shadow-sm transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+          className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl font-bold text-xs shadow-sm transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
         >
           <Plus className="w-4 h-4" />
           <span>{t.addFabric}</span>
@@ -213,26 +213,26 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
 
       {/* Summary KPI Cards */}
       <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="bg-white p-4 rounded-xl border border-[#E5E5E5] shadow-xs flex items-center justify-between">
+        <div className="bg-surface p-4 rounded-xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-700 block">
               {language === 'fa' ? 'انواع رخت ثبت شده' : language === 'ps' ? 'د رختونو ډولونه' : 'Fabric Types'}
             </span>
-            <span className="text-xl font-black text-[#1A1A1A] font-mono mt-0.5 block">
+            <span className="text-xl font-black text-ink font-mono mt-0.5 block">
               {summary.totalVarieties}
             </span>
           </div>
-          <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-[#D4AF37]">
+          <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-accent">
             <Layers className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-[#E5E5E5] shadow-xs flex items-center justify-between">
+        <div className="bg-surface p-4 rounded-xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-700 block">
               {language === 'fa' ? 'مجموع موجودی (متر)' : language === 'ps' ? 'ټوله ذخیره (متره)' : 'Total Stock'}
             </span>
-            <span className="text-xl font-black text-[#1A1A1A] font-mono mt-0.5 block">
+            <span className="text-xl font-black text-ink font-mono mt-0.5 block">
               {summary.totalMeters.toLocaleString()} <span className="text-xs font-normal text-stone-700">{t.meters}</span>
             </span>
           </div>
@@ -241,37 +241,37 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-[#E5E5E5] shadow-xs flex items-center justify-between">
+        <div className="bg-surface p-4 rounded-xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-700 block">
               {language === 'fa' ? 'موجودی کم / هشدار' : language === 'ps' ? 'لږ پاتې رختونه' : 'Low Stock Warning'}
             </span>
-            <span className="text-xl font-black text-amber-600 font-mono mt-0.5 block">
+            <span className="text-xl font-black text-teal-600 font-mono mt-0.5 block">
               {summary.lowStockCount}
             </span>
           </div>
-          <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
+          <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600">
             <AlertTriangle className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-[#E5E5E5] shadow-xs flex items-center justify-between">
+        <div className="bg-surface p-4 rounded-xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-700 block">
               {language === 'fa' ? 'ارزش کل موجودی' : language === 'ps' ? 'د ذخیرې ټول ارزښت' : 'Inventory Value'}
             </span>
-            <span className="text-xl font-black text-[#1A1A1A] font-mono mt-0.5 block">
+            <span className="text-xl font-black text-ink font-mono mt-0.5 block">
               {summary.totalValue.toLocaleString()} <span className="text-xs font-normal text-stone-700">{currencySymbol}</span>
             </span>
           </div>
           <div className="w-9 h-9 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-700">
-            <Sparkles className="w-5 h-5 text-[#D4AF37]" />
+            <Sparkles className="w-5 h-5 text-accent" />
           </div>
         </div>
       </div>
 
       {/* Search and Filters Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 bg-white p-3.5 rounded-2xl border border-[#E5E5E5] shadow-xs">
+      <div className="flex flex-col sm:flex-row gap-3 bg-surface p-3.5 rounded-2xl border border-line shadow-xs">
         {/* Search Bar */}
         <div className="relative flex-1">
           <Search className="w-4 h-4 text-stone-600 absolute start-3.5 top-1/2 -translate-y-1/2" />
@@ -280,7 +280,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder={t.searchFabricPlaceholder}
-            className="w-full ps-10 pe-9 py-2 bg-stone-50 border border-[#E5E5E5] rounded-xl text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-[#D4AF37] focus:bg-white transition"
+            className="w-full ps-10 pe-9 py-2 bg-stone-50 border border-line rounded-xl text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-accent focus:bg-surface transition"
           />
           {searchTerm && (
             <button
@@ -299,7 +299,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
               onClick={() => setStockFilter('all')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
                 stockFilter === 'all'
-                  ? 'bg-[#1A1A1A] text-white shadow-xs'
+                  ? 'bg-ink text-white shadow-xs'
                   : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
               }`}
             >
@@ -319,8 +319,8 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
               onClick={() => setStockFilter('low_stock')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
                 stockFilter === 'low_stock'
-                  ? 'bg-amber-500 text-stone-950 font-black shadow-xs'
-                  : 'bg-amber-50 text-amber-800 hover:bg-amber-100'
+                  ? 'bg-teal-500 text-white font-black shadow-xs'
+                  : 'bg-teal-50 text-teal-800 hover:bg-teal-100'
               }`}
             >
               <AlertTriangle className="w-3.5 h-3.5" />
@@ -329,7 +329,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
           </div>
 
           {/* Configurable Threshold Input */}
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50/90 border border-amber-200 rounded-xl text-xs text-amber-900">
+          <div className="flex items-center gap-1.5 px-3 py-1 bg-teal-50/90 border border-teal-200 rounded-xl text-xs text-teal-900">
             <span className="text-[11px] font-bold">{t.lowStockThreshold || (language === 'fa' ? 'آستانه هشدار کمبود:' : 'Alert Threshold:')}</span>
             <input
               type="number"
@@ -337,7 +337,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
               max="500"
               value={lowStockThreshold}
               onChange={e => handleUpdateThreshold(parseInt(e.target.value) || 1)}
-              className="w-14 px-1.5 py-0.5 bg-white border border-amber-300 rounded text-center text-xs font-bold font-mono text-stone-900"
+              className="w-14 px-1.5 py-0.5 bg-surface border border-teal-300 rounded text-center text-xs font-bold font-mono text-stone-900"
             />
             <span className="text-[11px] font-medium">{t.meters}</span>
           </div>
@@ -346,11 +346,11 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
 
       {/* Fabric Cards Grid */}
       {filteredFabrics.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#E5E5E5] p-12 text-center">
+        <div className="bg-surface rounded-2xl border border-line p-12 text-center">
           <div className="w-14 h-14 rounded-2xl bg-stone-100 flex items-center justify-center mx-auto text-stone-600 mb-3">
             <Layers className="w-7 h-7" />
           </div>
-          <h3 className="text-sm font-bold text-[#1A1A1A] mb-1">{t.noDataFound}</h3>
+          <h3 className="text-sm font-bold text-ink mb-1">{t.noDataFound}</h3>
           <p className="text-xs text-stone-700 max-w-sm mx-auto mb-4">
             {language === 'fa' 
               ? 'هیچ رختی با این مشخصات یافت نشد. می‌توانید رخت جدید ثبت نمایید.' 
@@ -358,7 +358,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
           </p>
           <button
             onClick={openAddModal}
-            className="px-4 py-2 bg-[#D4AF37] hover:bg-[#C29E2E] text-[#1A1A1A] rounded-xl font-bold text-xs inline-flex items-center gap-2 cursor-pointer shadow-xs"
+            className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-xl font-bold text-xs inline-flex items-center gap-2 cursor-pointer shadow-xs"
           >
             <Plus className="w-4 h-4" />
             <span>{t.addFabric}</span>
@@ -366,7 +366,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
         </div>
       ) : (
         /* Fabric Inventory Rows Form */
-        <div className="bg-white rounded-2xl border border-[#E5E5E5] shadow-xs overflow-hidden divide-y divide-stone-200">
+        <div className="bg-surface rounded-2xl border border-line shadow-xs overflow-hidden divide-y divide-stone-200">
           {/* Header Row for Large Screens */}
           <div className="hidden lg:grid grid-cols-12 gap-3 px-5 py-3 bg-stone-50 text-[11px] font-bold text-stone-600 uppercase tracking-wider border-b border-stone-200">
             <div className="col-span-2">
@@ -398,7 +398,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
                 key={fabric.id}
                 id={`fabric-row-${fabric.id}`}
                 className={`p-4 lg:px-5 lg:py-3.5 hover:bg-stone-50/70 transition-colors flex flex-col lg:grid lg:grid-cols-12 gap-3 items-start lg:items-center ${
-                  isLow ? 'bg-amber-50/30' : ''
+                  isLow ? 'bg-teal-50/30' : ''
                 }`}
               >
                 {/* 1. Code & Name */}
@@ -407,7 +407,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
                     {fabric.code}
                   </span>
                   <div className="min-w-0">
-                    <h3 className="font-extrabold text-sm text-[#1A1A1A] leading-tight truncate">
+                    <h3 className="font-extrabold text-sm text-ink leading-tight truncate">
                       {fabric.name}
                     </h3>
                     {fabric.notes && (
@@ -420,8 +420,8 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
 
                 {/* 2. Type & Color */}
                 <div className="w-full lg:col-span-2 text-xs text-stone-700">
-                  <div className="flex items-center gap-1.5 font-semibold text-[#1A1A1A]">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#D4AF37] shrink-0 inline-block" />
+                  <div className="flex items-center gap-1.5 font-semibold text-ink">
+                    <span className="w-2.5 h-2.5 rounded-full bg-accent shrink-0 inline-block" />
                     <span>{fabric.color}</span>
                   </div>
                   <span className="text-[11px] text-stone-700 block mt-0.5">
@@ -433,11 +433,11 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
                 <div className="w-full lg:col-span-3 space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-black text-[#1A1A1A] text-sm">
+                      <span className="font-mono font-black text-ink text-sm">
                         {stock} <span className="text-xs font-normal text-stone-700">{t.meters}</span>
                       </span>
                       {isLow ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500 text-stone-950 border border-amber-600 shadow-xs animate-pulse">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-teal-500 text-white border border-teal-600 shadow-xs animate-pulse">
                           <AlertTriangle className="w-3 h-3" />
                           <span>{t.lowStockAlert || (language === 'fa' ? 'کمبود موجودی' : 'Low Stock')} (&le;{lowStockThreshold}{t.meters})</span>
                         </span>
@@ -476,7 +476,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
                   <div className="w-full bg-stone-200 h-1.5 rounded-full overflow-hidden">
                     <div 
                       className={`h-full rounded-full transition-all duration-500 ${
-                        isOut ? 'bg-rose-500' : isLow ? 'bg-amber-500' : 'bg-emerald-500'
+                        isOut ? 'bg-rose-500' : isLow ? 'bg-teal-500' : 'bg-emerald-500'
                       }`}
                       style={{ width: `${Math.min(100, (stock / 60) * 100)}%` }}
                     />
@@ -485,7 +485,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
 
                 {/* 4. Price per meter & Total Row Value */}
                 <div className="w-full lg:col-span-2 text-xs">
-                  <div className="font-mono font-extrabold text-[#1A1A1A] text-sm">
+                  <div className="font-mono font-extrabold text-ink text-sm">
                     {Number(fabric.pricePerMeter).toLocaleString()} <span className="text-[11px] font-normal text-stone-700">{currencySymbol} / {t.meters}</span>
                   </div>
                   <div className="text-[10px] text-stone-700 font-mono mt-0.5">
@@ -532,14 +532,14 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
       {/* Add / Edit Fabric Modal */}
       {isAddingNew && (
         <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[calc(100dvh-1rem)] sm:max-h-[90vh]">
+          <div className="bg-surface w-full max-w-lg rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[calc(100dvh-1rem)] sm:max-h-[90vh]">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-stone-100 bg-stone-50">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/20 flex items-center justify-center text-[#B39025]">
+                <div className="w-8 h-8 rounded-xl bg-accent/20 flex items-center justify-center text-accent-hover">
                   <Layers className="w-4 h-4" />
                 </div>
-                <h2 className="font-extrabold text-base text-[#1A1A1A]">
+                <h2 className="font-extrabold text-base text-ink">
                   {editingFabric ? t.editFabric : t.addFabric}
                 </h2>
               </div>
@@ -553,7 +553,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
 
             {/* Quick Preset Badges */}
             {!editingFabric && (
-              <div className="px-6 pt-3 pb-1 border-b border-stone-100 bg-amber-50/50">
+              <div className="px-6 pt-3 pb-1 border-b border-stone-100 bg-teal-50/50">
                 <span className="text-[11px] font-bold text-stone-700 block mb-1.5">
                   {language === 'fa' ? 'انتخاب سریع از رخت‌های پرکاربرد افغانی:' : 'Quick Presets:'}
                 </span>
@@ -561,28 +561,28 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
                   <button
                     type="button"
                     onClick={() => applyPreset('لته سفید اعلا (White Cotton Latha)', 'نخی لته (Cotton Latha)', 'سفید / White', 450)}
-                    className="px-2.5 py-1 bg-white border border-amber-200 rounded-lg text-[11px] font-semibold text-stone-700 hover:bg-[#D4AF37] hover:text-[#1A1A1A] transition cursor-pointer"
+                    className="px-2.5 py-1 bg-surface border border-teal-200 rounded-lg text-[11px] font-semibold text-stone-700 hover:bg-accent hover:text-white transition cursor-pointer"
                   >
                     لته سفید (Latha)
                   </button>
                   <button
                     type="button"
                     onClick={() => applyPreset('ابریشم بوسکی کرمی (Silk Boski Cream)', 'ابریشم بوسکی (Silk)', 'کرمی / Cream', 850)}
-                    className="px-2.5 py-1 bg-white border border-amber-200 rounded-lg text-[11px] font-semibold text-stone-700 hover:bg-[#D4AF37] hover:text-[#1A1A1A] transition cursor-pointer"
+                    className="px-2.5 py-1 bg-surface border border-teal-200 rounded-lg text-[11px] font-semibold text-stone-700 hover:bg-accent hover:text-white transition cursor-pointer"
                   >
                     بوسکی (Boski)
                   </button>
                   <button
                     type="button"
                     onClick={() => applyPreset('پشم واسکتی طوسی (Charcoal Wool Blend)', 'پشم مجلسی (Wool)', 'خاکستری تیره / Charcoal', 1100)}
-                    className="px-2.5 py-1 bg-white border border-amber-200 rounded-lg text-[11px] font-semibold text-stone-700 hover:bg-[#D4AF37] hover:text-[#1A1A1A] transition cursor-pointer"
+                    className="px-2.5 py-1 bg-surface border border-teal-200 rounded-lg text-[11px] font-semibold text-stone-700 hover:bg-accent hover:text-white transition cursor-pointer"
                   >
                     پشم واسکتی (Wool)
                   </button>
                   <button
                     type="button"
                     onClick={() => applyPreset('واش این ویر ضد چروک (Wash & Wear)', 'واش این ویر (Wash & Wear)', 'آبی آسمانی / Sky Blue', 550)}
-                    className="px-2.5 py-1 bg-white border border-amber-200 rounded-lg text-[11px] font-semibold text-stone-700 hover:bg-[#D4AF37] hover:text-[#1A1A1A] transition cursor-pointer"
+                    className="px-2.5 py-1 bg-surface border border-teal-200 rounded-lg text-[11px] font-semibold text-stone-700 hover:bg-accent hover:text-white transition cursor-pointer"
                   >
                     واش این ویر
                   </button>
@@ -602,7 +602,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
                   value={formName}
                   onChange={e => setFormName(e.target.value)}
                   placeholder="e.g. لته سفید اعلا / White Cotton Latha"
-                  className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-[#D4AF37] focus:bg-white"
+                  className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-accent focus:bg-surface"
                 />
               </div>
 
@@ -616,7 +616,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
                     value={formCode}
                     onChange={e => setFormCode(e.target.value)}
                     placeholder="e.g. FAB-001"
-                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-medium focus:outline-hidden focus:ring-2 focus:ring-[#D4AF37] focus:bg-white"
+                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-medium focus:outline-hidden focus:ring-2 focus:ring-accent focus:bg-surface"
                   />
                 </div>
 
@@ -629,7 +629,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
                     value={formColor}
                     onChange={e => setFormColor(e.target.value)}
                     placeholder="e.g. سفید، کرمی، سیاه، آبی..."
-                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-[#D4AF37] focus:bg-white"
+                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-accent focus:bg-surface"
                   />
                 </div>
               </div>
@@ -643,7 +643,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
                   value={formType}
                   onChange={e => setFormType(e.target.value)}
                   placeholder="e.g. نخی لته، ابریشم بوسکی، پشم، مخمل، واش این ویر"
-                  className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-[#D4AF37] focus:bg-white"
+                  className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-accent focus:bg-surface"
                 />
               </div>
 
@@ -658,7 +658,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
                     step="0.5"
                     value={formStock}
                     onChange={e => setFormStock(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold focus:outline-hidden focus:ring-2 focus:ring-[#D4AF37] focus:bg-white"
+                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold focus:outline-hidden focus:ring-2 focus:ring-accent focus:bg-surface"
                   />
                 </div>
 
@@ -672,7 +672,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
                     step="10"
                     value={formPrice}
                     onChange={e => setFormPrice(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold focus:outline-hidden focus:ring-2 focus:ring-[#D4AF37] focus:bg-white"
+                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold focus:outline-hidden focus:ring-2 focus:ring-accent focus:bg-surface"
                   />
                 </div>
               </div>
@@ -686,7 +686,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
                   value={formNotes}
                   onChange={e => setFormNotes(e.target.value)}
                   placeholder="یادداشت‌های اضافی درباره کیفیت یا تامین کننده رخت..."
-                  className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-[#D4AF37] focus:bg-white resize-none"
+                  className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-accent focus:bg-surface resize-none"
                 />
               </div>
 
@@ -701,7 +701,7 @@ export const FabricsView: React.FC<FabricsViewProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-[#D4AF37] hover:bg-[#C29E2E] text-[#1A1A1A] rounded-xl text-xs font-extrabold shadow-sm transition cursor-pointer flex items-center gap-1.5"
+                  className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-extrabold shadow-sm transition cursor-pointer flex items-center gap-1.5"
                 >
                   <Check className="w-4 h-4" />
                   <span>{t.save}</span>

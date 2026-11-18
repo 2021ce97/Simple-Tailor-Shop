@@ -98,7 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Light, Elegant Sidebar Container */}
       <aside
         id="app-sidebar"
-        className={`fixed top-0 bottom-0 z-50 flex flex-col w-[min(18rem,88vw)] bg-white text-stone-800 transition-transform duration-300 ease-in-out lg:translate-x-0 no-print shadow-xl lg:shadow-xs ${
+        className={`fixed top-0 bottom-0 z-50 flex flex-col w-[min(18rem,88vw)] bg-surface-muted text-stone-800 transition-transform duration-300 ease-in-out lg:translate-x-0 no-print shadow-xl lg:shadow-xs ${
           isRtl 
             ? 'right-0 border-l border-stone-200' 
             : 'left-0 border-r border-stone-200'
@@ -116,14 +116,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => handleNavClick('dashboard')}
             className="flex items-center gap-3 cursor-pointer group select-none overflow-hidden"
           >
-            <div className="w-10 h-10 rounded-xl bg-stone-900 flex items-center justify-center text-amber-500 font-black shadow-xs group-hover:scale-105 transition-transform shrink-0 overflow-hidden">
+            <div className="w-10 h-10 rounded-xl bg-stone-900 flex items-center justify-center text-teal-500 font-black shadow-xs group-hover:scale-105 transition-transform shrink-0 overflow-hidden">
               <img src={shopSettings.logoUrl || '/royal-kawsar-logo.png'} alt="Royal Kawsar Brand Fashion" className="h-full w-full object-contain" />
             </div>
             <div className="overflow-hidden">
               <h1 className="font-extrabold text-sm text-stone-900 tracking-tight leading-tight truncate">
                 {shopTitle || 'ROYAL_KAWSAR_BRAND_FASHION'}
               </h1>
-              <p className="text-[11px] text-amber-700 font-semibold tracking-wide truncate">
+              <p className="text-[11px] text-teal-700 font-semibold tracking-wide truncate">
                 {t.appSubtitle}
               </p>
             </div>
@@ -147,8 +147,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
             id="sidebar-new-order-btn"
             className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-black transition-all duration-150 cursor-pointer shadow-xs group mb-3 ${
               isTabActive('new_order')
-                ? 'bg-amber-600 text-white ring-2 ring-amber-400'
-                : 'bg-amber-600 hover:bg-amber-700 text-white'
+                ? 'bg-teal-600 text-white ring-2 ring-teal-400'
+                : 'bg-teal-600 hover:bg-teal-700 text-white'
             }`}
           >
             <div className="flex items-center gap-2.5">
@@ -171,17 +171,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
             id="sidebar-dashboard-link"
             className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               isTabActive('dashboard')
-                ? 'bg-amber-50 text-amber-900 border border-amber-200/90 font-black shadow-2xs'
+                ? 'bg-teal-50 text-teal-900 border border-teal-200/90 font-black shadow-2xs'
                 : 'text-stone-700 hover:text-stone-950 hover:bg-stone-100'
             }`}
           >
             <div className="flex items-center gap-3">
-              <LayoutDashboard className={`w-4 h-4 ${isTabActive('dashboard') ? 'text-amber-700' : 'text-stone-400'}`} />
+              <LayoutDashboard className={`w-4 h-4 ${isTabActive('dashboard') ? 'text-teal-700' : 'text-stone-400'}`} />
               <span>{t.dashboard}</span>
             </div>
             {totalOrdersCount > 0 && (
               <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
-                isTabActive('dashboard') ? 'bg-amber-200 text-amber-900' : 'bg-stone-100 text-stone-600'
+                isTabActive('dashboard') ? 'bg-teal-200 text-teal-900' : 'bg-stone-100 text-stone-600'
               }`}>
                 {totalOrdersCount}
               </span>
@@ -194,17 +194,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
             id="sidebar-customers-link"
             className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               isTabActive('customers')
-                ? 'bg-amber-50 text-amber-900 border border-amber-200/90 font-black shadow-2xs'
+                ? 'bg-teal-50 text-teal-900 border border-teal-200/90 font-black shadow-2xs'
                 : 'text-stone-700 hover:text-stone-950 hover:bg-stone-100'
             }`}
           >
             <div className="flex items-center gap-3">
-              <Users className={`w-4 h-4 ${isTabActive('customers') ? 'text-amber-700' : 'text-stone-400'}`} />
+              <Users className={`w-4 h-4 ${isTabActive('customers') ? 'text-teal-700' : 'text-stone-400'}`} />
               <span>{t.customers}</span>
             </div>
             {totalCustomersCount > 0 && (
               <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
-                isTabActive('customers') ? 'bg-amber-200 text-amber-900' : 'bg-stone-100 text-stone-600'
+                isTabActive('customers') ? 'bg-teal-200 text-teal-900' : 'bg-stone-100 text-stone-600'
               }`}>
                 {totalCustomersCount}
               </span>
@@ -217,17 +217,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
             id="sidebar-fabrics-link"
             className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               isTabActive('fabrics')
-                ? 'bg-amber-50 text-amber-900 border border-amber-200/90 font-black shadow-2xs'
+                ? 'bg-teal-50 text-teal-900 border border-teal-200/90 font-black shadow-2xs'
                 : 'text-stone-700 hover:text-stone-950 hover:bg-stone-100'
             }`}
           >
             <div className="flex items-center gap-3">
-              <Layers className={`w-4 h-4 ${isTabActive('fabrics') ? 'text-amber-700' : 'text-stone-400'}`} />
+              <Layers className={`w-4 h-4 ${isTabActive('fabrics') ? 'text-teal-700' : 'text-stone-400'}`} />
               <span>{t.fabricInventory}</span>
             </div>
             {totalFabricsCount > 0 && (
               <span title={lowFabricCount ? `${lowFabricCount} low-stock fabrics` : undefined} className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
-                lowFabricCount > 0 ? 'bg-rose-500 text-white' : isTabActive('fabrics') ? 'bg-amber-200 text-amber-900' : 'bg-stone-100 text-stone-600'
+                lowFabricCount > 0 ? 'bg-rose-500 text-white' : isTabActive('fabrics') ? 'bg-teal-200 text-teal-900' : 'bg-stone-100 text-stone-600'
               }`}>
                 {lowFabricCount > 0 ? `! ${lowFabricCount}` : totalFabricsCount}
               </span>
@@ -289,7 +289,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {/* Financials & Accounts workspace */}
           <div className="my-2.5 border-t border-stone-200 pt-2.5">
-            <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-amber-700">
+            <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-teal-700">
               {language === 'fa' ? 'حسابداری و مصارف' : language === 'ps' ? 'حسابونه او لګښتونه' : 'Finance & Expenses'}
             </div>
           </div>
@@ -300,17 +300,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
             id="sidebar-expenses-link"
             className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               isTabActive('expenses')
-                ? 'bg-amber-50 text-amber-900 border border-amber-200/90 font-black shadow-2xs'
+                ? 'bg-teal-50 text-teal-900 border border-teal-200/90 font-black shadow-2xs'
                 : 'text-stone-700 hover:text-stone-950 hover:bg-stone-100'
             }`}
           >
             <div className="flex items-center gap-3">
-              <Wallet className={`w-4 h-4 ${isTabActive('expenses') ? 'text-amber-700' : 'text-stone-400'}`} />
+              <Wallet className={`w-4 h-4 ${isTabActive('expenses') ? 'text-teal-700' : 'text-stone-400'}`} />
               <span>{t.expenses}</span>
             </div>
             {expensesCount > 0 && (
               <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
-                isTabActive('expenses') ? 'bg-amber-200 text-amber-900' : 'bg-stone-100 text-stone-600'
+                isTabActive('expenses') ? 'bg-teal-200 text-teal-900' : 'bg-stone-100 text-stone-600'
               }`}>
                 {expensesCount}
               </span>
@@ -323,12 +323,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
             id="sidebar-reports-link"
             className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               isTabActive('reports')
-                ? 'bg-amber-50 text-amber-900 border border-amber-200/90 font-black shadow-2xs'
+                ? 'bg-teal-50 text-teal-900 border border-teal-200/90 font-black shadow-2xs'
                 : 'text-stone-700 hover:text-stone-950 hover:bg-stone-100'
             }`}
           >
             <div className="flex items-center gap-3">
-              <BarChart3 className={`w-4 h-4 ${isTabActive('reports') ? 'text-amber-700' : 'text-stone-400'}`} />
+              <BarChart3 className={`w-4 h-4 ${isTabActive('reports') ? 'text-teal-700' : 'text-stone-400'}`} />
               <span>{language === 'fa' ? 'گزارش‌ها' : language === 'ps' ? 'راپورونه' : 'Reports'}</span>
             </div>
           </button>
@@ -346,12 +346,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
             id="sidebar-settings-link"
             className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               isTabActive('settings')
-                ? 'bg-amber-50 text-amber-900 border border-amber-200/90 font-black shadow-2xs'
+                ? 'bg-teal-50 text-teal-900 border border-teal-200/90 font-black shadow-2xs'
                 : 'text-stone-700 hover:text-stone-950 hover:bg-stone-100'
             }`}
           >
             <div className="flex items-center gap-3">
-              <SlidersHorizontal className={`w-4 h-4 ${isTabActive('settings') ? 'text-amber-700' : 'text-stone-400'}`} />
+              <SlidersHorizontal className={`w-4 h-4 ${isTabActive('settings') ? 'text-teal-700' : 'text-stone-400'}`} />
               <span>{t.designAndSettings}</span>
             </div>
             <span className="text-[10px] font-mono px-2 py-0.5 bg-stone-100 rounded text-stone-500 font-bold">
@@ -363,7 +363,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* User Account & Sign Out Section */}
         <div className="px-3 py-2 mx-3 mb-2 rounded-xl bg-stone-100/90 border border-stone-200 flex items-center justify-between text-xs">
           <div className="flex items-center gap-2 overflow-hidden">
-            <div className="w-7 h-7 rounded-lg bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-800 shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-teal-100 border border-teal-200 flex items-center justify-center text-teal-800 shrink-0">
               <UserCheck className="w-3.5 h-3.5" />
             </div>
             <div className="overflow-hidden leading-tight">

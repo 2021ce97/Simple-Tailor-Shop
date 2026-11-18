@@ -56,7 +56,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     language === 'fa' ? 'دری' : language === 'ps' ? 'پښتو' : 'English';
 
   return (
-    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md text-stone-900 border-b border-stone-200 shadow-xs no-print">
+    <header className="sticky top-0 z-30 bg-surface/95 backdrop-blur-md text-stone-900 border-b border-stone-200 shadow-xs no-print">
       <div className="w-full px-4 sm:px-6">
         <div className="flex items-center justify-between h-14 sm:h-16 gap-2 sm:gap-3 min-w-0">
           {/* Left / Start: Sidebar Toggle & Brand */}
@@ -84,7 +84,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <h1 className="font-extrabold text-xs sm:text-base text-stone-900 tracking-tight leading-tight flex items-center gap-2 min-w-0">
                   <span className="truncate block max-w-[42vw] sm:max-w-none">{shopTitle || 'ROYAL_KAWSAR_BRAND_FASHION'}</span>
                 </h1>
-                <p className="text-[10px] text-amber-700 font-semibold hidden sm:block">
+                <p className="text-[10px] text-teal-700 font-semibold hidden sm:block">
                   {t.appSubtitle}
                 </p>
               </div>
@@ -108,7 +108,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }}
                 placeholder={language === 'fa' ? 'جستجوی سفارش یا مشتری...' : language === 'ps' ? 'فرمایش یا پېرودونکی ولټوئ...' : 'Search order or customer...'}
                 aria-label="Search orders by customer name or order ID"
-                className="w-full bg-stone-50 border border-stone-200 rounded-xl ps-9 pe-3 py-2 text-xs text-stone-800 placeholder:text-stone-400 outline-none focus:bg-white focus:border-amber-600 focus:ring-1 focus:ring-amber-500 transition"
+                className="w-full bg-stone-50 border border-stone-200 rounded-xl ps-9 pe-3 py-2 text-xs text-stone-800 placeholder:text-stone-400 outline-none focus:bg-surface focus:border-teal-600 focus:ring-1 focus:ring-teal-500 transition"
               />
             </div>
 
@@ -121,13 +121,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 bg-stone-100 hover:bg-stone-200/80 text-stone-800 rounded-xl text-xs font-bold transition border border-stone-200 cursor-pointer shadow-2xs"
                 aria-label="Select Language"
               >
-                <Globe className="w-3.5 h-3.5 text-amber-600" />
+                <Globe className="w-3.5 h-3.5 text-teal-600" />
                 <span className="hidden min-[380px]:inline">{currentLanguageLabel}</span>
                 <ChevronDown className={`w-3 h-3 text-stone-500 transition-transform ${isLangDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {isLangDropdownOpen && (
-                <div className="absolute end-0 mt-1.5 w-36 bg-white rounded-xl shadow-lg border border-stone-200 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                <div className="absolute end-0 mt-1.5 w-36 bg-surface rounded-xl shadow-lg border border-stone-200 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
                   <button
                     type="button"
                     onClick={() => {
@@ -135,11 +135,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                       setIsLangDropdownOpen(false);
                     }}
                     className={`w-full text-start px-3 py-2 text-xs flex items-center justify-between font-bold transition cursor-pointer ${
-                      language === 'fa' ? 'bg-amber-50 text-amber-900' : 'text-stone-700 hover:bg-stone-50'
+                      language === 'fa' ? 'bg-teal-50 text-teal-900' : 'text-stone-700 hover:bg-stone-50'
                     }`}
                   >
                     <span>دری (Dari)</span>
-                    {language === 'fa' && <Check className="w-3.5 h-3.5 text-amber-600" />}
+                    {language === 'fa' && <Check className="w-3.5 h-3.5 text-teal-600" />}
                   </button>
 
                   <button
@@ -149,11 +149,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                       setIsLangDropdownOpen(false);
                     }}
                     className={`w-full text-start px-3 py-2 text-xs flex items-center justify-between font-bold transition cursor-pointer ${
-                      language === 'ps' ? 'bg-amber-50 text-amber-900' : 'text-stone-700 hover:bg-stone-50'
+                      language === 'ps' ? 'bg-teal-50 text-teal-900' : 'text-stone-700 hover:bg-stone-50'
                     }`}
                   >
                     <span>پښتو (Pashto)</span>
-                    {language === 'ps' && <Check className="w-3.5 h-3.5 text-amber-600" />}
+                    {language === 'ps' && <Check className="w-3.5 h-3.5 text-teal-600" />}
                   </button>
 
                   <button
@@ -163,11 +163,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                       setIsLangDropdownOpen(false);
                     }}
                     className={`w-full text-start px-3 py-2 text-xs flex items-center justify-between font-bold transition cursor-pointer ${
-                      language === 'en' ? 'bg-amber-50 text-amber-900' : 'text-stone-700 hover:bg-stone-50'
+                      language === 'en' ? 'bg-teal-50 text-teal-900' : 'text-stone-700 hover:bg-stone-50'
                     }`}
                   >
                     <span>English</span>
-                    {language === 'en' && <Check className="w-3.5 h-3.5 text-amber-600" />}
+                    {language === 'en' && <Check className="w-3.5 h-3.5 text-teal-600" />}
                   </button>
                 </div>
               )}

@@ -682,17 +682,17 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
     >
       <div 
         id="receipt-modal-container"
-        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden flex flex-col max-h-[94vh] animate-in fade-in zoom-in-95 duration-200 border border-[#E5E5E5]"
+        className="bg-surface rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden flex flex-col max-h-[94vh] animate-in fade-in zoom-in-95 duration-200 border border-line"
       >
         {/* ==========================================
             TOP CONTROL BAR: Mode Tabs & Actions
            ========================================== */}
-        <div className="receipt-actions px-4 py-3 bg-[#1A1A1A] text-white border-b border-black no-print flex flex-col gap-2.5">
+        <div className="receipt-actions px-4 py-3 bg-ink text-white border-b border-black no-print flex flex-col gap-2.5">
           <div className="flex flex-col min-[430px]:flex-row min-[430px]:items-center justify-between gap-2">
             {/* Title & Order info */}
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-4 bg-[#D4AF37] rounded-full inline-block" />
-              <Scissors className="w-4 h-4 text-[#D4AF37]" />
+              <span className="w-1.5 h-4 bg-accent rounded-full inline-block" />
+              <Scissors className="w-4 h-4 text-accent-soft" />
               <h2 className="text-sm font-black tracking-wide">
                 {order.orderNumber} - {order.customerName}
               </h2>
@@ -705,7 +705,7 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
                 type="button"
                 onClick={() => handlePrint()}
                 id="print-slip-btn"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#D4AF37] hover:bg-[#B39025] active:bg-[#B39025] text-[#1A1A1A] font-black rounded-lg text-xs transition cursor-pointer shadow-xs"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent hover:bg-accent-hover active:bg-accent-hover text-white font-black rounded-lg text-xs transition cursor-pointer shadow-xs"
                 title={t.print}
               >
                 <Printer className="w-3.5 h-3.5" />
@@ -717,7 +717,7 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
                 type="button"
                 onClick={onClose}
                 id="close-receipt-btn"
-                className="p-1.5 text-stone-400 hover:text-white rounded-lg hover:bg-white/10 transition ml-1 cursor-pointer"
+                className="p-1.5 text-stone-300 hover:text-white rounded-lg hover:bg-surface/10 transition ml-1 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -727,13 +727,13 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
           {/* Sub-bar: Format Selector & Mode Switcher */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-white/10 text-xs">
             {/* Mode Switcher Tabs: Tailor Slip | Customer Bill */}
-            <div className="flex items-center gap-1 bg-white/10 rounded-xl p-1 border border-white/10 w-full sm:w-auto overflow-x-auto">
+            <div className="flex items-center gap-1 bg-surface/10 rounded-xl p-1 border border-white/10 w-full sm:w-auto overflow-x-auto">
               <button
                 type="button"
                 onClick={() => setActiveMode('tailor')}
                 className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
                   activeMode === 'tailor'
-                    ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
+                    ? 'bg-accent text-white shadow-xs'
                     : 'text-stone-300 hover:text-white'
                 }`}
               >
@@ -745,7 +745,7 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
                 onClick={() => setActiveMode('customer')}
                 className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
                   activeMode === 'customer'
-                    ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
+                    ? 'bg-accent text-white shadow-xs'
                     : 'text-stone-300 hover:text-white'
                 }`}
               >
@@ -755,13 +755,13 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
             </div>
 
             {/* Paper Size selector */}
-            <div className="flex items-center justify-center gap-1 bg-white/10 rounded-xl p-0.5 border border-white/10 w-full sm:w-auto">
+            <div className="flex items-center justify-center gap-1 bg-surface/10 rounded-xl p-0.5 border border-white/10 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => setPrintFormat('a6')}
                 className={`px-2 py-1 text-[11px] font-black rounded-md transition cursor-pointer ${
                   printFormat === 'a6'
-                    ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
+                    ? 'bg-accent text-white shadow-xs'
                     : 'text-stone-300 hover:text-white'
                 }`}
                 title="A6 Standard Sheet (105×148 mm)"
@@ -773,7 +773,7 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
                 onClick={() => setPrintFormat('a5')}
                 className={`px-2 py-1 text-[11px] font-black rounded-md transition cursor-pointer ${
                   printFormat === 'a5'
-                    ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
+                    ? 'bg-accent text-white shadow-xs'
                     : 'text-stone-300 hover:text-white'
                 }`}
                 title="A5 Standard Sheet (148×210 mm)"
@@ -785,7 +785,7 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
                 onClick={() => setPrintFormat('a4')}
                 className={`px-2 py-1 text-[11px] font-black rounded-md transition cursor-pointer ${
                   printFormat === 'a4'
-                    ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs'
+                    ? 'bg-accent text-white shadow-xs'
                     : 'text-stone-300 hover:text-white'
                 }`}
                 title="A4 Full Sheet"
@@ -799,7 +799,7 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
         {/* ==========================================
             PREVIEW AREA (Scrollable)
            ========================================== */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#F9F7F2] flex flex-col items-center justify-start gap-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-surface-muted flex flex-col items-center justify-start gap-6">
           {/* Active Main Printable Container */}
           <div ref={mainPrintRef} className="print-main-wrapper flex flex-col gap-6 w-full items-center">
             {activeMode === 'tailor' && renderTailorSlip(tailorPrintRef)}
@@ -810,21 +810,21 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
         {/* ==========================================
             FOOTER CONTROLS
            ========================================== */}
-        <div className="receipt-modal-footer px-3 sm:px-5 py-3 bg-white border-t border-[#E5E5E5] flex flex-col sm:flex-row sm:items-center justify-between no-print gap-3">
+        <div className="receipt-modal-footer px-3 sm:px-5 py-3 bg-surface border-t border-line flex flex-col sm:flex-row sm:items-center justify-between no-print gap-3">
           {/* Quick specific PDF download triggers */}
           <div className="grid grid-cols-1 min-[430px]:grid-cols-2 gap-2 w-full sm:w-auto">
             <button
               type="button"
               onClick={() => handleDownloadPdf('tailor')}
-              className="px-3 py-1.5 text-xs font-bold text-[#1A1A1A] bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl transition cursor-pointer flex items-center gap-1.5"
+              className="px-3 py-1.5 text-xs font-bold text-ink bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-xl transition cursor-pointer flex items-center gap-1.5"
             >
-              <Download className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <Download className="w-3.5 h-3.5 text-accent" />
               <span>{t.downloadTailorPdf}</span>
             </button>
             <button
               type="button"
               onClick={() => handleDownloadPdf('customer')}
-              className="px-3 py-1.5 text-xs font-bold text-[#1A1A1A] bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded-xl transition cursor-pointer flex items-center gap-1.5"
+              className="px-3 py-1.5 text-xs font-bold text-ink bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded-xl transition cursor-pointer flex items-center gap-1.5"
             >
               <Download className="w-3.5 h-3.5 text-stone-700" />
               <span>{t.downloadCustomerPdf}</span>
@@ -835,7 +835,7 @@ export const ReceiptSlipModal: React.FC<ReceiptSlipModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-1.5 text-xs font-bold text-[#706E6B] hover:text-[#1A1A1A] bg-[#F9F7F2] hover:bg-stone-200 rounded-xl transition cursor-pointer border border-[#E5E5E5]"
+              className="px-4 py-1.5 text-xs font-bold text-muted hover:text-ink bg-surface-muted hover:bg-stone-200 rounded-xl transition cursor-pointer border border-line"
             >
               {t.close}
             </button>

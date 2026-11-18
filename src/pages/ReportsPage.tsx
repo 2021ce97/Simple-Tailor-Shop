@@ -304,13 +304,13 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
   return (
     <div ref={reportContainerRef} className="space-y-6 pb-16 animate-in fade-in duration-200 print:bg-white print:p-0">
       {/* 1. Header Toolbar */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 rounded-2xl border border-[#E5E5E5] bg-white p-5 shadow-xs">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 rounded-2xl border border-line bg-surface p-5 shadow-xs">
         <div className="flex items-center gap-3.5">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#173b3b] text-[#e4bd63] shrink-0">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent text-accent-soft shrink-0">
             <BarChart3 className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-[#1A1A1A] tracking-tight">
+            <h1 className="text-xl font-black text-ink tracking-tight">
               {t.reportsNav}
             </h1>
             <p className="text-xs text-stone-500 mt-0.5">
@@ -333,8 +333,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                 onClick={() => setPeriod(option)}
                 className={`rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
                   period === option 
-                    ? 'bg-[#173b3b] text-white shadow-xs' 
-                    : 'text-stone-600 hover:bg-white hover:text-stone-900'
+                    ? 'bg-accent text-white shadow-xs'
+                    : 'text-stone-600 hover:bg-surface hover:text-stone-900'
                 }`}
               >
                 <CalendarDays className="mr-1 inline h-3 w-3" />
@@ -352,7 +352,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           <button
             type="button"
             onClick={downloadCsv}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-3.5 py-2 text-xs font-bold text-stone-700 hover:bg-stone-50 transition cursor-pointer shadow-2xs"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-surface px-3.5 py-2 text-xs font-bold text-stone-700 hover:bg-stone-50 transition cursor-pointer shadow-2xs"
           >
             <Download className="h-3.5 w-3.5" />
             <span>Export CSV</span>
@@ -362,7 +362,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             type="button"
             onClick={handlePrint}
             disabled={isPrinting}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[#173b3b] px-4 py-2 text-xs font-black text-white hover:bg-[#245454] transition cursor-pointer shadow-2xs disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-xs font-black text-white hover:bg-accent-hover transition cursor-pointer shadow-2xs disabled:opacity-50"
           >
             <Printer className="h-3.5 w-3.5" />
             <span>{isPrinting ? t.loading : t.print}</span>
@@ -378,8 +378,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             onClick={() => setActiveTab('overview')}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'overview'
-                ? 'bg-[#173b3b] text-white shadow-xs'
-                : 'bg-white text-stone-700 hover:bg-stone-200 border border-stone-200'
+                ? 'bg-accent text-white shadow-xs'
+                : 'bg-surface text-stone-700 hover:bg-stone-200 border border-stone-200'
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
@@ -390,11 +390,11 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             onClick={() => setActiveTab('tailor')}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'tailor'
-                ? 'bg-amber-700 text-white shadow-xs'
-                : 'bg-white text-stone-700 hover:bg-stone-200 border border-stone-200'
+                ? 'bg-teal-700 text-white shadow-xs'
+                : 'bg-surface text-stone-700 hover:bg-stone-200 border border-stone-200'
             }`}
           >
-            <Scissors className="w-3.5 h-3.5 text-amber-500" />
+            <Scissors className="w-3.5 h-3.5 text-teal-500" />
             <span>{t.tailoringStream} ({report.periodOrders.length})</span>
           </button>
 
@@ -403,7 +403,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'retail'
                 ? 'bg-emerald-700 text-white shadow-xs'
-                : 'bg-white text-stone-700 hover:bg-stone-200 border border-stone-200'
+                : 'bg-surface text-stone-700 hover:bg-stone-200 border border-stone-200'
             }`}
           >
             <ShoppingBag className="w-3.5 h-3.5 text-emerald-500" />
@@ -415,7 +415,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'collections'
                 ? 'bg-blue-700 text-white shadow-xs'
-                : 'bg-white text-stone-700 hover:bg-stone-200 border border-stone-200'
+                : 'bg-surface text-stone-700 hover:bg-stone-200 border border-stone-200'
             }`}
           >
             <DollarSign className="w-3.5 h-3.5 text-blue-500" />
@@ -423,7 +423,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           </button>
         </div>
 
-        <div className="text-xs font-mono font-bold text-stone-600 bg-white px-3 py-1.5 rounded-xl border border-stone-200">
+        <div className="text-xs font-mono font-bold text-stone-600 bg-surface px-3 py-1.5 rounded-xl border border-stone-200">
           📅 {periodLabel}: {dateKey(range.start.toISOString())} ➔ {dateKey(range.end.toISOString())}
         </div>
       </div>
@@ -445,7 +445,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                 🛍️ {t.retailCollected}: {money(report.retailCollected)}
               </p>
             </div>
-            <div className="rounded-xl border border-emerald-300 bg-white p-2.5 text-emerald-700 shadow-2xs">
+            <div className="rounded-xl border border-emerald-300 bg-surface p-2.5 text-emerald-700 shadow-2xs">
               <DollarSign className="h-5 w-5" />
             </div>
           </div>
@@ -466,28 +466,28 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                 🛍️ {t.retailRevenue}: {money(report.retailRevenue)}
               </p>
             </div>
-            <div className="rounded-xl border border-blue-300 bg-white p-2.5 text-blue-700 shadow-2xs">
+            <div className="rounded-xl border border-blue-300 bg-surface p-2.5 text-blue-700 shadow-2xs">
               <TrendingUp className="h-5 w-5" />
             </div>
           </div>
         </div>
 
         {/* Card 3: Total Net Profit (Tailor + Retail - Expenses) */}
-        <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 shadow-xs">
+        <div className="rounded-2xl border border-teal-200 bg-teal-50/70 p-4 shadow-xs">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[11px] font-extrabold uppercase tracking-wider text-amber-900">
+              <p className="text-[11px] font-extrabold uppercase tracking-wider text-teal-900">
                 ✨ {t.netProfit}
               </p>
-              <p className="mt-1.5 text-2xl font-black text-amber-950 font-mono">
+              <p className="mt-1.5 text-2xl font-black text-teal-950 font-mono">
                 {money(report.totalShopNetProfit)}
               </p>
-              <p className="mt-1 text-[11px] font-bold text-amber-800">
+              <p className="mt-1 text-[11px] font-bold text-teal-800">
                 🏷️ {t.totalShopProfit}: {money(report.totalShopProfit)}<br />
                 💸 {t.totalExpenses}: -{money(report.totalShopExpenses)}
               </p>
             </div>
-            <div className="rounded-xl border border-amber-300 bg-white p-2.5 text-amber-700 shadow-2xs">
+            <div className="rounded-xl border border-teal-300 bg-surface p-2.5 text-teal-700 shadow-2xs">
               <Percent className="h-5 w-5" />
             </div>
           </div>
@@ -507,7 +507,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                 {report.paymentCounts.partial} {language === 'fa' ? 'پرداخت قسمی' : 'Partial'} · {report.paymentCounts.unpaid} {language === 'fa' ? 'پرداخت نشده' : 'Unpaid'}
               </p>
             </div>
-            <div className="rounded-xl border border-rose-300 bg-white p-2.5 text-rose-700 shadow-2xs">
+            <div className="rounded-xl border border-rose-300 bg-surface p-2.5 text-rose-700 shadow-2xs">
               <Clock3 className="h-5 w-5" />
             </div>
           </div>
@@ -517,15 +517,15 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       {/* 4. Side-by-Side Detailed Breakdown: Tailoring vs Retail vs Collected Money */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Stream 1: Tailoring Department */}
-        <div className="rounded-2xl border border-[#E5E5E5] bg-white p-5 shadow-xs space-y-4">
+        <div className="rounded-2xl border border-line bg-surface p-5 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-            <h2 className="text-base font-black text-[#1A1A1A] flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center">
+            <h2 className="text-base font-black text-ink flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center">
                 <Scissors className="w-4 h-4" />
               </div>
               <span>{t.tailoringStream} ({language === 'fa' ? 'بخش خیاطی و دوخت' : 'Tailor Workshop'})</span>
             </h2>
-            <span className="text-xs font-mono font-bold bg-amber-50 text-amber-800 px-2.5 py-1 rounded-lg border border-amber-200">
+            <span className="text-xs font-mono font-bold bg-teal-50 text-teal-800 px-2.5 py-1 rounded-lg border border-teal-200">
               {report.periodOrders.length} {t.totalOrders}
             </span>
           </div>
@@ -549,7 +549,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
           <div className="space-y-2 pt-2 border-t border-stone-100">
             <span className="text-xs font-bold text-stone-700 block">{t.orderStatus}:</span>
             <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-              <div className="p-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 text-center font-bold">
+              <div className="p-2 bg-teal-50 border border-teal-200 rounded-lg text-teal-900 text-center font-bold">
                 <span>⏳ {t.statusPending}: {report.statusCounts.pending}</span>
               </div>
               <div className="p-2 bg-blue-50 border border-blue-200 rounded-lg text-blue-900 text-center font-bold">
@@ -572,7 +572,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
                 report.garments.map(([name, count]) => (
                   <div key={name} className="flex justify-between items-center text-xs p-2 bg-stone-50 rounded-lg">
                     <span className="font-bold text-stone-800">{name}</span>
-                    <span className="font-mono font-black text-amber-800 bg-amber-100 px-2 py-0.5 rounded">{count} {language === 'fa' ? 'دست' : 'suits'}</span>
+                    <span className="font-mono font-black text-teal-800 bg-teal-100 px-2 py-0.5 rounded">{count} {language === 'fa' ? 'دست' : 'suits'}</span>
                   </div>
                 ))
               ) : (
@@ -583,9 +583,9 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         </div>
 
         {/* Stream 2: Retail Boutique Department */}
-        <div className="rounded-2xl border border-[#E5E5E5] bg-white p-5 shadow-xs space-y-4">
+        <div className="rounded-2xl border border-line bg-surface p-5 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-            <h2 className="text-base font-black text-[#1A1A1A] flex items-center gap-2">
+            <h2 className="text-base font-black text-ink flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center">
                 <ShoppingBag className="w-4 h-4" />
               </div>
@@ -650,9 +650,9 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       </div>
 
       {/* 5. Comprehensive Money Collected Breakdown Table */}
-      <div className="rounded-2xl border border-[#E5E5E5] bg-white p-5 shadow-xs space-y-4">
+      <div className="rounded-2xl border border-line bg-surface p-5 shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-          <h2 className="text-base font-black text-[#1A1A1A] flex items-center gap-2">
+          <h2 className="text-base font-black text-ink flex items-center gap-2">
             <DollarSign className="w-5 h-5 text-emerald-600" />
             <span>{t.moneyCollectedBreakdown} ({language === 'fa' ? 'تحلیل نقدینگی و پول جمع‌آوری شده' : 'Cash Flow & Collections Data'})</span>
           </h2>
@@ -676,15 +676,15 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
             <tbody className="divide-y divide-stone-150">
               {/* Tailor Row */}
               <tr className="hover:bg-stone-50">
-                <td className="py-3 px-3 font-bold text-amber-900 flex items-center gap-2">
-                  <Scissors className="w-3.5 h-3.5 text-amber-700" />
+                <td className="py-3 px-3 font-bold text-teal-900 flex items-center gap-2">
+                  <Scissors className="w-3.5 h-3.5 text-teal-700" />
                   <span>{t.tailoringStream}</span>
                 </td>
                 <td className="py-3 px-3 font-mono">{report.periodOrders.length} {language === 'fa' ? 'سفارش' : 'orders'}</td>
                 <td className="py-3 px-3 font-mono font-bold">{money(report.tailorBilled)}</td>
                 <td className="py-3 px-3 font-mono font-black text-emerald-700 bg-emerald-50/50">{money(report.tailorCollected)}</td>
                 <td className="py-3 px-3 font-mono font-bold text-rose-700">{money(report.tailorBalance)}</td>
-                <td className="py-3 px-3 font-mono font-black text-amber-800">{money(report.tailorProfit)}</td>
+                <td className="py-3 px-3 font-mono font-black text-teal-800">{money(report.tailorProfit)}</td>
               </tr>
 
               {/* Retail Row */}
@@ -702,8 +702,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
 
               {/* Combined Grand Total Row */}
               <tr className="bg-stone-100 font-black text-sm">
-                <td className="py-3 px-3 text-[#1A1A1A] flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+                <td className="py-3 px-3 text-ink flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-accent" />
                   <span>{t.totalShopRevenue}</span>
                 </td>
                 <td className="py-3 px-3 font-mono">{report.periodOrders.length + report.periodSales.length}</td>
@@ -718,7 +718,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       </div>
 
       {/* 6. Low Stock & Inventory Alerts */}
-      <div className="rounded-2xl border border-rose-200 bg-white p-5 shadow-xs">
+      <div className="rounded-2xl border border-rose-200 bg-surface p-5 shadow-xs">
         <h2 className="flex items-center gap-2 text-sm font-black text-rose-900 mb-3">
           <Package className="h-4 w-4 text-rose-700" />
           <span>{language === 'fa' ? 'هشدارهای گدام و موجودی کم:' : 'Inventory & Low Stock Alerts:'}</span>

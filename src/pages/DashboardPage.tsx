@@ -505,11 +505,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
       default:
         return {
           label: t.statusPending,
-          badgeClass: 'bg-amber-50 text-amber-900 border-amber-300 ring-1 ring-amber-500/20 hover:bg-amber-100',
-          dotClass: 'bg-amber-500',
+          badgeClass: 'bg-stone-100 text-stone-900 border-stone-300 ring-1 ring-stone-500/20 hover:bg-stone-200',
+          dotClass: 'bg-stone-500',
           pulse: true,
           icon: Clock,
-          iconClass: 'text-amber-700',
+          iconClass: 'text-stone-700',
         };
     }
   };
@@ -517,11 +517,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
   return (
     <div className="flex flex-col gap-4 sm:gap-6 pb-16 animate-in fade-in duration-200 min-w-0">
       {/* Top Banner / Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-[#E5E5E5] shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 bg-surface p-4 sm:p-5 rounded-2xl border border-line shadow-xs">
         <div className="flex items-center gap-3">
-          <span className="w-1.5 h-7 bg-[#D4AF37] rounded-full inline-block shrink-0" />
+          <span className="w-1.5 h-7 bg-accent rounded-full inline-block shrink-0" />
           <div>
-            <h1 className="text-xl font-black text-[#1A1A1A] tracking-tight">
+            <h1 className="text-xl font-black text-ink tracking-tight">
               {t.dashboard}
             </h1>
             <p className="text-xs text-stone-500 mt-0.5">
@@ -534,7 +534,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <button
             onClick={onNewOrder}
             id="dashboard-new-order-btn"
-            className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-5 py-2.5 bg-[#D4AF37] hover:bg-[#C29E2E] active:scale-98 text-[#1A1A1A] font-black rounded-xl text-sm transition cursor-pointer shadow-xs"
+            className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-hover active:scale-98 text-white font-black rounded-xl text-sm transition cursor-pointer shadow-xs"
           >
             <Plus className="w-5 h-5 stroke-[2.5]" />
             <span>{t.newOrder}</span>
@@ -545,14 +545,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* 4 KPI Summary Cards: Tailor + Retail Revenue & Records */}
       <div className="grid grid-cols-1 min-[430px]:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4" id="dashboard-summary-cards">
         {/* Card 1: Today's Total Activity (Orders + Retail) */}
-        <div className="bg-white p-4.5 rounded-2xl border border-stone-200 shadow-xs hover:border-[#D4AF37] transition-all duration-200 flex flex-col justify-between relative overflow-hidden group">
+        <div className="dashboard-metric dashboard-metric--activity p-4.5 rounded-2xl border shadow-xs transition-all duration-200 flex flex-col justify-between relative overflow-hidden group">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <span className="text-[11px] uppercase tracking-wider text-stone-500 font-bold block">
+              <span className="metric-label text-[11px] uppercase tracking-wider font-bold block">
                 {t.todaysOrders} & {language === 'fa' ? 'پرچون' : 'Retail'}
               </span>
               <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-3xl font-black text-[#1A1A1A] font-mono">
+                <span className="text-3xl font-black metric-value font-mono">
                   {summary.todayOrdersCount + summary.todaySalesCount}
                 </span>
                 <span className="text-xs text-stone-500 font-bold">
@@ -560,29 +560,29 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </span>
               </div>
             </div>
-            <div className="w-11 h-11 rounded-xl bg-amber-50 text-[#B39025] flex items-center justify-center shrink-0 border border-amber-200/60 group-hover:scale-105 transition">
+            <div className="metric-icon w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border group-hover:scale-105 transition">
               <ShoppingBag className="w-5 h-5" />
             </div>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-between text-xs text-stone-600">
+          <div className="mt-3 pt-2.5 metric-divider border-t flex items-center justify-between text-xs text-stone-600">
             <span className="text-[11px] font-medium text-stone-500">
               {language === 'fa' ? 'عواید امروز:' : "Today's Total:"}
             </span>
-            <span className="font-mono font-bold text-[#1A1A1A]">
+            <span className="font-mono font-bold text-ink">
               {(summary.todayOrdersTotalAmount + summary.todaySalesRevenue).toLocaleString()} {currencySymbol}
             </span>
           </div>
         </div>
 
         {/* Card 2: Pending Deliveries */}
-        <div className="bg-white p-4.5 rounded-2xl border border-stone-200 shadow-xs hover:border-blue-300 transition-all duration-200 flex flex-col justify-between relative overflow-hidden group">
+        <div className="dashboard-metric dashboard-metric--pending p-4.5 rounded-2xl border shadow-xs transition-all duration-200 flex flex-col justify-between relative overflow-hidden group">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <span className="text-[11px] uppercase tracking-wider text-stone-500 font-bold block">
+              <span className="metric-label text-[11px] uppercase tracking-wider font-bold block">
                 {t.pendingDeliveries}
               </span>
               <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-3xl font-black text-blue-700 font-mono">
+                <span className="text-3xl font-black metric-value font-mono">
                   {summary.pendingDeliveriesCount}
                 </span>
                 <span className="text-xs text-stone-500 font-bold">
@@ -590,11 +590,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </span>
               </div>
             </div>
-            <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-200/60 group-hover:scale-105 transition">
+            <div className="metric-icon w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border group-hover:scale-105 transition">
               <PackageCheck className="w-5 h-5" />
             </div>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-between text-[11px]">
+          <div className="mt-3 pt-2.5 metric-divider border-t flex items-center justify-between text-[11px]">
             <span className="text-emerald-700 font-bold flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               {summary.readyForPickupCount} {t.statusReady}
@@ -607,24 +607,24 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         {/* Card 3: Total Monthly Revenue */}
-        <div className="bg-white p-4.5 rounded-2xl border border-stone-200 shadow-xs hover:border-emerald-300 transition-all duration-200 flex flex-col justify-between relative overflow-hidden group">
+        <div className="dashboard-metric dashboard-metric--revenue p-4.5 rounded-2xl border shadow-xs transition-all duration-200 flex flex-col justify-between relative overflow-hidden group">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <span className="text-[11px] uppercase tracking-wider text-stone-500 font-bold block">
+              <span className="metric-label text-[11px] uppercase tracking-wider font-bold block">
                 {t.totalMonthlyRevenue}
               </span>
               <div className="flex items-baseline gap-1 mt-1">
-                <span className="text-2xl sm:text-3xl font-black text-emerald-700 font-mono">
+                <span className="text-2xl sm:text-3xl font-black metric-value font-mono">
                   {summary.totalMonthlyRevenue.toLocaleString()}
                 </span>
                 <span className="text-xs font-bold text-emerald-800 font-sans">{currencySymbol}</span>
               </div>
             </div>
-            <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-200/60 group-hover:scale-105 transition">
+            <div className="metric-icon w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border group-hover:scale-105 transition">
               <TrendingUp className="w-5 h-5" />
             </div>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
+          <div className="mt-3 pt-2.5 metric-divider border-t flex items-center justify-between text-xs text-stone-500">
             <span className="text-[11px]">
               ✂️ {summary.orderMonthlyRevenue.toLocaleString()}
             </span>
@@ -635,24 +635,24 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         {/* Card 4: Retail Boutique Sales & Profit */}
-        <div className="bg-white p-4.5 rounded-2xl border border-stone-200 shadow-xs hover:border-amber-300 transition-all duration-200 flex flex-col justify-between relative overflow-hidden group">
+        <div className="dashboard-metric dashboard-metric--retail p-4.5 rounded-2xl border shadow-xs transition-all duration-200 flex flex-col justify-between relative overflow-hidden group">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <span className="text-[11px] uppercase tracking-wider text-stone-500 font-bold block">
+              <span className="metric-label text-[11px] uppercase tracking-wider font-bold block">
                 {t.retailRevenue} ({t.profit})
               </span>
               <div className="flex items-baseline gap-1 mt-1">
-                <span className="text-2xl sm:text-3xl font-black text-amber-800 font-mono">
+                <span className="text-2xl sm:text-3xl font-black metric-value font-mono">
                   {metrics.retailRevenue.toLocaleString()}
                 </span>
-                <span className="text-xs font-bold text-amber-900 font-sans">{currencySymbol}</span>
+                <span className="text-xs font-bold text-teal-900 font-sans">{currencySymbol}</span>
               </div>
             </div>
-            <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0 border border-amber-200/60 group-hover:scale-105 transition">
+            <div className="metric-icon w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border group-hover:scale-105 transition">
               <Tag className="w-5 h-5" />
             </div>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-between text-xs text-emerald-800 font-bold">
+          <div className="mt-3 pt-2.5 metric-divider border-t flex items-center justify-between text-xs text-emerald-800 font-bold">
             <span>{metrics.totalSales} {language === 'fa' ? 'معامله پرچون' : 'retail sales'}</span>
             <span className="font-mono font-black">+{metrics.retailProfit.toLocaleString()} {currencySymbol} {t.profit}</span>
           </div>
@@ -660,14 +660,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* 7-Day Daily Revenue Visualization */}
-      <div className="order-last min-w-0 bg-white p-3 sm:p-5 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-4 overflow-hidden">
+      <div className="order-last min-w-0 bg-surface p-3 sm:p-5 rounded-2xl border border-line shadow-xs space-y-4 overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-amber-50 text-[#B39025] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-teal-50 text-accent-hover flex items-center justify-center">
               <BarChart3 className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-black text-[#1A1A1A]">
+              <h2 className="text-sm font-black text-ink">
                 {language === 'fa' ? 'نمودار عواید ۷ روز گذشته' : language === 'ps' ? 'د تېرو ۷ ورځو عواید ګراف' : 'Last 7 Days Daily Revenue'}
               </h2>
               <p className="text-[11px] text-stone-500">
@@ -683,18 +683,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <span className="text-stone-500 font-sans text-[11px] font-bold">
                 {language === 'fa' ? 'مجموع ۷ روز:' : '7-Day Total:'}
               </span>
-              <span className="font-black text-[#1A1A1A]">
+              <span className="font-black text-ink">
                 {last7DaysRevenueData.total7DayRevenue.toLocaleString()} {currencySymbol}
               </span>
             </div>
 
             <div className="flex items-center gap-3 text-[11px] font-bold">
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-xs bg-[#D4AF37]" />
+                <span className="w-3 h-3 rounded-xs bg-accent" />
                 <span className="text-stone-700">{t.tailoringStream} ({last7DaysRevenueData.total7DayOrdersRevenue.toLocaleString()})</span>
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-xs bg-[#059669]" />
+                <span className="w-3 h-3 rounded-xs bg-chart-retail" />
                 <span className="text-stone-700">{t.retailStream} ({last7DaysRevenueData.total7DayProductsRevenue.toLocaleString()})</span>
               </span>
             </div>
@@ -708,16 +708,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
               data={last7DaysRevenueData.days}
               margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F0EFEA" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-line)" />
               <XAxis 
                 dataKey="displayLabel" 
-                tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 600 }}
-                axisLine={{ stroke: '#E5E5E5' }}
+                tick={{ fontSize: 11, fill: 'var(--color-muted)', fontWeight: 600 }}
+                axisLine={{ stroke: 'var(--color-line)' }}
                 tickLine={false}
               />
               <YAxis 
-                tick={{ fontSize: 11, fill: '#6B7280', fontFamily: 'monospace' }}
-                axisLine={{ stroke: '#E5E5E5' }}
+                tick={{ fontSize: 11, fill: 'var(--color-muted)', fontFamily: 'monospace' }}
+                axisLine={{ stroke: 'var(--color-line)' }}
                 tickLine={false}
                 tickFormatter={(val) => Number(val).toLocaleString()}
               />
@@ -728,27 +728,27 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     const prodRev = Number(payload.find(p => p.dataKey === 'productRevenue')?.value) || 0;
                     const totRev = ordRev + prodRev;
                     return (
-                      <div className="bg-[#181818] text-white p-3 rounded-xl shadow-xl border border-stone-700 text-xs space-y-1.5 min-w-44">
+                      <div className="bg-ink text-white p-3 rounded-xl shadow-xl border border-stone-700 text-xs space-y-1.5 min-w-44">
                         <div className="font-bold text-stone-300 border-b border-stone-800 pb-1">
                           {label}
                         </div>
                         <div className="flex items-center justify-between gap-4">
-                          <span className="text-[#D4AF37] flex items-center gap-1">
-                            <span className="w-2 h-2 rounded-xs bg-[#D4AF37]" />
+                          <span className="text-accent-soft flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-xs bg-accent" />
                             {t.tailorRevenue}:
                           </span>
                           <span className="font-mono font-bold">{ordRev.toLocaleString()} {currencySymbol}</span>
                         </div>
                         <div className="flex items-center justify-between gap-4">
-                          <span className="text-emerald-400 flex items-center gap-1">
-                            <span className="w-2 h-2 rounded-xs bg-[#059669]" />
+                          <span className="text-blue-200 flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-xs bg-chart-retail" />
                             {t.retailRevenue}:
                           </span>
                           <span className="font-mono font-bold">{prodRev.toLocaleString()} {currencySymbol}</span>
                         </div>
                         <div className="flex items-center justify-between gap-4 pt-1 border-t border-stone-800 font-bold">
                           <span className="text-white">{t.totalAmount}:</span>
-                          <span className="font-mono text-[#D4AF37]">{totRev.toLocaleString()} {currencySymbol}</span>
+                          <span className="font-mono text-accent-soft">{totRev.toLocaleString()} {currencySymbol}</span>
                         </div>
                       </div>
                     );
@@ -759,14 +759,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <Bar 
                 dataKey="orderRevenue" 
                 name={t.tailorRevenue} 
-                fill="#D4AF37" 
+                fill="var(--color-accent)"
                 radius={[4, 4, 0, 0]} 
                 maxBarSize={32}
               />
               <Bar 
                 dataKey="productRevenue" 
                 name={t.retailRevenue} 
-                fill="#059669" 
+                fill="var(--color-chart-retail)"
                 radius={[4, 4, 0, 0]} 
                 maxBarSize={32}
               />
@@ -782,14 +782,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
             onClick={() => setActiveStream('orders')}
             className={`px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 cursor-pointer ${
               activeStream === 'orders'
-                ? 'bg-[#1A1A1A] text-white shadow-xs'
-                : 'text-stone-700 hover:bg-white hover:text-stone-900'
+                ? 'bg-ink text-white shadow-xs'
+                : 'text-stone-700 hover:bg-surface hover:text-stone-900'
             }`}
           >
-            <Scissors className="w-3.5 h-3.5 text-[#D4AF37]" />
+            <Scissors className="w-3.5 h-3.5 text-inherit" />
             <span>{t.tailorRecords}</span>
             <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-              activeStream === 'orders' ? 'bg-[#D4AF37] text-[#1A1A1A]' : 'bg-stone-200'
+              activeStream === 'orders' ? 'bg-accent text-white' : 'bg-stone-200'
             }`}>
               {filteredOrders.length}
             </span>
@@ -800,13 +800,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
             className={`px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 cursor-pointer ${
               activeStream === 'retail'
                 ? 'bg-emerald-700 text-white shadow-xs'
-                : 'text-stone-700 hover:bg-white hover:text-stone-900'
+                : 'text-stone-700 hover:bg-surface hover:text-stone-900'
             }`}
           >
-            <ShoppingBag className="w-3.5 h-3.5 text-emerald-300" />
+            <ShoppingBag className="w-3.5 h-3.5 text-inherit" />
             <span>{t.retailRecords}</span>
             <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-              activeStream === 'retail' ? 'bg-white text-emerald-900 font-bold' : 'bg-stone-200'
+              activeStream === 'retail' ? 'bg-surface text-emerald-900 font-bold' : 'bg-stone-200'
             }`}>
               {filteredSales.length}
             </span>
@@ -816,14 +816,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
             onClick={() => setActiveStream('all')}
             className={`px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 cursor-pointer ${
               activeStream === 'all'
-                ? 'bg-[#173b3b] text-white shadow-xs'
-                : 'text-stone-700 hover:bg-white hover:text-stone-900'
+                ? 'bg-accent text-white shadow-xs'
+                : 'text-stone-700 hover:bg-surface hover:text-stone-900'
             }`}
           >
-            <Layers className="w-3.5 h-3.5 text-[#e4bd63]" />
+            <Layers className="w-3.5 h-3.5 text-inherit" />
             <span>{t.allRecords}</span>
             <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-              activeStream === 'all' ? 'bg-white text-stone-900 font-bold' : 'bg-stone-200'
+              activeStream === 'all' ? 'bg-surface text-stone-900 font-bold' : 'bg-stone-200'
             }`}>
               {filteredOrders.length + filteredSales.length}
             </span>
@@ -840,7 +840,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* Search & Filter Toolbar */}
-      <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-3">
+      <div className="bg-surface p-3.5 sm:p-4 rounded-2xl border border-line shadow-xs space-y-3">
         <div className="flex flex-col gap-3">
           {/* Search tailoring orders by order number or customer name. */}
           {activeStream !== 'retail' && (
@@ -857,7 +857,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   ? 'د فرمایش په شمېره یا د پېرودونکي په نوم لټون'
                   : 'Search by order number or customer name'}
                 aria-label={language === 'fa' ? 'جستجو با شماره سفارش یا نام مشتری' : language === 'ps' ? 'د فرمایش په شمېره یا د پېرودونکي په نوم لټون' : 'Search by order number or customer name'}
-                className={`w-full min-w-0 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-mono font-bold focus:bg-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/25 outline-hidden transition ${
+                className={`w-full min-w-0 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-mono font-bold focus:bg-surface focus:border-accent focus:ring-2 focus:ring-accent/25 outline-hidden transition ${
                   language === 'en' ? 'pl-10 pr-24' : 'pl-24 pr-10'
                 }`}
               />
@@ -892,13 +892,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   onClick={() => setStatusFilter(tab.id)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
                     statusFilter === tab.id
-                      ? 'bg-[#1A1A1A] text-white shadow-xs font-black'
-                      : 'text-stone-600 hover:text-[#1A1A1A] hover:bg-stone-200'
+                      ? 'bg-ink text-white shadow-xs font-black'
+                      : 'text-stone-600 hover:text-ink hover:bg-stone-200'
                   }`}
                 >
                   <span>{tab.label}</span>
                   <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                    statusFilter === tab.id ? 'bg-[#D4AF37] text-[#1A1A1A] font-bold' : 'bg-stone-200 text-stone-600'
+                    statusFilter === tab.id ? 'bg-accent text-white font-bold' : 'bg-stone-200 text-stone-600'
                   }`}>
                     {tab.count}
                   </span>
@@ -913,7 +913,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <select
                 value={paymentFilter}
                 onChange={e => setPaymentFilter(e.target.value)}
-                className="min-w-0 sm:min-w-52 px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold text-stone-700 outline-hidden focus:border-[#D4AF37] cursor-pointer"
+                className="min-w-0 sm:min-w-52 px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold text-stone-700 outline-hidden focus:border-accent cursor-pointer"
               >
                 <option value="all">{t.paymentStatus}: {t.all}</option>
                 <option value="paid">{t.paid}</option>
@@ -953,9 +953,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
               title="Reverse sort"
             >
               {sortBy === 'newest' || sortBy === 'delivery_desc' ? (
-                <ArrowDown className="w-3.5 h-3.5 text-[#B39025]" />
+                <ArrowDown className="w-3.5 h-3.5 text-accent-hover" />
               ) : (
-                <ArrowUp className="w-3.5 h-3.5 text-[#B39025]" />
+                <ArrowUp className="w-3.5 h-3.5 text-accent-hover" />
               )}
             </button>
           </div>
@@ -967,18 +967,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {(activeStream === 'retail' || activeStream === 'all') && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-black text-[#1A1A1A] flex items-center gap-2">
+            <h3 className="text-sm font-black text-ink flex items-center gap-2">
               <ShoppingBag className="w-4 h-4 text-emerald-600" />
               <span>{t.retailRecords} ({filteredSales.length})</span>
             </h3>
           </div>
 
           {filteredSales.length === 0 ? (
-            <div className="bg-white p-8 text-center rounded-2xl border border-stone-200">
+            <div className="bg-surface p-8 text-center rounded-2xl border border-stone-200">
               <p className="text-xs text-stone-500">{t.noDataFound}</p>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-xs">
+            <div className="bg-surface rounded-2xl border border-stone-200 overflow-hidden shadow-xs">
               <div className="overflow-x-auto">
                 <table className="w-full text-start text-xs border-collapse">
                   <thead>
@@ -1079,16 +1079,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="space-y-3">
           {activeStream === 'all' && (
             <div className="flex items-center justify-between pt-4 border-t border-stone-200">
-              <h3 className="text-sm font-black text-[#1A1A1A] flex items-center gap-2">
-                <Scissors className="w-4 h-4 text-[#D4AF37]" />
+              <h3 className="text-sm font-black text-ink flex items-center gap-2">
+                <Scissors className="w-4 h-4 text-accent" />
                 <span>{t.tailorRecords} ({filteredOrders.length})</span>
               </h3>
             </div>
           )}
 
           {filteredOrders.length === 0 ? (
-            <div className="bg-white p-12 text-center rounded-2xl border border-[#E5E5E5] shadow-xs">
-              <div className="w-16 h-16 rounded-full bg-stone-100 border border-stone-200 mx-auto flex items-center justify-center text-[#D4AF37] mb-3">
+            <div className="bg-surface p-12 text-center rounded-2xl border border-line shadow-xs">
+              <div className="w-16 h-16 rounded-full bg-stone-100 border border-stone-200 mx-auto flex items-center justify-center text-accent mb-3">
                 <Search className="w-8 h-8" />
               </div>
               <h3 className="text-sm font-bold text-stone-800">{t.noDataFound}</h3>
@@ -1107,7 +1107,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               ) : (
                 <button
                   onClick={onNewOrder}
-                  className="mt-4 px-5 py-2.5 bg-[#D4AF37] hover:bg-[#C29E2E] text-[#1A1A1A] rounded-xl text-xs font-black transition cursor-pointer shadow-xs"
+                  className="mt-4 px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-black transition cursor-pointer shadow-xs"
                 >
                   + {t.newOrder}
                 </button>
@@ -1116,11 +1116,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
           ) : (
             <div className="space-y-3">
               {/* Desktop Table Layout */}
-              <div className="hidden lg:block bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden shadow-xs">
+              <div className="hidden lg:block bg-surface rounded-2xl border border-line overflow-hidden shadow-xs">
                 <div className="overflow-x-auto w-full">
                   <table className="w-full text-start text-xs border-collapse min-w-[760px]">
                     <thead>
-                      <tr className="bg-stone-50 border-b border-[#E5E5E5] text-stone-600 font-bold uppercase tracking-wider text-[11px]">
+                      <tr className="bg-stone-50 border-b border-line text-stone-600 font-bold uppercase tracking-wider text-[11px]">
                         <th className="py-3 px-3 text-start whitespace-nowrap">{t.orderNumber}</th>
                         <th className="py-3 px-3 text-start">{t.customerDetails}</th>
                         <th className="py-3 px-3 text-start">{t.garmentType} & {t.fabric}</th>
@@ -1138,10 +1138,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         return (
                           <tr 
                             key={order.id} 
-                            className="hover:bg-amber-50/40 transition group"
+                            className="hover:bg-teal-50/40 transition group"
                           >
                             <td className="py-2.5 px-3 align-middle whitespace-nowrap">
-                              <span className="font-mono font-black text-xs text-[#1A1A1A] tracking-wider block">
+                              <span className="font-mono font-black text-xs text-ink tracking-wider block">
                                 {order.orderNumber}
                               </span>
                             </td>
@@ -1152,10 +1152,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                                   type="button"
                                   onClick={() => onSelectCustomer(order.customerId)}
                                   title={t.viewCustomerHistory}
-                                  className="font-extrabold text-[#1A1A1A] hover:text-[#B39025] hover:underline transition text-start inline-flex items-center gap-1 group/cust cursor-pointer truncate max-w-full"
+                                  className="font-extrabold text-ink hover:text-accent-hover hover:underline transition text-start inline-flex items-center gap-1 group/cust cursor-pointer truncate max-w-full"
                                 >
                                   <span className="truncate">{order.customerName}</span>
-                                  <ExternalLink className="w-3 h-3 text-stone-400 group-hover/cust:text-[#B39025] opacity-0 group-hover/cust:opacity-100 transition shrink-0" />
+                                  <ExternalLink className="w-3 h-3 text-stone-400 group-hover/cust:text-accent-hover opacity-0 group-hover/cust:opacity-100 transition shrink-0" />
                                 </button>
                                 <div className="flex items-center gap-1.5 text-stone-500 font-mono text-[11px]">
                                   <span>{order.customerPhone}</span>
@@ -1176,7 +1176,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
                             <td className="py-2.5 px-3 align-middle">
                               <div className="space-y-0.5 min-w-[110px] max-w-[160px]">
-                                <span className="font-bold text-[#1A1A1A] block truncate" title={orderGarmentSummary(order)}>{orderGarmentSummary(order)}</span>
+                                <span className="font-bold text-ink block truncate" title={orderGarmentSummary(order)}>{orderGarmentSummary(order)}</span>
                                 <span className="text-[11px] text-stone-500 block truncate" title={order.fabricName || ''}>
                                   {order.fabricName ? `🧵 ${order.fabricName}` : '—'}
                                 </span>
@@ -1189,8 +1189,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                                   <Clock className="w-3 h-3 text-stone-400 shrink-0" />
                                   <span>{order.orderDate.slice(0, 10)}</span>
                                 </div>
-                                <div className="text-[#1A1A1A] font-bold flex items-center gap-1">
-                                  <Calendar className="w-3 h-3 text-[#D4AF37] shrink-0" />
+                                <div className="text-ink font-bold flex items-center gap-1">
+                                  <Calendar className="w-3 h-3 text-accent shrink-0" />
                                   <span>{order.deliveryDate}</span>
                                 </div>
                               </div>
@@ -1236,14 +1236,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                                     order.balanceAmount === 0
                                       ? 'bg-emerald-100 text-emerald-800'
                                       : order.paidAmount > 0
-                                      ? 'bg-amber-100 text-amber-800'
+                                      ? 'bg-teal-100 text-teal-800'
                                       : 'bg-rose-100 text-rose-800'
                                   }`}>
                                     {order.balanceAmount === 0 ? t.paid : order.paidAmount > 0 ? t.partial : t.unpaid}
                                   </span>
                                 </div>
                                 <div className="font-mono text-xs">
-                                  <span className="font-bold text-[#1A1A1A]">{order.totalAmount} {currencySymbol}</span>
+                                  <span className="font-bold text-ink">{order.totalAmount} {currencySymbol}</span>
                                   {order.balanceAmount > 0 && (
                                     <span className="text-rose-600 font-bold block text-[11px]">
                                       ({t.balanceRemaining}: {order.balanceAmount})
@@ -1259,7 +1259,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                                   type="button"
                                   onClick={() => onViewReceipt(order)}
                                   title={t.print}
-                                  className="p-1.5 bg-[#D4AF37] hover:bg-[#C29E2E] text-[#1A1A1A] rounded-lg transition cursor-pointer shadow-2xs"
+                                  className="p-1.5 bg-accent hover:bg-accent-hover text-white rounded-lg transition cursor-pointer shadow-2xs"
                                 >
                                   <Printer className="w-4 h-4" />
                                 </button>
@@ -1298,10 +1298,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   return (
                     <div
                       key={order.id}
-                      className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-3"
+                      className="bg-surface p-4 rounded-2xl border border-line shadow-xs space-y-3"
                     >
                       <div className="flex items-center justify-between gap-2 border-b border-stone-100 pb-2.5">
-                        <span className="font-mono font-black text-sm text-[#1A1A1A]">
+                        <span className="font-mono font-black text-sm text-ink">
                           {order.orderNumber}
                         </span>
 
@@ -1337,7 +1337,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                           <button
                             type="button"
                             onClick={() => onSelectCustomer(order.customerId)}
-                            className="font-extrabold text-sm text-[#1A1A1A] hover:text-[#B39025] hover:underline text-start inline-flex items-center gap-1 cursor-pointer"
+                            className="font-extrabold text-sm text-ink hover:text-accent-hover hover:underline text-start inline-flex items-center gap-1 cursor-pointer"
                           >
                             <span>{order.customerName}</span>
                             <ExternalLink className="w-3 h-3 text-stone-400 shrink-0" />
@@ -1357,7 +1357,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       <div className="p-2.5 bg-stone-50 rounded-xl border border-stone-200 flex items-center justify-between text-xs">
                         <div>
                           <span className="text-stone-500 text-[11px] block">{t.totalAmount}</span>
-                          <span className="font-mono font-bold text-[#1A1A1A]">{order.totalAmount} {currencySymbol}</span>
+                          <span className="font-mono font-bold text-ink">{order.totalAmount} {currencySymbol}</span>
                         </div>
                         <div>
                           <span className="text-emerald-700 text-[11px] block">{t.paidAmount}</span>
@@ -1371,7 +1371,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
                       <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-stone-100">
                         <div className="text-[11px] text-stone-500 font-mono flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5 text-[#D4AF37]" />
+                          <Calendar className="w-3.5 h-3.5 text-accent" />
                           <span>{order.deliveryDate}</span>
                         </div>
 
@@ -1379,7 +1379,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                           <button
                             type="button"
                             onClick={() => onViewReceipt(order)}
-                            className="px-2.5 py-1 bg-[#D4AF37] hover:bg-[#C29E2E] text-[#1A1A1A] rounded-lg text-xs font-black flex items-center gap-1 shadow-2xs"
+                            className="px-2.5 py-1 bg-accent hover:bg-accent-hover text-white rounded-lg text-xs font-black flex items-center gap-1 shadow-2xs"
                           >
                             <Printer className="w-3.5 h-3.5" />
                             <span>{t.receipt}</span>
@@ -1409,7 +1409,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <button
                     type="button"
                     onClick={() => setVisibleOrderCount(count => count + 20)}
-                    className="px-5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-black transition cursor-pointer"
+                    className="px-5 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-900 border border-teal-200 text-xs font-black transition cursor-pointer"
                   >
                     {language === 'fa' ? 'نمایش ۲۰ مورد بیشتر' : language === 'ps' ? '۲۰ نور ریکارډونه وښایاست' : 'See 20 more records'}
                   </button>
@@ -1433,10 +1433,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {paymentModalOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white w-full max-w-sm rounded-2xl p-5 shadow-2xl border border-stone-200 space-y-4">
+          <div className="bg-surface w-full max-w-sm rounded-2xl p-5 shadow-2xl border border-stone-200 space-y-4">
             <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-              <h3 className="font-black text-sm text-[#1A1A1A] flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-[#D4AF37]" />
+              <h3 className="font-black text-sm text-ink flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-accent" />
                 <span>{t.paymentStatus} ({paymentModalOrder.orderNumber})</span>
               </h3>
               <button
@@ -1466,7 +1466,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 type="number"
                 value={newPaidInput}
                 onChange={e => setNewPaidInput(parseFloat(e.target.value) || 0)}
-                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm font-mono font-bold focus:outline-hidden focus:border-[#D4AF37]"
+                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm font-mono font-bold focus:outline-hidden focus:border-accent"
               />
               <div className="flex gap-2 mt-2">
                 <button
@@ -1490,7 +1490,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <button
                 type="button"
                 onClick={handleSavePaymentUpdate}
-                className="px-4 py-2 bg-[#D4AF37] hover:bg-[#C29E2E] rounded-xl text-xs font-black text-[#1A1A1A] cursor-pointer"
+                className="px-4 py-2 bg-accent hover:bg-accent-hover rounded-xl text-xs font-black text-white cursor-pointer"
               >
                 {t.save}
               </button>
@@ -1502,10 +1502,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* Printable Retail Receipt Modal in Dashboard */}
       {activeRetailReceipt && (
         <div id="retail-receipt-modal" className="print-modal-container fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="retail-receipt-container bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col">
+          <div className="retail-receipt-container bg-surface w-full max-w-sm rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col">
             <div className="flex items-center justify-between px-4 py-3 border-b border-stone-100 bg-stone-50 no-print">
-              <h3 className="font-extrabold text-sm text-[#1A1A1A] flex items-center gap-1.5">
-                <Printer className="w-4 h-4 text-[#B39025]" />
+              <h3 className="font-extrabold text-sm text-ink flex items-center gap-1.5">
+                <Printer className="w-4 h-4 text-accent-hover" />
                 <span>{language === 'fa' ? 'بل فروش جنس' : 'Retail Sales Receipt'}</span>
               </h3>
               <button
@@ -1646,7 +1646,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 type="button"
                 onClick={handleDownloadRetailPdf}
                 disabled={isGeneratingRetailPdf}
-                className="px-3.5 py-2 bg-white hover:bg-stone-100 border border-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                className="px-3.5 py-2 bg-surface hover:bg-stone-100 border border-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
                 title="Download PDF"
               >
                 <Download className="w-3.5 h-3.5" />

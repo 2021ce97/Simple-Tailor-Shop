@@ -412,15 +412,15 @@ function ShopApp() {
   }
 
   if (dataLoading) {
-    return <div className="min-h-screen grid place-items-center bg-[#F8F7F4] p-6"><div className="text-center"><div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-stone-200 border-t-amber-600" /><p className="font-bold text-stone-700">Loading data from Supabase…</p></div></div>;
+    return <div className="min-h-screen grid place-items-center bg-canvas p-6"><div className="text-center"><div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-stone-200 border-t-teal-600" /><p className="font-bold text-stone-700">Loading data from Supabase…</p></div></div>;
   }
 
   if (databaseError) {
-    return <div className="min-h-screen grid place-items-center bg-[#F8F7F4] p-6"><div role="alert" className="w-full max-w-lg rounded-2xl border border-rose-200 bg-white p-6 shadow-xl"><h1 className="text-xl font-black text-rose-800">Supabase connection error</h1><p className="mt-3 break-words text-sm text-stone-700">{databaseError}</p><button type="button" onClick={() => window.location.reload()} className="mt-5 rounded-xl bg-[#173b3b] px-4 py-2.5 font-bold text-white">Retry</button></div></div>;
+    return <div className="min-h-screen grid place-items-center bg-canvas p-6"><div role="alert" className="w-full max-w-lg rounded-2xl border border-rose-200 bg-surface p-6 shadow-xl"><h1 className="text-xl font-black text-rose-800">Supabase connection error</h1><p className="mt-3 break-words text-sm text-stone-700">{databaseError}</p><button type="button" onClick={() => window.location.reload()} className="mt-5 rounded-xl bg-accent px-4 py-2.5 font-bold text-white">Retry</button></div></div>;
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F7F4] text-[#1A1A1A] flex flex-col font-sans selection:bg-amber-400/30">
+    <div className="min-h-screen bg-canvas text-ink flex flex-col font-sans selection:bg-teal-400/30">
       {notification && <div role="status" className={`fixed inset-x-3 top-3 sm:left-auto sm:right-4 sm:top-4 z-[100] sm:max-w-md rounded-xl border px-4 py-3 text-sm font-bold shadow-xl ${notification.type === 'success' ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-rose-300 bg-rose-50 text-rose-800'}`}>{notification.message}</div>}
       {/* Sidebar Navigation */}
       <Sidebar
@@ -464,7 +464,7 @@ function ShopApp() {
 
         {/* Main Content View Container */}
         <main className="flex-1 min-w-0 w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-3 sm:py-5">
-          <Suspense fallback={<div className="grid min-h-[45vh] place-items-center"><div className="h-9 w-9 animate-spin rounded-full border-4 border-stone-200 border-t-amber-600" /></div>}>
+          <Suspense fallback={<div className="grid min-h-[45vh] place-items-center"><div className="h-9 w-9 animate-spin rounded-full border-4 border-stone-200 border-t-teal-600" /></div>}>
           {currentTab === 'dashboard' && (
             <Dashboard
               orders={orders}

@@ -245,8 +245,8 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-[#1A1A1A] tracking-tight flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#D4AF37]/20 flex items-center justify-center text-[#B39025]">
+          <h1 className="text-2xl font-black text-ink tracking-tight flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-accent/20 flex items-center justify-center text-accent-hover">
               <ShoppingBag className="w-5 h-5" />
             </div>
             <span>{t.productsInventory}</span>
@@ -267,7 +267,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
               onClick={() => setActiveViewTab('inventory')}
               className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
                 activeViewTab === 'inventory'
-                  ? 'bg-white text-[#1A1A1A] shadow-xs'
+                  ? 'bg-surface text-ink shadow-xs'
                   : 'text-stone-700 hover:text-stone-900'
               }`}
             >
@@ -277,7 +277,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
               onClick={() => setActiveViewTab('sales')}
               className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
                 activeViewTab === 'sales'
-                  ? 'bg-white text-[#1A1A1A] shadow-xs'
+                  ? 'bg-surface text-ink shadow-xs'
                   : 'text-stone-700 hover:text-stone-900'
               }`}
             >
@@ -288,7 +288,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
           <button
             onClick={handleOpenAddModal}
             id="btn-add-new-product"
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-[#D4AF37] hover:bg-[#C29E2E] text-[#1A1A1A] rounded-xl text-xs font-extrabold shadow-sm transition cursor-pointer"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-extrabold shadow-sm transition cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>{t.addProduct}</span>
@@ -298,26 +298,26 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
 
       {/* Top 4 Summary Cards */}
       <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs flex items-center justify-between">
+        <div className="bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-700 block">
               {language === 'fa' ? 'تعداد اجناس' : language === 'ps' ? 'د توکو شمیر' : 'Total Items'}
             </span>
-            <span className="text-xl font-black text-[#1A1A1A] font-mono mt-0.5 block">
+            <span className="text-xl font-black text-ink font-mono mt-0.5 block">
               {summary.totalProducts}
             </span>
           </div>
-          <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-[#B39025]">
+          <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-accent-hover">
             <ShoppingBag className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs flex items-center justify-between">
+        <div className="bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-700 block">
               {language === 'fa' ? 'موجودی کل' : language === 'ps' ? 'ټوله موجوده' : 'Stock in Store'}
             </span>
-            <span className="text-xl font-black text-[#1A1A1A] font-mono mt-0.5 block">
+            <span className="text-xl font-black text-ink font-mono mt-0.5 block">
               {summary.totalStock}
             </span>
           </div>
@@ -326,12 +326,12 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs flex items-center justify-between">
+        <div className="bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-700 block">
               {language === 'fa' ? 'سرمایه جنس گدام' : language === 'ps' ? 'د ګدام سرمایه' : 'Inventory Cost'}
             </span>
-            <span className="text-xl font-black text-[#1A1A1A] font-mono mt-0.5 block">
+            <span className="text-xl font-black text-ink font-mono mt-0.5 block">
               {summary.totalInventoryValue.toLocaleString()} <span className="text-xs font-normal text-stone-700">{currencySymbol}</span>
             </span>
           </div>
@@ -340,7 +340,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs flex items-center justify-between">
+        <div className="bg-surface p-4 rounded-2xl border border-line shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-stone-700 block">
               {language === 'fa' ? 'مجموع مفاد فروش' : language === 'ps' ? 'د پلور ټوله ګټه' : 'Total Sales Profit'}
@@ -358,7 +358,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
       {activeViewTab === 'inventory' ? (
         <>
           {/* Category Chips Bar & Search */}
-          <div className="bg-white p-4 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-3">
+          <div className="bg-surface p-4 rounded-2xl border border-line shadow-xs space-y-3">
             {/* Search Input */}
             <div className="relative">
               <Search className="w-4 h-4 text-stone-600 absolute start-3.5 top-1/2 -translate-y-1/2" />
@@ -367,7 +367,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 placeholder={t.searchProductPlaceholder}
-                className="w-full ps-10 pe-9 py-2 bg-stone-50 border border-[#E5E5E5] rounded-xl text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-[#D4AF37] focus:bg-white transition"
+                className="w-full ps-10 pe-9 py-2 bg-stone-50 border border-line rounded-xl text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-accent focus:bg-surface transition"
               />
               {searchTerm && (
                 <button
@@ -386,7 +386,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                   onClick={() => setSelectedCategory('all')}
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                     selectedCategory === 'all'
-                      ? 'bg-[#1A1A1A] text-white shadow-xs'
+                      ? 'bg-ink text-white shadow-xs'
                       : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                   }`}
                 >
@@ -402,7 +402,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                       onClick={() => setSelectedCategory(cat.name)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                         searchText(selectedCategory) === searchText(cat.name)
-                          ? 'bg-[#D4AF37] text-[#1A1A1A] shadow-xs font-black'
+                          ? 'bg-accent text-white shadow-xs font-black'
                           : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                       }`}
                     >
@@ -417,7 +417,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                 {!isAddingCategory ? (
                   <button
                     onClick={() => setIsAddingCategory(true)}
-                    className="px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#B39025] hover:bg-amber-50 border border-dashed border-[#D4AF37]/50 flex items-center gap-1 cursor-pointer whitespace-nowrap"
+                    className="px-2.5 py-1.5 rounded-xl text-xs font-bold text-accent-hover hover:bg-teal-50 border border-dashed border-accent/50 flex items-center gap-1 cursor-pointer whitespace-nowrap"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>{t.addCategory}</span>
@@ -434,7 +434,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                     <button
                       type="button"
                       onClick={handleCreateCategory}
-                      className="p-1 bg-[#D4AF37] text-white rounded-lg cursor-pointer"
+                      className="p-1 bg-accent text-white rounded-lg cursor-pointer"
                     >
                       <Check className="w-3.5 h-3.5" />
                     </button>
@@ -456,7 +456,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                     onClick={() => setStockFilter('all')}
                     className={`px-3 py-1 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer ${
                       stockFilter === 'all'
-                        ? 'bg-[#1A1A1A] text-white shadow-xs'
+                        ? 'bg-ink text-white shadow-xs'
                         : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                     }`}
                   >
@@ -476,8 +476,8 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                     onClick={() => setStockFilter('low_stock')}
                     className={`px-3 py-1 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
                       stockFilter === 'low_stock'
-                        ? 'bg-amber-500 text-stone-950 font-black shadow-xs'
-                        : 'bg-amber-50 text-amber-800 hover:bg-amber-100'
+                        ? 'bg-teal-500 text-white font-black shadow-xs'
+                        : 'bg-teal-50 text-teal-800 hover:bg-teal-100'
                     }`}
                   >
                     <AlertTriangle className="w-3.5 h-3.5" />
@@ -486,7 +486,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                 </div>
 
                 {/* Configurable Low Stock Threshold Input */}
-                <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50/90 border border-amber-200 rounded-xl text-xs text-amber-900">
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-teal-50/90 border border-teal-200 rounded-xl text-xs text-teal-900">
                   <span className="text-[11px] font-bold">{t.lowStockThreshold || (language === 'fa' ? 'آستانه هشدار کمبود:' : 'Alert Threshold:')}</span>
                   <input
                     type="number"
@@ -494,7 +494,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                     max="100"
                     value={lowStockThreshold}
                     onChange={e => handleUpdateThreshold(parseInt(e.target.value) || 1)}
-                    className="w-12 px-1 py-0.5 bg-white border border-amber-300 rounded text-center text-xs font-bold font-mono text-stone-900"
+                    className="w-12 px-1 py-0.5 bg-surface border border-teal-300 rounded text-center text-xs font-bold font-mono text-stone-900"
                   />
                   <span className="text-[11px] font-medium">{t.units}</span>
                 </div>
@@ -504,7 +504,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
 
           {/* Products Rows Layout */}
           {filteredProducts.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-[#E5E5E5] p-12 text-center">
+            <div className="bg-surface rounded-2xl border border-line p-12 text-center">
               <ShoppingBag className="w-12 h-12 text-stone-300 mx-auto mb-3" />
               <h3 className="font-extrabold text-stone-800 text-sm">{t.noProductsFound}</h3>
               <p className="text-xs text-stone-700 mt-1 max-w-sm mx-auto">
@@ -514,13 +514,13 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
               </p>
               <button
                 onClick={handleOpenAddModal}
-                className="mt-4 px-4 py-2 bg-[#D4AF37] text-[#1A1A1A] font-bold text-xs rounded-xl hover:bg-[#C29E2E] transition cursor-pointer"
+                className="mt-4 px-4 py-2 bg-accent text-white font-bold text-xs rounded-xl hover:bg-accent-hover transition cursor-pointer"
               >
                 {t.addProduct}
               </button>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-[#E5E5E5] shadow-xs overflow-hidden divide-y divide-stone-200">
+            <div className="bg-surface rounded-2xl border border-line shadow-xs overflow-hidden divide-y divide-stone-200">
               {/* Header Row for Large Screens */}
               <div className="hidden lg:grid grid-cols-12 gap-3 px-5 py-3 bg-stone-50 text-[11px] font-bold text-stone-600 uppercase tracking-wider border-b border-stone-200">
                 <div className="col-span-3">
@@ -551,12 +551,12 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                     key={product.id}
                     id={`product-row-${product.id}`}
                     className={`p-4 lg:px-5 lg:py-3.5 hover:bg-stone-50/70 transition-colors flex flex-col lg:grid lg:grid-cols-12 gap-3 items-start lg:items-center ${
-                      isLow ? 'bg-amber-50/30' : ''
+                      isLow ? 'bg-teal-50/30' : ''
                     }`}
                   >
                     {/* 1. Name & Category */}
                     <div className="w-full lg:col-span-3 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-[#B39025] shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-accent-hover shrink-0">
                         {getCategoryIcon(product.category)}
                       </div>
                       <div className="min-w-0">
@@ -565,7 +565,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                             {product.category}
                           </span>
                         </div>
-                        <h3 className="font-extrabold text-sm text-[#1A1A1A] leading-tight truncate">
+                        <h3 className="font-extrabold text-sm text-ink leading-tight truncate">
                           {product.name}
                         </h3>
                         {product.description && (
@@ -593,7 +593,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                     {/* 3. Purchase Price (Cost) */}
                     <div className="w-full lg:col-span-2 text-xs">
                       <span className="text-[10px] text-stone-700 block lg:hidden">{t.purchasePrice}:</span>
-                      <span className="font-mono font-black text-[#1A1A1A] text-sm">
+                      <span className="font-mono font-black text-ink text-sm">
                         {Number(product.purchasePrice).toLocaleString()} <span className="text-[11px] font-normal text-stone-700">{currencySymbol}</span>
                       </span>
                       <span className="text-[10px] text-stone-700 block mt-0.5">
@@ -604,11 +604,11 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                     {/* 4. In Stock */}
                     <div className="w-full lg:col-span-2 text-xs space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono font-black text-sm text-[#1A1A1A]">
+                        <span className="font-mono font-black text-sm text-ink">
                           {stock} <span className="text-xs font-normal text-stone-700">{t.units}</span>
                         </span>
                         {isLow ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500 text-stone-950 border border-amber-600 shadow-xs animate-pulse">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-teal-500 text-white border border-teal-600 shadow-xs animate-pulse">
                             <AlertTriangle className="w-3 h-3" />
                             <span>{t.lowStockAlert || (language === 'fa' ? 'کمبود موجودی' : 'Low Stock')} (&le;{lowStockThreshold})</span>
                           </span>
@@ -664,7 +664,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                         <button
                           type="button"
                           onClick={() => handleRestock(product)}
-                          className="py-1.5 px-3 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 cursor-pointer shadow-2xs bg-amber-500 hover:bg-amber-600 text-stone-950"
+                          className="py-1.5 px-3 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 cursor-pointer shadow-2xs bg-teal-500 hover:bg-teal-600 text-white"
                         >
                           <Package className="w-3.5 h-3.5" />
                           <span>{language === 'fa' ? 'افزایش موجودی' : language === 'ps' ? 'موجودي زیاته کړئ' : 'Restock'}</span>
@@ -696,11 +696,11 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
         </>
       ) : (
         /* Sales History View */
-        <div className="bg-white rounded-2xl border border-[#E5E5E5] shadow-xs overflow-hidden">
+        <div className="bg-surface rounded-2xl border border-line shadow-xs overflow-hidden">
           <div className="p-4 border-b border-stone-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-emerald-600" />
-              <h3 className="font-extrabold text-sm text-[#1A1A1A]">{t.salesHistory}</h3>
+              <h3 className="font-extrabold text-sm text-ink">{t.salesHistory}</h3>
             </div>
             <span className="text-xs font-mono text-stone-700">
               {sales.length} {language === 'fa' ? 'معامله ثبت شده' : 'Sales Records'}
@@ -733,7 +733,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                         {sale.saleDate ? sale.saleDate.slice(0, 10) : '—'}
                       </td>
                       <td className="py-3 px-4">
-                        <span className="font-bold text-[#1A1A1A] block">{sale.productName}</span>
+                        <span className="font-bold text-ink block">{sale.productName}</span>
                         <span className="text-[10px] text-stone-700">{sale.category}</span>
                       </td>
                       <td className="py-3 px-4 font-mono font-bold">
@@ -742,7 +742,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                       <td className="py-3 px-4 font-mono text-stone-700">
                         {sale.purchasePrice.toLocaleString()} {currencySymbol}
                       </td>
-                      <td className="py-3 px-4 font-mono font-bold text-[#1A1A1A]">
+                      <td className="py-3 px-4 font-mono font-bold text-ink">
                         {sale.sellingPrice.toLocaleString()} {currencySymbol}
                       </td>
                       <td className="py-3 px-4 font-mono font-black text-stone-900">
@@ -766,14 +766,14 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
       {/* MODAL 1: Add / Edit Product (CRITICAL: Strictly NO Selling Price field requested) */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[calc(100dvh-1rem)] sm:max-h-[90vh]">
+          <div className="bg-surface w-full max-w-lg rounded-2xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[calc(100dvh-1rem)] sm:max-h-[90vh]">
             <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-stone-100 bg-stone-50">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/20 flex items-center justify-center text-[#B39025]">
+                <div className="w-8 h-8 rounded-xl bg-accent/20 flex items-center justify-center text-accent-hover">
                   <ShoppingBag className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="font-extrabold text-base text-[#1A1A1A]">
+                  <h2 className="font-extrabold text-base text-ink">
                     {editingProduct ? t.editProduct : t.addProduct}
                   </h2>
                   <p className="text-[11px] text-stone-700">
@@ -803,7 +803,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g. بوت چرمی اعلا / ساعت مچی / عطر شیخ"
-                  className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:bg-white focus:border-[#D4AF37] outline-hidden"
+                  className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:bg-surface focus:border-accent outline-hidden"
                 />
               </div>
 
@@ -816,7 +816,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                   <select
                     value={formData.category}
                     onChange={e => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-bold text-[#1A1A1A] outline-hidden cursor-pointer"
+                    className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-bold text-ink outline-hidden cursor-pointer"
                   >
                     {categories.map(cat => (
                       <option key={cat.id} value={cat.name}>
@@ -835,7 +835,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                     value={formData.brand}
                     onChange={e => setFormData({ ...formData, brand: e.target.value })}
                     placeholder="e.g. Rolex, Bata, Dior"
-                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:bg-white focus:border-[#D4AF37] outline-hidden"
+                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:bg-surface focus:border-accent outline-hidden"
                   />
                 </div>
               </div>
@@ -857,7 +857,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                       setFormData({ ...formData, purchasePrice: val === '' ? 0 : parseFloat(val) || 0 });
                     }}
                     placeholder="1200"
-                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-[#1A1A1A] focus:bg-white focus:border-[#D4AF37] outline-hidden"
+                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-ink focus:bg-surface focus:border-accent outline-hidden"
                   />
                   <span className="text-[10px] text-stone-700 mt-0.5 block">
                     {language === 'fa' ? 'قیمتی که جنس را خریده‌اید' : 'Price you paid for the product'}
@@ -875,7 +875,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                     value={formData.stockQuantity}
                     onChange={e => setFormData({ ...formData, stockQuantity: parseInt(e.target.value) || 0 })}
                     placeholder="10"
-                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-[#1A1A1A] focus:bg-white focus:border-[#D4AF37] outline-hidden"
+                    className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-bold text-ink focus:bg-surface focus:border-accent outline-hidden"
                   />
                 </div>
               </div>
@@ -890,7 +890,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                   value={formData.sku}
                   onChange={e => setFormData({ ...formData, sku: e.target.value })}
                   placeholder="PRD-101"
-                  className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-medium focus:bg-white focus:border-[#D4AF37] outline-hidden"
+                  className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-medium focus:bg-surface focus:border-accent outline-hidden"
                 />
               </div>
 
@@ -904,13 +904,13 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                   value={formData.description}
                   onChange={e => setFormData({ ...formData, description: e.target.value })}
                   placeholder="e.g. سایز ۴۱ و ۴۲، رنگ قهوه‌ای تیره..."
-                  className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:bg-white focus:border-[#D4AF37] outline-hidden"
+                  className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:bg-surface focus:border-accent outline-hidden"
                 />
               </div>
 
               {/* Selling price reassurance notice */}
-              <div className="p-3 bg-amber-50/80 rounded-xl border border-amber-200 flex items-start gap-2.5 text-xs text-amber-900">
-                <Sparkles className="w-4 h-4 text-[#B39025] shrink-0 mt-0.5" />
+              <div className="p-3 bg-teal-50/80 rounded-xl border border-teal-200 flex items-start gap-2.5 text-xs text-teal-900">
+                <Sparkles className="w-4 h-4 text-accent-hover shrink-0 mt-0.5" />
                 <p>
                   {language === 'fa'
                     ? 'طبق خواسته شما، قیمت فروش در این مرحله درج نمی‌شود. هنگام فروش هر جنس، قیمت فروش را دلخواه خود تعیین می‌نمایید.'
@@ -929,7 +929,7 @@ export const ProductsView: React.FC<ProductsViewProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-[#D4AF37] hover:bg-[#C29E2E] text-[#1A1A1A] rounded-xl text-xs font-extrabold shadow-sm transition cursor-pointer"
+                  className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-extrabold shadow-sm transition cursor-pointer"
                 >
                   {editingProduct ? t.updateProduct : t.addProduct}
                 </button>
