@@ -101,7 +101,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [activeStream, setActiveStream] = useState<DashboardViewStream>('orders');
 
   // Search, Filters & Sorting State
-  const [orderNumberSearchTerm, setOrderNumberSearchTerm] = useState('');
+  const [orderSearchTerm, setOrderSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [paymentFilter, setPaymentFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
@@ -126,18 +126,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   // Filtered & Sorted Tailoring Orders
   const filteredOrders = useMemo(() => {
+    const localNameQuery = searchText(orderSearchTerm);
+    const localOrderQuery = normalizeOrderNumber(orderSearchTerm.replace(/\s/g, ''));
     const list = orders.filter(order => {
       const normalizedOrderNumber = normalizeOrderNumber(order.orderNumber);
 
-      // The toolbar field is deliberately limited to exact order-number matches.
-      const localOrderQuery = normalizeOrderNumber(orderNumberSearchTerm);
-      const matchesOrderNumberSearch = !localOrderQuery || (
+      // Match exact order numbers or any part of the customer's name.
+      const matchesOrderSearch = !orderSearchTerm.trim() || (
         isLegacyOrderNumber(localOrderQuery)
           ? normalizedOrderNumber === localOrderQuery
           : isManualOrderNumber(localOrderQuery)
             ? isManualOrderNumber(normalizedOrderNumber) && normalizedOrderNumber === localOrderQuery
             : false
-      );
+      ) || (!!localNameQuery && textIncludes(order.customerName, localNameQuery));
 
       // The top navigation search remains a broad, system-wide search.
       const q = searchText(globalSearchTerm);
@@ -180,7 +181,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         (paymentFilter === 'paid' && order.balanceAmount === 0) ||
         (paymentFilter === 'balance' && order.balanceAmount > 0);
 
-      return matchesOrderNumberSearch && matchesGlobalSearch && matchesStatus && matchesPayment;
+      return matchesOrderSearch && matchesGlobalSearch && matchesStatus && matchesPayment;
     });
 
     return list.sort((a, b) => {
@@ -206,11 +207,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
       }
       return 0;
     });
-  }, [orders, orderNumberSearchTerm, globalSearchTerm, statusFilter, paymentFilter, sortBy, language]);
+  }, [orders, orderSearchTerm, globalSearchTerm, statusFilter, paymentFilter, sortBy, language]);
 
   // Filtered & Sorted Retail Sales
   const filteredSales = useMemo(() => {
-    if (orderNumberSearchTerm.trim()) return [];
+    if (orderSearchTerm.trim()) return [];
     const list = (productSales || []).filter(sale => {
       const q = searchText(globalSearchTerm);
       if (!q) return true;
@@ -230,15 +231,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
       const dateB = new Date(b.saleDate || b.createdAt || '').getTime() || 0;
       return sortBy === 'oldest' ? dateA - dateB : dateB - dateA;
     });
-  }, [productSales, orderNumberSearchTerm, globalSearchTerm, sortBy]);
+  }, [productSales, orderSearchTerm, globalSearchTerm, sortBy]);
 
-  const visibleOrders = filteredOrders.slice(0, visibleOrderCount);
+  const visibleOrders = orderSearchTerm.trim() ? filteredOrders : filteredOrders.slice(0, visibleOrderCount);
   const visibleSales = filteredSales.slice(0, visibleSaleCount);
 
   useEffect(() => {
     setVisibleOrderCount(20);
     setVisibleSaleCount(20);
-  }, [orderNumberSearchTerm, globalSearchTerm, statusFilter, paymentFilter, sortBy, activeStream]);
+  }, [orderSearchTerm, globalSearchTerm, statusFilter, paymentFilter, sortBy, activeStream]);
 
   // Comprehensive Metrics (Tailor + Retail)
   const metrics = useMemo(() => {
@@ -841,29 +842,29 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* Search & Filter Toolbar */}
       <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-[#E5E5E5] shadow-xs space-y-3">
         <div className="flex flex-col gap-3">
-          {/* Dedicated order-number search; the top navigation search stays broad. */}
+          {/* Search tailoring orders by order number or customer name. */}
           {activeStream !== 'retail' && (
             <div className="relative w-full">
               <Search className="w-4 h-4 text-stone-400 absolute start-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                dir="ltr"
-                value={orderNumberSearchTerm}
-                onChange={e => setOrderNumberSearchTerm(normalizeDigits(e.target.value).replace(/\s/g, '').toUpperCase())}
+                dir="auto"
+                value={orderSearchTerm}
+                onChange={e => setOrderSearchTerm(e.target.value)}
                 placeholder={language === 'fa'
-                  ? 'فقط جستجو با شماره سفارش؛ مانند MA-0223 یا 0023'
+                  ? 'جستجو با شماره سفارش یا نام مشتری'
                   : language === 'ps'
-                  ? 'یوازې د فرمایش په شمېره لټون؛ لکه MA-0223 یا 0023'
-                  : 'Search by order number only, e.g. MA-0223 or 0023'}
-                aria-label={language === 'fa' ? 'جستجو فقط با شماره سفارش' : language === 'ps' ? 'یوازې د فرمایش په شمېره لټون' : 'Search by order number only'}
+                  ? 'د فرمایش په شمېره یا د پېرودونکي په نوم لټون'
+                  : 'Search by order number or customer name'}
+                aria-label={language === 'fa' ? 'جستجو با شماره سفارش یا نام مشتری' : language === 'ps' ? 'د فرمایش په شمېره یا د پېرودونکي په نوم لټون' : 'Search by order number or customer name'}
                 className={`w-full min-w-0 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-mono font-bold focus:bg-white focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/25 outline-hidden transition ${
                   language === 'en' ? 'pl-10 pr-24' : 'pl-24 pr-10'
                 }`}
               />
-              {orderNumberSearchTerm && (
+              {orderSearchTerm && (
                 <button
                   type="button"
-                  onClick={() => setOrderNumberSearchTerm('')}
+                  onClick={() => setOrderSearchTerm('')}
                   title={language === 'fa' ? 'پاک کردن جستجو' : language === 'ps' ? 'پلټنه پاکه کړئ' : 'Clear search'}
                   className="absolute end-3 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 rounded-lg bg-stone-200 px-2 py-1 text-[10px] font-bold text-stone-600 hover:bg-stone-300 hover:text-stone-900 cursor-pointer"
                 >
@@ -1092,13 +1093,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
               <h3 className="text-sm font-bold text-stone-800">{t.noDataFound}</h3>
               <p className="text-xs text-stone-500 mt-1 max-w-sm mx-auto">
-                {orderNumberSearchTerm || globalSearchTerm
-                  ? (language === 'fa' ? `هیچ فرمایشی مطابق با "${orderNumberSearchTerm || globalSearchTerm}" یافت نشد.` : language === 'ps' ? `له "${orderNumberSearchTerm || globalSearchTerm}" سره سم کوم فرمایش ونه موندل شو.` : `No orders matched "${orderNumberSearchTerm || globalSearchTerm}".`)
+                {orderSearchTerm || globalSearchTerm
+                  ? (language === 'fa' ? `هیچ فرمایشی مطابق با "${orderSearchTerm || globalSearchTerm}" یافت نشد.` : language === 'ps' ? `له "${orderSearchTerm || globalSearchTerm}" سره سم کوم فرمایش ونه موندل شو.` : `No orders matched "${orderSearchTerm || globalSearchTerm}".`)
                   : (language === 'fa' ? 'هنوز فرمایشی ثبت نشده است.' : 'No orders registered yet.')}
               </p>
-              {orderNumberSearchTerm ? (
+              {orderSearchTerm ? (
                 <button
-                  onClick={() => { setOrderNumberSearchTerm(''); setStatusFilter('all'); setPaymentFilter('all'); }}
+                  onClick={() => { setOrderSearchTerm(''); setStatusFilter('all'); setPaymentFilter('all'); }}
                   className="mt-4 px-4 py-2 bg-stone-100 text-stone-700 hover:bg-stone-200 rounded-xl text-xs font-bold transition cursor-pointer"
                 >
                   {language === 'fa' ? 'پاک کردن جستجو' : 'Clear Search'}
@@ -1403,7 +1404,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   );
                 })}
               </div>
-              {visibleOrderCount < filteredOrders.length && (
+              {visibleOrders.length < filteredOrders.length && (
                 <div className="text-center pt-1">
                   <button
                     type="button"
